@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+option csharp_namespace = "Larp.Proto.Events";
+
+package larp.events;
+
+import "accounts.proto";
+
+enum EventRsvp {
+    UNANSWERED = 0;
+    NO = 1;
+    MAYBE = 2; 
+    YES = 3;
+    CONFIRMED = 4;
+    APPROVED = 5;
+}
+
+message Event {
+    int32 event_id = 1;
+    string title = 2;
+    string location = 3;
+    string date = 4;
+    string event_type = 5;
+    bool rsvp = 6;
+    bool hidden = 7;
+    repeated AccountAttendance attendees = 8;
+}
+
+message AccountAttendance {
+    int32 account_id = 1;
+    string name = 2;
+    int32 moonstone = 3;
+    EventRsvp rsvp = 4;
+    repeated larp.accounts.AccountCharacterSummary characters = 5;
+}
+

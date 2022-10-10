@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option csharp_namespace = "Larp.Proto.Common";
+
+package larp.common;
+
+message Game {
+  int32 game_id = 1;
+  string title = 2;
+}
