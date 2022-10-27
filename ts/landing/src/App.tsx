@@ -1,8 +1,15 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import {larpAuthClient} from "./LarpService";
+import * as larp_authorization_pb from './Protos/larp/authorization_pb.d';
 
 function App() {
+  let a = new larp_authorization_pb.InitiateLoginRequest();
+  a.setEmail("acrion@gmail.com");
+  larpAuthClient.initiateLogin(a, null, function(err, response) {
+    console.log(response.toObject());
+  })
   return (
     <div className="App">
       <header className="App-header">
