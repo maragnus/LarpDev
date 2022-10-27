@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Grpc.AspNetCore" Version="2.40.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Larp.Data.Seeder\Larp.Data.Seeder.csproj" />
+      <ProjectReference Include="..\Larp.Data\Larp.Data.csproj" />
+      <ProjectReference Include="..\Larp.Protos\Larp.Protos.csproj" />
+    </ItemGroup>
+
+</Project>
