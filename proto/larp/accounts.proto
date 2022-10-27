@@ -1,16 +1,21 @@
 syntax = "proto3";
 
-option csharp_namespace = "Larp.Proto.Accounts";
+option csharp_namespace = "Larp.Proto";
 
-package larp.accounts;
+package larp;
+
+enum AdminRank {
+    ADMIN_RANK_NOT_ADMIN = 0;
+    ADMIN_RANK_ADMIN = 1;
+}
 
 message Account {
-    int32 account_id = 1;
+    string account_id = 1;
     string name = 2;
     string location = 3;
     repeated AccountEmail emails = 4;
     string phone = 5;
-    bool is_admin = 6;
+    bool is_super_admin = 6;
     string notes = 7;
     string created = 8;
     repeated AccountCharacterSummary characters = 9;
@@ -18,17 +23,24 @@ message Account {
 
 message AccountEmail {
     string email = 1;
-    bool verified = 2;
+    bool is_verified = 2;
 }
 
 message AccountCharacterSummary {
-    int32 account_id = 1;
-    string account_name = 2;
-    string character_id = 3;
-    string character_name = 4;
-    string home_chapter = 5;
-    string specialty = 6;
-    int32 level = 7;
-    bool is_live = 8;
-    bool is_review = 9;
+    string account_id = 1;
+    string game_id = 2;
+    string account_name = 3;
+    string character_id = 4;
+    string character_name = 5;
+    string home_chapter = 6;
+    string specialty = 7;
+    int32 level = 8;
+    bool is_live = 9;
+    bool is_review = 10;
+}
+
+message AccountAdmin {
+    string account_id = 1;
+    string game_id = 2;
+    AdminRank rank = 3;
 }

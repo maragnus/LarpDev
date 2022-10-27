@@ -1,8 +1,8 @@
 $ProtobufVersion="21.7"
 $GenGrpcVersion="1.4.1"
 
-$ProtoDir="../proto/larp"
-$TsDir="../ts/proto/larp"
+$ProtoDir="../proto"
+$TsDir="../ts/proto"
 
 New-Item -Type Directory -Force $TsDir
 
@@ -26,6 +26,8 @@ if (-not (Test-Path "${PWD}\protoc-gen-grpc-web.exe")) {
 Push-Location $ProtoDir
 [string[]]$ProtoFiles = Get-ChildItem -File -Recurse | Resolve-Path -Relative | ForEach-Object { $_.Substring(2).Replace("\", "/") }
 Pop-Location | Out-Null
+
+$ProtoFiles
 
 & "./protoc.exe" "-I=${ProtoDir}" @ProtoFiles `
   "--grpc-web_out=import_style=typescript,mode=grpcweb:${TsDir}"

@@ -1,6 +1,6 @@
 import * as jspb from 'google-protobuf'
 
-import * as accounts_pb from './accounts_pb';
+import * as larp_accounts_pb from '../larp/accounts_pb';
 
 
 export class InitiateLoginRequest extends jspb.Message {
@@ -75,8 +75,8 @@ export class ConfirmLoginResponse extends jspb.Message {
   getMessage(): string;
   setMessage(value: string): ConfirmLoginResponse;
 
-  getProfile(): accounts_pb.Account | undefined;
-  setProfile(value?: accounts_pb.Account): ConfirmLoginResponse;
+  getProfile(): larp_accounts_pb.Account | undefined;
+  setProfile(value?: larp_accounts_pb.Account): ConfirmLoginResponse;
   hasProfile(): boolean;
   clearProfile(): ConfirmLoginResponse;
 
@@ -93,7 +93,7 @@ export namespace ConfirmLoginResponse {
     sessionId: string,
     statusCode: ValidationResponseCode,
     message: string,
-    profile?: accounts_pb.Account.AsObject,
+    profile?: larp_accounts_pb.Account.AsObject,
   }
 }
 
@@ -119,8 +119,8 @@ export class ValidateSessionResponse extends jspb.Message {
   getStatusCode(): ValidationResponseCode;
   setStatusCode(value: ValidationResponseCode): ValidateSessionResponse;
 
-  getProfile(): accounts_pb.Account | undefined;
-  setProfile(value?: accounts_pb.Account): ValidateSessionResponse;
+  getProfile(): larp_accounts_pb.Account | undefined;
+  setProfile(value?: larp_accounts_pb.Account): ValidateSessionResponse;
   hasProfile(): boolean;
   clearProfile(): ValidateSessionResponse;
 
@@ -135,7 +135,7 @@ export class ValidateSessionResponse extends jspb.Message {
 export namespace ValidateSessionResponse {
   export type AsObject = {
     statusCode: ValidationResponseCode,
-    profile?: accounts_pb.Account.AsObject,
+    profile?: larp_accounts_pb.Account.AsObject,
   }
 
   export enum ProfileCase { 

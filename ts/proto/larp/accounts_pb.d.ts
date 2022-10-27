@@ -20,8 +20,8 @@ export class Account extends jspb.Message {
   getPhone(): string;
   setPhone(value: string): Account;
 
-  getIsAdmin(): boolean;
-  setIsAdmin(value: boolean): Account;
+  getIsSuperAdmin(): boolean;
+  setIsSuperAdmin(value: boolean): Account;
 
   getNotes(): string;
   setNotes(value: string): Account;
@@ -49,7 +49,7 @@ export namespace Account {
     location: string,
     emailsList: Array<AccountEmail.AsObject>,
     phone: string,
-    isAdmin: boolean,
+    isSuperAdmin: boolean,
     notes: string,
     created: string,
     charactersList: Array<AccountCharacterSummary.AsObject>,
@@ -128,3 +128,33 @@ export namespace AccountCharacterSummary {
   }
 }
 
+export class AccountAdmin extends jspb.Message {
+  getAccountId(): number;
+  setAccountId(value: number): AccountAdmin;
+
+  getGameId(): number;
+  setGameId(value: number): AccountAdmin;
+
+  getRank(): AdminRank;
+  setRank(value: AdminRank): AccountAdmin;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): AccountAdmin.AsObject;
+  static toObject(includeInstance: boolean, msg: AccountAdmin): AccountAdmin.AsObject;
+  static serializeBinaryToWriter(message: AccountAdmin, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): AccountAdmin;
+  static deserializeBinaryFromReader(message: AccountAdmin, reader: jspb.BinaryReader): AccountAdmin;
+}
+
+export namespace AccountAdmin {
+  export type AsObject = {
+    accountId: number,
+    gameId: number,
+    rank: AdminRank,
+  }
+}
+
+export enum AdminRank { 
+  ADMIN_RANK_NOT_ADMIN = 0,
+  ADMIN_RANK_ADMIN = 1,
+}

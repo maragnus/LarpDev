@@ -1,6 +1,6 @@
 import * as jspb from 'google-protobuf'
 
-import * as accounts_pb from './accounts_pb';
+import * as larp_accounts_pb from '../larp/accounts_pb';
 
 
 export class Event extends jspb.Message {
@@ -64,10 +64,10 @@ export class AccountAttendance extends jspb.Message {
   getRsvp(): EventRsvp;
   setRsvp(value: EventRsvp): AccountAttendance;
 
-  getCharactersList(): Array<accounts_pb.AccountCharacterSummary>;
-  setCharactersList(value: Array<accounts_pb.AccountCharacterSummary>): AccountAttendance;
+  getCharactersList(): Array<larp_accounts_pb.AccountCharacterSummary>;
+  setCharactersList(value: Array<larp_accounts_pb.AccountCharacterSummary>): AccountAttendance;
   clearCharactersList(): AccountAttendance;
-  addCharacters(value?: accounts_pb.AccountCharacterSummary, index?: number): accounts_pb.AccountCharacterSummary;
+  addCharacters(value?: larp_accounts_pb.AccountCharacterSummary, index?: number): larp_accounts_pb.AccountCharacterSummary;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): AccountAttendance.AsObject;
@@ -83,7 +83,7 @@ export namespace AccountAttendance {
     name: string,
     moonstone: number,
     rsvp: EventRsvp,
-    charactersList: Array<accounts_pb.AccountCharacterSummary.AsObject>,
+    charactersList: Array<larp_accounts_pb.AccountCharacterSummary.AsObject>,
   }
 }
 

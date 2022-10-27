@@ -3,8 +3,8 @@
 PROTOBUF_VERSION=21.7
 GEN_GRPC_VERSION=1.4.1
 
-PROTO_DIR=../proto/larp
-TS_DIR=../ts/proto/larp
+PROTO_DIR=../proto
+TS_DIR=../ts/proto
 
 set -eu # exit on error, fail on unset variables
 

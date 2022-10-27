@@ -8,7 +8,7 @@
 // versions:
 // 	protoc-gen-grpc-web v1.4.1
 // 	protoc              v3.21.7
-// source: authorization.proto
+// source: larp/authorization.proto
 
 
 /* eslint-disable */
@@ -17,7 +17,7 @@
 
 import * as grpcWeb from 'grpc-web';
 
-import * as authorization_pb from './authorization_pb';
+import * as larp_authorization_pb from '../larp/authorization_pb';
 
 
 export class LarpAuthenticationClient {
@@ -42,29 +42,29 @@ export class LarpAuthenticationClient {
   methodDescriptorInitiateLogin = new grpcWeb.MethodDescriptor(
     '/larp.authorization.LarpAuthentication/InitiateLogin',
     grpcWeb.MethodType.UNARY,
-    authorization_pb.InitiateLoginRequest,
-    authorization_pb.InitiateLoginResponse,
-    (request: authorization_pb.InitiateLoginRequest) => {
+    larp_authorization_pb.InitiateLoginRequest,
+    larp_authorization_pb.InitiateLoginResponse,
+    (request: larp_authorization_pb.InitiateLoginRequest) => {
       return request.serializeBinary();
     },
-    authorization_pb.InitiateLoginResponse.deserializeBinary
+    larp_authorization_pb.InitiateLoginResponse.deserializeBinary
   );
 
   initiateLogin(
-    request: authorization_pb.InitiateLoginRequest,
-    metadata: grpcWeb.Metadata | null): Promise<authorization_pb.InitiateLoginResponse>;
+    request: larp_authorization_pb.InitiateLoginRequest,
+    metadata: grpcWeb.Metadata | null): Promise<larp_authorization_pb.InitiateLoginResponse>;
 
   initiateLogin(
-    request: authorization_pb.InitiateLoginRequest,
+    request: larp_authorization_pb.InitiateLoginRequest,
     metadata: grpcWeb.Metadata | null,
     callback: (err: grpcWeb.RpcError,
-               response: authorization_pb.InitiateLoginResponse) => void): grpcWeb.ClientReadableStream<authorization_pb.InitiateLoginResponse>;
+               response: larp_authorization_pb.InitiateLoginResponse) => void): grpcWeb.ClientReadableStream<larp_authorization_pb.InitiateLoginResponse>;
 
   initiateLogin(
-    request: authorization_pb.InitiateLoginRequest,
+    request: larp_authorization_pb.InitiateLoginRequest,
     metadata: grpcWeb.Metadata | null,
     callback?: (err: grpcWeb.RpcError,
-               response: authorization_pb.InitiateLoginResponse) => void) {
+               response: larp_authorization_pb.InitiateLoginResponse) => void) {
     if (callback !== undefined) {
       return this.client_.rpcCall(
         this.hostname_ +
@@ -85,29 +85,29 @@ export class LarpAuthenticationClient {
   methodDescriptorConfirmLogin = new grpcWeb.MethodDescriptor(
     '/larp.authorization.LarpAuthentication/ConfirmLogin',
     grpcWeb.MethodType.UNARY,
-    authorization_pb.ConfirmLoginRequest,
-    authorization_pb.ConfirmLoginResponse,
-    (request: authorization_pb.ConfirmLoginRequest) => {
+    larp_authorization_pb.ConfirmLoginRequest,
+    larp_authorization_pb.ConfirmLoginResponse,
+    (request: larp_authorization_pb.ConfirmLoginRequest) => {
       return request.serializeBinary();
     },
-    authorization_pb.ConfirmLoginResponse.deserializeBinary
+    larp_authorization_pb.ConfirmLoginResponse.deserializeBinary
   );
 
   confirmLogin(
-    request: authorization_pb.ConfirmLoginRequest,
-    metadata: grpcWeb.Metadata | null): Promise<authorization_pb.ConfirmLoginResponse>;
+    request: larp_authorization_pb.ConfirmLoginRequest,
+    metadata: grpcWeb.Metadata | null): Promise<larp_authorization_pb.ConfirmLoginResponse>;
 
   confirmLogin(
-    request: authorization_pb.ConfirmLoginRequest,
+    request: larp_authorization_pb.ConfirmLoginRequest,
     metadata: grpcWeb.Metadata | null,
     callback: (err: grpcWeb.RpcError,
-               response: authorization_pb.ConfirmLoginResponse) => void): grpcWeb.ClientReadableStream<authorization_pb.ConfirmLoginResponse>;
+               response: larp_authorization_pb.ConfirmLoginResponse) => void): grpcWeb.ClientReadableStream<larp_authorization_pb.ConfirmLoginResponse>;
 
   confirmLogin(
-    request: authorization_pb.ConfirmLoginRequest,
+    request: larp_authorization_pb.ConfirmLoginRequest,
     metadata: grpcWeb.Metadata | null,
     callback?: (err: grpcWeb.RpcError,
-               response: authorization_pb.ConfirmLoginResponse) => void) {
+               response: larp_authorization_pb.ConfirmLoginResponse) => void) {
     if (callback !== undefined) {
       return this.client_.rpcCall(
         this.hostname_ +
@@ -128,29 +128,29 @@ export class LarpAuthenticationClient {
   methodDescriptorValidateSession = new grpcWeb.MethodDescriptor(
     '/larp.authorization.LarpAuthentication/ValidateSession',
     grpcWeb.MethodType.UNARY,
-    authorization_pb.ValidateSessionRequest,
-    authorization_pb.ValidateSessionResponse,
-    (request: authorization_pb.ValidateSessionRequest) => {
+    larp_authorization_pb.ValidateSessionRequest,
+    larp_authorization_pb.ValidateSessionResponse,
+    (request: larp_authorization_pb.ValidateSessionRequest) => {
       return request.serializeBinary();
     },
-    authorization_pb.ValidateSessionResponse.deserializeBinary
+    larp_authorization_pb.ValidateSessionResponse.deserializeBinary
   );
 
   validateSession(
-    request: authorization_pb.ValidateSessionRequest,
-    metadata: grpcWeb.Metadata | null): Promise<authorization_pb.ValidateSessionResponse>;
+    request: larp_authorization_pb.ValidateSessionRequest,
+    metadata: grpcWeb.Metadata | null): Promise<larp_authorization_pb.ValidateSessionResponse>;
 
   validateSession(
-    request: authorization_pb.ValidateSessionRequest,
+    request: larp_authorization_pb.ValidateSessionRequest,
     metadata: grpcWeb.Metadata | null,
     callback: (err: grpcWeb.RpcError,
-               response: authorization_pb.ValidateSessionResponse) => void): grpcWeb.ClientReadableStream<authorization_pb.ValidateSessionResponse>;
+               response: larp_authorization_pb.ValidateSessionResponse) => void): grpcWeb.ClientReadableStream<larp_authorization_pb.ValidateSessionResponse>;
 
   validateSession(
-    request: authorization_pb.ValidateSessionRequest,
+    request: larp_authorization_pb.ValidateSessionRequest,
     metadata: grpcWeb.Metadata | null,
     callback?: (err: grpcWeb.RpcError,
-               response: authorization_pb.ValidateSessionResponse) => void) {
+               response: larp_authorization_pb.ValidateSessionResponse) => void) {
     if (callback !== undefined) {
       return this.client_.rpcCall(
         this.hostname_ +

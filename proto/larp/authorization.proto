@@ -4,7 +4,7 @@ option csharp_namespace = "Larp.Proto.Authorization";
 
 package larp.authorization;
 
-import public "accounts.proto";
+import public "larp/accounts.proto";
 
 service LarpAuthentication {
     rpc InitiateLogin(InitiateLoginRequest) returns (InitiateLoginResponse);
@@ -36,7 +36,7 @@ message ConfirmLoginResponse {
     string session_id = 1;
     ValidationResponseCode status_code = 2;
     string message = 3;
-    larp.accounts.Account profile = 4;
+    larp.Account profile = 4;
 }
 
 message ValidateSessionRequest {
@@ -45,5 +45,5 @@ message ValidateSessionRequest {
 
 message ValidateSessionResponse {
     ValidationResponseCode status_code = 1;
-    optional larp.accounts.Account profile = 2;
+    optional larp.Account profile = 2;
 }

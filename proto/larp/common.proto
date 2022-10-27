@@ -1,10 +1,15 @@
 syntax = "proto3";
 
-option csharp_namespace = "Larp.Proto.Common";
+option csharp_namespace = "Larp.Proto";
 
-package larp.common;
+package larp;
 
 message Game {
-  int32 game_id = 1;
+  string game_id = 1;
   string title = 2;
+  string description = 3;
+}
+
+message State {
+  repeated Game games = 1;
 }

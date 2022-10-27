@@ -4,10 +4,10 @@ option csharp_namespace = "Larp.Proto";
 
 package larp;
 
-import public "accounts.proto";
-import public "authorization.proto";
-import public "common.proto";
-import public "events.proto";
+import public "larp/accounts.proto";
+import public "larp/authorization.proto";
+import public "larp/common.proto";
+import public "larp/events.proto";
 
 
 
