@@ -4,8 +4,11 @@ import * as larp_accounts_pb from '../larp/accounts_pb';
 
 
 export class Event extends jspb.Message {
-  getEventId(): number;
-  setEventId(value: number): Event;
+  getEventId(): string;
+  setEventId(value: string): Event;
+
+  getGameId(): string;
+  setGameId(value: string): Event;
 
   getTitle(): string;
   setTitle(value: string): Event;
@@ -40,7 +43,8 @@ export class Event extends jspb.Message {
 
 export namespace Event {
   export type AsObject = {
-    eventId: number,
+    eventId: string,
+    gameId: string,
     title: string,
     location: string,
     date: string,
@@ -52,8 +56,8 @@ export namespace Event {
 }
 
 export class AccountAttendance extends jspb.Message {
-  getAccountId(): number;
-  setAccountId(value: number): AccountAttendance;
+  getAccountId(): string;
+  setAccountId(value: string): AccountAttendance;
 
   getName(): string;
   setName(value: string): AccountAttendance;
@@ -79,7 +83,7 @@ export class AccountAttendance extends jspb.Message {
 
 export namespace AccountAttendance {
   export type AsObject = {
-    accountId: number,
+    accountId: string,
     name: string,
     moonstone: number,
     rsvp: EventRsvp,

@@ -1,5 +1,5 @@
 ﻿ using System.Text.Json;
-using Larp.Proto.FifthEdition;
+using Larp.Proto.Mystwood5e;
 using MongoDB.Driver;
 
 namespace Larp.Data;

@@ -1,14 +1,14 @@
 syntax = "proto3";
 
-option csharp_namespace = "Larp.Proto.FifthEdition";
+option csharp_namespace = "Larp.Proto.Mystwood5e";
 
-package larp.e5;
+package larp.mw5e;
 
-import public "larp/FifthEdition/character.proto";
-import public "larp/FifthEdition/gifts.proto";
-import public "larp/FifthEdition/occupations.proto";
-import public "larp/FifthEdition/other.proto";
-import public "larp/FifthEdition/skills.proto";
+import public "larp/mw5e/character.proto";
+import public "larp/mw5e/gifts.proto";
+import public "larp/mw5e/occupations.proto";
+import public "larp/mw5e/other.proto";
+import public "larp/mw5e/skills.proto";
 
 message GameState {
   repeated Gift gifts = 1;

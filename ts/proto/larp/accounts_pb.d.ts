@@ -3,8 +3,8 @@ import * as jspb from 'google-protobuf'
 
 
 export class Account extends jspb.Message {
-  getAccountId(): number;
-  setAccountId(value: number): Account;
+  getAccountId(): string;
+  setAccountId(value: string): Account;
 
   getName(): string;
   setName(value: string): Account;
@@ -44,7 +44,7 @@ export class Account extends jspb.Message {
 
 export namespace Account {
   export type AsObject = {
-    accountId: number,
+    accountId: string,
     name: string,
     location: string,
     emailsList: Array<AccountEmail.AsObject>,
@@ -60,8 +60,8 @@ export class AccountEmail extends jspb.Message {
   getEmail(): string;
   setEmail(value: string): AccountEmail;
 
-  getVerified(): boolean;
-  setVerified(value: boolean): AccountEmail;
+  getIsVerified(): boolean;
+  setIsVerified(value: boolean): AccountEmail;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): AccountEmail.AsObject;
@@ -74,13 +74,16 @@ export class AccountEmail extends jspb.Message {
 export namespace AccountEmail {
   export type AsObject = {
     email: string,
-    verified: boolean,
+    isVerified: boolean,
   }
 }
 
 export class AccountCharacterSummary extends jspb.Message {
-  getAccountId(): number;
-  setAccountId(value: number): AccountCharacterSummary;
+  getAccountId(): string;
+  setAccountId(value: string): AccountCharacterSummary;
+
+  getGameId(): string;
+  setGameId(value: string): AccountCharacterSummary;
 
   getAccountName(): string;
   setAccountName(value: string): AccountCharacterSummary;
@@ -116,7 +119,8 @@ export class AccountCharacterSummary extends jspb.Message {
 
 export namespace AccountCharacterSummary {
   export type AsObject = {
-    accountId: number,
+    accountId: string,
+    gameId: string,
     accountName: string,
     characterId: string,
     characterName: string,
@@ -129,11 +133,11 @@ export namespace AccountCharacterSummary {
 }
 
 export class AccountAdmin extends jspb.Message {
-  getAccountId(): number;
-  setAccountId(value: number): AccountAdmin;
+  getAccountId(): string;
+  setAccountId(value: string): AccountAdmin;
 
-  getGameId(): number;
-  setGameId(value: number): AccountAdmin;
+  getGameId(): string;
+  setGameId(value: string): AccountAdmin;
 
   getRank(): AdminRank;
   setRank(value: AdminRank): AccountAdmin;
@@ -148,8 +152,8 @@ export class AccountAdmin extends jspb.Message {
 
 export namespace AccountAdmin {
   export type AsObject = {
-    accountId: number,
-    gameId: number,
+    accountId: string,
+    gameId: string,
     rank: AdminRank,
   }
 }

@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-option csharp_namespace = "Larp.Proto.FifthEdition";
+option csharp_namespace = "Larp.Proto.Mystwood5e";
 
-package larp.e5;
+package larp.mw5e;
 
 enum SkillClass {
     SKILL_CLASS_UNAVAILABLE = 0;

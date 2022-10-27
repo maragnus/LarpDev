@@ -62,8 +62,8 @@ export namespace CharacterVantage {
 }
 
 export class Character extends jspb.Message {
-  getAccountId(): number;
-  setAccountId(value: number): Character;
+  getAccountId(): string;
+  setAccountId(value: string): Character;
 
   getCharactername(): string;
   setCharactername(value: string): Character;
@@ -171,7 +171,7 @@ export class Character extends jspb.Message {
 
 export namespace Character {
   export type AsObject = {
-    accountId: number,
+    accountId: string,
     charactername: string,
     religions: string,
     occupation: string,

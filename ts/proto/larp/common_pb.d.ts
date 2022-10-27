@@ -3,8 +3,8 @@ import * as jspb from 'google-protobuf'
 
 
 export class Game extends jspb.Message {
-  getGameId(): number;
-  setGameId(value: number): Game;
+  getGameId(): string;
+  setGameId(value: string): Game;
 
   getTitle(): string;
   setTitle(value: string): Game;
@@ -22,7 +22,7 @@ export class Game extends jspb.Message {
 
 export namespace Game {
   export type AsObject = {
-    gameId: number,
+    gameId: string,
     title: string,
     description: string,
   }
