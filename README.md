@@ -2,6 +2,19 @@
 
 Formerly called Mystwood Landing, LARP Landing is a web application that hosts characters for LARP games. This revision is redesigned to utilize MongoDB (opposed to TSQL) and support additional games and editions (both Mystwood 5e and 6e).
 
+# Explicit Open Source Dependencies
+These projects are explicitly (intentially selected) dependencies of this application. They may not include all implicitly included dependencies by these projects.
+
+* [protobuf](https://developers.google.com/protocol-buffers) provides common data structures between C# and TypeScript
+  * [grpc-web](https://github.com/grpc/grpc-web) generates client-side grpc and protobufs
+  * [gRPC for .NET](https://github.com/grpc/grpc-dotnet) generates server-side grpc and protobufs
+* [ASP.NET Core 6.0](https://learn.microsoft.com/en-us/aspnet/core/release-notes/aspnetcore-6.0) provides the framework for the server-side application written in C#
+* [React](https://reactjs.org/) provides presentation layer for the client-side application
+* [MongoDB](https://www.mongodb.com/) provides server-side database 
+  * [Mongo CSharp Driver](https://github.com/mongodb/mongo-csharp-driver)
+  * [Mongo2Go](https://github.com/Mongo2Go/Mongo2Go) provides MongoDB server for slightly-integrated unit testing that includes database functionality
+* [Moq](https://github.com/moq/moq) provides mocking writing C# unit tests
+
 # Components
 
 ## proto/larp
