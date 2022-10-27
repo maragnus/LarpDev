@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option csharp_namespace = "Larp.Proto.FifthEdition";
+
+package larp.e5;
+
+import public "larp/FifthEdition/character.proto";
+import public "larp/FifthEdition/gifts.proto";
+import public "larp/FifthEdition/occupations.proto";
+import public "larp/FifthEdition/other.proto";
+import public "larp/FifthEdition/skills.proto";
+
+message GameState {
+  repeated Gift gifts = 1;
+  repeated SkillDefinition skills = 2;
+  repeated Occupation occupations = 3;
+  repeated Vantage vantages = 4;
+  repeated Religion religions = 5;
+  repeated HomeChapter home_chapters = 6;
+  repeated Spell spells = 7;
+}

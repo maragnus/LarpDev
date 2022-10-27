@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+option csharp_namespace = "Larp.Proto.FifthEdition";
+
+package larp.accounts.e5;
+
+enum SkillPurchase {
+    SKILL_PURCHASE_FREE = 0;
+    SKILL_PURCHASE_OCCUPATION = 1;
+    SKILL_PURCHASE_PURCHASE = 2;
+    SKILL_PURCHASE_BESTOWED = 3;
+}
+
+message CharacterSkill {
+    string name = 1;
+    int32 rank = 2;
+    SkillPurchase type = 3;
+    optional int32 purchases = 4;
+}
+
+
+message CharacterVantage {
+    string name = 1;
+    int32 rank = 2;
+}
+
+message Character {
+    string account_id = 1;
+
+    string characterName = 2;
+    string religions = 3;
+    string occupation = 4;
+    string specialty = 5;
+    string enhancement = 6;
+    string homeChapter = 7;
+    string publicStory = 8;
+    string privateStory = 9;
+    string homeland = 10;
+
+    int32 startingMoonstone = 11;
+    int32 skillTokens = 12;
+
+    int32 courage = 20;
+    int32 dexterity = 21;
+    int32 empathy = 22;
+    int32 passion = 23;
+    int32 prowess = 24;
+    int32 wisdom = 25;
+
+    repeated CharacterSkill skills = 26;
+    repeated CharacterVantage advantages = 27;
+    repeated CharacterVantage disadvantages = 28;
+    repeated string spells = 29;
+    repeated string flavorTraits = 30;
+
+    optional string unusualFeatures = 31;
+    optional string cures = 32;
+    optional string documents = 33;
+    optional string notes = 34;
+}
+

@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+option csharp_namespace = "Larp.Proto.FifthEdition";
+
+package larp.e5;
+
+message Gift {
+    string name = 1;
+    string title = 2;
+    repeated string properties = 3;
+    repeated GiftRank ranks = 4;
+}
+
+message GiftProperty {
+    string name = 1;
+    string title = 2;
+}
+
+message GiftPropertyValue {
+    string name = 1;
+    string value = 2;
+}
+
+message GiftRank {
+    int32 rank = 1;
+    repeated string properties = 2;
+    repeated Ability abilities = 3;
+}
+
+message Ability {
+    string name = 1; // Name without rank
+    int32 rank = 2; // 0 if there's only one rank, otherwise represents I, II, IV, 1, 2 ,3
+    string title = 3; // Name and Rank verbatim
+}

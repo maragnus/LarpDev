@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option csharp_namespace = "Larp.Proto.FifthEdition";
+
+package larp.e5;
+
+enum OccupationType {
+    OCCUPATION_TYPE_BASIC = 0;
+    OCCUPATION_TYPE_YOUTH = 1;
+    OCCUPATION_TYPE_ADVANCED = 2;
+    OCCUPATION_TYPE_PLOT = 3;
+    OCCUPATION_TYPE_ENHANCEMENT = 4;
+}
+
+// Indicates a single skill or a choice of skills
+message SkillChoice {
+    int32 count = 1;
+    repeated string skills = 2;
+}
+
+message Occupation {
+    string name = 1;
+    repeated string specialties = 2;
+    OccupationType type = 3;
+    SkillChoice skills = 4;
+    optional string duty = 5;
+    optional string livery = 6;
+}
