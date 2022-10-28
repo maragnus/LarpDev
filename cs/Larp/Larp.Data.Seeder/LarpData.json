@@ -1,5 +1,5 @@
 {
   "Games": [
-    { "GameId": 1, "Title": "Mystwood 5e", "Description": "Mystwood 5th Edition"}
+    { "Name": "mw5e", "Title": "Mystwood 5e", "Description": "Mystwood 5th Edition"}
   ]
 }

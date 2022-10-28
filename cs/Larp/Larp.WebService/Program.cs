@@ -3,9 +3,20 @@ using Larp.Data;
 using Larp.Data.Seeder;
 using Larp.Data.Services;
 using Larp.WebService.GrpcServices;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Internal;
 
 var builder = WebApplication.CreateBuilder(args);
+
+if (OperatingSystem.IsMacOS())
+{
+    builder.WebHost.ConfigureKestrel(options =>
+    {
+        // Setup a HTTP/2 endpoint without TLS.
+        options.ListenLocalhost(5208, o => o.Protocols = HttpProtocols.Http1AndHttp2);
+        options.ListenLocalhost(5209, o => o.Protocols = HttpProtocols.Http2);
+    });
+}
 
 builder.Services.AddSingleton<ISystemClock, SystemClock>();
 builder.Services.AddSingleton<LarpDataCache>();

@@ -5,7 +5,7 @@ option csharp_namespace = "Larp.Proto";
 package larp;
 
 message Game {
-  string game_id = 1;
+  string name = 1;
   string title = 2;
   string description = 3;
 }
