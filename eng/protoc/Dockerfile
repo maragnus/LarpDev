@@ -29,5 +29,5 @@ RUN cp /work/bin/* /usr/bin
 ADD protoc.sh /work/protoc.sh
 RUN chmod +x /work/protoc.sh
 
-CMD [ "bash", "/work/protoc.sh" ]
+CMD [ "/bin/bash", "/work/protoc.sh" ]
 #ENTRYPOINT [ "bash" ]

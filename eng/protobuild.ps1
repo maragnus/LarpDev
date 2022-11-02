@@ -1,4 +1,4 @@
-docker build -t protoc $PWD\protoc
+docker build --quiet -t protoc $PWD\protoc
 
 $ProtoDir="../proto"
 $TsDir="../ts/landing/src/Protos"
@@ -6,7 +6,4 @@ $TsDir="../ts/landing/src/Protos"
 $ProtoDir = "/" + (Resolve-Path $ProtoDir).Path.Replace(":", "").Replace("\", "/") + ":/work/in"
 $TsDir = "/" + (Resolve-Path $TsDir).Path.Replace(":", "").Replace("\", "/") + ":/work/out"
 
-$ProtoDir
-$TsDir
-
-docker run -it -v $ProtoDir -v $TsDir grpc
+docker run -t -v $ProtoDir -v $TsDir grpc
