@@ -97,7 +97,7 @@ proto.larp.Game.prototype.toObject = function(opt_includeInstance) {
  */
 proto.larp.Game.toObject = function(includeInstance, msg) {
   var f, obj = {
-    gameId: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    name: jspb.Message.getFieldWithDefault(msg, 1, ""),
     title: jspb.Message.getFieldWithDefault(msg, 2, ""),
     description: jspb.Message.getFieldWithDefault(msg, 3, "")
   };
@@ -138,7 +138,7 @@ proto.larp.Game.deserializeBinaryFromReader = function(msg, reader) {
     switch (field) {
     case 1:
       var value = /** @type {string} */ (reader.readString());
-      msg.setGameId(value);
+      msg.setName(value);
       break;
     case 2:
       var value = /** @type {string} */ (reader.readString());
@@ -177,7 +177,7 @@ proto.larp.Game.prototype.serializeBinary = function() {
  */
 proto.larp.Game.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = message.getGameId();
+  f = message.getName();
   if (f.length > 0) {
     writer.writeString(
       1,
@@ -202,10 +202,10 @@ proto.larp.Game.serializeBinaryToWriter = function(message, writer) {
 
 
 /**
- * optional string game_id = 1;
+ * optional string name = 1;
  * @return {string}
  */
-proto.larp.Game.prototype.getGameId = function() {
+proto.larp.Game.prototype.getName = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
 
@@ -214,7 +214,7 @@ proto.larp.Game.prototype.getGameId = function() {
  * @param {string} value
  * @return {!proto.larp.Game} returns this
  */
-proto.larp.Game.prototype.setGameId = function(value) {
+proto.larp.Game.prototype.setName = function(value) {
   return jspb.Message.setProto3StringField(this, 1, value);
 };
 

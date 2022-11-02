@@ -2,7 +2,7 @@ import {LarpAuthenticationClient} from "./Protos/larp/AuthorizationServiceClient
 
 // eslint-disable-next-line no-restricted-globals
 const host = location.hostname === 'localhost'
-    ? 'https://localhost:44330'
+    ? 'https://localhost:5001'
     : 'https://mystwoodlanding.azurewebsites.net';
 
 export const larpAuthClient = new LarpAuthenticationClient(host);
