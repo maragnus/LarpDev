@@ -8,7 +8,7 @@ public class UserSessionManagerOptions
     public int TokenLength { get; set; } = 6;
 
     /// <summary>Frequency to check database when validating a session</summary>
-    public TimeSpan CacheDuration { get; set; } = TimeSpan.FromHours(4);
+    public TimeSpan CacheDuration { get; set; } = TimeSpan.FromMinutes(1);
 
     /// <summary>Maximum duration of a new session</summary>
     public TimeSpan UserSessionDuration { get; set; } = TimeSpan.FromDays(365);

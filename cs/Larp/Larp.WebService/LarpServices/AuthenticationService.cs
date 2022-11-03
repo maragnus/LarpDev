@@ -48,7 +48,7 @@ public class AuthenticationService : IAuthenticationService
             accountId = account.AccountId;
         }
 
-        var token = await _sessions.GenerateToken(accountId, deviceId);
+        var token = await _sessions.GenerateToken(accountId, email, deviceId);
 
         await _notificationService.SendAuthenticationToken(accountId, token);
         
@@ -57,7 +57,7 @@ public class AuthenticationService : IAuthenticationService
 
     public async Task<AuthenticationResult> ConfirmLogin(string email, string code)
     {
-        var filter = Builders<Data.Account>.Filter.ElemMatch(x => x.Emails, e => e.Email == email);
+        var filter = Builders<Account>.Filter.ElemMatch(x => x.Emails, e => e.Email == email);
         var account =
             await _larpContext.Accounts
                 .Find(filter)
@@ -68,7 +68,7 @@ public class AuthenticationService : IAuthenticationService
 
         try
         {
-            var sessionId = await _sessions.CreateUserSession(code);
+            var sessionId = await _sessions.CreateUserSession(account.AccountId, code);
             return new(true, null, sessionId);
         }
         catch (UserSessionException ex)

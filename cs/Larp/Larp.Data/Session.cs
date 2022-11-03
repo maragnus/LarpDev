@@ -8,6 +8,7 @@ public class Session
     [BsonId, BsonRepresentation(BsonType.ObjectId)]
     public string SessionId { get; set; } = null!;
     public string? Token { get; set; }
+    public string? Email { get; set; }
     public string AccountId { get; set; } = null!;
     public string? DeviceId { get; set; }
     public bool IsAuthenticated { get; set; }

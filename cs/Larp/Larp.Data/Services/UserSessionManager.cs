@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using System.Runtime.InteropServices;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
@@ -16,11 +17,12 @@ public enum UserSessionValidationResult
 
 public interface IUserSessionManager
 {
-    Task<string> GenerateToken(string accountId, string deviceId);
-    Task<string> CreateUserSession(string token);
+    Task<string> GenerateToken(string accountId, string email, string deviceId);
+    Task<string> CreateUserSession(string accountId, string token);
     Task DestroyUserSessions(string accountId);
     Task DestroyUserSession(string sessionId);
     Task<UserSessionValidationResult> ValidateUserSession(string sessionId);
+    Task ConfirmEmailAddress(string accountId, string email);
 }
 
 public class UserSessionManager : IUserSessionManager
@@ -61,7 +63,7 @@ public class UserSessionManager : IUserSessionManager
 
     private static readonly SemaphoreSlim TokenLock = new(1);
     
-    public async Task<string> GenerateToken(string accountId, string deviceId)
+    public async Task<string> GenerateToken(string accountId, string email, string deviceId)
     {
         await TokenLock.WaitAsync();
         try
@@ -72,6 +74,7 @@ public class UserSessionManager : IUserSessionManager
             {
                 Token = token,
                 AccountId = accountId,
+                Email = email,
                 DeviceId = deviceId,
                 CreatedOn = _clock.UtcNow,
                 DestroyedOn = null,
@@ -91,22 +94,34 @@ public class UserSessionManager : IUserSessionManager
         }
     }
     
-    public async Task<string> CreateUserSession(string token)
+    public async Task<string> CreateUserSession(string accountId, string token)
     {
         var session = 
-            await _larpContext.Sessions.Find(x => x.Token == token).FirstOrDefaultAsync()
+            await _larpContext.Sessions.Find(x => x.Token == token && x.AccountId == accountId).FirstOrDefaultAsync()
             ?? throw new UserSessionException("Token was not found");
+
+        await ConfirmEmailAddress(session.AccountId, session.Email!);
 
         var update = Builders<Session>.Update
             .Set(s => s.Token, null)
             .Set(s=>s.ActivatedOn, _clock.UtcNow)
-            .Set(s=>s.IsAuthenticated, true);
+            .Set(s=>s.IsAuthenticated, true)
+            .Set(s =>s.Email, null);
 
         await _larpContext.Sessions.UpdateOneAsync(x => x.Token == token, update);
-
+        
         return session.SessionId;
     }
 
+    public async Task ConfirmEmailAddress(string accountId, string email)
+    {
+        var accountFilter = Builders<Account>.Filter.And(
+            Builders<Account>.Filter.Eq(x=>x.AccountId, accountId),
+            Builders<Account>.Filter.ElemMatch(x => x.Emails, x => x.Email == email));
+        var accountUpdate = Builders<Account>.Update.Set(x=>x.Emails[-1].IsVerified, true);
+        await _larpContext.Accounts.UpdateOneAsync(accountFilter, accountUpdate);
+    }
+    
     public async Task DestroyUserSessions(string accountId)
     {
         var update = Builders<Session>.Update

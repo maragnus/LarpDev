@@ -1,5 +1,10 @@
 import {larpAuthClient} from "./LarpService";
-import {ConfirmLoginRequest, InitiateLoginRequest, ValidationResponseCode} from "./Protos/larp/authorization_pb";
+import {
+    ConfirmLoginRequest,
+    InitiateLoginRequest,
+    ValidateSessionRequest,
+    ValidationResponseCode
+} from "./Protos/larp/authorization_pb";
 
 export interface SessionCallback {
     callback: (() => void);
@@ -49,6 +54,14 @@ export class SessionService {
             if (sessionId !== sessionService._sessionId)
                 sessionService.updateState(sessionId);
         }, 1000);
+
+        setTimeout(async function() {
+            await sessionService.validateSession();
+        }, 1);
+
+        setInterval(async function() {
+            await sessionService.validateSession();
+        }, 60 * 1000);
     }
 
     isAuthenticated(): boolean {
@@ -94,6 +107,32 @@ export class SessionService {
         // TODO -- Send logout rpc
         this.updateState(undefined);
         return true;
+    }
+
+    async validateSession(): Promise<boolean> {
+        const isAuthenticated = (this._sessionId?.length ?? 0) > 0;
+        if (!isAuthenticated)
+            return false;
+
+        const result = await larpAuthClient.validateSession(new ValidateSessionRequest().setSessionId(this._sessionId ?? ""), null);
+        console.log("Validation result: " + result.getStatusCode());
+        if (result.getStatusCode() === ValidationResponseCode.SUCCESS)
+            return true;
+
+        switch (result.getStatusCode()) {
+            case ValidationResponseCode.INVALID:
+                console.log("Session is invalid!");
+                break;
+            case ValidationResponseCode.EXPIRED:
+                console.log("Session expired!");
+                break;
+            default:
+                console.log("Unexpected session state!");
+                break;
+        }
+
+        this.updateState(undefined);
+        return false;
     }
 
     async login(email: string): Promise<LoginStatus> {
