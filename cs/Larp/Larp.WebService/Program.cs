@@ -3,6 +3,7 @@ using Larp.Common.LifeCycle;
 using Larp.Data;
 using Larp.Data.Seeder;
 using Larp.Data.Services;
+using Larp.WebService;
 using Larp.WebService.GrpcServices;
 using Larp.WebService.LarpServices;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -27,6 +28,7 @@ builder.Services.AddGrpc(o =>
 {
     o.EnableDetailedErrors = true;
     o.ResponseCompressionLevel = CompressionLevel.SmallestSize;
+    o.Interceptors.Add<AuthInterceptor>();
 });
 
 builder.Services.AddCors(cors =>
@@ -68,10 +70,21 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseCors();
-app.UseGrpcWeb(new GrpcWebOptions() { DefaultEnabled = true});
+app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true });
 
 app.MapFallbackToFile("index.html");
+
 app.MapGrpcService<AuthenticationGrpcService>()
+    .EnableGrpcWeb()
+    .RequireCors("GrpcCors")
+    .AllowAnonymous();
+
+app.MapGrpcService<UserGrpcService>()
+    .EnableGrpcWeb()
+    .RequireCors("GrpcCors")
+    .AllowAnonymous();
+
+app.MapGrpcService<AdminGrpcService>()
     .EnableGrpcWeb()
     .RequireCors("GrpcCors")
     .AllowAnonymous();

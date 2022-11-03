@@ -23,6 +23,9 @@ public interface IUserSessionManager
     Task DestroyUserSession(string sessionId);
     Task<UserSessionValidationResult> ValidateUserSession(string sessionId);
     Task ConfirmEmailAddress(string accountId, string email);
+
+    Task<Account> GetUserAccount(string accountId);
+    void UserAccountChanged(string accountId);
 }
 
 public class UserSessionManager : IUserSessionManager
@@ -140,6 +143,24 @@ public class UserSessionManager : IUserSessionManager
         await _larpContext.Sessions.UpdateManyAsync(x => x.SessionId == sessionId, update);
     }
 
+    public async Task<Account> GetUserAccount(string accountId)
+    {
+        if (!_cache.TryGetValue(accountId, out Account account))
+        {
+            account =
+                await _larpContext.Accounts.Find(x => x.AccountId == accountId).FirstOrDefaultAsync();
+            
+            _cache.Set(accountId, account, _options.CacheDuration);
+        }
+
+        return account;
+    }
+
+    public void UserAccountChanged(string accountId)
+    {
+        _cache.Remove(accountId);
+    }
+    
     public async Task<UserSessionValidationResult> ValidateUserSession(string sessionId)
     {
         if (!_cache.TryGetValue(sessionId, out Session session))

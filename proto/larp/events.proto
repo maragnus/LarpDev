@@ -4,15 +4,37 @@ option csharp_namespace = "Larp.Proto";
 
 package larp;
 
-import "larp/accounts.proto";
-
 enum EventRsvp {
-    UNANSWERED = 0;
-    NO = 1;
-    MAYBE = 2; 
-    YES = 3;
-    CONFIRMED = 4;
-    APPROVED = 5;
+    EVENT_RSVP_UNANSWERED = 0;
+    EVENT_RSVP_NO = 1; // Will not attend
+    EVENT_RSVP_MAYBE = 2; // Potentially attending
+    EVENT_RSVP_YES = 3; // Intention to attend
+    EVENT_RSVP_CONFIRMED = 4; // User confirmed their attendance (post letter)
+    EVENT_RSVP_APPROVED = 5; // Admin has approved user's attendance
+}
+
+enum EventAttendanceType {
+    EVENT_ATTENDANCE_TYPE_PLAYER = 0;
+    EVENT_ATTENDANCE_TYPE_STAFF = 1;
+    EVENT_ATTENDANCE_TYPE_MIXED = 2;    
+}
+
+message EventComponent {
+    string name = 1;
+}
+
+message EventComponentAttendance {
+    EventAttendanceType type = 1;
+    optional string character_id = 2;
+    optional string character_name = 3;
+}
+
+message EventAttendance {
+    string account_id = 1;
+    string account_name = 2;
+    int32 moonstone = 5;
+    EventRsvp rsvp = 6;
+    repeated EventComponentAttendance components = 7;
 }
 
 message Event {
@@ -24,14 +46,6 @@ message Event {
     string event_type = 6;
     bool rsvp = 7;
     bool hidden = 8;
-    repeated AccountAttendance attendees = 9;
+    repeated EventComponent components = 9;
+    repeated EventAttendance attendees = 10;
 }
-
-message AccountAttendance {
-    string account_id = 1;
-    string name = 2;
-    int32 moonstone = 3;
-    EventRsvp rsvp = 4;
-    repeated larp.AccountCharacterSummary characters = 5;
-}
-

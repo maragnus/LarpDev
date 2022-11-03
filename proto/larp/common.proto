@@ -13,3 +13,11 @@ message Game {
 message State {
   repeated Game games = 1;
 }
+
+message Empty {
+  
+}
+
+message StringRequest {
+  string value = 1;
+}

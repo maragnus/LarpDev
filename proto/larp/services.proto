@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+import "larp/accounts.proto";
+import "larp/common.proto";
+import "larp/events.proto";
+
+option csharp_namespace = "Larp.Proto";
+
+package larp;
+
+message AccountResponse {
+    Account account = 1;
+}
+
+message EventListRequest {
+    bool includePast = 1;
+    bool includeFuture = 2;
+    bool includeAttendance = 3;
+}
+
+message EventListResponse {
+    repeated Event event = 1;
+}
+
+message EventComponentRsvp {
+    string component_name = 1;
+    EventAttendanceType type = 2;
+    optional string character_id = 3;
+}
+
+message EventRsvpRequest {
+    string event_id = 1;
+    optional string character_id = 2;
+    EventRsvp rsvp = 3;
+    repeated EventComponentRsvp components = 4;
+}
+
+service LarpUserClient {
+    rpc GetAccount(Empty) returns (AccountResponse);
+    rpc AddEmail(StringRequest) returns (AccountResponse);
+    rpc RemoveEmail(StringRequest) returns (AccountResponse);
+    rpc PreferEmail(StringRequest) returns (AccountResponse);
+    rpc SetLocation(StringRequest) returns (AccountResponse);
+    rpc SetPhone(StringRequest) returns (AccountResponse);
+
+    rpc GetEvents(EventListRequest) returns (EventListResponse);
+    rpc RsvpEvent(EventRsvpRequest) returns (Event);
+}
+
+message AccountRequest {
+    Account account = 1;
+}
+
+service LarpAdminClient {
+    rpc SetAccount(AccountRequest) returns (AccountResponse);
+}

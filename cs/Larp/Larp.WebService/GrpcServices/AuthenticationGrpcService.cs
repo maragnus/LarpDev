@@ -15,6 +15,7 @@ public class AuthenticationGrpcService : LarpAuthentication.LarpAuthenticationBa
     {
         _logger = logger;
         _authenticationService = authenticationService;
+       
     }
 
     public override async Task<InitiateLoginResponse> InitiateLogin(InitiateLoginRequest request,

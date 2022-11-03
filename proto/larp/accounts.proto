@@ -24,19 +24,18 @@ message Account {
 message AccountEmail {
     string email = 1;
     bool is_verified = 2;
+    bool is_preferred = 3;
 }
 
 message AccountCharacterSummary {
-    string account_id = 1;
-    string game_id = 2;
+    string game_id = 1;
+    string account_id = 2;
     string account_name = 3;
     string character_id = 4;
     string character_name = 5;
     string home_chapter = 6;
     string specialty = 7;
     int32 level = 8;
-    bool is_live = 9;
-    bool is_review = 10;
 }
 
 message AccountAdmin {
