@@ -23,8 +23,8 @@ public class AuthWorkflowTests
         
         var larpDataCache = new LarpDataCache(new MemoryCacheOptions() { Clock = clock });
         var testDataFixture = await LarpDataTestFixture.CreateTestFixtureAsync(false);
-        var userSessionService = new UserSessionService(testDataFixture.Context, larpDataCache, clock,
-            Options.Create<UserSessionServiceOptions>(new()
+        var userSessionService = new UserSessionManager(testDataFixture.Context, larpDataCache, clock,
+            Options.Create<UserSessionManagerOptions>(new()
             {
                 CacheDuration = TimeSpan.FromMinutes(10),
                 UserSessionDuration = TimeSpan.FromDays(5)

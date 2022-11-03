@@ -36,6 +36,10 @@ export class SessionService {
         this.startInterval();
     }
 
+    getEmail(): string | undefined {
+        return this._email;
+    }
+
     startInterval() {
         // Make sure that all sessions identify if we are signed out
         setInterval(function () {
@@ -48,7 +52,7 @@ export class SessionService {
     }
 
     isAuthenticated(): boolean {
-        return this._sessionId !== undefined;
+        return this._sessionId !== undefined && this._sessionId !== "";
     }
 
     updateState(sessionId?: string): void {

@@ -1,8 +1,8 @@
 ﻿namespace Larp.Data.Services;
 
-public class UserSessionServiceOptions
+public class UserSessionManagerOptions
 {
-    public const string SectionName = "UserSessionService";
+    public const string SectionName = "UserSessionManager";
 
     /// <summary>Number of characters to send to the user to authenticate their account</summary>
     public int TokenLength { get; set; } = 6;

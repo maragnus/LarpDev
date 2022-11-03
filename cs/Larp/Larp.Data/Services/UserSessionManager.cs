@@ -14,7 +14,7 @@ public enum UserSessionValidationResult
     Expired = 3, // Previously authenticated but now expired
 }
 
-public interface IUserSessionService
+public interface IUserSessionManager
 {
     Task<string> GenerateToken(string accountId, string deviceId);
     Task<string> CreateUserSession(string token);
@@ -23,14 +23,14 @@ public interface IUserSessionService
     Task<UserSessionValidationResult> ValidateUserSession(string sessionId);
 }
 
-public class UserSessionService : IUserSessionService
+public class UserSessionManager : IUserSessionManager
 {
     private readonly LarpContext _larpContext;
     private readonly LarpDataCache _cache;
     private readonly ISystemClock _clock;
-    private readonly UserSessionServiceOptions _options;
+    private readonly UserSessionManagerOptions _options;
 
-    public UserSessionService(LarpContext larpContext, LarpDataCache cache, ISystemClock clock, IOptions<UserSessionServiceOptions> options)
+    public UserSessionManager(LarpContext larpContext, LarpDataCache cache, ISystemClock clock, IOptions<UserSessionManagerOptions> options)
     {
         _larpContext = larpContext;
         _cache = cache;

@@ -4,12 +4,12 @@ using System.Security.Cryptography.Xml;
 using Larp.Data;
 using Larp.Data.Services;
 using Larp.Proto;
-using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Internal;
 using MongoDB.Driver;
 
 namespace Larp.WebService.LarpServices;
 
-public record AuthenticationResult(bool IsSuccess, string? Message, string? SessionId);
+public record AuthenticationResult(bool IsSuccess, string? Message, string? SessionId, bool IsExpired = false);
 
 public interface IAuthenticationService
 {
@@ -21,11 +21,11 @@ public interface IAuthenticationService
 public class AuthenticationService : IAuthenticationService
 {
     private readonly LarpContext _larpContext;
-    private readonly IUserSessionService _sessions;
+    private readonly IUserSessionManager _sessions;
     private readonly IUserNotificationService _notificationService;
     private readonly ISystemClock _clock;
 
-    public AuthenticationService(LarpContext larpContext, IUserSessionService sessions, IUserNotificationService notificationService, ISystemClock clock)
+    public AuthenticationService(LarpContext larpContext, IUserSessionManager sessions, IUserNotificationService notificationService, ISystemClock clock)
     {
         _larpContext = larpContext;
         _sessions = sessions;
@@ -40,9 +40,17 @@ public class AuthenticationService : IAuthenticationService
             await _larpContext.Accounts.Find(filter)
                 .Project(x=>x.AccountId)
                 .FirstOrDefaultAsync();
-        
+
         if (accountId == null)
-            return new(false, "Email address was not found", "");
+        {
+            var account = new Data.Account()
+            {
+                Created = _clock.UtcNow,
+                Emails = { new Data.AccountEmail() { Email = email } }
+            };
+            await _larpContext.Accounts.InsertOneAsync(account, new InsertOneOptions(), CancellationToken.None);
+            accountId = account.AccountId;
+        }
 
         var token = await _sessions.GenerateToken(accountId, deviceId);
 
@@ -79,7 +87,7 @@ public class AuthenticationService : IAuthenticationService
         return result switch
         {
             UserSessionValidationResult.Authenticated => new(true, null, sessionId),
-            UserSessionValidationResult.Expired => new(false, "Session has expired", null),
+            UserSessionValidationResult.Expired => new(false, "Session has expired", null, true),
             UserSessionValidationResult.Invalid => new(false, "Session could not be found", null),
             UserSessionValidationResult.NotConfirmed => new(false, "Session has not been confirmed", null),
             _ => throw new InvalidOperationException(

@@ -5,10 +5,14 @@ using Larp.Data;
 using Larp.Data.Seeder;
 using Larp.Data.Services;
 using Larp.WebService.GrpcServices;
+using Larp.WebService.LarpServices;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Extensions.Internal;
+using ISystemClock = Microsoft.Extensions.Internal.ISystemClock;
+using SystemClock = Microsoft.Extensions.Internal.SystemClock;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSingleton<ISystemClock, SystemClock>();
 
 if (OperatingSystem.IsMacOS())
 {
@@ -19,17 +23,6 @@ if (OperatingSystem.IsMacOS())
         options.ListenLocalhost(5001, o => o.Protocols = HttpProtocols.Http2);
     });
 }
-
-builder.Services.AddSingleton<ISystemClock, SystemClock>();
-builder.Services.AddSingleton<LarpDataCache>();
-builder.Services.AddScoped<UserSessionService>();
-builder.Services.Configure<UserSessionServiceOptions>(builder.Configuration.GetSection(UserSessionServiceOptions.SectionName));
-
-builder.Services.AddScoped<LarpContext>();
-builder.Services.Configure<LarpDataOptions>(builder.Configuration.GetSection(LarpDataOptions.SectionName));
-
-builder.Services.AddScoped<LarpDataSeeder>();
-builder.Services.AddStartupTask<LarpDataSeederStartupTask>();
 
 builder.Services.AddGrpc(o =>
 {
@@ -49,6 +42,22 @@ builder.Services.AddCors(cors =>
         .WithOrigins("https://localhost:5002", "https://mystwoodlanding.azurewebsites.net")
         .WithExposedHeaders("Grpc-Status", "Grpc-Message"));
 });
+
+// Larp.Data
+builder.Services.AddSingleton<LarpDataCache>();
+builder.Services.AddScoped<IUserSessionManager, UserSessionManager>();
+builder.Services.Configure<UserSessionManagerOptions>(builder.Configuration.GetSection(UserSessionManagerOptions.SectionName));
+builder.Services.AddScoped<LarpContext>();
+builder.Services.Configure<LarpDataOptions>(builder.Configuration.GetSection(LarpDataOptions.SectionName));
+
+// Larp.Data.Seeder
+builder.Services.AddScoped<LarpDataSeeder>();
+builder.Services.AddStartupTask<LarpDataSeederStartupTask>();
+
+// Larp.WebService
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<AuthenticationGrpcService>();
+builder.Services.AddScoped<IUserNotificationService, UserNotificationService>();
 
 var app = builder.Build();
 
