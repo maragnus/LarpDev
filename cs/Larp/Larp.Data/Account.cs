@@ -1,5 +1,4 @@
-﻿using Larp.Proto;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Larp.Data;

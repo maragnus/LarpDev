@@ -1,15 +1,13 @@
 ﻿using Larp.Data;
-using Larp.Proto;
 using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
 
 namespace Larp.WebService.Tests;
 
-public class DataHelper
+public class TestDataHelper
 {
     private readonly LarpContext _context;
 
-    public DataHelper(LarpContext context)
+    public TestDataHelper(LarpContext context)
     {
         _context = context;
     }

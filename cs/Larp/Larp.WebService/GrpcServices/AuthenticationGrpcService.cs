@@ -1,9 +1,6 @@
 using Grpc.Core;
-using Larp.Data;
-using Larp.Data.Services;
 using Larp.Proto.Authorization;
 using Larp.WebService.LarpServices;
-using MongoDB.Driver;
 using Account = Larp.Proto.Account;
 
 namespace Larp.WebService.GrpcServices;
@@ -74,8 +71,7 @@ public class AuthenticationGrpcService : LarpAuthentication.LarpAuthenticationBa
     public override async Task<ValidateSessionResponse> ValidateSession(ValidateSessionRequest request,
         ServerCallContext context)
     {
-        // TODO -- get email
-        _logger.LogInformation("Session revalidated by {Email}", request.SessionId);
+        _logger.LogInformation("Session revalidated by {SessionId}", request.SessionId);
         try
         {
             var result = await _authenticationService.ValidateSession(request.SessionId);
@@ -94,6 +90,7 @@ public class AuthenticationGrpcService : LarpAuthentication.LarpAuthenticationBa
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Exception when validating session");
             return new ValidateSessionResponse()
             {
                 StatusCode = ValidationResponseCode.Invalid
