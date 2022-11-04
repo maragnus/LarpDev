@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option csharp_namespace = "Larp.Proto";
+option csharp_namespace = "Larp.Protos";
 
 package larp;
 
@@ -8,6 +8,7 @@ import public "larp/accounts.proto";
 import public "larp/authorization.proto";
 import public "larp/common.proto";
 import public "larp/events.proto";
+import public "larp/services.proto";
 
 
 

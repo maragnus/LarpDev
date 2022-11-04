@@ -6,6 +6,7 @@ import Landing from "./Pages/Landing";
 import LandingNavigation from "./Common/LandingNavigation";
 import LoginPage from "./Pages/LoginPage";
 import ConfirmPage from "./Pages/ConfirmPage";
+import ProfileView from "./Pages/ProfileView";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
             <Route path="/" element={<Landing/>}/>
             <Route path="/login" element={<LoginPage/>}/>
             <Route path="/confirm" element={<ConfirmPage/>}/>
+            <Route path="/profile" element={<ProfileView/>}/>
         </Routes>
           <Paper sx={{position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000}} elevation={3}>
               <LandingNavigation/>

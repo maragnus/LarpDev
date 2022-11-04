@@ -7,13 +7,15 @@ using MongoDB.Driver;
 
 namespace Larp.Data.Services;
 
-public enum UserSessionValidationResult
+public enum UserSessionValidationResultStatucCode
 {
     Invalid = 0, // Cannot find user or session
     NotConfirmed = 1, // Created but not yet confirmed
     Authenticated = 2, // Fully authenticated
     Expired = 3, // Previously authenticated but now expired
 }
+
+public record UserSessionValidationResult(UserSessionValidationResultStatucCode StatusCode, Account? Account = null);
 
 public interface IUserSessionManager
 {
@@ -172,14 +174,17 @@ public class UserSessionManager : IUserSessionManager
         }
 
         if (session == null)
-            return UserSessionValidationResult.Invalid;
+            return new UserSessionValidationResult(UserSessionValidationResultStatucCode.Invalid);
 
         if (session.ExpiresOn <= _clock.UtcNow)
-            return UserSessionValidationResult.Expired;
+            return  new UserSessionValidationResult(UserSessionValidationResultStatucCode.Expired);
 
         if (session.IsAuthenticated)
-            return UserSessionValidationResult.Authenticated;
-
-        return UserSessionValidationResult.NotConfirmed;
+        {
+            var account = await GetUserAccount(session.AccountId);
+            return new UserSessionValidationResult(UserSessionValidationResultStatucCode.Authenticated, account);
+        }
+        
+        return new UserSessionValidationResult(UserSessionValidationResultStatucCode.NotConfirmed);
     }
 }

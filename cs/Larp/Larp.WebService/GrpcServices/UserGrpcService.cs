@@ -1,8 +1,11 @@
 using System.Security.Authentication;
+using Google.Protobuf.Collections;
 using Grpc.Core;
 using Larp.Data;
-using Larp.Proto;
+using Larp.Protos;
+using Larp.Protos.Services;
 using Account = Larp.Data.Account;
+using AccountEmail = Larp.Protos.AccountEmail;
 
 namespace Larp.WebService.GrpcServices;
 
@@ -16,7 +19,7 @@ public static class ServerCallContextExtensions
     }
 }
 
-public class UserGrpcService : LarpUserClient.LarpUserClientBase
+public class UserGrpcService : LarpUser.LarpUserBase
 {
     private readonly LarpContext _larpContext;
 
@@ -24,15 +27,36 @@ public class UserGrpcService : LarpUserClient.LarpUserClientBase
     {
         _larpContext = larpContext;
     }
-     
+    
     public override Task<AccountResponse> GetAccount(Empty request, ServerCallContext context)
     {
         var account = context.GetAccount();
-        return base.GetAccount(request, context);
+
+        var emails = account.Emails.Select(e => new Protos.AccountEmail()
+        {
+            Email = e.Email,
+            IsPreferred = e.IsPreferred,
+            IsVerified = e.IsVerified
+        });
+
+        var result = new Protos.Account()
+        {
+            AccountId = account.AccountId,
+            Created = account.Created.ToString("O"),
+            Location = account.Location ?? "",
+            Name = account.Name ?? "",
+            Phone = account.Phone ?? ""
+        };
+        result.Emails.AddRange(emails);
+        
+        return Task.FromResult(new AccountResponse() { Account = result });
     }
 }
 
-public class AdminGrpcService : Larp.Proto.LarpAdminClient.LarpAdminClientBase
+public class AdminGrpcService : Larp.Protos.Services.LarpAdmin.LarpAdminBase
 {
-    
+    public override Task<AccountResponse> SetAccount(AccountRequest request, ServerCallContext context)
+    {
+        return base.SetAccount(request, context);
+    }
 }

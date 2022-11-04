@@ -8,9 +8,13 @@ export class Account extends jspb.Message {
 
   getName(): string;
   setName(value: string): Account;
+  hasName(): boolean;
+  clearName(): Account;
 
   getLocation(): string;
   setLocation(value: string): Account;
+  hasLocation(): boolean;
+  clearLocation(): Account;
 
   getEmailsList(): Array<AccountEmail>;
   setEmailsList(value: Array<AccountEmail>): Account;
@@ -19,12 +23,16 @@ export class Account extends jspb.Message {
 
   getPhone(): string;
   setPhone(value: string): Account;
-
-  getIsSuperAdmin(): boolean;
-  setIsSuperAdmin(value: boolean): Account;
+  hasPhone(): boolean;
+  clearPhone(): Account;
 
   getNotes(): string;
   setNotes(value: string): Account;
+  hasNotes(): boolean;
+  clearNotes(): Account;
+
+  getIsSuperAdmin(): boolean;
+  setIsSuperAdmin(value: boolean): Account;
 
   getCreated(): string;
   setCreated(value: string): Account;
@@ -45,14 +53,34 @@ export class Account extends jspb.Message {
 export namespace Account {
   export type AsObject = {
     accountId: string,
-    name: string,
-    location: string,
+    name?: string,
+    location?: string,
     emailsList: Array<AccountEmail.AsObject>,
-    phone: string,
+    phone?: string,
+    notes?: string,
     isSuperAdmin: boolean,
-    notes: string,
     created: string,
     charactersList: Array<AccountCharacterSummary.AsObject>,
+  }
+
+  export enum NameCase { 
+    _NAME_NOT_SET = 0,
+    NAME = 2,
+  }
+
+  export enum LocationCase { 
+    _LOCATION_NOT_SET = 0,
+    LOCATION = 3,
+  }
+
+  export enum PhoneCase { 
+    _PHONE_NOT_SET = 0,
+    PHONE = 5,
+  }
+
+  export enum NotesCase { 
+    _NOTES_NOT_SET = 0,
+    NOTES = 6,
   }
 }
 
@@ -62,6 +90,9 @@ export class AccountEmail extends jspb.Message {
 
   getIsVerified(): boolean;
   setIsVerified(value: boolean): AccountEmail;
+
+  getIsPreferred(): boolean;
+  setIsPreferred(value: boolean): AccountEmail;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): AccountEmail.AsObject;
@@ -75,15 +106,16 @@ export namespace AccountEmail {
   export type AsObject = {
     email: string,
     isVerified: boolean,
+    isPreferred: boolean,
   }
 }
 
 export class AccountCharacterSummary extends jspb.Message {
-  getAccountId(): string;
-  setAccountId(value: string): AccountCharacterSummary;
-
   getGameId(): string;
   setGameId(value: string): AccountCharacterSummary;
+
+  getAccountId(): string;
+  setAccountId(value: string): AccountCharacterSummary;
 
   getAccountName(): string;
   setAccountName(value: string): AccountCharacterSummary;
@@ -96,18 +128,16 @@ export class AccountCharacterSummary extends jspb.Message {
 
   getHomeChapter(): string;
   setHomeChapter(value: string): AccountCharacterSummary;
+  hasHomeChapter(): boolean;
+  clearHomeChapter(): AccountCharacterSummary;
 
   getSpecialty(): string;
   setSpecialty(value: string): AccountCharacterSummary;
+  hasSpecialty(): boolean;
+  clearSpecialty(): AccountCharacterSummary;
 
   getLevel(): number;
   setLevel(value: number): AccountCharacterSummary;
-
-  getIsLive(): boolean;
-  setIsLive(value: boolean): AccountCharacterSummary;
-
-  getIsReview(): boolean;
-  setIsReview(value: boolean): AccountCharacterSummary;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): AccountCharacterSummary.AsObject;
@@ -119,16 +149,24 @@ export class AccountCharacterSummary extends jspb.Message {
 
 export namespace AccountCharacterSummary {
   export type AsObject = {
-    accountId: string,
     gameId: string,
+    accountId: string,
     accountName: string,
     characterId: string,
     characterName: string,
-    homeChapter: string,
-    specialty: string,
+    homeChapter?: string,
+    specialty?: string,
     level: number,
-    isLive: boolean,
-    isReview: boolean,
+  }
+
+  export enum HomeChapterCase { 
+    _HOME_CHAPTER_NOT_SET = 0,
+    HOME_CHAPTER = 6,
+  }
+
+  export enum SpecialtyCase { 
+    _SPECIALTY_NOT_SET = 0,
+    SPECIALTY = 7,
   }
 }
 

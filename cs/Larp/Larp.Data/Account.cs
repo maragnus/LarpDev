@@ -20,4 +20,5 @@ public class AccountEmail
 {
     public string Email { get; set; } = null!;
     public bool IsVerified { get; set; }
+    public bool IsPreferred { get; set; }
 }

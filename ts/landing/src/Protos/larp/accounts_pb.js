@@ -155,8 +155,8 @@ proto.larp.Account.toObject = function(includeInstance, msg) {
     emailsList: jspb.Message.toObjectList(msg.getEmailsList(),
     proto.larp.AccountEmail.toObject, includeInstance),
     phone: jspb.Message.getFieldWithDefault(msg, 5, ""),
-    isSuperAdmin: jspb.Message.getBooleanFieldWithDefault(msg, 6, false),
-    notes: jspb.Message.getFieldWithDefault(msg, 7, ""),
+    notes: jspb.Message.getFieldWithDefault(msg, 6, ""),
+    isSuperAdmin: jspb.Message.getBooleanFieldWithDefault(msg, 7, false),
     created: jspb.Message.getFieldWithDefault(msg, 8, ""),
     charactersList: jspb.Message.toObjectList(msg.getCharactersList(),
     proto.larp.AccountCharacterSummary.toObject, includeInstance)
@@ -218,12 +218,12 @@ proto.larp.Account.deserializeBinaryFromReader = function(msg, reader) {
       msg.setPhone(value);
       break;
     case 6:
-      var value = /** @type {boolean} */ (reader.readBool());
-      msg.setIsSuperAdmin(value);
-      break;
-    case 7:
       var value = /** @type {string} */ (reader.readString());
       msg.setNotes(value);
+      break;
+    case 7:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setIsSuperAdmin(value);
       break;
     case 8:
       var value = /** @type {string} */ (reader.readString());
@@ -270,15 +270,15 @@ proto.larp.Account.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getName();
-  if (f.length > 0) {
+  f = /** @type {string} */ (jspb.Message.getField(message, 2));
+  if (f != null) {
     writer.writeString(
       2,
       f
     );
   }
-  f = message.getLocation();
-  if (f.length > 0) {
+  f = /** @type {string} */ (jspb.Message.getField(message, 3));
+  if (f != null) {
     writer.writeString(
       3,
       f
@@ -292,23 +292,23 @@ proto.larp.Account.serializeBinaryToWriter = function(message, writer) {
       proto.larp.AccountEmail.serializeBinaryToWriter
     );
   }
-  f = message.getPhone();
-  if (f.length > 0) {
+  f = /** @type {string} */ (jspb.Message.getField(message, 5));
+  if (f != null) {
     writer.writeString(
       5,
+      f
+    );
+  }
+  f = /** @type {string} */ (jspb.Message.getField(message, 6));
+  if (f != null) {
+    writer.writeString(
+      6,
       f
     );
   }
   f = message.getIsSuperAdmin();
   if (f) {
     writer.writeBool(
-      6,
-      f
-    );
-  }
-  f = message.getNotes();
-  if (f.length > 0) {
-    writer.writeString(
       7,
       f
     );
@@ -363,7 +363,25 @@ proto.larp.Account.prototype.getName = function() {
  * @return {!proto.larp.Account} returns this
  */
 proto.larp.Account.prototype.setName = function(value) {
-  return jspb.Message.setProto3StringField(this, 2, value);
+  return jspb.Message.setField(this, 2, value);
+};
+
+
+/**
+ * Clears the field making it undefined.
+ * @return {!proto.larp.Account} returns this
+ */
+proto.larp.Account.prototype.clearName = function() {
+  return jspb.Message.setField(this, 2, undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.larp.Account.prototype.hasName = function() {
+  return jspb.Message.getField(this, 2) != null;
 };
 
 
@@ -381,7 +399,25 @@ proto.larp.Account.prototype.getLocation = function() {
  * @return {!proto.larp.Account} returns this
  */
 proto.larp.Account.prototype.setLocation = function(value) {
-  return jspb.Message.setProto3StringField(this, 3, value);
+  return jspb.Message.setField(this, 3, value);
+};
+
+
+/**
+ * Clears the field making it undefined.
+ * @return {!proto.larp.Account} returns this
+ */
+proto.larp.Account.prototype.clearLocation = function() {
+  return jspb.Message.setField(this, 3, undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.larp.Account.prototype.hasLocation = function() {
+  return jspb.Message.getField(this, 3) != null;
 };
 
 
@@ -437,34 +473,34 @@ proto.larp.Account.prototype.getPhone = function() {
  * @return {!proto.larp.Account} returns this
  */
 proto.larp.Account.prototype.setPhone = function(value) {
-  return jspb.Message.setProto3StringField(this, 5, value);
+  return jspb.Message.setField(this, 5, value);
 };
 
 
 /**
- * optional bool is_super_admin = 6;
- * @return {boolean}
- */
-proto.larp.Account.prototype.getIsSuperAdmin = function() {
-  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 6, false));
-};
-
-
-/**
- * @param {boolean} value
+ * Clears the field making it undefined.
  * @return {!proto.larp.Account} returns this
  */
-proto.larp.Account.prototype.setIsSuperAdmin = function(value) {
-  return jspb.Message.setProto3BooleanField(this, 6, value);
+proto.larp.Account.prototype.clearPhone = function() {
+  return jspb.Message.setField(this, 5, undefined);
 };
 
 
 /**
- * optional string notes = 7;
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.larp.Account.prototype.hasPhone = function() {
+  return jspb.Message.getField(this, 5) != null;
+};
+
+
+/**
+ * optional string notes = 6;
  * @return {string}
  */
 proto.larp.Account.prototype.getNotes = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 7, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
 };
 
 
@@ -473,7 +509,43 @@ proto.larp.Account.prototype.getNotes = function() {
  * @return {!proto.larp.Account} returns this
  */
 proto.larp.Account.prototype.setNotes = function(value) {
-  return jspb.Message.setProto3StringField(this, 7, value);
+  return jspb.Message.setField(this, 6, value);
+};
+
+
+/**
+ * Clears the field making it undefined.
+ * @return {!proto.larp.Account} returns this
+ */
+proto.larp.Account.prototype.clearNotes = function() {
+  return jspb.Message.setField(this, 6, undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.larp.Account.prototype.hasNotes = function() {
+  return jspb.Message.getField(this, 6) != null;
+};
+
+
+/**
+ * optional bool is_super_admin = 7;
+ * @return {boolean}
+ */
+proto.larp.Account.prototype.getIsSuperAdmin = function() {
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 7, false));
+};
+
+
+/**
+ * @param {boolean} value
+ * @return {!proto.larp.Account} returns this
+ */
+proto.larp.Account.prototype.setIsSuperAdmin = function(value) {
+  return jspb.Message.setProto3BooleanField(this, 7, value);
 };
 
 
@@ -566,7 +638,8 @@ proto.larp.AccountEmail.prototype.toObject = function(opt_includeInstance) {
 proto.larp.AccountEmail.toObject = function(includeInstance, msg) {
   var f, obj = {
     email: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    isVerified: jspb.Message.getBooleanFieldWithDefault(msg, 2, false)
+    isVerified: jspb.Message.getBooleanFieldWithDefault(msg, 2, false),
+    isPreferred: jspb.Message.getBooleanFieldWithDefault(msg, 3, false)
   };
 
   if (includeInstance) {
@@ -611,6 +684,10 @@ proto.larp.AccountEmail.deserializeBinaryFromReader = function(msg, reader) {
       var value = /** @type {boolean} */ (reader.readBool());
       msg.setIsVerified(value);
       break;
+    case 3:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setIsPreferred(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -654,6 +731,13 @@ proto.larp.AccountEmail.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getIsPreferred();
+  if (f) {
+    writer.writeBool(
+      3,
+      f
+    );
+  }
 };
 
 
@@ -693,6 +777,24 @@ proto.larp.AccountEmail.prototype.setIsVerified = function(value) {
 };
 
 
+/**
+ * optional bool is_preferred = 3;
+ * @return {boolean}
+ */
+proto.larp.AccountEmail.prototype.getIsPreferred = function() {
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 3, false));
+};
+
+
+/**
+ * @param {boolean} value
+ * @return {!proto.larp.AccountEmail} returns this
+ */
+proto.larp.AccountEmail.prototype.setIsPreferred = function(value) {
+  return jspb.Message.setProto3BooleanField(this, 3, value);
+};
+
+
 
 
 
@@ -725,16 +827,14 @@ proto.larp.AccountCharacterSummary.prototype.toObject = function(opt_includeInst
  */
 proto.larp.AccountCharacterSummary.toObject = function(includeInstance, msg) {
   var f, obj = {
-    accountId: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    gameId: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    gameId: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    accountId: jspb.Message.getFieldWithDefault(msg, 2, ""),
     accountName: jspb.Message.getFieldWithDefault(msg, 3, ""),
     characterId: jspb.Message.getFieldWithDefault(msg, 4, ""),
     characterName: jspb.Message.getFieldWithDefault(msg, 5, ""),
     homeChapter: jspb.Message.getFieldWithDefault(msg, 6, ""),
     specialty: jspb.Message.getFieldWithDefault(msg, 7, ""),
-    level: jspb.Message.getFieldWithDefault(msg, 8, 0),
-    isLive: jspb.Message.getBooleanFieldWithDefault(msg, 9, false),
-    isReview: jspb.Message.getBooleanFieldWithDefault(msg, 10, false)
+    level: jspb.Message.getFieldWithDefault(msg, 8, 0)
   };
 
   if (includeInstance) {
@@ -773,11 +873,11 @@ proto.larp.AccountCharacterSummary.deserializeBinaryFromReader = function(msg, r
     switch (field) {
     case 1:
       var value = /** @type {string} */ (reader.readString());
-      msg.setAccountId(value);
+      msg.setGameId(value);
       break;
     case 2:
       var value = /** @type {string} */ (reader.readString());
-      msg.setGameId(value);
+      msg.setAccountId(value);
       break;
     case 3:
       var value = /** @type {string} */ (reader.readString());
@@ -802,14 +902,6 @@ proto.larp.AccountCharacterSummary.deserializeBinaryFromReader = function(msg, r
     case 8:
       var value = /** @type {number} */ (reader.readInt32());
       msg.setLevel(value);
-      break;
-    case 9:
-      var value = /** @type {boolean} */ (reader.readBool());
-      msg.setIsLive(value);
-      break;
-    case 10:
-      var value = /** @type {boolean} */ (reader.readBool());
-      msg.setIsReview(value);
       break;
     default:
       reader.skipField();
@@ -840,14 +932,14 @@ proto.larp.AccountCharacterSummary.prototype.serializeBinary = function() {
  */
 proto.larp.AccountCharacterSummary.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = message.getAccountId();
+  f = message.getGameId();
   if (f.length > 0) {
     writer.writeString(
       1,
       f
     );
   }
-  f = message.getGameId();
+  f = message.getAccountId();
   if (f.length > 0) {
     writer.writeString(
       2,
@@ -875,15 +967,15 @@ proto.larp.AccountCharacterSummary.serializeBinaryToWriter = function(message, w
       f
     );
   }
-  f = message.getHomeChapter();
-  if (f.length > 0) {
+  f = /** @type {string} */ (jspb.Message.getField(message, 6));
+  if (f != null) {
     writer.writeString(
       6,
       f
     );
   }
-  f = message.getSpecialty();
-  if (f.length > 0) {
+  f = /** @type {string} */ (jspb.Message.getField(message, 7));
+  if (f != null) {
     writer.writeString(
       7,
       f
@@ -896,28 +988,14 @@ proto.larp.AccountCharacterSummary.serializeBinaryToWriter = function(message, w
       f
     );
   }
-  f = message.getIsLive();
-  if (f) {
-    writer.writeBool(
-      9,
-      f
-    );
-  }
-  f = message.getIsReview();
-  if (f) {
-    writer.writeBool(
-      10,
-      f
-    );
-  }
 };
 
 
 /**
- * optional string account_id = 1;
+ * optional string game_id = 1;
  * @return {string}
  */
-proto.larp.AccountCharacterSummary.prototype.getAccountId = function() {
+proto.larp.AccountCharacterSummary.prototype.getGameId = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
 
@@ -926,16 +1004,16 @@ proto.larp.AccountCharacterSummary.prototype.getAccountId = function() {
  * @param {string} value
  * @return {!proto.larp.AccountCharacterSummary} returns this
  */
-proto.larp.AccountCharacterSummary.prototype.setAccountId = function(value) {
+proto.larp.AccountCharacterSummary.prototype.setGameId = function(value) {
   return jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
 /**
- * optional string game_id = 2;
+ * optional string account_id = 2;
  * @return {string}
  */
-proto.larp.AccountCharacterSummary.prototype.getGameId = function() {
+proto.larp.AccountCharacterSummary.prototype.getAccountId = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
 };
 
@@ -944,7 +1022,7 @@ proto.larp.AccountCharacterSummary.prototype.getGameId = function() {
  * @param {string} value
  * @return {!proto.larp.AccountCharacterSummary} returns this
  */
-proto.larp.AccountCharacterSummary.prototype.setGameId = function(value) {
+proto.larp.AccountCharacterSummary.prototype.setAccountId = function(value) {
   return jspb.Message.setProto3StringField(this, 2, value);
 };
 
@@ -1017,7 +1095,25 @@ proto.larp.AccountCharacterSummary.prototype.getHomeChapter = function() {
  * @return {!proto.larp.AccountCharacterSummary} returns this
  */
 proto.larp.AccountCharacterSummary.prototype.setHomeChapter = function(value) {
-  return jspb.Message.setProto3StringField(this, 6, value);
+  return jspb.Message.setField(this, 6, value);
+};
+
+
+/**
+ * Clears the field making it undefined.
+ * @return {!proto.larp.AccountCharacterSummary} returns this
+ */
+proto.larp.AccountCharacterSummary.prototype.clearHomeChapter = function() {
+  return jspb.Message.setField(this, 6, undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.larp.AccountCharacterSummary.prototype.hasHomeChapter = function() {
+  return jspb.Message.getField(this, 6) != null;
 };
 
 
@@ -1035,7 +1131,25 @@ proto.larp.AccountCharacterSummary.prototype.getSpecialty = function() {
  * @return {!proto.larp.AccountCharacterSummary} returns this
  */
 proto.larp.AccountCharacterSummary.prototype.setSpecialty = function(value) {
-  return jspb.Message.setProto3StringField(this, 7, value);
+  return jspb.Message.setField(this, 7, value);
+};
+
+
+/**
+ * Clears the field making it undefined.
+ * @return {!proto.larp.AccountCharacterSummary} returns this
+ */
+proto.larp.AccountCharacterSummary.prototype.clearSpecialty = function() {
+  return jspb.Message.setField(this, 7, undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.larp.AccountCharacterSummary.prototype.hasSpecialty = function() {
+  return jspb.Message.getField(this, 7) != null;
 };
 
 
@@ -1054,42 +1168,6 @@ proto.larp.AccountCharacterSummary.prototype.getLevel = function() {
  */
 proto.larp.AccountCharacterSummary.prototype.setLevel = function(value) {
   return jspb.Message.setProto3IntField(this, 8, value);
-};
-
-
-/**
- * optional bool is_live = 9;
- * @return {boolean}
- */
-proto.larp.AccountCharacterSummary.prototype.getIsLive = function() {
-  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 9, false));
-};
-
-
-/**
- * @param {boolean} value
- * @return {!proto.larp.AccountCharacterSummary} returns this
- */
-proto.larp.AccountCharacterSummary.prototype.setIsLive = function(value) {
-  return jspb.Message.setProto3BooleanField(this, 9, value);
-};
-
-
-/**
- * optional bool is_review = 10;
- * @return {boolean}
- */
-proto.larp.AccountCharacterSummary.prototype.getIsReview = function() {
-  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 10, false));
-};
-
-
-/**
- * @param {boolean} value
- * @return {!proto.larp.AccountCharacterSummary} returns this
- */
-proto.larp.AccountCharacterSummary.prototype.setIsReview = function(value) {
-  return jspb.Message.setProto3BooleanField(this, 10, value);
 };
 
 

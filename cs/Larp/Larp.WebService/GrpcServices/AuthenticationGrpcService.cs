@@ -1,7 +1,7 @@
 using Grpc.Core;
-using Larp.Proto.Authorization;
+using Larp.Protos.Authorization;
 using Larp.WebService.LarpServices;
-using Account = Larp.Proto.Account;
+using Account = Larp.Protos.Account;
 
 namespace Larp.WebService.GrpcServices;
 
@@ -97,5 +97,11 @@ public class AuthenticationGrpcService : LarpAuthentication.LarpAuthenticationBa
                 StatusCode = ValidationResponseCode.Invalid
             };
         }
+    }
+
+    public override async Task<LogoutResponse> Logout(LogoutRequest request, ServerCallContext context)
+    {
+        await _authenticationService.DestroySession(request.SessionId);
+        return new LogoutResponse();
     }
 }

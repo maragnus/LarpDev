@@ -1,11 +1,13 @@
-import {larpAuthClient} from "./LarpService";
+import {larpAuthClient, larpUserClient} from "./LarpService";
 import {
     ConfirmLoginRequest,
-    InitiateLoginRequest,
+    InitiateLoginRequest, LogoutRequest,
     ValidateSessionRequest,
     ValidationResponseCode
 } from "./Protos/larp/authorization_pb";
-import {Metadata} from "grpc-web";
+import {Empty} from "./Protos/larp/common_pb";
+import {Account} from "./Protos/larp/accounts_pb";
+import { Metadata } from "grpc-web";
 
 export interface SessionCallback {
     callback: (() => void);
@@ -30,9 +32,6 @@ export class SessionService {
     private _nextSubscriptionId: number = 0;
     private _email?: string;
     private _sessionId?: string;
-    private _metadata: Metadata = new class implements Metadata {
-        [s: string]: string;
-    };
 
     private static readonly SessionIdKey = "MWL_SESSION_ID";
     private static readonly AccountKey = "MWL_PROFILE";
@@ -75,7 +74,6 @@ export class SessionService {
     updateState(sessionId?: string): void {
         this._sessionId = sessionId;
         localStorage.setItem(SessionService.SessionIdKey, sessionId ?? "");
-        this._metadata["Authorization"] = sessionId ?? "";
         this.notifySubscribers();
     }
 
@@ -109,8 +107,19 @@ export class SessionService {
     }
 
     async logout(): Promise<boolean> {
-        // TODO -- Send logout rpc
-        this.updateState(undefined);
+        if (this._sessionId === undefined)
+            return true;
+
+        try {
+            await larpAuthClient.logout(new LogoutRequest().setSessionId(this._sessionId), null);
+        }
+        catch (e) {
+            console.log("Logout failed");
+            console.log(e);
+        }
+        finally {
+            this.updateState(undefined);
+        }
         return true;
     }
 
@@ -173,6 +182,18 @@ export class SessionService {
     isAdmin() {
         return false;
     }
+
+    getMetadata(): Metadata {
+        return {
+            "x-session-id": this._sessionId ?? "invalid"
+        };
+    }
+
+    async getAccount(): Promise<Account.AsObject> {
+        const result = await larpUserClient.getAccount(new Empty(), this.getMetadata());
+        return (result.getAccount() ?? new Account()).toObject();
+    }
+
 }
 
 const sessionService: SessionService = new SessionService();

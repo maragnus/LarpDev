@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option csharp_namespace = "Larp.Proto.Mystwood5e";
+option csharp_namespace = "Larp.Protos.Mystwood5e";
 
 package larp.mw5e;
 

@@ -1,4 +1,4 @@
-﻿using Larp.Proto.Mystwood5e;
+﻿using Larp.Protos.Mystwood5e;
 using MongoDB.Driver;
 
 namespace Larp.Data;

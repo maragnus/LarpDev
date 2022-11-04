@@ -134,7 +134,7 @@ export default function LoginPage() {
                         {"Login"}
                     </DialogTitle>
                     <DialogContent>
-                        <DialogContentText id="alert-dialog-description">
+                        <DialogContentText id="alert-dialog-description" component="div">
                             <Typography variant="body1" mb={2}>
                                 {message}
                             </Typography>

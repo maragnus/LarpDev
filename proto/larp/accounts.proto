@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option csharp_namespace = "Larp.Proto";
+option csharp_namespace = "Larp.Protos";
 
 package larp;
 
@@ -11,12 +11,12 @@ enum AdminRank {
 
 message Account {
     string account_id = 1;
-    string name = 2;
-    string location = 3;
+    optional string name = 2;
+    optional string location = 3;
     repeated AccountEmail emails = 4;
-    string phone = 5;
-    bool is_super_admin = 6;
-    string notes = 7;
+    optional string phone = 5;
+    optional string notes = 6;
+    bool is_super_admin = 7;
     string created = 8;
     repeated AccountCharacterSummary characters = 9;
 }
@@ -33,8 +33,8 @@ message AccountCharacterSummary {
     string account_name = 3;
     string character_id = 4;
     string character_name = 5;
-    string home_chapter = 6;
-    string specialty = 7;
+    optional string home_chapter = 6;
+    optional string specialty = 7;
     int32 level = 8;
 }
 

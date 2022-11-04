@@ -1,7 +1,100 @@
 import * as jspb from 'google-protobuf'
 
-import * as larp_accounts_pb from '../larp/accounts_pb';
 
+
+export class EventComponent extends jspb.Message {
+  getName(): string;
+  setName(value: string): EventComponent;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): EventComponent.AsObject;
+  static toObject(includeInstance: boolean, msg: EventComponent): EventComponent.AsObject;
+  static serializeBinaryToWriter(message: EventComponent, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): EventComponent;
+  static deserializeBinaryFromReader(message: EventComponent, reader: jspb.BinaryReader): EventComponent;
+}
+
+export namespace EventComponent {
+  export type AsObject = {
+    name: string,
+  }
+}
+
+export class EventComponentAttendance extends jspb.Message {
+  getType(): EventAttendanceType;
+  setType(value: EventAttendanceType): EventComponentAttendance;
+
+  getCharacterId(): string;
+  setCharacterId(value: string): EventComponentAttendance;
+  hasCharacterId(): boolean;
+  clearCharacterId(): EventComponentAttendance;
+
+  getCharacterName(): string;
+  setCharacterName(value: string): EventComponentAttendance;
+  hasCharacterName(): boolean;
+  clearCharacterName(): EventComponentAttendance;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): EventComponentAttendance.AsObject;
+  static toObject(includeInstance: boolean, msg: EventComponentAttendance): EventComponentAttendance.AsObject;
+  static serializeBinaryToWriter(message: EventComponentAttendance, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): EventComponentAttendance;
+  static deserializeBinaryFromReader(message: EventComponentAttendance, reader: jspb.BinaryReader): EventComponentAttendance;
+}
+
+export namespace EventComponentAttendance {
+  export type AsObject = {
+    type: EventAttendanceType,
+    characterId?: string,
+    characterName?: string,
+  }
+
+  export enum CharacterIdCase { 
+    _CHARACTER_ID_NOT_SET = 0,
+    CHARACTER_ID = 2,
+  }
+
+  export enum CharacterNameCase { 
+    _CHARACTER_NAME_NOT_SET = 0,
+    CHARACTER_NAME = 3,
+  }
+}
+
+export class EventAttendance extends jspb.Message {
+  getAccountId(): string;
+  setAccountId(value: string): EventAttendance;
+
+  getAccountName(): string;
+  setAccountName(value: string): EventAttendance;
+
+  getMoonstone(): number;
+  setMoonstone(value: number): EventAttendance;
+
+  getRsvp(): EventRsvp;
+  setRsvp(value: EventRsvp): EventAttendance;
+
+  getComponentsList(): Array<EventComponentAttendance>;
+  setComponentsList(value: Array<EventComponentAttendance>): EventAttendance;
+  clearComponentsList(): EventAttendance;
+  addComponents(value?: EventComponentAttendance, index?: number): EventComponentAttendance;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): EventAttendance.AsObject;
+  static toObject(includeInstance: boolean, msg: EventAttendance): EventAttendance.AsObject;
+  static serializeBinaryToWriter(message: EventAttendance, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): EventAttendance;
+  static deserializeBinaryFromReader(message: EventAttendance, reader: jspb.BinaryReader): EventAttendance;
+}
+
+export namespace EventAttendance {
+  export type AsObject = {
+    accountId: string,
+    accountName: string,
+    moonstone: number,
+    rsvp: EventRsvp,
+    componentsList: Array<EventComponentAttendance.AsObject>,
+  }
+}
 
 export class Event extends jspb.Message {
   getEventId(): string;
@@ -28,10 +121,15 @@ export class Event extends jspb.Message {
   getHidden(): boolean;
   setHidden(value: boolean): Event;
 
-  getAttendeesList(): Array<AccountAttendance>;
-  setAttendeesList(value: Array<AccountAttendance>): Event;
+  getComponentsList(): Array<EventComponent>;
+  setComponentsList(value: Array<EventComponent>): Event;
+  clearComponentsList(): Event;
+  addComponents(value?: EventComponent, index?: number): EventComponent;
+
+  getAttendeesList(): Array<EventAttendance>;
+  setAttendeesList(value: Array<EventAttendance>): Event;
   clearAttendeesList(): Event;
-  addAttendees(value?: AccountAttendance, index?: number): AccountAttendance;
+  addAttendees(value?: EventAttendance, index?: number): EventAttendance;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Event.AsObject;
@@ -51,51 +149,21 @@ export namespace Event {
     eventType: string,
     rsvp: boolean,
     hidden: boolean,
-    attendeesList: Array<AccountAttendance.AsObject>,
-  }
-}
-
-export class AccountAttendance extends jspb.Message {
-  getAccountId(): string;
-  setAccountId(value: string): AccountAttendance;
-
-  getName(): string;
-  setName(value: string): AccountAttendance;
-
-  getMoonstone(): number;
-  setMoonstone(value: number): AccountAttendance;
-
-  getRsvp(): EventRsvp;
-  setRsvp(value: EventRsvp): AccountAttendance;
-
-  getCharactersList(): Array<larp_accounts_pb.AccountCharacterSummary>;
-  setCharactersList(value: Array<larp_accounts_pb.AccountCharacterSummary>): AccountAttendance;
-  clearCharactersList(): AccountAttendance;
-  addCharacters(value?: larp_accounts_pb.AccountCharacterSummary, index?: number): larp_accounts_pb.AccountCharacterSummary;
-
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): AccountAttendance.AsObject;
-  static toObject(includeInstance: boolean, msg: AccountAttendance): AccountAttendance.AsObject;
-  static serializeBinaryToWriter(message: AccountAttendance, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): AccountAttendance;
-  static deserializeBinaryFromReader(message: AccountAttendance, reader: jspb.BinaryReader): AccountAttendance;
-}
-
-export namespace AccountAttendance {
-  export type AsObject = {
-    accountId: string,
-    name: string,
-    moonstone: number,
-    rsvp: EventRsvp,
-    charactersList: Array<larp_accounts_pb.AccountCharacterSummary.AsObject>,
+    componentsList: Array<EventComponent.AsObject>,
+    attendeesList: Array<EventAttendance.AsObject>,
   }
 }
 
 export enum EventRsvp { 
-  UNANSWERED = 0,
-  NO = 1,
-  MAYBE = 2,
-  YES = 3,
-  CONFIRMED = 4,
-  APPROVED = 5,
+  EVENT_RSVP_UNANSWERED = 0,
+  EVENT_RSVP_NO = 1,
+  EVENT_RSVP_MAYBE = 2,
+  EVENT_RSVP_YES = 3,
+  EVENT_RSVP_CONFIRMED = 4,
+  EVENT_RSVP_APPROVED = 5,
+}
+export enum EventAttendanceType { 
+  EVENT_ATTENDANCE_TYPE_PLAYER = 0,
+  EVENT_ATTENDANCE_TYPE_STAFF = 1,
+  EVENT_ATTENDANCE_TYPE_MIXED = 2,
 }

@@ -168,5 +168,48 @@ export class LarpAuthenticationClient {
     this.methodDescriptorValidateSession);
   }
 
+  methodDescriptorLogout = new grpcWeb.MethodDescriptor(
+    '/larp.authorization.LarpAuthentication/Logout',
+    grpcWeb.MethodType.UNARY,
+    larp_authorization_pb.LogoutRequest,
+    larp_authorization_pb.LogoutResponse,
+    (request: larp_authorization_pb.LogoutRequest) => {
+      return request.serializeBinary();
+    },
+    larp_authorization_pb.LogoutResponse.deserializeBinary
+  );
+
+  logout(
+    request: larp_authorization_pb.LogoutRequest,
+    metadata: grpcWeb.Metadata | null): Promise<larp_authorization_pb.LogoutResponse>;
+
+  logout(
+    request: larp_authorization_pb.LogoutRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: larp_authorization_pb.LogoutResponse) => void): grpcWeb.ClientReadableStream<larp_authorization_pb.LogoutResponse>;
+
+  logout(
+    request: larp_authorization_pb.LogoutRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: larp_authorization_pb.LogoutResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/larp.authorization.LarpAuthentication/Logout',
+        request,
+        metadata || {},
+        this.methodDescriptorLogout,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/larp.authorization.LarpAuthentication/Logout',
+    request,
+    metadata || {},
+    this.methodDescriptorLogout);
+  }
+
 }
 

@@ -29,3 +29,5 @@ var larp_common_pb = require('../larp/common_pb.js');
 goog.object.extend(proto, larp_common_pb);
 var larp_events_pb = require('../larp/events_pb.js');
 goog.object.extend(proto, larp_events_pb);
+var larp_services_pb = require('../larp/services_pb.js');
+goog.object.extend(proto, larp_services_pb);

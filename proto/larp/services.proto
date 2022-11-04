@@ -4,9 +4,9 @@ import "larp/accounts.proto";
 import "larp/common.proto";
 import "larp/events.proto";
 
-option csharp_namespace = "Larp.Proto";
+option csharp_namespace = "Larp.Protos.Services";
 
-package larp;
+package larp.services;
 
 message AccountResponse {
     Account account = 1;
@@ -35,7 +35,7 @@ message EventRsvpRequest {
     repeated EventComponentRsvp components = 4;
 }
 
-service LarpUserClient {
+service LarpUser {
     rpc GetAccount(Empty) returns (AccountResponse);
     rpc AddEmail(StringRequest) returns (AccountResponse);
     rpc RemoveEmail(StringRequest) returns (AccountResponse);
@@ -51,6 +51,6 @@ message AccountRequest {
     Account account = 1;
 }
 
-service LarpAdminClient {
+service LarpAdmin {
     rpc SetAccount(AccountRequest) returns (AccountResponse);
 }

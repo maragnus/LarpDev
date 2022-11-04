@@ -48,3 +48,35 @@ export namespace State {
   }
 }
 
+export class Empty extends jspb.Message {
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): Empty.AsObject;
+  static toObject(includeInstance: boolean, msg: Empty): Empty.AsObject;
+  static serializeBinaryToWriter(message: Empty, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Empty;
+  static deserializeBinaryFromReader(message: Empty, reader: jspb.BinaryReader): Empty;
+}
+
+export namespace Empty {
+  export type AsObject = {
+  }
+}
+
+export class StringRequest extends jspb.Message {
+  getValue(): string;
+  setValue(value: string): StringRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): StringRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: StringRequest): StringRequest.AsObject;
+  static serializeBinaryToWriter(message: StringRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): StringRequest;
+  static deserializeBinaryFromReader(message: StringRequest, reader: jspb.BinaryReader): StringRequest;
+}
+
+export namespace StringRequest {
+  export type AsObject = {
+    value: string,
+  }
+}
+

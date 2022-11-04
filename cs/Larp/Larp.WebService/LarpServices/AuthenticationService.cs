@@ -12,6 +12,7 @@ public interface IAuthenticationService
     Task<AuthenticationResult> InitiateLogin(string email, string deviceId);
     Task<AuthenticationResult> ConfirmLogin(string email, string code);
     Task<AuthenticationResult> ValidateSession(string sessionId);
+    Task DestroySession(string sessionId);
 }
 
 public class AuthenticationService : IAuthenticationService
@@ -80,14 +81,19 @@ public class AuthenticationService : IAuthenticationService
     public async Task<AuthenticationResult> ValidateSession(string sessionId)
     {
         var result = await _sessions.ValidateUserSession(sessionId);
-        return result switch
+        return result.StatusCode switch
         {
-            UserSessionValidationResult.Authenticated => new(true, null, sessionId),
-            UserSessionValidationResult.Expired => new(false, "Session has expired", null, true),
-            UserSessionValidationResult.Invalid => new(false, "Session could not be found", null),
-            UserSessionValidationResult.NotConfirmed => new(false, "Session has not been confirmed", null),
+            UserSessionValidationResultStatucCode.Authenticated => new(true, null, sessionId),
+            UserSessionValidationResultStatucCode.Expired => new(false, "Session has expired", null, true),
+            UserSessionValidationResultStatucCode.Invalid => new(false, "Session could not be found", null),
+            UserSessionValidationResultStatucCode.NotConfirmed => new(false, "Session has not been confirmed", null),
             _ => throw new InvalidOperationException(
                 $"{nameof(UserSessionValidationResult)} value of {result} has not been implemented")
         };
+    }
+
+    public async Task DestroySession(string sessionId)
+    {
+        await _sessions.DestroyUserSession(sessionId);
     }
 }

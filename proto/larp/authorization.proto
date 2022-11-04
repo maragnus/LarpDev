@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option csharp_namespace = "Larp.Proto.Authorization";
+option csharp_namespace = "Larp.Protos.Authorization";
 
 package larp.authorization;
 
@@ -10,6 +10,7 @@ service LarpAuthentication {
     rpc InitiateLogin(InitiateLoginRequest) returns (InitiateLoginResponse);
     rpc ConfirmLogin(ConfirmLoginRequest) returns (ConfirmLoginResponse);
     rpc ValidateSession(ValidateSessionRequest) returns (ValidateSessionResponse);
+    rpc Logout(LogoutRequest) returns (LogoutResponse);
 }
 
 enum ValidationResponseCode {
@@ -46,4 +47,12 @@ message ValidateSessionRequest {
 message ValidateSessionResponse {
     ValidationResponseCode status_code = 1;
     optional larp.Account profile = 2;
+}
+
+message LogoutRequest {
+    string session_id = 1;
+}
+
+message LogoutResponse {
+    
 }

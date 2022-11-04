@@ -1,4 +1,4 @@
-﻿using Larp.Proto;
+﻿using Larp.Protos;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
