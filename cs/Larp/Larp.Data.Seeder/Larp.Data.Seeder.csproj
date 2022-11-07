@@ -18,6 +18,22 @@
     <ItemGroup>
       <None Remove="larpdata.json" />
       <EmbeddedResource Include="LarpData.json" />
+      <None Remove="Mw5eAdvantages.json" />
+      <EmbeddedResource Include="Mw5eAdvantages.json" />
+      <None Remove="Mw5eDisadvantages.json" />
+      <EmbeddedResource Include="Mw5eDisadvantages.json" />
+      <None Remove="Mw5eGifts.json" />
+      <EmbeddedResource Include="Mw5eGifts.json" />
+      <None Remove="Mw5eHomeChapter.json" />
+      <EmbeddedResource Include="Mw5eHomeChapters.json" />
+      <None Remove="Mw5eReligion.json" />
+      <EmbeddedResource Include="Mw5eReligions.json" />
+      <None Remove="Mw5eSkills.json" />
+      <EmbeddedResource Include="Mw5eSkills.json" />
+      <None Remove="Mw5eSpells.json" />
+      <EmbeddedResource Include="Mw5eSpells.json" />
+      <None Remove="Mw5eOccupations.json" />
+      <EmbeddedResource Include="Mw5eOccupations.json" />
     </ItemGroup>
 
 </Project>

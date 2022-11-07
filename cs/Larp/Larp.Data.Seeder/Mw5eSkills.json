@@ -1,0 +1,1128 @@
+[
+  {
+    "name": "Absolution",
+    "title": "Absolution",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Agility",
+    "title": "Agility",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Apothecary",
+    "title": "Apothecary X",
+    "class": "Major",
+    "purchasable": "Once",
+    "ranksPerPurchase": 2,
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Apprenticeship",
+    "title": "Apprenticeship",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Armor Repair",
+    "title": "Armor Repair",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Armored In Faith",
+    "title": "Armored In Faith",
+    "class": "Minor",
+    "purchasable": "Once",
+    "costPerPurchase": 5
+  },
+  {
+    "name": "Armstraining",
+    "title": "Armstraining X",
+    "class": "Major",
+    "purchasable": "Once",
+    "ranksPerPurchase": 2,
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Artistry",
+    "title": "Artistry",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Bardic Magic",
+    "title": "Bardic Magic",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Bardic Voice",
+    "title": "Bardic Voice X",
+    "class": "Major",
+    "purchasable": "Once",
+    "ranksPerPurchase": 2,
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Basic Weaponry",
+    "title": "Basic Weaponry",
+    "class": "Free",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Battle Rage",
+    "title": "Battle Rage",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Battlemage",
+    "title": "Battlemage",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Begging",
+    "title": "Begging",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Beloved of the Forest",
+    "title": "Beloved of the Forest",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Bestow Favor",
+    "title": "Bestow Favor",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Blessed",
+    "title": "Blessed",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Brawler",
+    "title": "Brawler",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Butcher",
+    "title": "Butcher",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Buy/Sell",
+    "title": "Buy/Sell X",
+    "class": "Minor",
+    "purchasable": "Multiple",
+    "ranksPerPurchase": 10,
+    "costPerPurchase": 5
+  },
+  {
+    "name": "Carry Wounded",
+    "title": "Carry Wounded",
+    "class": "Free",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Commerce",
+    "title": "Commerce",
+    "class": "Minor",
+    "purchasable": "Once",
+    "costPerPurchase": 5
+  },
+  {
+    "name": "Cooking",
+    "title": "Cooking X",
+    "class": "Major",
+    "purchasable": "Once",
+    "ranksPerPurchase": 2,
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Copyist",
+    "title": "Copyist",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Cosmopolitan Connections",
+    "title": "Cosmopolitan Connections",
+    "class": "Standard",
+    "purchasable": "Unavailable",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Cure Affliction",
+    "title": "Cure Affliction",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Detect Health",
+    "title": "Detect Health",
+    "class": "Minor",
+    "purchasable": "Once",
+    "costPerPurchase": 5
+  },
+  {
+    "name": "Divine Lore",
+    "title": "Divine Lore",
+    "class": "Minor",
+    "purchasable": "Once",
+    "costPerPurchase": 5
+  },
+  {
+    "name": "Divine Spells",
+    "title": "Divine Spells",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Drinks on the House",
+    "title": "Drinks on the House",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Duelist",
+    "title": "Duelist",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Duty",
+    "title": "Duty X",
+    "class": "Standard",
+    "purchasable": "Unavailable",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Engineering",
+    "title": "Engineering",
+    "class": "Minor",
+    "purchasable": "Once",
+    "costPerPurchase": 5
+  },
+  {
+    "name": "Entertainer",
+    "title": "Entertainer",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Evade Trap",
+    "title": "Evade Trap",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Execution",
+    "title": "Execution",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Fence",
+    "title": "Fence",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Flee",
+    "title": "Flee",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Fortune Telling",
+    "title": "Fortune Telling",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Fully Armored",
+    "title": "Fully Armored",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Grant Karma",
+    "title": "Grant Karma",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Guild Wages",
+    "title": "Guild Wages",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Hagsblood",
+    "title": "Hagsblood",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Improved Battle Endurance",
+    "title": "Improved Battle Endurance",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Improved Battle Rage",
+    "title": "Improved Battle Rage",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Improved Burst Casting",
+    "title": "Improved Burst Casting",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Improved Bestow Favor",
+    "title": "Improved Bestow Favor",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Improved Butcher",
+    "title": "Improved Butcher",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Improved Duelist",
+    "title": "Improved Duelist",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Improved Instruction",
+    "title": "Improved Instruction",
+    "class": "Major",
+    "purchasable": "Multiple",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Improved Leadership",
+    "title": "Improved Leadership",
+    "class": "Minor",
+    "purchasable": "Once",
+    "costPerPurchase": 5
+  },
+  {
+    "name": "Improved Resistance",
+    "title": "Improved Resistance",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Improved Scavenging",
+    "title": "Improved Scavenging",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Improved Storm Casting",
+    "title": "Improved Storm Casting",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Income",
+    "title": "Income X",
+    "class": "Minor",
+    "purchasable": "Multiple",
+    "ranksPerPurchase": 5,
+    "costPerPurchase": 5
+  },
+  {
+    "name": "Increased Mana",
+    "title": "Increased Mana",
+    "class": "Standard",
+    "purchasable": "Multiple",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Information Gathering",
+    "title": "Information Gathering",
+    "class": "Standard",
+    "purchasable": "Unavailable",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Instruction",
+    "title": "Instruction",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Iron Will",
+    "title": "Iron Will",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Joy of Life",
+    "title": "Joy of Life",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Knockout",
+    "title": "Knockout",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Leadership",
+    "title": "Leadership",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Literacy",
+    "title": "Literacy",
+    "class": "Free",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Livery",
+    "title": "Livery",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Loremaster",
+    "title": "Loremaster",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Mage Lore",
+    "title": "Mage Lore",
+    "class": "Minor",
+    "purchasable": "Once",
+    "costPerPurchase": 5
+  },
+  {
+    "name": "Master Entertainer",
+    "title": "Master Entertainer",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Masterwork",
+    "title": "Masterwork",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Medicine",
+    "title": "Medicine",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Metalworking",
+    "title": "Metalworking X",
+    "class": "Major",
+    "purchasable": "Once",
+    "ranksPerPurchase": 2,
+    "costPerPurchase": 15
+  },
+  {
+    "name": "News & Rumors",
+    "title": "News & Rumors",
+    "class": "Minor",
+    "purchasable": "Once",
+    "costPerPurchase": 5
+  },
+  {
+    "name": "Occupational Spells",
+    "title": "Occupational Spells",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Pathfinding",
+    "title": "Pathfinding",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Patronage",
+    "title": "Patronage X",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Poisoner",
+    "title": "Poisoner X",
+    "class": "Major",
+    "purchasable": "Once",
+    "ranksPerPurchase": 2,
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Precision",
+    "title": "Precision",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Production (Cloth)",
+    "title": "Production X (Cloth)",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Production (Food)",
+    "title": "Production X (Food)",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Production (Metal)",
+    "title": "Production X (Metal)",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Production (Parchment)",
+    "title": "Production X (Parchment)",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Production (Wood)",
+    "title": "Production X (Wood)",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Production (Air)",
+    "title": "Production X (Air)",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Production (Earth)",
+    "title": "Production X (Earth)",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Production (Fire)",
+    "title": "Production X (Fire)",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Production (Water)",
+    "title": "Production X (Water)",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Production (Chaos)",
+    "title": "Production X (Chaos)",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Production (Death)",
+    "title": "Production X (Death)",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Production (Life)",
+    "title": "Production X (Life)",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Production (Time)",
+    "title": "Production X (Time)",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Quick Learner",
+    "title": "Quick Learner",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Religious Ceremony",
+    "title": "Religious Ceremony",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Research",
+    "title": "Research",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Retainers",
+    "title": "Retainers X",
+    "class": "Minor",
+    "purchasable": "Multiple",
+    "ranksPerPurchase": 1,
+    "costPerPurchase": 5
+  },
+  {
+    "name": "Room for More",
+    "title": "Room for More",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Scavenging",
+    "title": "Scavenging",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Scribe",
+    "title": "Scribe X",
+    "class": "Major",
+    "purchasable": "Once",
+    "ranksPerPurchase": 2,
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Sell Drinks",
+    "title": "Sell Drinks",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Serene Contemplation",
+    "title": "Serene Contemplation",
+    "class": "Minor",
+    "purchasable": "Once",
+    "costPerPurchase": 5
+  },
+  {
+    "name": "Set Trap",
+    "title": "Set Trap",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Sewing",
+    "title": "Sewing X",
+    "class": "Major",
+    "purchasable": "Once",
+    "ranksPerPurchase": 2,
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Shifter Senses",
+    "title": "Shifter Senses",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Slayer (Type)",
+    "title": "Slayer (Type)",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Standard Bearer",
+    "title": "Standard Bearer",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Stench of the Enemy",
+    "title": "Stench of the Enemy",
+    "class": "Minor",
+    "purchasable": "Once",
+    "costPerPurchase": 5
+  },
+  {
+    "name": "Sunder",
+    "title": "Sunder",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Swarm Magic",
+    "title": "Swarm Magic",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Tarot Mortis Punchinello",
+    "title": "Tarot Mortis Punchinello",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Taunt",
+    "title": "Taunt",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Tavern Share",
+    "title": "Tavern Share",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Tinkering",
+    "title": "Tinkering",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  },
+  {
+    "name": "Toughness",
+    "title": "Toughness",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Unarmed Combat",
+    "title": "Unarmed Combat",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Use Two Weapons",
+    "title": "Use Two Weapons",
+    "class": "Major",
+    "purchasable": "Once",
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Wages of Sin",
+    "title": "Wages of Sin",
+    "class": "Minor",
+    "purchasable": "Multiple",
+    "costPerPurchase": 5
+  },
+  {
+    "name": "Warcaster",
+    "title": "Warcaster",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Specialization (Bow)",
+    "title": "Weapon Specialization (Bow)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Specialization (Claws)",
+    "title": "Weapon Specialization (Claws)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Specialization (Dagger)",
+    "title": "Weapon Specialization (Dagger)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Specialization (Fists)",
+    "title": "Weapon Specialization (Fists)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Specialization (Flail)",
+    "title": "Weapon Specialization (Flail)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Specialization (Hand Crossbow)",
+    "title": "Weapon Specialization (Hand Crossbow)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Specialization (Javelin)",
+    "title": "Weapon Specialization (Javelin)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Specialization (Normal Crossbow)",
+    "title": "Weapon Specialization (Normal Crossbow)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Specialization (One Handed Axe)",
+    "title": "Weapon Specialization (One Handed Axe)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Specialization (One Handed Blunt)",
+    "title": "Weapon Specialization (One Handed Blunt)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Specialization (One Handed Sword)",
+    "title": "Weapon Specialization (One Handed Sword)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Specialization (One Handed Tool)",
+    "title": "Weapon Specialization (One Handed Tool)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Specialization (Polearm)",
+    "title": "Weapon Specialization (Polearm)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Specialization (Spear)",
+    "title": "Weapon Specialization (Spear)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Specialization (Staff)",
+    "title": "Weapon Specialization (Staff)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Specialization (Thrown Weapon)",
+    "title": "Weapon Specialization (Thrown Weapon)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Specialization (Two Handed Axe)",
+    "title": "Weapon Specialization (Two Handed Axe)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Specialization (Two Handed Blunt)",
+    "title": "Weapon Specialization (Two Handed Blunt)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Specialization (Two Handed Sword)",
+    "title": "Weapon Specialization (Two Handed Sword)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Specialization (Two Handed Tool)",
+    "title": "Weapon Specialization (Two Handed Tool)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Use (Bow)",
+    "title": "Weapon Use (Bow)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Use (Claws)",
+    "title": "Weapon Use (Claws)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Use (Dagger)",
+    "title": "Weapon Use (Dagger)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Use (Fists)",
+    "title": "Weapon Use (Fists)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Use (Flail)",
+    "title": "Weapon Use (Flail)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Use (Hand Crossbow)",
+    "title": "Weapon Use (Hand Crossbow)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Use (Javelin)",
+    "title": "Weapon Use (Javelin)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Use (Normal Crossbow)",
+    "title": "Weapon Use (Normal Crossbow)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Use (One Handed Axe)",
+    "title": "Weapon Use (One Handed Axe)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Use (One Handed Blunt)",
+    "title": "Weapon Use (One Handed Blunt)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Use (One Handed Sword)",
+    "title": "Weapon Use (One Handed Sword)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Use (One Handed Tool)",
+    "title": "Weapon Use (One Handed Tool)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Use (Polearm)",
+    "title": "Weapon Use (Polearm)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Use (Spear)",
+    "title": "Weapon Use (Spear)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Use (Staff)",
+    "title": "Weapon Use (Staff)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Use (Thrown Weapon)",
+    "title": "Weapon Use (Thrown Weapon)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Use (Two Handed Axe)",
+    "title": "Weapon Use (Two Handed Axe)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Use (Two Handed Blunt)",
+    "title": "Weapon Use (Two Handed Blunt)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Use (Two Handed Sword)",
+    "title": "Weapon Use (Two Handed Sword)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Weapon Use (Two Handed Tool)",
+    "title": "Weapon Use (Two Handed Tool)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
+    "name": "Wear Armor",
+    "title": "Wear Armor X",
+    "class": "Minor",
+    "purchasable": "Multiple",
+    "ranksPerPurchase": 1,
+    "costPerPurchase": 5
+  },
+  {
+    "name": "Woodwise",
+    "title": "Woodwise",
+    "class": "Minor",
+    "purchasable": "Once",
+    "costPerPurchase": 5
+  },
+  {
+    "name": "Woodworking",
+    "title": "Woodworking X",
+    "class": "Major",
+    "purchasable": "Once",
+    "ranksPerPurchase": 2,
+    "costPerPurchase": 15
+  },
+  {
+    "name": "Work Rhythm",
+    "title": "Work Rhythm",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "costPerPurchase": null
+  }
+]

@@ -1,0 +1,723 @@
+[
+    {
+        "category": "Gift of Wisdom",
+        "name": "Amicus Mort",
+        "type": "Voice",
+        "mana": 4,
+        "effect": "“By my Voice, Charm Undead”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Arrow of Death",
+        "type": "Bolt",
+        "mana": 4,
+        "effect": "“Doom by Will”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Arrows of Time",
+        "type": "Storm",
+        "mana": 4,
+        "effect": "“Root by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Aura of Chaos",
+        "type": "Voice",
+        "mana": 4,
+        "effect": "“By my Voice, 1 Damage to Enemy by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Awaken",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“Purge Knockout”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Awaken Rage",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“Frenzy to Animal by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Blinding Glamour",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“Subdue by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Castigation of Cassandra",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“3 Damage to Fae by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Disguising Glamour",
+        "type": "Voice",
+        "mana": 3,
+        "effect": "“By my Voice, Compel you to perceive me as (basic type of creature or person) by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Dispel Magic",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“Purge Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Dizzydweamor",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“Compel you to spin around three times by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Dominion Mortis",
+        "type": "Bolt",
+        "mana": 3,
+        "effect": "“Enslave Undead by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Dreamseeker",
+        "type": "Voice",
+        "mana": 1,
+        "effect": "“Detect Unconscious”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Exponere Mortis",
+        "type": "Voice",
+        "mana": 1,
+        "effect": "“Detect Undead”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Feet of Clay",
+        "type": "Spray",
+        "mana": 1,
+        "effect": "“Slow by Magic” x3"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Fool's Gold",
+        "type": "Voice",
+        "mana": 1,
+        "effect": "“By my Voice, Compel you to perceive this as (a small item) by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Gaze of the Medusa",
+        "type": "Bolt",
+        "mana": 4,
+        "effect": "“Paralyze by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Gorgon's Breath of Chaos",
+        "type": "Bolt",
+        "mana": 4,
+        "effect": "“Doom by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Hydra's Grasp",
+        "type": "Spray",
+        "mana": 4,
+        "effect": "“Bind by Magic” x4"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Illusory Vermin",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“Compel you to (itch or sneeze) uncontrollably for a 60 count by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Infernal Dominion",
+        "type": "Bolt",
+        "mana": 4,
+        "effect": "“Enslave Daemon by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Infernal Kinship",
+        "type": "Voice",
+        "mana": 4,
+        "effect": "“By my Voice, Charm Daemon”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Infernal Revelation",
+        "type": "Voice",
+        "mana": 1,
+        "effect": "“Detect Daemon”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Infernal Tongues",
+        "type": "Voice",
+        "mana": 1,
+        "effect": "“Speak to Daemon”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Mage Winds",
+        "type": "Storm",
+        "mana": 3,
+        "effect": "“Repel by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Mind Blast",
+        "type": "Spray",
+        "mana": 2,
+        "effect": "“Subdue by Magic” x4"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Minotaur's Breath",
+        "type": "Spray",
+        "mana": 5,
+        "effect": "“Frenzy by Magic” x3"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Mortal Puppet",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“Animate by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Primal Fear",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“1 Damage by Will”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Red Bolt of Chaos",
+        "type": "Bolt",
+        "mana": 0,
+        "effect": "“3 Damage by Magic”. May be used once per Renew. If you possess the Gift of Passion, you may call “by your Element” instead of “by Magic”."
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Red Hex",
+        "type": "Bolt",
+        "mana": 3,
+        "effect": "“Frenzy by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "The Serpent's Coils",
+        "type": "Bolt",
+        "mana": 2,
+        "effect": "“Bind by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Shield of Capricorn",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“Repel by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Smiting the Beast",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“3 Damage to Animal by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Speech of the Dead",
+        "type": "Voice",
+        "mana": 3,
+        "effect": "“Speak to Spirit”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Sussuria Mortis",
+        "type": "Voice",
+        "mana": 1,
+        "effect": "“Speak to Undead”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Telmar's Transfixion",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“Root by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Tendrils of the Kraken",
+        "type": "Spray",
+        "mana": 2,
+        "effect": "“Root by Magic” x3"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Titan's Tread",
+        "type": "Voice",
+        "mana": 3,
+        "effect": "“By my Voice, Slow to Enemy by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "The Twin Serpent",
+        "type": "Spray",
+        "mana": 3,
+        "effect": "“Bind by Magic” x2"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Varo's Hand",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“Disarm (Item) by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Voice Stealer",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“Silence by Magic”"
+    },
+    {
+        "category": "Gift of Wisdom",
+        "name": "Webcutter",
+        "type": "Voice",
+        "mana": 4,
+        "effect": "“By my Voice, Purge Bind and Root”"
+    },
+    {
+        "category": "Divine Spells of Justice",
+        "name": "Apprehend",
+        "type": "Gesture",
+        "mana": 3,
+        "effect": "“Root by Magic by Gesture”"
+    },
+    {
+        "category": "Divine Spells of Justice",
+        "name": "Banish",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“5 Damage to Daemon”"
+    },
+    {
+        "category": "Divine Spells of Justice",
+        "name": "Castigate",
+        "type": "Voice",
+        "mana": 2,
+        "effect": "“By my Voice, 1 Damage to Daemon”"
+    },
+    {
+        "category": "Divine Spells of Justice",
+        "name": "Defend",
+        "type": "Spray",
+        "mana": 1,
+        "effect": "“Root Daemon by Magic” x3"
+    },
+    {
+        "category": "Divine Spells of Justice",
+        "name": "Expose Daemons",
+        "type": "Voice",
+        "mana": 1,
+        "effect": "“Detect Daemon”"
+    },
+    {
+        "category": "Divine Spells of Justice",
+        "name": "Mute",
+        "type": "Gesture",
+        "mana": 3,
+        "effect": "“Silence by Magic by Gesture”"
+    },
+    {
+        "category": "Divine Spells of Mercy",
+        "name": "Aid",
+        "type": "Spray",
+        "mana": 1,
+        "effect": "“Purge Maim” x3"
+    },
+    {
+        "category": "Divine Spells of Mercy",
+        "name": "Calm",
+        "type": "Spray",
+        "mana": 1,
+        "effect": "“Purge Frenzy” x3"
+    },
+    {
+        "category": "Divine Spells of Mercy",
+        "name": "Cleansing",
+        "type": "Bolt",
+        "mana": 3,
+        "effect": "“Purge Blight”"
+    },
+    {
+        "category": "Divine Spells of Mercy",
+        "name": "Mercy",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“Heal Enemy”"
+    },
+    {
+        "category": "Divine Spells of Mercy",
+        "name": "Purification",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“3 Damage to Daemon” or “3 Damage to Undead”"
+    },
+    {
+        "category": "Divine Spells of Mercy",
+        "name": "Seek the Fallen",
+        "type": "Voice",
+        "mana": 0,
+        "effect": "“Detect Unconscious”. May be used once per Renew."
+    },
+    {
+        "category": "Divine Spells of Mercy",
+        "name": "Storm of Battle",
+        "type": "Storm",
+        "mana": 4,
+        "effect": "“Subdue by Magic”"
+    },
+    {
+        "category": "Divine Spells of the Wild",
+        "name": "Banish Undead",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“5 Damage to Undead”"
+    },
+    {
+        "category": "Divine Spells of the Wild",
+        "name": "Bestial Rage",
+        "type": "Gesture",
+        "mana": 4,
+        "effect": "“Frenzy by Will by Gesture”"
+    },
+    {
+        "category": "Divine Spells of the Wild",
+        "name": "Castigate Undead",
+        "type": "Voice",
+        "mana": 2,
+        "effect": "“By my Voice, 1 Damage to Undead”"
+    },
+    {
+        "category": "Divine Spells of the Wild",
+        "name": "Entangle",
+        "type": "Storm",
+        "mana": 6,
+        "effect": "Storm for “Bind by Magic” or “Root by Magic”, chosen with each packet."
+    },
+    {
+        "category": "Divine Spells of the Wild",
+        "name": "Expose the Unliving",
+        "type": "Voice",
+        "mana": 1,
+        "effect": "“Detect Undead”"
+    },
+    {
+        "category": "Divine Spells of the Wild",
+        "name": "Freedom",
+        "type": "Voice",
+        "mana": 3,
+        "effect": "“By my Voice, Purge Root”"
+    },
+    {
+        "category": "Divine Spells of the Wild",
+        "name": "Sympathy",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“Heal Animal”"
+    },
+    {
+        "category": "Beekeeper",
+        "name": "Distracting Stings",
+        "type": "Voice",
+        "mana": 1,
+        "effect": "“Disengage”"
+    },
+    {
+        "category": "Beekeeper",
+        "name": "Honeyed Words",
+        "type": "Bolt",
+        "mana": 2,
+        "effect": "“Charm by Magic”"
+    },
+    {
+        "category": "Beekeeper",
+        "name": "Stinging of the Bees",
+        "type": "Spray",
+        "mana": 2,
+        "effect": "“1 Damage by Earth”"
+    },
+    {
+        "category": "Beekeeper",
+        "name": "Swarmspeech",
+        "type": "Voice",
+        "mana": 1,
+        "effect": "“Speak to Vermin”"
+    },
+    {
+        "category": "Executioner",
+        "name": "Cauterizing Spark",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“2 Damage by Fire”"
+    },
+    {
+        "category": "Executioner",
+        "name": "Cripple Limb",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“Maim (Limb) by Magic”"
+    },
+    {
+        "category": "Executioner",
+        "name": "Find Fugitive",
+        "type": "Voice",
+        "mana": 1,
+        "effect": "“Detect Living”"
+    },
+    {
+        "category": "Executioner",
+        "name": "Soothing End",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“Slow and Subdue by Will”"
+    },
+    {
+        "category": "Executioner",
+        "name": "Torment",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "Up to three bolts of “Subdue by Will” or “Torment by Will” used within 5 minutes"
+    },
+    {
+        "category": "Gaoler",
+        "name": "Halt Miscreant",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“Root by Magic”"
+    },
+    {
+        "category": "Gaoler",
+        "name": "Shackle",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“Bind by Magic”"
+    },
+    {
+        "category": "Gaoler",
+        "name": "Silence Cell",
+        "type": "Room",
+        "mana": 3,
+        "effect": "“Silence to Room by Magic”"
+    },
+    {
+        "category": "Gaoler",
+        "name": "Torment",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "Up to three bolts of “Subdue by Will” or “Torment by Will” used within 5 minutes"
+    },
+    {
+        "category": "Gravedigger",
+        "name": "Decay",
+        "type": "Bolt",
+        "mana": 3,
+        "effect": "“Doom to Undead by Magic”"
+    },
+    {
+        "category": "Gravedigger",
+        "name": "Hex against Accidents",
+        "type": "Bolt",
+        "mana": 2,
+        "effect": "“Bestow one Resist Crushing”"
+    },
+    {
+        "category": "Gravedigger",
+        "name": "Quiet the Dead",
+        "type": "Bolt",
+        "mana": 2,
+        "effect": "“Paralyze Undead by Magic”"
+    },
+    {
+        "category": "Gravedigger",
+        "name": "Transfix the Dead",
+        "type": "Spray",
+        "mana": 1,
+        "effect": "“Root Undead by Magic” x3"
+    },
+    {
+        "category": "Physician",
+        "name": "Cauterizing Spark",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“2 Damage by Fire”"
+    },
+    {
+        "category": "Physician",
+        "name": "Cripple Limb",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“Maim (Limb) by Magic”"
+    },
+    {
+        "category": "Physician",
+        "name": "Fleabath",
+        "type": "Bolt",
+        "mana": 2,
+        "effect": "“Purge Swamp Fleas Affliction and 1 Damage by Water”. Note that this can be used on a character or on a piece of furniture with a Swamp Fleas tag affixed to it, but not on a source of Swamp Fleas, such as a matrix or waystone."
+    },
+    {
+        "category": "Physician",
+        "name": "Peaceful Sleep",
+        "type": "Gesture",
+        "mana": 1,
+        "effect": "“Knockout by Will”. This may only be used on a willing or helpless character."
+    },
+    {
+        "category": "Witch Hunter",
+        "name": "Find Fugitive",
+        "type": "Voice",
+        "mana": 1,
+        "effect": "“Detect Living”"
+    },
+    {
+        "category": "Witch Hunter",
+        "name": "Holdfast",
+        "type": "Voice",
+        "mana": 2,
+        "effect": "“By my Voice, Subdue by Will”"
+    },
+    {
+        "category": "Witch Hunter",
+        "name": "Torment",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "Up to three bolts of “Subdue by Will” or “Torment by Will” used within 5 minutes"
+    },
+    {
+        "category": "Witch Hunter",
+        "name": "Transfix the Unnatural",
+        "type": "Spray",
+        "mana": 1,
+        "effect": "“Root Daemon by Magic” x3"
+    },
+    {
+        "category": "Witch Hunter",
+        "name": "Walk Unhindered",
+        "type": "Spray",
+        "mana": 1,
+        "effect": "“Purge Root” x3"
+    },
+    {
+        "category": "Herald",
+        "name": "Diplomatic Immunity",
+        "type": "Voice",
+        "mana": 3,
+        "effect": "“By my Voice, Repel by Magic”"
+    },
+    {
+        "category": "Herald",
+        "name": "Holdfast",
+        "type": "Voice",
+        "mana": 2,
+        "effect": "“By my Voice, Subdue by Will”"
+    },
+    {
+        "category": "Herald",
+        "name": "Honeyed Words",
+        "type": "Bolt",
+        "mana": 2,
+        "effect": "“Charm by Magic”"
+    },
+    {
+        "category": "Herald",
+        "name": "Silence in the Ranks",
+        "type": "Voice",
+        "mana": 2,
+        "effect": "“By my Voice, Silence for one Minute by"
+    },
+    {
+        "category": "Ratcatcher",
+        "name": "Blast Vermin",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“Five Damage to Vermin”"
+    },
+    {
+        "category": "Ratcatcher",
+        "name": "Escape Bonds",
+        "type": "Bolt",
+        "mana": 1,
+        "effect": "“Purge Bind”"
+    },
+    {
+        "category": "Ratcatcher",
+        "name": "Expose Vermin",
+        "type": "Voice",
+        "mana": 1,
+        "effect": "“Detect Vermin”"
+    },
+    {
+        "category": "Ratcatcher",
+        "name": "Hex against Accidents",
+        "type": "Bolt",
+        "mana": 2,
+        "effect": "“Bestow one Resist Crushing”"
+    },
+    {
+        "category": "Ratcatcher",
+        "name": "Smite Vermin",
+        "type": "Voice",
+        "mana": 2,
+        "effect": "“By my Voice, 1 Damage to Vermin”"
+    },
+    {
+        "category": "Ratcatcher",
+        "name": "Walk Unhindered",
+        "type": "Spray",
+        "mana": 1,
+        "effect": "“Purge Root” x3"
+    },
+    {
+        "category": "Bardic",
+        "name": "Blather",
+        "type": "Gesture",
+        "mana": 1,
+        "effect": "Utter a string of nonsense words at a target. If they respond to you, even by saying “What?”, you may call “Subdue by Will by Gesture”. If they do not respond or notice, you do not spend the Mana."
+    },
+    {
+        "category": "Bardic",
+        "name": "Fury",
+        "type": "Gesture",
+        "mana": 2,
+        "effect": "Work another character up into a bloody rage with your words, then call “Bestow One Special Attack and Frenzy at Foe.” 2 Bardic Voice CP: Work a group of up to six characters up into a bloody rage with your words, then call “Bestow One Special Attack and Frenzy at Foe.”"
+    },
+    {
+        "category": "Bardic",
+        "name": "Rally",
+        "type": "Gesture",
+        "mana": 1,
+        "effect": "You may sing for at least a 60 count (1 minutes) to call “Heal 1”. 1 Bardic Voice CP: You may sing for at least a 60 count (1 minutes) to call “Heal 5”, which must be used on a conscious character."
+    },
+    {
+        "category": "Bardic",
+        "name": "Song of Courage",
+        "type": "Gesture/Voice",
+        "mana": 1,
+        "effect": "You may sing for at least a 60 count (1 minutes) to call “Bestow Resist Will” on a target. 1 Bardic Voice CP: You may sing for at least a 60 count (1 minutes) to call “By my Voice, Purge Will”."
+    }
+]

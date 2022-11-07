@@ -24,7 +24,7 @@ class AuthInterceptor : Interceptor
             return await continuation(request, context);
 
         var result = await _userSessionManager.ValidateUserSession(authenticationHeader);
-        if (result.StatusCode != UserSessionValidationResultStatucCode.Authenticated)
+        if (result.StatusCode != UserSessionValidationResultStatusCode.Authenticated)
             throw new Exception("Not authenticated");
 
         context.UserState["Account"] = result.Account;

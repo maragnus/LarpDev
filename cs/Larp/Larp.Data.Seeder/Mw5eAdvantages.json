@@ -1,0 +1,194 @@
+[
+    {
+        "title": "Advantageous Gluttony 1",
+        "name": "Advantageous Gluttony",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Call of Freedom 1",
+        "name": "Call of Freedom",
+        "rank": 1,
+        "physical": true
+    },
+    {
+        "title": "Caustic Blood 2",
+        "name": "Caustic Blood",
+        "rank": 2,
+        "physical": true
+    },
+    {
+        "title": "Crushing Strength 1",
+        "name": "Crushing Strength",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Crushing Strength 2",
+        "name": "Crushing Strength",
+        "rank": 2,
+        "physical": false
+    },
+    {
+        "title": "Crushing Strength 3",
+        "name": "Crushing Strength",
+        "rank": 3,
+        "physical": false
+    },
+    {
+        "title": "Durability 1",
+        "name": "Durability",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Elemental Fury 1",
+        "name": "Elemental Fury",
+        "rank": 1,
+        "physical": true
+    },
+    {
+        "title": "Elemental Fury 2",
+        "name": "Elemental Fury",
+        "rank": 2,
+        "physical": true
+    },
+    {
+        "title": "Elemental Fury 3",
+        "name": "Elemental Fury",
+        "rank": 3,
+        "physical": true
+    },
+    {
+        "title": "Elemental Resistance 1",
+        "name": "Elemental Resistance",
+        "rank": 1,
+        "physical": true
+    },
+    {
+        "title": "Evil Eye 1",
+        "name": "Evil Eye",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Feign Death 1",
+        "name": "Feign Death",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Forest Ally 1",
+        "name": "Forest Ally",
+        "rank": 1,
+        "physical": true
+    },
+    {
+        "title": "Healing Blood 1",
+        "name": "Healing Blood",
+        "rank": 1,
+        "physical": true
+    },
+    {
+        "title": "Hunter's Senses 1",
+        "name": "Hunter's Senses",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Natural Armor 2",
+        "name": "Natural Armor",
+        "rank": 2,
+        "physical": true
+    },
+    {
+        "title": "Old Blood 1",
+        "name": "Old Blood",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Poison Spittle 2",
+        "name": "Poison Spittle",
+        "rank": 2,
+        "physical": true
+    },
+    {
+        "title": "Purity 1",
+        "name": "Purity",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Skin Changer 2",
+        "name": "Skin Changer",
+        "rank": 2,
+        "physical": false
+    },
+    {
+        "title": "Stonefast 1",
+        "name": "Stonefast",
+        "rank": 1,
+        "physical": true
+    },
+    {
+        "title": "Stubborn Courage 1",
+        "name": "Stubborn Courage",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Talent 1",
+        "name": "Talent",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Talent 2",
+        "name": "Talent",
+        "rank": 2,
+        "physical": false
+    },
+    {
+        "title": "Talent 3",
+        "name": "Talent",
+        "rank": 3,
+        "physical": false
+    },
+    {
+        "title": "Treewalk 1",
+        "name": "Treewalk",
+        "rank": 1,
+        "physical": true
+    },
+    {
+        "title": "Undead Bane 1",
+        "name": "Undead Bane",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Witchblood 1",
+        "name": "Witchblood",
+        "rank": 1,
+        "physical": true
+    },
+    {
+        "title": "Witchblood 2",
+        "name": "Witchblood",
+        "rank": 2,
+        "physical": true
+    },
+    {
+        "title": "Witchblood 3",
+        "name": "Witchblood",
+        "rank": 3,
+        "physical": true
+    },
+    {
+        "title": "Witchblood 4",
+        "name": "Witchblood",
+        "rank": 4,
+        "physical": true
+    }
+]

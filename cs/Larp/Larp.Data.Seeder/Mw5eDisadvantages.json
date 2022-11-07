@@ -1,0 +1,248 @@
+[
+    {
+        "title": "Anathema 1",
+        "name": "Anathema",
+        "rank": 1,
+        "physical": true
+    },
+    {
+        "title": "Blind 4",
+        "name": "Blind",
+        "rank": 4,
+        "physical": false
+    },
+    {
+        "title": "Bloodlust 3",
+        "name": "Bloodlust",
+        "rank": 3,
+        "physical": false
+    },
+    {
+        "title": "Carouser 1",
+        "name": "Carouser",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Cowardice 2",
+        "name": "Cowardice",
+        "rank": 2,
+        "physical": false
+    },
+    {
+        "title": "Creature of the Night 2",
+        "name": "Creature of the Night",
+        "rank": 2,
+        "physical": false
+    },
+    {
+        "title": "Divine Disfavor: God of the Wild 2",
+        "name": "Divine Disfavor: God of the Wild",
+        "rank": 2,
+        "physical": false
+    },
+    {
+        "title": "Divine Disfavor: Goddess of Mercy 4",
+        "name": "Divine Disfavor: Goddess of Mercy",
+        "rank": 4,
+        "physical": false
+    },
+    {
+        "title": "Divine Disfavor: Lord of Justice 1",
+        "name": "Divine Disfavor: Lord of Justice",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Eternal Foe: Fae 1",
+        "name": "Eternal Foe: Fae",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Eternal Foe: Chaos or Undeath 2",
+        "name": "Eternal Foe: Chaos or Undeath",
+        "rank": 2,
+        "physical": false
+    },
+    {
+        "title": "Excessive Curiosity 1",
+        "name": "Excessive Curiosity",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Forgetful 1",
+        "name": "Forgetful",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Greed 1",
+        "name": "Greed",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Gullible 1",
+        "name": "Gullible",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Horribly Disfigured 1",
+        "name": "Horribly Disfigured",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Maimed 3",
+        "name": "Maimed",
+        "rank": 3,
+        "physical": false
+    },
+    {
+        "title": "Mostly Illiterate 1",
+        "name": "Mostly Illiterate",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Nearsighted 1",
+        "name": "Nearsighted",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Pacifist 2",
+        "name": "Pacifist",
+        "rank": 2,
+        "physical": false
+    },
+    {
+        "title": "Perpetual Gloom 1",
+        "name": "Perpetual Gloom",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Phobia (Chaos) 1",
+        "name": "Phobia (Chaos)",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Phobia (Darkness) 1",
+        "name": "Phobia (Darkness)",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Phobia (Enclosed Places) 1",
+        "name": "Phobia (Enclosed Places)",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Phobia (Fae) 1",
+        "name": "Phobia (Fae)",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Phobia (Fire) 1",
+        "name": "Phobia (Fire)",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Phobia (Large Animals) 1",
+        "name": "Phobia (Large Animals)",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Phobia (Nobles) 1",
+        "name": "Phobia (Nobles)",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Phobia (Spell Casters) 1",
+        "name": "Phobia (Spell Casters)",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Phobia (Undead) 1",
+        "name": "Phobia (Undead)",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Raging Hunger 1",
+        "name": "Raging Hunger",
+        "rank": 1,
+        "physical": true
+    },
+    {
+        "title": "Sickly 3",
+        "name": "Sickly",
+        "rank": 3,
+        "physical": false
+    },
+    {
+        "title": "Slow 2",
+        "name": "Slow",
+        "rank": 2,
+        "physical": false
+    },
+    {
+        "title": "Spendthrift 1",
+        "name": "Spendthrift",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Tainted 1",
+        "name": "Tainted",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Teetotaler 1",
+        "name": "Teetotaler",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Troublemaker 1",
+        "name": "Troublemaker",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Truthfulness 2",
+        "name": "Truthfulness",
+        "rank": 2,
+        "physical": false
+    },
+    {
+        "title": "Unwashed 1",
+        "name": "Unwashed",
+        "rank": 1,
+        "physical": false
+    },
+    {
+        "title": "Vulnerability 1",
+        "name": "Vulnerability",
+        "rank": 1,
+        "physical": true
+    },
+    {
+        "title": "Wild Heart 1",
+        "name": "Wild Heart",
+        "rank": 1,
+        "physical": true
+    }
+]

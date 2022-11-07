@@ -7,7 +7,7 @@ using MongoDB.Driver;
 
 namespace Larp.Data.Services;
 
-public enum UserSessionValidationResultStatucCode
+public enum UserSessionValidationResultStatusCode
 {
     Invalid = 0, // Cannot find user or session
     NotConfirmed = 1, // Created but not yet confirmed
@@ -15,7 +15,7 @@ public enum UserSessionValidationResultStatucCode
     Expired = 3, // Previously authenticated but now expired
 }
 
-public record UserSessionValidationResult(UserSessionValidationResultStatucCode StatusCode, Account? Account = null);
+public record UserSessionValidationResult(UserSessionValidationResultStatusCode StatusCode, Account? Account = null);
 
 public interface IUserSessionManager
 {
@@ -174,17 +174,17 @@ public class UserSessionManager : IUserSessionManager
         }
 
         if (session == null)
-            return new UserSessionValidationResult(UserSessionValidationResultStatucCode.Invalid);
+            return new UserSessionValidationResult(UserSessionValidationResultStatusCode.Invalid);
 
         if (session.ExpiresOn <= _clock.UtcNow)
-            return  new UserSessionValidationResult(UserSessionValidationResultStatucCode.Expired);
+            return  new UserSessionValidationResult(UserSessionValidationResultStatusCode.Expired);
 
         if (session.IsAuthenticated)
         {
             var account = await GetUserAccount(session.AccountId);
-            return new UserSessionValidationResult(UserSessionValidationResultStatucCode.Authenticated, account);
+            return new UserSessionValidationResult(UserSessionValidationResultStatusCode.Authenticated, account);
         }
         
-        return new UserSessionValidationResult(UserSessionValidationResultStatucCode.NotConfirmed);
+        return new UserSessionValidationResult(UserSessionValidationResultStatusCode.NotConfirmed);
     }
 }

@@ -1,0 +1,26 @@
+[
+    {
+        "name": "justice",
+        "title": "Follower of Justice"
+    },
+    {
+        "name": "mercy",
+        "title": "Follower of Mercy"
+    },
+    {
+        "name": "wild",
+        "title": "Follower of the Wild"
+    },
+    {
+        "name": "old",
+        "title": "Old Faith"
+    },
+    {
+        "name": "chaos",
+        "title": "Chaos"
+    },
+    {
+        "name": "all",
+        "title": "All Gods Equally"
+    }
+]

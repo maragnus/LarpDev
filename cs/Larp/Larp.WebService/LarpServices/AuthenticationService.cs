@@ -83,10 +83,10 @@ public class AuthenticationService : IAuthenticationService
         var result = await _sessions.ValidateUserSession(sessionId);
         return result.StatusCode switch
         {
-            UserSessionValidationResultStatucCode.Authenticated => new(true, null, sessionId),
-            UserSessionValidationResultStatucCode.Expired => new(false, "Session has expired", null, true),
-            UserSessionValidationResultStatucCode.Invalid => new(false, "Session could not be found", null),
-            UserSessionValidationResultStatucCode.NotConfirmed => new(false, "Session has not been confirmed", null),
+            UserSessionValidationResultStatusCode.Authenticated => new(true, null, sessionId),
+            UserSessionValidationResultStatusCode.Expired => new(false, "Session has expired", null, true),
+            UserSessionValidationResultStatusCode.Invalid => new(false, "Session could not be found", null),
+            UserSessionValidationResultStatusCode.NotConfirmed => new(false, "Session has not been confirmed", null),
             _ => throw new InvalidOperationException(
                 $"{nameof(UserSessionValidationResult)} value of {result} has not been implemented")
         };

@@ -1,0 +1,1539 @@
+[
+  {
+    "type": "Basic",
+    "name": "Adventurer",
+    "skills": [
+      "Agility",
+      "Scavenging",
+      "Serene Contemplation",
+      "Wear Armor 2"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Apprentice",
+    "duty": "assist master",
+    "skills": [
+      "Agility",
+      "Apprenticeship",
+      "Duty 1",
+      "Serene Contemplation"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Production (1 Cloth)",
+          "Production (1 Food)",
+          "Production (1 Metal)",
+          "Production (1 Parchment)",
+          "Production (1 Wood)",
+          "Production (1 Air)",
+          "Production (1 Earth)",
+          "Production (1 Fire)",
+          "Production (1 Water)",
+          "Production (1 Chaos)",
+          "Production (1 Death)",
+          "Production (1 Life)",
+          "Production (1 Time)"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Baker",
+    "skills": [
+      "Cooking 4",
+      "Income 10",
+      "News & Rumors",
+      "Weapon Use (Flail)"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Barber Surgeon",
+    "skills": [
+      "Apothecary 2",
+      "Cure Affliction",
+      "Medicine"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Bard/Minstrel/Thespian",
+    "specialties": [
+      "Bard",
+      "Minstrel",
+      "Thespian"
+    ],
+    "skills": [
+      "Bardic Voice 4",
+      "Entertainer",
+      "News & Rumors"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Beggar",
+    "skills": [
+      "Agility",
+      "Begging",
+      "Livery",
+      "Scavenging"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Information Gathering",
+          "Weapon Use (Staff)"
+        ]
+      }
+    ],
+    "livery": "rags and patches"
+  },
+  {
+    "type": "Basic",
+    "name": "Blacksmith",
+    "livery": "leather apron",
+    "skills": [
+      "Livery",
+      "Metalworking 4",
+      "Weapon Specialization (One Handed Blunt)",
+      "Weapon Specialization (Two Handed Blunt)"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Boatman",
+    "skills": [
+      "Buy/Sell 10",
+      "Income 5",
+      "Production (1 Water)",
+      "News & Rumors",
+      "Work Rhythm"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Cosmopolitan Connections",
+          "Scavenging"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Butcher",
+    "livery": "bloodstained apron",
+    "skills": [
+      "Butcher",
+      "Cooking 2",
+      "Livery",
+      "Toughness"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Clerk/Forger",
+    "specialties": [
+      "Clerk",
+      "Forger"
+    ],
+    "skills": [
+      "Copyist",
+      "Production (2 Parchment)",
+      "Scribe 4",
+      "Serene Contemplation"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Courier",
+    "skills": [
+      "Agility",
+      "Income 5",
+      "News & Rumors",
+      "Pathfinding",
+      "Scribe 2"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Dancer/Juggler/Acrobat",
+    "specialties": [
+      "Dancer",
+      "Juggler",
+      "Acrobat"
+    ],
+    "livery": "performance costume",
+    "skills": [
+      "Agility",
+      "Entertainer",
+      "Livery",
+      "News & Rumors",
+      "Weapon Specialization (Thrown Weapon)"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Folk Healer",
+    "skills": [
+      "Apothecary 2",
+      "Cure Affliction",
+      "Detect Health",
+      "News & Rumors"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Fortune Teller",
+    "skills": [
+      "Fortune Telling",
+      "Income 10",
+      "Mage Lore",
+      "News & Rumors",
+      "Serene Contemplation"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Bardic Voice 2",
+          "Scribe 2"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Gentlefolk",
+    "skills": [
+      "Bestow Favor",
+      "Income 10"
+    ],
+    "choices": [
+      {
+        "count": 2,
+        "choices": [
+          "Bardic Voice 2",
+          "Cooking 2",
+          "Divine Lore",
+          "Information Gathering",
+          "Research",
+          "Scribe 2",
+          "Serene Contemplation",
+          "Sewing 2"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Gravedigger",
+    "skills": [
+      "Engineering",
+      "Income 5",
+      "Occupational Spells (page 126)",
+      "Production (1 Death Component)",
+      "Slayer (Undead)",
+      "Weapon Specialization (Tool)",
+      "Woodworking 2"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Herbalist",
+    "skills": [
+      "Apothecary 4",
+      "Cure Affliction",
+      "Mage Lore",
+      "Woodwise"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Herder",
+    "skills": [
+      "Pathfinding",
+      "Production (2 Cloth)",
+      "Production (6 Food)",
+      "Wear Armor 1",
+      "Woodwise"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Hermit",
+    "skills": [
+      "Apothecary 2",
+      "Cure Affliction",
+      "Divine Lore",
+      "Scribe 2"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Hunter",
+    "skills": [
+      "Butcher",
+      "Pathfinding",
+      "Production (2 Food)",
+      "Weapon Specialization (Bow)",
+      "Weapon Specialization (Normal Crossbow)",
+      "Wear Armor 1",
+      "Woodwise"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Laborer",
+    "duty": "Manual Labor",
+    "skills": [
+      "Duty 2",
+      "Engineering",
+      "Income 5",
+      "Toughness",
+      "Weapon Use (Tool)",
+      "Work Rhythm"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Weapon Use (Two Handed Axe)",
+          "Weapon Use (Two Handed Blunt)"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Lackey",
+    "livery": "your master's colors",
+    "skills": [
+      "Buy/Sell 10",
+      "Commerce",
+      "Livery",
+      "Quick Learner",
+      "News & Rumors"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Serene Contemplation",
+          "Unarmed Combat"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Lay Cleric",
+    "skills": [
+      "Divine Lore",
+      "Divine Spells",
+      "Income 5",
+      "Religious Ceremony",
+      "Serene Contemplation",
+      "Wear Armor 3"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Warcaster",
+          "Weapon Specialization (One Handed Blunt)",
+          "Weapon Specialization (One Handed Sword)",
+          "Weapon Specialization (Two Handed Blunt)",
+          "Weapon Specialization (Two Handed Sword)"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Locksmith",
+    "skills": [
+      "Engineering",
+      "Income 5",
+      "Set Trap",
+      "Weapon Use (Staff)",
+      "Woodworking 4"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Novice Monk",
+    "livery": "robe or habit",
+    "skills": [
+      "Divine Lore",
+      "Livery",
+      "Research",
+      "Scribe 2",
+      "Serene Contemplation"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Peddler",
+    "skills": [
+      "Buy/Sell (50)",
+      "Commerce",
+      "Income 10",
+      "News & Rumors",
+      "Pathfinding"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Penitent",
+    "livery": "icons of faith",
+    "skills": [
+      "Battle Rage",
+      "Blessed",
+      "Divine Lore",
+      "Livery",
+      "Weapon Specialization (Flail)",
+      "Weapon Use (Flail)"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Ragpicker",
+    "duty": "Clean up trash",
+    "skills": [
+      "Duty 2",
+      "Scavenging",
+      "Weapon Specialization (Tool)"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Production (1 Cloth)",
+          "Production (1 Food)",
+          "Production (1 Metal)",
+          "Production (1 Parchment)",
+          "Production (1 Wood)"
+        ]
+      },
+      {
+        "count": 1,
+        "choices": [
+          "Toughness",
+          "Weapon Use (Polearm)"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Ratcatcher",
+    "livery": "rats or rat symbols",
+    "skills": [
+      "Engineering",
+      "Livery",
+      "Occupational Spells (page 126)",
+      "Poisoner 2",
+      "Set Trap",
+      "Slayer (Vermin)"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Squire",
+    "skills": [
+      "Income 10",
+      "Wear Armor 4"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Armstraining 4",
+          "Metalworking 2"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Street Vendor",
+    "skills": [
+      "Buy/Sell 10",
+      "Cooking 2",
+      "News & Rumors",
+      "Scavenging"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Metalworking 2",
+          "Sewing 2",
+          "Woodworking 2"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Tailor/Leatherworker",
+    "specialties": [
+      "Tailor",
+      "Leatherworker"
+    ],
+    "duty": "mending and patching",
+    "skills": [
+      "Duty 1",
+      "Medicine",
+      "Sewing 4"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Tavern Keeper",
+    "duty": "minding the tavern",
+    "skills": [
+      "Cooking 2",
+      "Drinks on the House",
+      "Duty 1",
+      "Income 10",
+      "Information Gathering",
+      "News & Rumors",
+      "Sell Drinks"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Tinker",
+    "skills": [
+      "Armor Repair",
+      "Buy/Sell (30)",
+      "Commerce",
+      "News & Rumors",
+      "Scavenging",
+      "Tinkering"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Town Crier",
+    "skills": [
+      "Bardic Voice 2",
+      "Duty 1",
+      "Income 10",
+      "Information Gathering",
+      "News & Rumors",
+      "Unarmed Combat"
+    ],
+    "duty": "shout proclamations you have been hired to or seditious blather"
+  },
+  {
+    "type": "Basic",
+    "name": "Town Guard",
+    "duty": "inspection by a Corporal or Captain of the Guard",
+    "livery": "based on local Chapter",
+    "skills": [
+      "Duty 1",
+      "Income 5",
+      "Livery",
+      "Warcaster",
+      "Weapon Specialization (any one Weapon Type)",
+      "Weapon Use (Large Shield)",
+      "Wear Armor 3"
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Woodsfolk",
+    "duty": "gathering firewood",
+    "skills": [
+      "Duty 1",
+      "Weapon Specialization (One Handed Axe)",
+      "Weapon Specialization (Two Handed Axe)",
+      "Wear Armor 1",
+      "Woodworking 4",
+      "Woodwise"
+    ]
+  },
+  {
+    "type": "Youth",
+    "name": "Adventurer (Youth)",
+    "skills": [
+      "Agility",
+      "Scavenging",
+      "Serene Contemplation",
+      "Wear Armor 2"
+    ]
+  },
+  {
+    "type": "Youth",
+    "name": "Apprentice (Youth)",
+    "duty": "assist master",
+    "skills": [
+      "Agility",
+      "Apprenticeship",
+      "Duty 1",
+      "Serene Contemplation"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Production (1 Cloth)",
+          "Production (1 Food)",
+          "Production (1 Metal)",
+          "Production (1 Parchment)",
+          "Production (1 Wood)",
+          "Production (1 Air)",
+          "Production (1 Earth)",
+          "Production (1 Fire)",
+          "Production (1 Water)",
+          "Production (1 Chaos)",
+          "Production (1 Death)",
+          "Production (1 Life)",
+          "Production (1 Time)"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Youth",
+    "name": "Bard/Minstrel/Thespian (Youth)",
+    "specialties": [
+      "Bard",
+      "Minstrel",
+      "Thespian"
+    ],
+    "skills": [
+      "Bardic Voice 4",
+      "Entertainer",
+      "News & Rumors"
+    ]
+  },
+  {
+    "type": "Youth",
+    "name": "Beggar (Youth)",
+    "livery": "rags and patches",
+    "skills": [
+      "Agility",
+      "Begging",
+      "Livery",
+      "Scavenging"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Information Gathering",
+          "Weapon Use (Staff)"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Youth",
+    "name": "Dancer/Juggler/Acrobat (Youth)",
+    "specialties": [
+      "Dancer",
+      "Juggler",
+      "Acrobat"
+    ],
+    "livery": "performance costume",
+    "skills": [
+      "Agility",
+      "Entertainer",
+      "Livery",
+      "News & Rumors",
+      "Weapon Specialization (Thrown Weapon)"
+    ]
+  },
+  {
+    "type": "Youth",
+    "name": "Guttersnipe (Youth)",
+    "duty": "assist master",
+    "skills": [
+      "Agility",
+      "Duty 1",
+      "Evade Trap",
+      "Production (1 Death)",
+      "Scavenging"
+    ]
+  },
+  {
+    "type": "Youth",
+    "name": "Initiate (Youth)",
+    "livery": "robes or other religious symbols",
+    "skills": [
+      "Divine Lore",
+      "Livery",
+      "Quick Learner",
+      "Serene Contemplation"
+    ]
+  },
+  {
+    "type": "Youth",
+    "name": "Lackey (Youth)",
+    "livery": "your master's colors",
+    "skills": [
+      "Buy/Sell 10",
+      "Commerce",
+      "Livery",
+      "Quick Learner",
+      "News & Rumors"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Serene Contemplation",
+          "Unarmed Combat"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Youth",
+    "name": "Page (Youth)",
+    "livery": "your patron’s colors",
+    "skills": [
+      "Agility",
+      "Income 5",
+      "Livery",
+      "Quick Learner",
+      "Wear Armor 2"
+    ]
+  },
+  {
+    "type": "Youth",
+    "name": "Student (Youth)",
+    "skills": [
+      "Copyist",
+      "Production (1 Parchment)",
+      "Quick Learner",
+      "Serene Contemplation"
+    ]
+  },
+  {
+    "type": "Youth",
+    "name": "Town Guard Recruit (Youth)",
+    "duty": "inspection by Corporal or Captain of the Guard",
+    "livery": "green and black Town Guard tabard",
+    "skills": [
+      "Duty 1",
+      "Income 5",
+      "Livery",
+      "Wear Armor 2"
+    ]
+  },
+  {
+    "type": "Youth",
+    "name": "Ward (Youth)",
+    "skills": [
+      "Bestow Favor",
+      "Income 10",
+      "Quick Learner",
+      "Scavenging"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Absolver/Flagellant",
+    "specialties": [
+      "Absolver",
+      "Flagellant"
+    ],
+    "livery": "icons of faith",
+    "skills": [
+      "Absolution",
+      "Battle Rage",
+      "Blessed",
+      "Divine Lore",
+      "Improved Battle Rage",
+      "Iron Will",
+      "Livery",
+      "Toughness",
+      "Weapon Specialization (Flail)",
+      "Weapon Use (Flail)"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Almoner",
+    "duty": "distribute money to the needy",
+    "skills": [
+      "Begging",
+      "Blessed",
+      "Buy/Sell 20",
+      "Cooking 2",
+      "Divine Lore",
+      "Duty 1",
+      "Income 10"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Artist (Author/Gilder/Painter/Sculptor)",
+    "specialties": [
+      "Artist",
+      "Author",
+      "Gilder",
+      "Painter",
+      "Sculptor"
+    ],
+    "skills": [
+      "Artistry",
+      "Income 10",
+      "Serene Contemplation"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Metalworking 4",
+          "Scribe 4",
+          "Sewing 4",
+          "Woodworking 4"
+        ]
+      },
+      {
+        "count": 1,
+        "choices": [
+          "Commerce",
+          "Divine Lore",
+          "Engineering",
+          "Mage Lore",
+          "Woodwise"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Astrologer",
+    "skills": [
+      "Fortune Telling",
+      "Divine Lore",
+      "Information Gathering",
+      "Mage Lore",
+      "Production (1 Time)",
+      "Research",
+      "Scribe 2",
+      "Serene Contemplation"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Beekeeper",
+    "livery": "beekeeping garb with mask",
+    "skills": [
+      "Apothecary 2",
+      "Income 10",
+      "Livery",
+      "Occupational Spells (page 125)",
+      "Production (4 Food)",
+      "Production (4 Life)",
+      "Serene Contemplation",
+      "Swarm Magic",
+      "Wear Armor 1",
+      "Woodwise"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Corporal of the Guard",
+    "duty": "inspecting the Guard",
+    "livery": "based on local Chapter",
+    "skills": [
+      "Armstraining 2",
+      "Duty 2",
+      "Income 10",
+      "Leadership (Town Guard)",
+      "Livery",
+      "Warcaster",
+      "Weapon Specialization (any one Weapon Type)",
+      "Weapon Use (Large Shield)",
+      "Wear Armor 4"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Crofter",
+    "skills": [
+      "News & Rumors",
+      "Production (2 Cloth)",
+      "Production (4 Food)",
+      "Production (4 Wood)",
+      "Weapon Specialization (Tool)",
+      "Work Rhythm",
+      "Woodworking 2"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Demagogue",
+    "skills": [
+      "Armstraining 4",
+      "Bardic Voice 4",
+      "Income 10",
+      "Information Gathering",
+      "Leadership (those who have joined your cause)",
+      "News & Rumors",
+      "Unarmed Combat"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Dragon Slayer",
+    "skills": [
+      "Battle Rage",
+      "Livery",
+      "Scavenging",
+      "Slayer (Beastman)",
+      "Slayer (Draconian)",
+      "Slayer (Goblin)",
+      "Slayer (Minotaur)",
+      "Slayer (Troll)",
+      "Wear Armor 3"
+    ],
+    "livery": "Fantastical costume, hair, and tattoos"
+  },
+  {
+    "type": "Advanced",
+    "name": "Executioner",
+    "livery": "black hood",
+    "skills": [
+      "Entertainer",
+      "Execution",
+      "Income 10",
+      "Livery",
+      "Occupational Spells (page 125)",
+      "Poisoner 4",
+      "Weapon Specialization (One Handed Axe)",
+      "Weapon Specialization (One Handed Sword)",
+      "Weapon Specialization (Two Handed Axe)",
+      "Weapon Specialization (Two Handed Sword)"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Famulus",
+    "livery": "your master's symbol",
+    "skills": [
+      "Armstraining 2",
+      "Iron Will",
+      "Livery",
+      "Mage Lore",
+      "Slayer (Daemons)",
+      "Weapon Specialization (any one Weapon Type)",
+      "Warcaster"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Fence/Pawnbroker",
+    "specialties": [
+      "Fence",
+      "Pawnbroker"
+    ],
+    "skills": [
+      "Buy/Sell (50)",
+      "Commerce",
+      "Fence",
+      "Income 10",
+      "News & Rumors",
+      "Retainers 1"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Information Gathering",
+          "Research"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Forester/Ranger/Gamekeeper",
+    "specialties": [
+      "Forester",
+      "Ranger",
+      "Gamekeeper"
+    ],
+    "skills": [
+      "Pathfinding",
+      "Production (8 Wood)",
+      "Weapon Specialization (One Handed Axe)",
+      "Weapon Specialization (Two Handed Axe)",
+      "Wear Armor 2",
+      "Woodwise",
+      "Woodworking 4"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Freeholder",
+    "skills": [
+      "Butcher",
+      "Patronage 1",
+      "Production (4 Cloth)",
+      "Production (12 Food)",
+      "Production (2 Wood)",
+      "Weapon Use (Flail)",
+      "Woodwise",
+      "Woodworking 2"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Gaoler",
+    "duty": "inspecting prisoners and upkeeping cells",
+    "livery": "Town Guard",
+    "skills": [
+      "Duty 1",
+      "Income 10",
+      "Livery",
+      "Occupational Spells (page 125)",
+      "Set Trap",
+      "Weapon Specialization (One Handed Blunt)",
+      "Weapon Specialization (Two Handed Blunt)",
+      "Warcaster",
+      "Wear Armor 3"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Herald",
+    "livery": "Herald’s garb",
+    "skills": [
+      "Armstraining 2",
+      "Bardic Voice 4",
+      "Income 10",
+      "Information Gathering",
+      "Livery",
+      "Occupational Spells (page 126)",
+      "Scribe 2"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Juror",
+    "skills": [
+      "Bardic Voice 2",
+      "Research",
+      "Scribe 2",
+      "Serene Contemplation"
+    ],
+    "choices": [
+      {
+        "count": 2,
+        "choices": [
+          "Commerce",
+          "Detect Health",
+          "Divine Lore",
+          "Engineering",
+          "Iron Will",
+          "Mage Lore",
+          "News & Rumors",
+          "Woodwise"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Knight Errant",
+    "livery": "Your heraldry",
+    "skills": [
+      "Armstraining 4",
+      "Income 10",
+      "Leadership (any non-Knight sworn to aid you)",
+      "Livery",
+      "Retainers 1",
+      "Wear Armor 6"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Librarian",
+    "skills": [
+      "Copyist",
+      "Research x2",
+      "Scribe 4",
+      "Serene Contemplation"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Litigant",
+    "skills": [
+      "Bardic Voice 2",
+      "Battle Rage",
+      "Duelist",
+      "Livery (red surcoat) Toughness",
+      "Unarmed Combat"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Master Thespian",
+    "skills": [
+      "Bardic Voice 6",
+      "Master Entertainer",
+      "Income 10",
+      "News & Rumors",
+      "Scribe 2"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Information Gathering",
+          "Research"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Merchant",
+    "skills": [
+      "Buy/Sell (100)",
+      "Commerce",
+      "Income 20",
+      "News & Rumors",
+      "Patronage 1",
+      "Retainers 2",
+      "any one Craft 2 skill"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Miller",
+    "skills": [
+      "Income 20",
+      "News & Rumors",
+      "Production (8 Food)",
+      "Woodworking 4"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Production (4 Air)",
+          "Production (4 Water)",
+          "Production (3 Life)"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Miner",
+    "skills": [
+      "Commerce",
+      "Engineering",
+      "Metalworking 2",
+      "Patronage 1",
+      "Production (8 Metal)",
+      "Weapon Specialization (Tool)",
+      "Wear Armor 3",
+      "Woodworking 2"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Philosopher",
+    "skills": [
+      "Loremaster",
+      "Production (2 Parchment)",
+      "Research x2",
+      "Scribe 6",
+      "Serene Contemplation"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Physician",
+    "livery": "doctor’s robes",
+    "skills": [
+      "Apothecary 6",
+      "Cure Affliction",
+      "Livery",
+      "Medicine",
+      "Occupational Spells (page 126)",
+      "Research",
+      "Serene Contemplation"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Pit Fighter/Judicial Champion",
+    "specialties": [
+      "Pit Fighter",
+      "Judicial Champion"
+    ],
+    "skills": [
+      "Armstraining 4",
+      "Battle Rage",
+      "Duelist",
+      "Entertainer",
+      "Unarmed Combat",
+      "Wear Armor 3"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Poacher",
+    "skills": [
+      "Butcher",
+      "Pathfinding",
+      "Production (3 Cloth)",
+      "Production (6 Food)",
+      "Weapon Specialization (Bow)",
+      "Weapon Specialization (Normal Crossbow)",
+      "Wear Armor 2",
+      "Woodwise"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Quarrier",
+    "duty": "Manual Labor",
+    "skills": [
+      "Duty 1",
+      "Engineering",
+      "Production (4 Earth)",
+      "Toughness",
+      "Weapon Use (Two Handed Blunt)",
+      "Wear Armor 1",
+      "Work Rhythm"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Ruffian",
+    "skills": [
+      "Brawler",
+      "Scavenging",
+      "Toughness",
+      "Unarmed Combat",
+      "Weapon Specialization (One Handed Blunt)",
+      "Wear Armor 2"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Sacristan",
+    "skills": [
+      "Blessed",
+      "Divine Lore",
+      "Research",
+      "Scribe 2",
+      "Set Trap",
+      "Weapon Specialization (any one)",
+      "Wear Armor 2",
+      "Woodworking 2"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Sawbones",
+    "livery": "Apron and gloves",
+    "skills": [
+      "Apothecary 4",
+      "Cure Affliction",
+      "Livery",
+      "Medicine",
+      "Sewing 2",
+      "Weapon Specialization (Dagger)"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Sergeant at Arms/Bodyguard",
+    "specialties": [
+      "Sergeant at Arms",
+      "Bodyguard"
+    ],
+    "livery": "patron’s colors",
+    "skills": [
+      "Armstraining 6",
+      "Income 10",
+      "Leadership (retainers and followers of your patron)",
+      "Livery",
+      "Wear Armor 4"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Sharp",
+    "skills": [
+      "Bardic Voice 2",
+      "Commerce",
+      "Cosmopolitan Connections",
+      "Fortune Telling",
+      "Information Gathering",
+      "Iron Will",
+      "News & Rumors",
+      "Room for More",
+      "Unarmed Combat."
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Steward",
+    "skills": [
+      "Buy/Sell (50)",
+      "Cooking 6",
+      "Commerce",
+      "Leadership (retainers and followers of your patron)",
+      "Scribe 2"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Theologian",
+    "skills": [
+      "Bardic Voice 2",
+      "Divine Lore",
+      "Divine Spells",
+      "Research x2",
+      "Scribe 4",
+      "Serene Contemplation"
+    ]
+  },
+  {
+    "type": "Advanced",
+    "name": "Varlet",
+    "duty": "fulfilling the requests of your master",
+    "skills": [
+      "Duty 2",
+      "Income 5",
+      "Information Gathering",
+      "Leadership (your master)",
+      "Unarmed Combat",
+      "Craft skill 2"
+    ]
+  },
+  {
+    "type": "Plot",
+    "name": "Cantor",
+    "skills": [
+      "Absolution",
+      "Bardic Voice 4",
+      "Divine Lore",
+      "Divine Spells",
+      "Entertainer",
+      "Grant Karma",
+      "News & Rumors",
+      "Religious Ceremony",
+      "Serene Contemplation"
+    ]
+  },
+  {
+    "type": "Plot",
+    "name": "Captain of the Guard",
+    "duty": "reviewing the guard",
+    "livery": "based on local Chapter",
+    "skills": [
+      "Duty 1",
+      "Income 15",
+      "Improved Leadership (Town Guard)",
+      "Livery",
+      "Patronage 1",
+      "Scribe 2",
+      "Warcaster",
+      "Weapon Specialization (any one Weapon Type)",
+      "Weapon Use (Large Shield)",
+      "Wear Armor 5"
+    ]
+  },
+  {
+    "type": "Plot",
+    "name": "Friar",
+    "skills": [
+      "Absolution",
+      "Divine Lore",
+      "Divine Spells",
+      "Grant Karma",
+      "News & Rumors",
+      "Pathfinding",
+      "Religious Ceremony"
+    ]
+  },
+  {
+    "type": "Plot",
+    "name": "Inquisitor",
+    "livery": "icons of faith",
+    "skills": [
+      "Battlemage",
+      "Divine Lore",
+      "Divine Spells",
+      "Leadership (anyone under your command in battle)",
+      "Livery",
+      "Mage Lore",
+      "Slayer (Undead)",
+      "Wear Armor 3"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Information Gathering",
+          "Research"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Plot",
+    "name": "Knight Paladin",
+    "livery": "your heraldry",
+    "skills": [
+      "Absolution",
+      "Battlemage",
+      "Blessed",
+      "Divine Lore",
+      "Divine Spells",
+      "Grant Karma",
+      "Income 10",
+      "Livery",
+      "Religious Ceremony",
+      "Retainers 1, Wear Armor 10"
+    ]
+  },
+  {
+    "type": "Plot",
+    "name": "Knight Penitent",
+    "livery": "your heraldry",
+    "skills": [
+      "Battlemage",
+      "Blessed",
+      "Divine Lore",
+      "Divine Spells",
+      "Income 10",
+      "Livery",
+      "Retainers 1",
+      "Wear Armor 8"
+    ]
+  },
+  {
+    "type": "Plot",
+    "name": "Knight of the Realm",
+    "livery": "Your heraldry",
+    "skills": [
+      "Armstraining 4",
+      "Income (50)",
+      "Improved Leadership (anyone wearing your colors)",
+      "Livery",
+      "Patronage 3",
+      "Retainers 6",
+      "Wear Armor 8"
+    ]
+  },
+  {
+    "type": "Plot",
+    "name": "Knight Templar",
+    "livery": "your heraldry",
+    "skills": [
+      "Battlemage",
+      "Leadership (any non-Knight sworn to aid you)",
+      "Income 10",
+      "Livery",
+      "Mage Lore",
+      "Research",
+      "Retainers 1",
+      "Scribe 4",
+      "Wear Armor 6"
+    ]
+  },
+  {
+    "type": "Plot",
+    "name": "Magistrate",
+    "duty": "holding court",
+    "skills": [
+      "Bardic Voice 2",
+      "Commerce",
+      "Duty 1",
+      "Income 20",
+      "News & Rumors",
+      "Research",
+      "Retainers 3",
+      "Scribe 4"
+    ]
+  },
+  {
+    "type": "Plot",
+    "name": "Ordained Priest",
+    "skills": [
+      "Absolution",
+      "Battlemage",
+      "Divine Lore",
+      "Divine Spells",
+      "Grant Karma",
+      "Income 10",
+      "Religious Ceremony",
+      "Serene Contemplation",
+      "Wear Armor 4"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Weapon Specialization (One Handed Blunt)",
+          "Weapon Specialization (One Handed Sword)",
+          "Weapon Specialization (Two Handed Blunt)",
+          "Weapon Specialization (Two Handed Sword)"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Plot",
+    "name": "Tavern Master",
+    "duty": "minding the tavern",
+    "skills": [
+      "Buy/Sell 20",
+      "Cooking 2",
+      "Drinks on the House",
+      "Duty 2",
+      "Income 10",
+      "News & Rumors",
+      "Patronage",
+      "Retainers 1",
+      "Sell Drinks",
+      "Tavern Share"
+    ]
+  },
+  {
+    "type": "Plot",
+    "name": "Witch Hunter",
+    "skills": [
+      "Armstraining 2",
+      "Battlemage",
+      "Leadership (anyone under your command in battle)",
+      "Mage Lore",
+      "Occupational Spells (page 126)",
+      "Set Trap",
+      "Slayer (Daemons)",
+      "Wear Armor 4"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Information Gathering",
+          "Research"
+        ]
+      }
+    ]
+  }
+]

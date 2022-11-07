@@ -33,7 +33,7 @@ enum SpellType {
 
 message Spell {
     string name = 1;
-    SpellType type = 2;
+    string type = 2;
     string category = 3;
     int32 mana = 4;
     string effect = 5;

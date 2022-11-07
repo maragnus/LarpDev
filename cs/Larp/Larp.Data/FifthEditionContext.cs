@@ -1,28 +1,47 @@
-﻿using Larp.Protos.Mystwood5e;
+﻿using Google.Protobuf;
+using Larp.Data.Services;
+using Larp.Protos.Mystwood5e;
+using Microsoft.Extensions.Caching.Memory;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 
 namespace Larp.Data;
 
 public class FifthEditionContext
 {
-    public FifthEditionContext(IMongoDatabase database)
+    private readonly LarpDataCache _cache;
+    public const string PrefixName = "Mw5e";
+    
+    public FifthEditionContext(IMongoDatabase database, LarpDataCache cache)
     {
-        Characters =  database.GetCollection<Character>(nameof(Characters));
-        Gifts = database.GetCollection<Gift>(nameof(Gifts));
-        HomeChapters = database.GetCollection<HomeChapter>(nameof(HomeChapters));
-        Occupations = database.GetCollection<Occupation>(nameof(Occupations));
-        Religions = database.GetCollection<Religion>(nameof(Religions));
-        Skills = database.GetCollection<SkillDefinition>(nameof(Skills));
-        Spells = database.GetCollection<Spell>(nameof(Spells));
-        Vantages = database.GetCollection<Vantage>(nameof(Vantages));
+        _cache = cache;
+        Characters = database.GetCollection<Character>($"{PrefixName}.{nameof(Characters)}");
+        GameStates = database.GetCollection<BsonDocument>($"{PrefixName}.{nameof(GameStates)}");
     }
 
+    public IMongoCollection<BsonDocument> GameStates { get; set; }
+
     public IMongoCollection<Character> Characters { get; set; }
-    public IMongoCollection<Gift> Gifts { get; }
-    public IMongoCollection<HomeChapter> HomeChapters { get; }
-    public IMongoCollection<Occupation> Occupations { get; set; }
-    public IMongoCollection<Religion> Religions { get; set; }
-    public IMongoCollection<SkillDefinition> Skills { get; }
-    public IMongoCollection<Spell> Spells { get; }
-    public IMongoCollection<Vantage> Vantages { get; }
+
+    public async ValueTask<GameState> GetGameState()
+    {
+        if (_cache.TryGetValue(nameof(GameState), out GameState gameState)) 
+            return gameState;
+        
+        var bson = await GameStates.Find(FilterDefinition<BsonDocument>.Empty).FirstAsync();
+        gameState = JsonParser.Default.Parse<GameState>(bson.ToJson());
+        _cache.Set(nameof(GameState), gameState);
+        return gameState;
+    }
+
+    public async Task SetGameState(GameState gameState)
+    {
+        _cache.Set(nameof(GameState), gameState);
+        
+        var json = JsonFormatter.Default.Format(gameState);
+        var bson = BsonDocument.Parse(json);
+        
+        await GameStates.InsertOneAsync(bson, new InsertOneOptions());
+    }
 }

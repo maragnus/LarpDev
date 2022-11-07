@@ -21,8 +21,8 @@ enum SkillPurchasable {
 message SkillDefinition  {
     string name = 1;
     string title = 2;
-    SkillClass class = 3;
-    SkillPurchasable purchasable = 4;
+    string class = 3;
+    string purchasable = 4;
     optional int32 ranksPerPurchase = 5;
     optional int32 costPerPurchase = 6;
     repeated string iterations = 7;
