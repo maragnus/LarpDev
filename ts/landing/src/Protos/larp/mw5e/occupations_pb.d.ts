@@ -6,10 +6,10 @@ export class SkillChoice extends jspb.Message {
   getCount(): number;
   setCount(value: number): SkillChoice;
 
-  getSkillsList(): Array<string>;
-  setSkillsList(value: Array<string>): SkillChoice;
-  clearSkillsList(): SkillChoice;
-  addSkills(value: string, index?: number): SkillChoice;
+  getChoicesList(): Array<string>;
+  setChoicesList(value: Array<string>): SkillChoice;
+  clearChoicesList(): SkillChoice;
+  addChoices(value: string, index?: number): SkillChoice;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): SkillChoice.AsObject;
@@ -22,7 +22,7 @@ export class SkillChoice extends jspb.Message {
 export namespace SkillChoice {
   export type AsObject = {
     count: number,
-    skillsList: Array<string>,
+    choicesList: Array<string>,
   }
 }
 
@@ -35,13 +35,18 @@ export class Occupation extends jspb.Message {
   clearSpecialtiesList(): Occupation;
   addSpecialties(value: string, index?: number): Occupation;
 
-  getType(): OccupationType;
-  setType(value: OccupationType): Occupation;
+  getType(): string;
+  setType(value: string): Occupation;
 
-  getSkills(): SkillChoice | undefined;
-  setSkills(value?: SkillChoice): Occupation;
-  hasSkills(): boolean;
-  clearSkills(): Occupation;
+  getSkillsList(): Array<string>;
+  setSkillsList(value: Array<string>): Occupation;
+  clearSkillsList(): Occupation;
+  addSkills(value: string, index?: number): Occupation;
+
+  getChoicesList(): Array<SkillChoice>;
+  setChoicesList(value: Array<SkillChoice>): Occupation;
+  clearChoicesList(): Occupation;
+  addChoices(value?: SkillChoice, index?: number): SkillChoice;
 
   getDuty(): string;
   setDuty(value: string): Occupation;
@@ -65,20 +70,21 @@ export namespace Occupation {
   export type AsObject = {
     name: string,
     specialtiesList: Array<string>,
-    type: OccupationType,
-    skills?: SkillChoice.AsObject,
+    type: string,
+    skillsList: Array<string>,
+    choicesList: Array<SkillChoice.AsObject>,
     duty?: string,
     livery?: string,
   }
 
   export enum DutyCase { 
     _DUTY_NOT_SET = 0,
-    DUTY = 5,
+    DUTY = 6,
   }
 
   export enum LiveryCase { 
     _LIVERY_NOT_SET = 0,
-    LIVERY = 6,
+    LIVERY = 7,
   }
 }
 

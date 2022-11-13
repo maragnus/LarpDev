@@ -106,7 +106,7 @@ proto.larp.mw5e.SkillChoice.prototype.toObject = function(opt_includeInstance) {
 proto.larp.mw5e.SkillChoice.toObject = function(includeInstance, msg) {
   var f, obj = {
     count: jspb.Message.getFieldWithDefault(msg, 1, 0),
-    skillsList: (f = jspb.Message.getRepeatedField(msg, 2)) == null ? undefined : f
+    choicesList: (f = jspb.Message.getRepeatedField(msg, 2)) == null ? undefined : f
   };
 
   if (includeInstance) {
@@ -149,7 +149,7 @@ proto.larp.mw5e.SkillChoice.deserializeBinaryFromReader = function(msg, reader) 
       break;
     case 2:
       var value = /** @type {string} */ (reader.readString());
-      msg.addSkills(value);
+      msg.addChoices(value);
       break;
     default:
       reader.skipField();
@@ -187,7 +187,7 @@ proto.larp.mw5e.SkillChoice.serializeBinaryToWriter = function(message, writer) 
       f
     );
   }
-  f = message.getSkillsList();
+  f = message.getChoicesList();
   if (f.length > 0) {
     writer.writeRepeatedString(
       2,
@@ -216,10 +216,10 @@ proto.larp.mw5e.SkillChoice.prototype.setCount = function(value) {
 
 
 /**
- * repeated string skills = 2;
+ * repeated string choices = 2;
  * @return {!Array<string>}
  */
-proto.larp.mw5e.SkillChoice.prototype.getSkillsList = function() {
+proto.larp.mw5e.SkillChoice.prototype.getChoicesList = function() {
   return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 2));
 };
 
@@ -228,7 +228,7 @@ proto.larp.mw5e.SkillChoice.prototype.getSkillsList = function() {
  * @param {!Array<string>} value
  * @return {!proto.larp.mw5e.SkillChoice} returns this
  */
-proto.larp.mw5e.SkillChoice.prototype.setSkillsList = function(value) {
+proto.larp.mw5e.SkillChoice.prototype.setChoicesList = function(value) {
   return jspb.Message.setField(this, 2, value || []);
 };
 
@@ -238,7 +238,7 @@ proto.larp.mw5e.SkillChoice.prototype.setSkillsList = function(value) {
  * @param {number=} opt_index
  * @return {!proto.larp.mw5e.SkillChoice} returns this
  */
-proto.larp.mw5e.SkillChoice.prototype.addSkills = function(value, opt_index) {
+proto.larp.mw5e.SkillChoice.prototype.addChoices = function(value, opt_index) {
   return jspb.Message.addToRepeatedField(this, 2, value, opt_index);
 };
 
@@ -247,8 +247,8 @@ proto.larp.mw5e.SkillChoice.prototype.addSkills = function(value, opt_index) {
  * Clears the list making it empty but non-null.
  * @return {!proto.larp.mw5e.SkillChoice} returns this
  */
-proto.larp.mw5e.SkillChoice.prototype.clearSkillsList = function() {
-  return this.setSkillsList([]);
+proto.larp.mw5e.SkillChoice.prototype.clearChoicesList = function() {
+  return this.setChoicesList([]);
 };
 
 
@@ -258,7 +258,7 @@ proto.larp.mw5e.SkillChoice.prototype.clearSkillsList = function() {
  * @private {!Array<number>}
  * @const
  */
-proto.larp.mw5e.Occupation.repeatedFields_ = [2];
+proto.larp.mw5e.Occupation.repeatedFields_ = [2,4,5];
 
 
 
@@ -293,10 +293,12 @@ proto.larp.mw5e.Occupation.toObject = function(includeInstance, msg) {
   var f, obj = {
     name: jspb.Message.getFieldWithDefault(msg, 1, ""),
     specialtiesList: (f = jspb.Message.getRepeatedField(msg, 2)) == null ? undefined : f,
-    type: jspb.Message.getFieldWithDefault(msg, 3, 0),
-    skills: (f = msg.getSkills()) && proto.larp.mw5e.SkillChoice.toObject(includeInstance, f),
-    duty: jspb.Message.getFieldWithDefault(msg, 5, ""),
-    livery: jspb.Message.getFieldWithDefault(msg, 6, "")
+    type: jspb.Message.getFieldWithDefault(msg, 3, ""),
+    skillsList: (f = jspb.Message.getRepeatedField(msg, 4)) == null ? undefined : f,
+    choicesList: jspb.Message.toObjectList(msg.getChoicesList(),
+    proto.larp.mw5e.SkillChoice.toObject, includeInstance),
+    duty: jspb.Message.getFieldWithDefault(msg, 6, ""),
+    livery: jspb.Message.getFieldWithDefault(msg, 7, "")
   };
 
   if (includeInstance) {
@@ -342,19 +344,23 @@ proto.larp.mw5e.Occupation.deserializeBinaryFromReader = function(msg, reader) {
       msg.addSpecialties(value);
       break;
     case 3:
-      var value = /** @type {!proto.larp.mw5e.OccupationType} */ (reader.readEnum());
+      var value = /** @type {string} */ (reader.readString());
       msg.setType(value);
       break;
     case 4:
-      var value = new proto.larp.mw5e.SkillChoice;
-      reader.readMessage(value,proto.larp.mw5e.SkillChoice.deserializeBinaryFromReader);
-      msg.setSkills(value);
+      var value = /** @type {string} */ (reader.readString());
+      msg.addSkills(value);
       break;
     case 5:
+      var value = new proto.larp.mw5e.SkillChoice;
+      reader.readMessage(value,proto.larp.mw5e.SkillChoice.deserializeBinaryFromReader);
+      msg.addChoices(value);
+      break;
+    case 6:
       var value = /** @type {string} */ (reader.readString());
       msg.setDuty(value);
       break;
-    case 6:
+    case 7:
       var value = /** @type {string} */ (reader.readString());
       msg.setLivery(value);
       break;
@@ -402,31 +408,38 @@ proto.larp.mw5e.Occupation.serializeBinaryToWriter = function(message, writer) {
     );
   }
   f = message.getType();
-  if (f !== 0.0) {
-    writer.writeEnum(
+  if (f.length > 0) {
+    writer.writeString(
       3,
       f
     );
   }
-  f = message.getSkills();
-  if (f != null) {
-    writer.writeMessage(
+  f = message.getSkillsList();
+  if (f.length > 0) {
+    writer.writeRepeatedString(
       4,
-      f,
-      proto.larp.mw5e.SkillChoice.serializeBinaryToWriter
+      f
     );
   }
-  f = /** @type {string} */ (jspb.Message.getField(message, 5));
-  if (f != null) {
-    writer.writeString(
+  f = message.getChoicesList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
       5,
-      f
+      f,
+      proto.larp.mw5e.SkillChoice.serializeBinaryToWriter
     );
   }
   f = /** @type {string} */ (jspb.Message.getField(message, 6));
   if (f != null) {
     writer.writeString(
       6,
+      f
+    );
+  }
+  f = /** @type {string} */ (jspb.Message.getField(message, 7));
+  if (f != null) {
+    writer.writeString(
+      7,
       f
     );
   }
@@ -489,66 +502,11 @@ proto.larp.mw5e.Occupation.prototype.clearSpecialtiesList = function() {
 
 
 /**
- * optional OccupationType type = 3;
- * @return {!proto.larp.mw5e.OccupationType}
- */
-proto.larp.mw5e.Occupation.prototype.getType = function() {
-  return /** @type {!proto.larp.mw5e.OccupationType} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
-};
-
-
-/**
- * @param {!proto.larp.mw5e.OccupationType} value
- * @return {!proto.larp.mw5e.Occupation} returns this
- */
-proto.larp.mw5e.Occupation.prototype.setType = function(value) {
-  return jspb.Message.setProto3EnumField(this, 3, value);
-};
-
-
-/**
- * optional SkillChoice skills = 4;
- * @return {?proto.larp.mw5e.SkillChoice}
- */
-proto.larp.mw5e.Occupation.prototype.getSkills = function() {
-  return /** @type{?proto.larp.mw5e.SkillChoice} */ (
-    jspb.Message.getWrapperField(this, proto.larp.mw5e.SkillChoice, 4));
-};
-
-
-/**
- * @param {?proto.larp.mw5e.SkillChoice|undefined} value
- * @return {!proto.larp.mw5e.Occupation} returns this
-*/
-proto.larp.mw5e.Occupation.prototype.setSkills = function(value) {
-  return jspb.Message.setWrapperField(this, 4, value);
-};
-
-
-/**
- * Clears the message field making it undefined.
- * @return {!proto.larp.mw5e.Occupation} returns this
- */
-proto.larp.mw5e.Occupation.prototype.clearSkills = function() {
-  return this.setSkills(undefined);
-};
-
-
-/**
- * Returns whether this field is set.
- * @return {boolean}
- */
-proto.larp.mw5e.Occupation.prototype.hasSkills = function() {
-  return jspb.Message.getField(this, 4) != null;
-};
-
-
-/**
- * optional string duty = 5;
+ * optional string type = 3;
  * @return {string}
  */
-proto.larp.mw5e.Occupation.prototype.getDuty = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
+proto.larp.mw5e.Occupation.prototype.getType = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
 };
 
 
@@ -556,34 +514,91 @@ proto.larp.mw5e.Occupation.prototype.getDuty = function() {
  * @param {string} value
  * @return {!proto.larp.mw5e.Occupation} returns this
  */
-proto.larp.mw5e.Occupation.prototype.setDuty = function(value) {
-  return jspb.Message.setField(this, 5, value);
+proto.larp.mw5e.Occupation.prototype.setType = function(value) {
+  return jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
 /**
- * Clears the field making it undefined.
+ * repeated string skills = 4;
+ * @return {!Array<string>}
+ */
+proto.larp.mw5e.Occupation.prototype.getSkillsList = function() {
+  return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 4));
+};
+
+
+/**
+ * @param {!Array<string>} value
  * @return {!proto.larp.mw5e.Occupation} returns this
  */
-proto.larp.mw5e.Occupation.prototype.clearDuty = function() {
-  return jspb.Message.setField(this, 5, undefined);
+proto.larp.mw5e.Occupation.prototype.setSkillsList = function(value) {
+  return jspb.Message.setField(this, 4, value || []);
 };
 
 
 /**
- * Returns whether this field is set.
- * @return {boolean}
+ * @param {string} value
+ * @param {number=} opt_index
+ * @return {!proto.larp.mw5e.Occupation} returns this
  */
-proto.larp.mw5e.Occupation.prototype.hasDuty = function() {
-  return jspb.Message.getField(this, 5) != null;
+proto.larp.mw5e.Occupation.prototype.addSkills = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 4, value, opt_index);
 };
 
 
 /**
- * optional string livery = 6;
+ * Clears the list making it empty but non-null.
+ * @return {!proto.larp.mw5e.Occupation} returns this
+ */
+proto.larp.mw5e.Occupation.prototype.clearSkillsList = function() {
+  return this.setSkillsList([]);
+};
+
+
+/**
+ * repeated SkillChoice choices = 5;
+ * @return {!Array<!proto.larp.mw5e.SkillChoice>}
+ */
+proto.larp.mw5e.Occupation.prototype.getChoicesList = function() {
+  return /** @type{!Array<!proto.larp.mw5e.SkillChoice>} */ (
+    jspb.Message.getRepeatedWrapperField(this, proto.larp.mw5e.SkillChoice, 5));
+};
+
+
+/**
+ * @param {!Array<!proto.larp.mw5e.SkillChoice>} value
+ * @return {!proto.larp.mw5e.Occupation} returns this
+*/
+proto.larp.mw5e.Occupation.prototype.setChoicesList = function(value) {
+  return jspb.Message.setRepeatedWrapperField(this, 5, value);
+};
+
+
+/**
+ * @param {!proto.larp.mw5e.SkillChoice=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.larp.mw5e.SkillChoice}
+ */
+proto.larp.mw5e.Occupation.prototype.addChoices = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 5, opt_value, proto.larp.mw5e.SkillChoice, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.larp.mw5e.Occupation} returns this
+ */
+proto.larp.mw5e.Occupation.prototype.clearChoicesList = function() {
+  return this.setChoicesList([]);
+};
+
+
+/**
+ * optional string duty = 6;
  * @return {string}
  */
-proto.larp.mw5e.Occupation.prototype.getLivery = function() {
+proto.larp.mw5e.Occupation.prototype.getDuty = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
 };
 
@@ -592,7 +607,7 @@ proto.larp.mw5e.Occupation.prototype.getLivery = function() {
  * @param {string} value
  * @return {!proto.larp.mw5e.Occupation} returns this
  */
-proto.larp.mw5e.Occupation.prototype.setLivery = function(value) {
+proto.larp.mw5e.Occupation.prototype.setDuty = function(value) {
   return jspb.Message.setField(this, 6, value);
 };
 
@@ -601,7 +616,7 @@ proto.larp.mw5e.Occupation.prototype.setLivery = function(value) {
  * Clears the field making it undefined.
  * @return {!proto.larp.mw5e.Occupation} returns this
  */
-proto.larp.mw5e.Occupation.prototype.clearLivery = function() {
+proto.larp.mw5e.Occupation.prototype.clearDuty = function() {
   return jspb.Message.setField(this, 6, undefined);
 };
 
@@ -610,8 +625,44 @@ proto.larp.mw5e.Occupation.prototype.clearLivery = function() {
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.larp.mw5e.Occupation.prototype.hasLivery = function() {
+proto.larp.mw5e.Occupation.prototype.hasDuty = function() {
   return jspb.Message.getField(this, 6) != null;
+};
+
+
+/**
+ * optional string livery = 7;
+ * @return {string}
+ */
+proto.larp.mw5e.Occupation.prototype.getLivery = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 7, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.larp.mw5e.Occupation} returns this
+ */
+proto.larp.mw5e.Occupation.prototype.setLivery = function(value) {
+  return jspb.Message.setField(this, 7, value);
+};
+
+
+/**
+ * Clears the field making it undefined.
+ * @return {!proto.larp.mw5e.Occupation} returns this
+ */
+proto.larp.mw5e.Occupation.prototype.clearLivery = function() {
+  return jspb.Message.setField(this, 7, undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.larp.mw5e.Occupation.prototype.hasLivery = function() {
+  return jspb.Message.getField(this, 7) != null;
 };
 
 

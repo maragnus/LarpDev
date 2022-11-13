@@ -86,8 +86,8 @@ proto.larp.mw5e.SkillDefinition.toObject = function(includeInstance, msg) {
   var f, obj = {
     name: jspb.Message.getFieldWithDefault(msg, 1, ""),
     title: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    pb_class: jspb.Message.getFieldWithDefault(msg, 3, 0),
-    purchasable: jspb.Message.getFieldWithDefault(msg, 4, 0),
+    pb_class: jspb.Message.getFieldWithDefault(msg, 3, ""),
+    purchasable: jspb.Message.getFieldWithDefault(msg, 4, ""),
     ranksperpurchase: jspb.Message.getFieldWithDefault(msg, 5, 0),
     costperpurchase: jspb.Message.getFieldWithDefault(msg, 6, 0),
     iterationsList: (f = jspb.Message.getRepeatedField(msg, 7)) == null ? undefined : f
@@ -136,11 +136,11 @@ proto.larp.mw5e.SkillDefinition.deserializeBinaryFromReader = function(msg, read
       msg.setTitle(value);
       break;
     case 3:
-      var value = /** @type {!proto.larp.mw5e.SkillClass} */ (reader.readEnum());
+      var value = /** @type {string} */ (reader.readString());
       msg.setClass(value);
       break;
     case 4:
-      var value = /** @type {!proto.larp.mw5e.SkillPurchasable} */ (reader.readEnum());
+      var value = /** @type {string} */ (reader.readString());
       msg.setPurchasable(value);
       break;
     case 5:
@@ -199,15 +199,15 @@ proto.larp.mw5e.SkillDefinition.serializeBinaryToWriter = function(message, writ
     );
   }
   f = message.getClass();
-  if (f !== 0.0) {
-    writer.writeEnum(
+  if (f.length > 0) {
+    writer.writeString(
       3,
       f
     );
   }
   f = message.getPurchasable();
-  if (f !== 0.0) {
-    writer.writeEnum(
+  if (f.length > 0) {
+    writer.writeString(
       4,
       f
     );
@@ -273,38 +273,38 @@ proto.larp.mw5e.SkillDefinition.prototype.setTitle = function(value) {
 
 
 /**
- * optional SkillClass class = 3;
- * @return {!proto.larp.mw5e.SkillClass}
+ * optional string class = 3;
+ * @return {string}
  */
 proto.larp.mw5e.SkillDefinition.prototype.getClass = function() {
-  return /** @type {!proto.larp.mw5e.SkillClass} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
 };
 
 
 /**
- * @param {!proto.larp.mw5e.SkillClass} value
+ * @param {string} value
  * @return {!proto.larp.mw5e.SkillDefinition} returns this
  */
 proto.larp.mw5e.SkillDefinition.prototype.setClass = function(value) {
-  return jspb.Message.setProto3EnumField(this, 3, value);
+  return jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
 /**
- * optional SkillPurchasable purchasable = 4;
- * @return {!proto.larp.mw5e.SkillPurchasable}
+ * optional string purchasable = 4;
+ * @return {string}
  */
 proto.larp.mw5e.SkillDefinition.prototype.getPurchasable = function() {
-  return /** @type {!proto.larp.mw5e.SkillPurchasable} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
 };
 
 
 /**
- * @param {!proto.larp.mw5e.SkillPurchasable} value
+ * @param {string} value
  * @return {!proto.larp.mw5e.SkillDefinition} returns this
  */
 proto.larp.mw5e.SkillDefinition.prototype.setPurchasable = function(value) {
-  return jspb.Message.setProto3EnumField(this, 4, value);
+  return jspb.Message.setProto3StringField(this, 4, value);
 };
 
 

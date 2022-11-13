@@ -79,6 +79,11 @@ app.MapGrpcService<AuthenticationGrpcService>()
     .RequireCors("GrpcCors")
     .AllowAnonymous();
 
+app.MapGrpcService<Mystwood5eGrpcService>()
+    .EnableGrpcWeb()
+    .RequireCors("GrpcCors")
+    .AllowAnonymous();
+
 app.MapGrpcService<UserGrpcService>()
     .EnableGrpcWeb()
     .RequireCors("GrpcCors")

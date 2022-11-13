@@ -80,8 +80,8 @@ export class Spell extends jspb.Message {
   getName(): string;
   setName(value: string): Spell;
 
-  getType(): SpellType;
-  setType(value: SpellType): Spell;
+  getType(): string;
+  setType(value: string): Spell;
 
   getCategory(): string;
   setCategory(value: string): Spell;
@@ -103,7 +103,7 @@ export class Spell extends jspb.Message {
 export namespace Spell {
   export type AsObject = {
     name: string,
-    type: SpellType,
+    type: string,
     category: string,
     mana: number,
     effect: string,

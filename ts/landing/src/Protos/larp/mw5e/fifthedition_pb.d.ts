@@ -8,6 +8,12 @@ import * as larp_mw5e_skills_pb from '../../larp/mw5e/skills_pb';
 
 
 export class GameState extends jspb.Message {
+  getLastUpdated(): string;
+  setLastUpdated(value: string): GameState;
+
+  getRevision(): string;
+  setRevision(value: string): GameState;
+
   getGiftsList(): Array<larp_mw5e_gifts_pb.Gift>;
   setGiftsList(value: Array<larp_mw5e_gifts_pb.Gift>): GameState;
   clearGiftsList(): GameState;
@@ -23,10 +29,15 @@ export class GameState extends jspb.Message {
   clearOccupationsList(): GameState;
   addOccupations(value?: larp_mw5e_occupations_pb.Occupation, index?: number): larp_mw5e_occupations_pb.Occupation;
 
-  getVantagesList(): Array<larp_mw5e_other_pb.Vantage>;
-  setVantagesList(value: Array<larp_mw5e_other_pb.Vantage>): GameState;
-  clearVantagesList(): GameState;
-  addVantages(value?: larp_mw5e_other_pb.Vantage, index?: number): larp_mw5e_other_pb.Vantage;
+  getAdvantagesList(): Array<larp_mw5e_other_pb.Vantage>;
+  setAdvantagesList(value: Array<larp_mw5e_other_pb.Vantage>): GameState;
+  clearAdvantagesList(): GameState;
+  addAdvantages(value?: larp_mw5e_other_pb.Vantage, index?: number): larp_mw5e_other_pb.Vantage;
+
+  getDisadvantagesList(): Array<larp_mw5e_other_pb.Vantage>;
+  setDisadvantagesList(value: Array<larp_mw5e_other_pb.Vantage>): GameState;
+  clearDisadvantagesList(): GameState;
+  addDisadvantages(value?: larp_mw5e_other_pb.Vantage, index?: number): larp_mw5e_other_pb.Vantage;
 
   getReligionsList(): Array<larp_mw5e_other_pb.Religion>;
   setReligionsList(value: Array<larp_mw5e_other_pb.Religion>): GameState;
@@ -53,10 +64,13 @@ export class GameState extends jspb.Message {
 
 export namespace GameState {
   export type AsObject = {
+    lastUpdated: string,
+    revision: string,
     giftsList: Array<larp_mw5e_gifts_pb.Gift.AsObject>,
     skillsList: Array<larp_mw5e_skills_pb.SkillDefinition.AsObject>,
     occupationsList: Array<larp_mw5e_occupations_pb.Occupation.AsObject>,
-    vantagesList: Array<larp_mw5e_other_pb.Vantage.AsObject>,
+    advantagesList: Array<larp_mw5e_other_pb.Vantage.AsObject>,
+    disadvantagesList: Array<larp_mw5e_other_pb.Vantage.AsObject>,
     religionsList: Array<larp_mw5e_other_pb.Religion.AsObject>,
     homeChaptersList: Array<larp_mw5e_other_pb.HomeChapter.AsObject>,
     spellsList: Array<larp_mw5e_other_pb.Spell.AsObject>,

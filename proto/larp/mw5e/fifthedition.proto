@@ -12,6 +12,7 @@ import public "larp/mw5e/skills.proto";
 
 message GameState {
   string last_updated = 1;
+  string revision = 2;
   repeated Gift gifts = 10;
   repeated SkillDefinition skills = 11;
   repeated Occupation occupations = 12;

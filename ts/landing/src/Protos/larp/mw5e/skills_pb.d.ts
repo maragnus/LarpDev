@@ -9,11 +9,11 @@ export class SkillDefinition extends jspb.Message {
   getTitle(): string;
   setTitle(value: string): SkillDefinition;
 
-  getClass(): SkillClass;
-  setClass(value: SkillClass): SkillDefinition;
+  getClass(): string;
+  setClass(value: string): SkillDefinition;
 
-  getPurchasable(): SkillPurchasable;
-  setPurchasable(value: SkillPurchasable): SkillDefinition;
+  getPurchasable(): string;
+  setPurchasable(value: string): SkillDefinition;
 
   getRanksperpurchase(): number;
   setRanksperpurchase(value: number): SkillDefinition;
@@ -42,8 +42,8 @@ export namespace SkillDefinition {
   export type AsObject = {
     name: string,
     title: string,
-    pb_class: SkillClass,
-    purchasable: SkillPurchasable,
+    pb_class: string,
+    purchasable: string,
     ranksperpurchase?: number,
     costperpurchase?: number,
     iterationsList: Array<string>,

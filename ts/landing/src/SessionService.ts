@@ -1,13 +1,17 @@
-import {larpAuthClient, larpUserClient} from "./LarpService";
+import {larpAuthClient, larpMw5eClient, larpUserClient} from "./LarpService";
 import {
     ConfirmLoginRequest,
-    InitiateLoginRequest, LogoutRequest,
+    InitiateLoginRequest,
+    LogoutRequest,
     ValidateSessionRequest,
     ValidationResponseCode
 } from "./Protos/larp/authorization_pb";
 import {Empty} from "./Protos/larp/common_pb";
 import {Account} from "./Protos/larp/accounts_pb";
-import { Metadata } from "grpc-web";
+import {Metadata} from "grpc-web";
+import {GameState} from "./Protos/larp/mw5e/fifthedition_pb";
+import {UpdateCacheRequest} from "./Protos/larp/mw5e/services_pb";
+import {CachedGameState} from "./CachedGameState";
 
 export interface SessionCallback {
     callback: (() => void);
@@ -32,6 +36,7 @@ export class SessionService {
     private _nextSubscriptionId: number = 0;
     private _email?: string;
     private _sessionId?: string;
+    private _mw5eGameState = new CachedGameState<GameState.AsObject>("mw5e");
 
     private static readonly SessionIdKey = "MWL_SESSION_ID";
     private static readonly AccountKey = "MWL_PROFILE";
@@ -192,6 +197,35 @@ export class SessionService {
     async getAccount(): Promise<Account.AsObject> {
         const result = await larpUserClient.getAccount(new Empty(), this.getMetadata());
         return (result.getAccount() ?? new Account()).toObject();
+    }
+
+    async getGameState(): Promise<GameState.AsObject> {
+        const cacheName = "mw5e";
+
+        if (!this._mw5eGameState.isExpired())
+            return this._mw5eGameState.get()!;
+
+        // Initial load or check for updates
+        try {
+            const lastRevision = this._mw5eGameState.getRevision() ?? "";
+            const req = new UpdateCacheRequest().setLastUpdated(lastRevision)
+            const response = await larpMw5eClient.getGameState(req, null);
+            if (response.hasGameState()) {
+                console.log("Cached GameState updated for " + cacheName)
+                const newState: GameState.AsObject = response.getGameState()?.toObject()!;
+                this._mw5eGameState.set(newState);
+            } else {
+                // Cache is current
+                this._mw5eGameState.current();
+            }
+            return this._mw5eGameState.get()!;
+        } catch (e) {
+            const result = this._mw5eGameState.get();
+            if (result === undefined)
+                throw e;
+            console.log("Failed to update GameState for " + cacheName + ", using cache");
+            return result;
+        }
     }
 
 }

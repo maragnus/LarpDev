@@ -1,0 +1,24 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Larp.Protos.Mystwood5e";
+
+package larp.mw5e;
+
+import "larp/mw5e/fifthedition.proto";
+
+service Mw5e {
+  rpc GetGameState(UpdateCacheRequest) returns (GameStateResponse);
+  rpc GetCharacter(FindById) returns (Character);
+}
+
+message UpdateCacheRequest {
+  string last_updated = 1;
+}
+
+message GameStateResponse {
+  optional GameState game_state = 1;
+}
+
+message FindById {
+  string id = 1;
+}

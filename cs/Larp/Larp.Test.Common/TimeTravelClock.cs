@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Internal;
 
-namespace Larp.WebService.Tests;
+namespace Larp.Test.Common;
 
-public class TimeTravelClock : ISystemClock, Microsoft.AspNetCore.Authentication.ISystemClock
+public class TimeTravelClock : ISystemClock
 {
     public TimeTravelClock() : this(DateTimeOffset.Now) {}
     public TimeTravelClock(DateTimeOffset now) => UtcNow = now;

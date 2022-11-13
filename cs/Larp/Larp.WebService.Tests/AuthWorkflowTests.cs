@@ -1,5 +1,6 @@
 ﻿using Larp.Data.Services;
 using Larp.Data.TextFixture;
+using Larp.Test.Common;
 using Larp.WebService.LarpServices;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
@@ -22,7 +23,7 @@ public class AuthWorkflowTests
         Token = null;
         
         var larpDataCache = new LarpDataCache(new MemoryCacheOptions() { Clock = Clock });
-        var testDataFixture = await LarpDataTestFixture.CreateTestFixtureAsync(false);
+        var testDataFixture = await LarpDataTestFixture.CreateTestFixtureAsync(false, Clock);
         var userSessionService = new UserSessionManager(testDataFixture.Context, larpDataCache, Clock,
             Options.Create<UserSessionManagerOptions>(new()
             {
@@ -89,11 +90,10 @@ public class AuthWorkflowTests
     [TestMethod]
     public async Task AuthenticationWorkflow_NotExists()
     {
-        AuthenticationResult result = null!;
-        
-        result = await AuthService.InitiateLogin("acrion@gmail.com", "test");
-        Assert.IsFalse(result.IsSuccess, result.Message);
-        Assert.IsNull(Token);
+        // This will create a new account
+        var result = await AuthService.InitiateLogin("acrion@gmail.com", "test");
+        Assert.IsTrue(result.IsSuccess, result.Message);
+        Assert.IsNotNull(Token);
     }
     
     [TestMethod]
@@ -117,9 +117,11 @@ public class AuthWorkflowTests
     {
         await Helper.AddAccount("Josh", "acrion@gmail.com", Clock.UtcNow.AddDays(-30));
 
-        AuthenticationResult result = null!;
+        // This code isn't possible to generate but meets entry criteria
+        const string code = "AB0O1L"; 
         
-        result = await AuthService.ConfirmLogin("acrion@gmail.com", "ABCDEF");
+        // Attempt to authenticate with the wrong code
+        var result = await AuthService.ConfirmLogin("acrion@gmail.com", code);
         Assert.IsFalse(result.IsSuccess, result.Message);
         Assert.IsNull(result.SessionId);
     }

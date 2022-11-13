@@ -683,7 +683,7 @@ proto.larp.mw5e.Spell.prototype.toObject = function(opt_includeInstance) {
 proto.larp.mw5e.Spell.toObject = function(includeInstance, msg) {
   var f, obj = {
     name: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    type: jspb.Message.getFieldWithDefault(msg, 2, 0),
+    type: jspb.Message.getFieldWithDefault(msg, 2, ""),
     category: jspb.Message.getFieldWithDefault(msg, 3, ""),
     mana: jspb.Message.getFieldWithDefault(msg, 4, 0),
     effect: jspb.Message.getFieldWithDefault(msg, 5, "")
@@ -728,7 +728,7 @@ proto.larp.mw5e.Spell.deserializeBinaryFromReader = function(msg, reader) {
       msg.setName(value);
       break;
     case 2:
-      var value = /** @type {!proto.larp.mw5e.SpellType} */ (reader.readEnum());
+      var value = /** @type {string} */ (reader.readString());
       msg.setType(value);
       break;
     case 3:
@@ -780,8 +780,8 @@ proto.larp.mw5e.Spell.serializeBinaryToWriter = function(message, writer) {
     );
   }
   f = message.getType();
-  if (f !== 0.0) {
-    writer.writeEnum(
+  if (f.length > 0) {
+    writer.writeString(
       2,
       f
     );
@@ -829,20 +829,20 @@ proto.larp.mw5e.Spell.prototype.setName = function(value) {
 
 
 /**
- * optional SpellType type = 2;
- * @return {!proto.larp.mw5e.SpellType}
+ * optional string type = 2;
+ * @return {string}
  */
 proto.larp.mw5e.Spell.prototype.getType = function() {
-  return /** @type {!proto.larp.mw5e.SpellType} */ (jspb.Message.getFieldWithDefault(this, 2, 0));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
 };
 
 
 /**
- * @param {!proto.larp.mw5e.SpellType} value
+ * @param {string} value
  * @return {!proto.larp.mw5e.Spell} returns this
  */
 proto.larp.mw5e.Spell.prototype.setType = function(value) {
-  return jspb.Message.setProto3EnumField(this, 2, value);
+  return jspb.Message.setProto3StringField(this, 2, value);
 };
 
 

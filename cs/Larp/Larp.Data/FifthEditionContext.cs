@@ -1,5 +1,4 @@
-﻿using Google.Protobuf;
-using Larp.Data.Services;
+﻿using Larp.Data.Services;
 using Larp.Protos.Mystwood5e;
 using Microsoft.Extensions.Caching.Memory;
 using MongoDB.Bson;
@@ -12,6 +11,7 @@ public class FifthEditionContext
 {
     private readonly LarpDataCache _cache;
     public const string PrefixName = "Mw5e";
+    private const string GameStateCacheName = PrefixName + "." + nameof(GameState);
     
     public FifthEditionContext(IMongoDatabase database, LarpDataCache cache)
     {
@@ -26,22 +26,20 @@ public class FifthEditionContext
 
     public async ValueTask<GameState> GetGameState()
     {
-        if (_cache.TryGetValue(nameof(GameState), out GameState gameState)) 
+        if (_cache.TryGetValue(GameStateCacheName, out GameState gameState)) 
             return gameState;
         
         var bson = await GameStates.Find(FilterDefinition<BsonDocument>.Empty).FirstAsync();
-        gameState = JsonParser.Default.Parse<GameState>(bson.ToJson());
-        _cache.Set(nameof(GameState), gameState);
-        return gameState;
+        return _cache.Set(GameStateCacheName, bson.ToMessage<GameState>());
     }
 
     public async Task SetGameState(GameState gameState)
     {
-        _cache.Set(nameof(GameState), gameState);
+        _cache.Set(GameStateCacheName, gameState);
         
-        var json = JsonFormatter.Default.Format(gameState);
-        var bson = BsonDocument.Parse(json);
-        
-        await GameStates.InsertOneAsync(bson, new InsertOneOptions());
+        await GameStates.ReplaceOneAsync(
+            Builders<BsonDocument>.Filter.Empty,
+            gameState.ToBsonDocument(),
+            new ReplaceOptions { IsUpsert = true});
     }
 }

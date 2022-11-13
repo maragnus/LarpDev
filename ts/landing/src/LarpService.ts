@@ -1,9 +1,9 @@
 import {LarpAuthenticationClient} from "./Protos/larp/AuthorizationServiceClientPb";
-import {grpc} from "@improbable-eng/grpc-web";
 import {
     LarpAdminClient,
     LarpUserClient,
 } from "./Protos/larp/ServicesServiceClientPb";
+import {Mw5eClient} from "./Protos/larp/mw5e/ServicesServiceClientPb";
 
 // eslint-disable-next-line no-restricted-globals
 const host = location.hostname === 'localhost'
@@ -13,3 +13,4 @@ const host = location.hostname === 'localhost'
 export const larpAuthClient = new LarpAuthenticationClient(host, null, null);
 export const larpUserClient = new LarpUserClient(host, null, null);
 export const larpAdminClient = new LarpAdminClient(host, null, null);
+export const larpMw5eClient = new Mw5eClient(host, null, null);

@@ -59,7 +59,7 @@ if (goog.DEBUG && !COMPILED) {
  * @private {!Array<number>}
  * @const
  */
-proto.larp.mw5e.GameState.repeatedFields_ = [1,2,3,4,5,6,7];
+proto.larp.mw5e.GameState.repeatedFields_ = [10,11,12,13,14,15,16,17];
 
 
 
@@ -92,13 +92,17 @@ proto.larp.mw5e.GameState.prototype.toObject = function(opt_includeInstance) {
  */
 proto.larp.mw5e.GameState.toObject = function(includeInstance, msg) {
   var f, obj = {
+    lastUpdated: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    revision: jspb.Message.getFieldWithDefault(msg, 2, ""),
     giftsList: jspb.Message.toObjectList(msg.getGiftsList(),
     larp_mw5e_gifts_pb.Gift.toObject, includeInstance),
     skillsList: jspb.Message.toObjectList(msg.getSkillsList(),
     larp_mw5e_skills_pb.SkillDefinition.toObject, includeInstance),
     occupationsList: jspb.Message.toObjectList(msg.getOccupationsList(),
     larp_mw5e_occupations_pb.Occupation.toObject, includeInstance),
-    vantagesList: jspb.Message.toObjectList(msg.getVantagesList(),
+    advantagesList: jspb.Message.toObjectList(msg.getAdvantagesList(),
+    larp_mw5e_other_pb.Vantage.toObject, includeInstance),
+    disadvantagesList: jspb.Message.toObjectList(msg.getDisadvantagesList(),
     larp_mw5e_other_pb.Vantage.toObject, includeInstance),
     religionsList: jspb.Message.toObjectList(msg.getReligionsList(),
     larp_mw5e_other_pb.Religion.toObject, includeInstance),
@@ -143,36 +147,49 @@ proto.larp.mw5e.GameState.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setLastUpdated(value);
+      break;
+    case 2:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setRevision(value);
+      break;
+    case 10:
       var value = new larp_mw5e_gifts_pb.Gift;
       reader.readMessage(value,larp_mw5e_gifts_pb.Gift.deserializeBinaryFromReader);
       msg.addGifts(value);
       break;
-    case 2:
+    case 11:
       var value = new larp_mw5e_skills_pb.SkillDefinition;
       reader.readMessage(value,larp_mw5e_skills_pb.SkillDefinition.deserializeBinaryFromReader);
       msg.addSkills(value);
       break;
-    case 3:
+    case 12:
       var value = new larp_mw5e_occupations_pb.Occupation;
       reader.readMessage(value,larp_mw5e_occupations_pb.Occupation.deserializeBinaryFromReader);
       msg.addOccupations(value);
       break;
-    case 4:
+    case 13:
       var value = new larp_mw5e_other_pb.Vantage;
       reader.readMessage(value,larp_mw5e_other_pb.Vantage.deserializeBinaryFromReader);
-      msg.addVantages(value);
+      msg.addAdvantages(value);
       break;
-    case 5:
+    case 14:
+      var value = new larp_mw5e_other_pb.Vantage;
+      reader.readMessage(value,larp_mw5e_other_pb.Vantage.deserializeBinaryFromReader);
+      msg.addDisadvantages(value);
+      break;
+    case 15:
       var value = new larp_mw5e_other_pb.Religion;
       reader.readMessage(value,larp_mw5e_other_pb.Religion.deserializeBinaryFromReader);
       msg.addReligions(value);
       break;
-    case 6:
+    case 16:
       var value = new larp_mw5e_other_pb.HomeChapter;
       reader.readMessage(value,larp_mw5e_other_pb.HomeChapter.deserializeBinaryFromReader);
       msg.addHomeChapters(value);
       break;
-    case 7:
+    case 17:
       var value = new larp_mw5e_other_pb.Spell;
       reader.readMessage(value,larp_mw5e_other_pb.Spell.deserializeBinaryFromReader);
       msg.addSpells(value);
@@ -206,10 +223,24 @@ proto.larp.mw5e.GameState.prototype.serializeBinary = function() {
  */
 proto.larp.mw5e.GameState.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
+  f = message.getLastUpdated();
+  if (f.length > 0) {
+    writer.writeString(
+      1,
+      f
+    );
+  }
+  f = message.getRevision();
+  if (f.length > 0) {
+    writer.writeString(
+      2,
+      f
+    );
+  }
   f = message.getGiftsList();
   if (f.length > 0) {
     writer.writeRepeatedMessage(
-      1,
+      10,
       f,
       larp_mw5e_gifts_pb.Gift.serializeBinaryToWriter
     );
@@ -217,7 +248,7 @@ proto.larp.mw5e.GameState.serializeBinaryToWriter = function(message, writer) {
   f = message.getSkillsList();
   if (f.length > 0) {
     writer.writeRepeatedMessage(
-      2,
+      11,
       f,
       larp_mw5e_skills_pb.SkillDefinition.serializeBinaryToWriter
     );
@@ -225,15 +256,23 @@ proto.larp.mw5e.GameState.serializeBinaryToWriter = function(message, writer) {
   f = message.getOccupationsList();
   if (f.length > 0) {
     writer.writeRepeatedMessage(
-      3,
+      12,
       f,
       larp_mw5e_occupations_pb.Occupation.serializeBinaryToWriter
     );
   }
-  f = message.getVantagesList();
+  f = message.getAdvantagesList();
   if (f.length > 0) {
     writer.writeRepeatedMessage(
-      4,
+      13,
+      f,
+      larp_mw5e_other_pb.Vantage.serializeBinaryToWriter
+    );
+  }
+  f = message.getDisadvantagesList();
+  if (f.length > 0) {
+    writer.writeRepeatedMessage(
+      14,
       f,
       larp_mw5e_other_pb.Vantage.serializeBinaryToWriter
     );
@@ -241,7 +280,7 @@ proto.larp.mw5e.GameState.serializeBinaryToWriter = function(message, writer) {
   f = message.getReligionsList();
   if (f.length > 0) {
     writer.writeRepeatedMessage(
-      5,
+      15,
       f,
       larp_mw5e_other_pb.Religion.serializeBinaryToWriter
     );
@@ -249,7 +288,7 @@ proto.larp.mw5e.GameState.serializeBinaryToWriter = function(message, writer) {
   f = message.getHomeChaptersList();
   if (f.length > 0) {
     writer.writeRepeatedMessage(
-      6,
+      16,
       f,
       larp_mw5e_other_pb.HomeChapter.serializeBinaryToWriter
     );
@@ -257,7 +296,7 @@ proto.larp.mw5e.GameState.serializeBinaryToWriter = function(message, writer) {
   f = message.getSpellsList();
   if (f.length > 0) {
     writer.writeRepeatedMessage(
-      7,
+      17,
       f,
       larp_mw5e_other_pb.Spell.serializeBinaryToWriter
     );
@@ -266,12 +305,48 @@ proto.larp.mw5e.GameState.serializeBinaryToWriter = function(message, writer) {
 
 
 /**
- * repeated Gift gifts = 1;
+ * optional string last_updated = 1;
+ * @return {string}
+ */
+proto.larp.mw5e.GameState.prototype.getLastUpdated = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.larp.mw5e.GameState} returns this
+ */
+proto.larp.mw5e.GameState.prototype.setLastUpdated = function(value) {
+  return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional string revision = 2;
+ * @return {string}
+ */
+proto.larp.mw5e.GameState.prototype.getRevision = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.larp.mw5e.GameState} returns this
+ */
+proto.larp.mw5e.GameState.prototype.setRevision = function(value) {
+  return jspb.Message.setProto3StringField(this, 2, value);
+};
+
+
+/**
+ * repeated Gift gifts = 10;
  * @return {!Array<!proto.larp.mw5e.Gift>}
  */
 proto.larp.mw5e.GameState.prototype.getGiftsList = function() {
   return /** @type{!Array<!proto.larp.mw5e.Gift>} */ (
-    jspb.Message.getRepeatedWrapperField(this, larp_mw5e_gifts_pb.Gift, 1));
+    jspb.Message.getRepeatedWrapperField(this, larp_mw5e_gifts_pb.Gift, 10));
 };
 
 
@@ -280,7 +355,7 @@ proto.larp.mw5e.GameState.prototype.getGiftsList = function() {
  * @return {!proto.larp.mw5e.GameState} returns this
 */
 proto.larp.mw5e.GameState.prototype.setGiftsList = function(value) {
-  return jspb.Message.setRepeatedWrapperField(this, 1, value);
+  return jspb.Message.setRepeatedWrapperField(this, 10, value);
 };
 
 
@@ -290,7 +365,7 @@ proto.larp.mw5e.GameState.prototype.setGiftsList = function(value) {
  * @return {!proto.larp.mw5e.Gift}
  */
 proto.larp.mw5e.GameState.prototype.addGifts = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 1, opt_value, proto.larp.mw5e.Gift, opt_index);
+  return jspb.Message.addToRepeatedWrapperField(this, 10, opt_value, proto.larp.mw5e.Gift, opt_index);
 };
 
 
@@ -304,12 +379,12 @@ proto.larp.mw5e.GameState.prototype.clearGiftsList = function() {
 
 
 /**
- * repeated SkillDefinition skills = 2;
+ * repeated SkillDefinition skills = 11;
  * @return {!Array<!proto.larp.mw5e.SkillDefinition>}
  */
 proto.larp.mw5e.GameState.prototype.getSkillsList = function() {
   return /** @type{!Array<!proto.larp.mw5e.SkillDefinition>} */ (
-    jspb.Message.getRepeatedWrapperField(this, larp_mw5e_skills_pb.SkillDefinition, 2));
+    jspb.Message.getRepeatedWrapperField(this, larp_mw5e_skills_pb.SkillDefinition, 11));
 };
 
 
@@ -318,7 +393,7 @@ proto.larp.mw5e.GameState.prototype.getSkillsList = function() {
  * @return {!proto.larp.mw5e.GameState} returns this
 */
 proto.larp.mw5e.GameState.prototype.setSkillsList = function(value) {
-  return jspb.Message.setRepeatedWrapperField(this, 2, value);
+  return jspb.Message.setRepeatedWrapperField(this, 11, value);
 };
 
 
@@ -328,7 +403,7 @@ proto.larp.mw5e.GameState.prototype.setSkillsList = function(value) {
  * @return {!proto.larp.mw5e.SkillDefinition}
  */
 proto.larp.mw5e.GameState.prototype.addSkills = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 2, opt_value, proto.larp.mw5e.SkillDefinition, opt_index);
+  return jspb.Message.addToRepeatedWrapperField(this, 11, opt_value, proto.larp.mw5e.SkillDefinition, opt_index);
 };
 
 
@@ -342,12 +417,12 @@ proto.larp.mw5e.GameState.prototype.clearSkillsList = function() {
 
 
 /**
- * repeated Occupation occupations = 3;
+ * repeated Occupation occupations = 12;
  * @return {!Array<!proto.larp.mw5e.Occupation>}
  */
 proto.larp.mw5e.GameState.prototype.getOccupationsList = function() {
   return /** @type{!Array<!proto.larp.mw5e.Occupation>} */ (
-    jspb.Message.getRepeatedWrapperField(this, larp_mw5e_occupations_pb.Occupation, 3));
+    jspb.Message.getRepeatedWrapperField(this, larp_mw5e_occupations_pb.Occupation, 12));
 };
 
 
@@ -356,7 +431,7 @@ proto.larp.mw5e.GameState.prototype.getOccupationsList = function() {
  * @return {!proto.larp.mw5e.GameState} returns this
 */
 proto.larp.mw5e.GameState.prototype.setOccupationsList = function(value) {
-  return jspb.Message.setRepeatedWrapperField(this, 3, value);
+  return jspb.Message.setRepeatedWrapperField(this, 12, value);
 };
 
 
@@ -366,7 +441,7 @@ proto.larp.mw5e.GameState.prototype.setOccupationsList = function(value) {
  * @return {!proto.larp.mw5e.Occupation}
  */
 proto.larp.mw5e.GameState.prototype.addOccupations = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 3, opt_value, proto.larp.mw5e.Occupation, opt_index);
+  return jspb.Message.addToRepeatedWrapperField(this, 12, opt_value, proto.larp.mw5e.Occupation, opt_index);
 };
 
 
@@ -380,12 +455,12 @@ proto.larp.mw5e.GameState.prototype.clearOccupationsList = function() {
 
 
 /**
- * repeated Vantage vantages = 4;
+ * repeated Vantage advantages = 13;
  * @return {!Array<!proto.larp.mw5e.Vantage>}
  */
-proto.larp.mw5e.GameState.prototype.getVantagesList = function() {
+proto.larp.mw5e.GameState.prototype.getAdvantagesList = function() {
   return /** @type{!Array<!proto.larp.mw5e.Vantage>} */ (
-    jspb.Message.getRepeatedWrapperField(this, larp_mw5e_other_pb.Vantage, 4));
+    jspb.Message.getRepeatedWrapperField(this, larp_mw5e_other_pb.Vantage, 13));
 };
 
 
@@ -393,8 +468,8 @@ proto.larp.mw5e.GameState.prototype.getVantagesList = function() {
  * @param {!Array<!proto.larp.mw5e.Vantage>} value
  * @return {!proto.larp.mw5e.GameState} returns this
 */
-proto.larp.mw5e.GameState.prototype.setVantagesList = function(value) {
-  return jspb.Message.setRepeatedWrapperField(this, 4, value);
+proto.larp.mw5e.GameState.prototype.setAdvantagesList = function(value) {
+  return jspb.Message.setRepeatedWrapperField(this, 13, value);
 };
 
 
@@ -403,8 +478,8 @@ proto.larp.mw5e.GameState.prototype.setVantagesList = function(value) {
  * @param {number=} opt_index
  * @return {!proto.larp.mw5e.Vantage}
  */
-proto.larp.mw5e.GameState.prototype.addVantages = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 4, opt_value, proto.larp.mw5e.Vantage, opt_index);
+proto.larp.mw5e.GameState.prototype.addAdvantages = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 13, opt_value, proto.larp.mw5e.Vantage, opt_index);
 };
 
 
@@ -412,18 +487,56 @@ proto.larp.mw5e.GameState.prototype.addVantages = function(opt_value, opt_index)
  * Clears the list making it empty but non-null.
  * @return {!proto.larp.mw5e.GameState} returns this
  */
-proto.larp.mw5e.GameState.prototype.clearVantagesList = function() {
-  return this.setVantagesList([]);
+proto.larp.mw5e.GameState.prototype.clearAdvantagesList = function() {
+  return this.setAdvantagesList([]);
 };
 
 
 /**
- * repeated Religion religions = 5;
+ * repeated Vantage disadvantages = 14;
+ * @return {!Array<!proto.larp.mw5e.Vantage>}
+ */
+proto.larp.mw5e.GameState.prototype.getDisadvantagesList = function() {
+  return /** @type{!Array<!proto.larp.mw5e.Vantage>} */ (
+    jspb.Message.getRepeatedWrapperField(this, larp_mw5e_other_pb.Vantage, 14));
+};
+
+
+/**
+ * @param {!Array<!proto.larp.mw5e.Vantage>} value
+ * @return {!proto.larp.mw5e.GameState} returns this
+*/
+proto.larp.mw5e.GameState.prototype.setDisadvantagesList = function(value) {
+  return jspb.Message.setRepeatedWrapperField(this, 14, value);
+};
+
+
+/**
+ * @param {!proto.larp.mw5e.Vantage=} opt_value
+ * @param {number=} opt_index
+ * @return {!proto.larp.mw5e.Vantage}
+ */
+proto.larp.mw5e.GameState.prototype.addDisadvantages = function(opt_value, opt_index) {
+  return jspb.Message.addToRepeatedWrapperField(this, 14, opt_value, proto.larp.mw5e.Vantage, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.larp.mw5e.GameState} returns this
+ */
+proto.larp.mw5e.GameState.prototype.clearDisadvantagesList = function() {
+  return this.setDisadvantagesList([]);
+};
+
+
+/**
+ * repeated Religion religions = 15;
  * @return {!Array<!proto.larp.mw5e.Religion>}
  */
 proto.larp.mw5e.GameState.prototype.getReligionsList = function() {
   return /** @type{!Array<!proto.larp.mw5e.Religion>} */ (
-    jspb.Message.getRepeatedWrapperField(this, larp_mw5e_other_pb.Religion, 5));
+    jspb.Message.getRepeatedWrapperField(this, larp_mw5e_other_pb.Religion, 15));
 };
 
 
@@ -432,7 +545,7 @@ proto.larp.mw5e.GameState.prototype.getReligionsList = function() {
  * @return {!proto.larp.mw5e.GameState} returns this
 */
 proto.larp.mw5e.GameState.prototype.setReligionsList = function(value) {
-  return jspb.Message.setRepeatedWrapperField(this, 5, value);
+  return jspb.Message.setRepeatedWrapperField(this, 15, value);
 };
 
 
@@ -442,7 +555,7 @@ proto.larp.mw5e.GameState.prototype.setReligionsList = function(value) {
  * @return {!proto.larp.mw5e.Religion}
  */
 proto.larp.mw5e.GameState.prototype.addReligions = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 5, opt_value, proto.larp.mw5e.Religion, opt_index);
+  return jspb.Message.addToRepeatedWrapperField(this, 15, opt_value, proto.larp.mw5e.Religion, opt_index);
 };
 
 
@@ -456,12 +569,12 @@ proto.larp.mw5e.GameState.prototype.clearReligionsList = function() {
 
 
 /**
- * repeated HomeChapter home_chapters = 6;
+ * repeated HomeChapter home_chapters = 16;
  * @return {!Array<!proto.larp.mw5e.HomeChapter>}
  */
 proto.larp.mw5e.GameState.prototype.getHomeChaptersList = function() {
   return /** @type{!Array<!proto.larp.mw5e.HomeChapter>} */ (
-    jspb.Message.getRepeatedWrapperField(this, larp_mw5e_other_pb.HomeChapter, 6));
+    jspb.Message.getRepeatedWrapperField(this, larp_mw5e_other_pb.HomeChapter, 16));
 };
 
 
@@ -470,7 +583,7 @@ proto.larp.mw5e.GameState.prototype.getHomeChaptersList = function() {
  * @return {!proto.larp.mw5e.GameState} returns this
 */
 proto.larp.mw5e.GameState.prototype.setHomeChaptersList = function(value) {
-  return jspb.Message.setRepeatedWrapperField(this, 6, value);
+  return jspb.Message.setRepeatedWrapperField(this, 16, value);
 };
 
 
@@ -480,7 +593,7 @@ proto.larp.mw5e.GameState.prototype.setHomeChaptersList = function(value) {
  * @return {!proto.larp.mw5e.HomeChapter}
  */
 proto.larp.mw5e.GameState.prototype.addHomeChapters = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 6, opt_value, proto.larp.mw5e.HomeChapter, opt_index);
+  return jspb.Message.addToRepeatedWrapperField(this, 16, opt_value, proto.larp.mw5e.HomeChapter, opt_index);
 };
 
 
@@ -494,12 +607,12 @@ proto.larp.mw5e.GameState.prototype.clearHomeChaptersList = function() {
 
 
 /**
- * repeated Spell spells = 7;
+ * repeated Spell spells = 17;
  * @return {!Array<!proto.larp.mw5e.Spell>}
  */
 proto.larp.mw5e.GameState.prototype.getSpellsList = function() {
   return /** @type{!Array<!proto.larp.mw5e.Spell>} */ (
-    jspb.Message.getRepeatedWrapperField(this, larp_mw5e_other_pb.Spell, 7));
+    jspb.Message.getRepeatedWrapperField(this, larp_mw5e_other_pb.Spell, 17));
 };
 
 
@@ -508,7 +621,7 @@ proto.larp.mw5e.GameState.prototype.getSpellsList = function() {
  * @return {!proto.larp.mw5e.GameState} returns this
 */
 proto.larp.mw5e.GameState.prototype.setSpellsList = function(value) {
-  return jspb.Message.setRepeatedWrapperField(this, 7, value);
+  return jspb.Message.setRepeatedWrapperField(this, 17, value);
 };
 
 
@@ -518,7 +631,7 @@ proto.larp.mw5e.GameState.prototype.setSpellsList = function(value) {
  * @return {!proto.larp.mw5e.Spell}
  */
 proto.larp.mw5e.GameState.prototype.addSpells = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 7, opt_value, proto.larp.mw5e.Spell, opt_index);
+  return jspb.Message.addToRepeatedWrapperField(this, 17, opt_value, proto.larp.mw5e.Spell, opt_index);
 };
 
 

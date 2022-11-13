@@ -10,6 +10,12 @@
         <Protobuf Include="../../../proto/**/*.proto" GrpcServices="Server" ProtoRoot="../../../proto/">
             <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
         </Protobuf>
+        <Protobuf Update="..\..\..\proto\larp\mw5e\services.proto">
+          <Access>Public</Access>
+          <ProtoCompile>True</ProtoCompile>
+          <CompileOutputs>True</CompileOutputs>
+          <OutputDir>obj\Debug\net6.0\</OutputDir>
+        </Protobuf>
     </ItemGroup>
 
     <ItemGroup>
@@ -18,6 +24,7 @@
 
     <ItemGroup>
       <Folder Include="larp" />
+      <Folder Include="larp\mw5e" />
     </ItemGroup>
     
 </Project>

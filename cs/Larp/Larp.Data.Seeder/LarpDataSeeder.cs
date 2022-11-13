@@ -38,7 +38,8 @@ public class LarpDataSeeder
 
         var gameState = new GameState
         {
-            LastUpdated = _clock.UtcNow.ToString("O")
+            LastUpdated = _clock.UtcNow.ToString("O"),
+            Revision = Guid.NewGuid().ToString("N")
         };
         
         await ImportData(() => gameState.Advantages);

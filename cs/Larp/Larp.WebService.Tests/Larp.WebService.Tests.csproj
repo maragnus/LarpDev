@@ -17,7 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Larp.Data.TextFixture\Larp.Data.TextFixture.csproj" />
+      <ProjectReference Include="..\Larp.Data.TestFixture\Larp.Data.TestFixture.csproj" />
       <ProjectReference Include="..\Larp.WebService\Larp.WebService.csproj" />
     </ItemGroup>
 
