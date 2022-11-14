@@ -50,8 +50,8 @@ export default class LandingNavigation extends React.Component<any, any> {
 
         if (this.state.isAdmin) {
             items.push(<BottomNavigationAction key={4} label="Players" icon={<PersonOutline/>} to="/players/search" component={NavLink}/>);
-        } else {
-            items.push(<BottomNavigationAction key={5} label="Skills" icon={<BookOutlined/>} to="/skills" component={NavLink}/>);
+        } else if (false) {
+            items.push(<BottomNavigationAction key={5} label="Clarify" icon={<BookOutlined/>} to="/clarify" component={NavLink}/>);
         }
 
         return (

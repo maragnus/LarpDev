@@ -3,7 +3,7 @@ using Grpc.Core;
 using Grpc.Core.Interceptors;
 using Larp.Data.Services;
 
-namespace Larp.WebService;
+namespace Larp.WebService.GrpcServices;
 
 class AuthInterceptor : Interceptor
 {

@@ -1,7 +1,6 @@
-﻿using Larp.Data;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 
-namespace Larp.WebService.Tests;
+namespace Larp.Data.TestFixture;
 
 public class TestDataHelper
 {
@@ -12,16 +11,23 @@ public class TestDataHelper
         _context = context;
     }
 
-    public async Task AddAccount(string name, string email, DateTimeOffset created)
+    public async Task<string> AddAccount(string name, string email, DateTimeOffset created)
     {
         var account = new Data.Account()
         {
             AccountId = ObjectId.GenerateNewId().ToString(),
             Name = name,
-            Emails = { new Data.AccountEmail() { Email = email, IsVerified = true } },
+            Emails = { new Data.AccountEmail()
+            {
+                Email = email,
+                NormalizedEmail = email.ToLowerInvariant(),
+                IsVerified = true
+            } },
             Created = created
         };
 
         await _context.Accounts.InsertOneAsync(account);
+
+        return account.AccountId;
     }
 }

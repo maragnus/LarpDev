@@ -23,7 +23,7 @@ message SkillDefinition  {
     string title = 2;
     string class = 3;
     string purchasable = 4;
-    optional int32 ranksPerPurchase = 5;
-    optional int32 costPerPurchase = 6;
+    optional int32 ranks_per_purchase = 5;
+    optional int32 cost_per_purchase = 6;
     repeated string iterations = 7;
 };

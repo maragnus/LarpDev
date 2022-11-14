@@ -2,6 +2,7 @@ using System.Security.Authentication;
 using Google.Protobuf.Collections;
 using Grpc.Core;
 using Larp.Data;
+using Larp.Data.Services;
 using Larp.Protos;
 using Larp.Protos.Services;
 using Account = Larp.Data.Account;
@@ -17,39 +18,68 @@ public static class ServerCallContextExtensions
             throw new AuthenticationException("Account is invalid");
         return account;
     }
+    
+    public static string GetAccountId(this ServerCallContext context)
+    {
+        if (context.UserState["Account"] is not Account account)
+            throw new AuthenticationException("Account is invalid");
+        return account.AccountId;
+    }
+}
+
+public class ResponseException : Exception
+{
+    public ResponseException(string message) : base(message) { }
+    public ResponseException(string message, Exception innerException) :base(message, innerException) {}
 }
 
 public class UserGrpcService : LarpUser.LarpUserBase
 {
     private readonly LarpContext _larpContext;
+    private readonly IUserSessionManager _userSessionManager;
 
-    public UserGrpcService(LarpContext larpContext)
+    public UserGrpcService(LarpContext larpContext, IUserSessionManager userSessionManager)
     {
         _larpContext = larpContext;
+        _userSessionManager = userSessionManager;
     }
-    
-    public override Task<AccountResponse> GetAccount(Empty request, ServerCallContext context)
+
+    public override async Task<AccountResponse> AddEmail(StringRequest request, ServerCallContext context)
     {
-        var account = context.GetAccount();
+        var accountId = context.GetAccountId();
+        await _userSessionManager.AddEmailAddress(accountId, request.Value);
+        return await GetAccountResponse(accountId);
+    }
 
-        var emails = account.Emails.Select(e => new Protos.AccountEmail()
-        {
-            Email = e.Email,
-            IsPreferred = e.IsPreferred,
-            IsVerified = e.IsVerified
-        });
+    public override async Task<AccountResponse> PreferEmail(StringRequest request, ServerCallContext context)
+    {
+        var accountId = context.GetAccountId();
+        await _userSessionManager.PreferEmailAddress(accountId, request.Value);
+        return await GetAccountResponse(accountId);
+    }
 
-        var result = new Protos.Account()
+    public override async Task<AccountResponse> RemoveEmail(StringRequest request, ServerCallContext context)
+    {
+        var accountId = context.GetAccountId();
+        await _userSessionManager.RemoveEmailAddress(accountId, request.Value);
+        return await GetAccountResponse(accountId);
+    }
+
+    private async Task<AccountResponse> GetAccountResponse(string accountId)
+    {
+        var account = await _userSessionManager.GetUserAccount(accountId);
+        return new AccountResponse
         {
-            AccountId = account.AccountId,
-            Created = account.Created.ToString("O"),
-            Location = account.Location ?? "",
-            Name = account.Name ?? "",
-            Phone = account.Phone ?? ""
+            Account = account.ToProto()
         };
-        result.Emails.AddRange(emails);
-        
-        return Task.FromResult(new AccountResponse() { Account = result });
+    }
+
+    public override Task<AccountResponse> GetAuthenticatedAccount(Empty request, ServerCallContext context)
+    {
+        return Task.FromResult(new AccountResponse()
+        {
+            Account = context.GetAccount().ToProto()
+        });
     }
 }
 

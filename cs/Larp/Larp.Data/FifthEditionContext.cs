@@ -2,7 +2,6 @@
 using Larp.Protos.Mystwood5e;
 using Microsoft.Extensions.Caching.Memory;
 using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 
 namespace Larp.Data;
@@ -20,9 +19,9 @@ public class FifthEditionContext
         GameStates = database.GetCollection<BsonDocument>($"{PrefixName}.{nameof(GameStates)}");
     }
 
-    public IMongoCollection<BsonDocument> GameStates { get; set; }
+    public IMongoCollection<BsonDocument> GameStates { get; }
 
-    public IMongoCollection<Character> Characters { get; set; }
+    public IMongoCollection<Character> Characters { get; }
 
     public async ValueTask<GameState> GetGameState()
     {

@@ -88,8 +88,8 @@ proto.larp.mw5e.SkillDefinition.toObject = function(includeInstance, msg) {
     title: jspb.Message.getFieldWithDefault(msg, 2, ""),
     pb_class: jspb.Message.getFieldWithDefault(msg, 3, ""),
     purchasable: jspb.Message.getFieldWithDefault(msg, 4, ""),
-    ranksperpurchase: jspb.Message.getFieldWithDefault(msg, 5, 0),
-    costperpurchase: jspb.Message.getFieldWithDefault(msg, 6, 0),
+    ranksPerPurchase: jspb.Message.getFieldWithDefault(msg, 5, 0),
+    costPerPurchase: jspb.Message.getFieldWithDefault(msg, 6, 0),
     iterationsList: (f = jspb.Message.getRepeatedField(msg, 7)) == null ? undefined : f
   };
 
@@ -145,11 +145,11 @@ proto.larp.mw5e.SkillDefinition.deserializeBinaryFromReader = function(msg, read
       break;
     case 5:
       var value = /** @type {number} */ (reader.readInt32());
-      msg.setRanksperpurchase(value);
+      msg.setRanksPerPurchase(value);
       break;
     case 6:
       var value = /** @type {number} */ (reader.readInt32());
-      msg.setCostperpurchase(value);
+      msg.setCostPerPurchase(value);
       break;
     case 7:
       var value = /** @type {string} */ (reader.readString());
@@ -309,10 +309,10 @@ proto.larp.mw5e.SkillDefinition.prototype.setPurchasable = function(value) {
 
 
 /**
- * optional int32 ranksPerPurchase = 5;
+ * optional int32 ranks_per_purchase = 5;
  * @return {number}
  */
-proto.larp.mw5e.SkillDefinition.prototype.getRanksperpurchase = function() {
+proto.larp.mw5e.SkillDefinition.prototype.getRanksPerPurchase = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 5, 0));
 };
 
@@ -321,7 +321,7 @@ proto.larp.mw5e.SkillDefinition.prototype.getRanksperpurchase = function() {
  * @param {number} value
  * @return {!proto.larp.mw5e.SkillDefinition} returns this
  */
-proto.larp.mw5e.SkillDefinition.prototype.setRanksperpurchase = function(value) {
+proto.larp.mw5e.SkillDefinition.prototype.setRanksPerPurchase = function(value) {
   return jspb.Message.setField(this, 5, value);
 };
 
@@ -330,7 +330,7 @@ proto.larp.mw5e.SkillDefinition.prototype.setRanksperpurchase = function(value) 
  * Clears the field making it undefined.
  * @return {!proto.larp.mw5e.SkillDefinition} returns this
  */
-proto.larp.mw5e.SkillDefinition.prototype.clearRanksperpurchase = function() {
+proto.larp.mw5e.SkillDefinition.prototype.clearRanksPerPurchase = function() {
   return jspb.Message.setField(this, 5, undefined);
 };
 
@@ -339,16 +339,16 @@ proto.larp.mw5e.SkillDefinition.prototype.clearRanksperpurchase = function() {
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.larp.mw5e.SkillDefinition.prototype.hasRanksperpurchase = function() {
+proto.larp.mw5e.SkillDefinition.prototype.hasRanksPerPurchase = function() {
   return jspb.Message.getField(this, 5) != null;
 };
 
 
 /**
- * optional int32 costPerPurchase = 6;
+ * optional int32 cost_per_purchase = 6;
  * @return {number}
  */
-proto.larp.mw5e.SkillDefinition.prototype.getCostperpurchase = function() {
+proto.larp.mw5e.SkillDefinition.prototype.getCostPerPurchase = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 6, 0));
 };
 
@@ -357,7 +357,7 @@ proto.larp.mw5e.SkillDefinition.prototype.getCostperpurchase = function() {
  * @param {number} value
  * @return {!proto.larp.mw5e.SkillDefinition} returns this
  */
-proto.larp.mw5e.SkillDefinition.prototype.setCostperpurchase = function(value) {
+proto.larp.mw5e.SkillDefinition.prototype.setCostPerPurchase = function(value) {
   return jspb.Message.setField(this, 6, value);
 };
 
@@ -366,7 +366,7 @@ proto.larp.mw5e.SkillDefinition.prototype.setCostperpurchase = function(value) {
  * Clears the field making it undefined.
  * @return {!proto.larp.mw5e.SkillDefinition} returns this
  */
-proto.larp.mw5e.SkillDefinition.prototype.clearCostperpurchase = function() {
+proto.larp.mw5e.SkillDefinition.prototype.clearCostPerPurchase = function() {
   return jspb.Message.setField(this, 6, undefined);
 };
 
@@ -375,7 +375,7 @@ proto.larp.mw5e.SkillDefinition.prototype.clearCostperpurchase = function() {
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.larp.mw5e.SkillDefinition.prototype.hasCostperpurchase = function() {
+proto.larp.mw5e.SkillDefinition.prototype.hasCostPerPurchase = function() {
   return jspb.Message.getField(this, 6) != null;
 };
 

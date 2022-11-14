@@ -14,11 +14,34 @@ public class Account
     public bool IsSuperAdmin { get; set; }
     public string? Notes { get; set; }
     public DateTimeOffset Created { get; set; }
+
+    public Protos.Account ToProto()
+    {
+        var emails = Emails.Select(e => new Protos.AccountEmail()
+        {
+            Email = e.Email,
+            IsPreferred = e.IsPreferred,
+            IsVerified = e.IsVerified
+        });
+
+        var result = new Protos.Account()
+        {
+            AccountId = AccountId,
+            Created = Created.ToString("O"),
+            Location = Location ?? "",
+            Name = Name ?? "",
+            Phone = Phone ?? ""
+        };
+        result.Emails.AddRange(emails);
+        
+        return result;
+    }
 }
 
 public class AccountEmail
 {
     public string Email { get; set; } = null!;
+    public string NormalizedEmail { get; set; } = null!;
     public bool IsVerified { get; set; }
     public bool IsPreferred { get; set; }
 }

@@ -15,15 +15,15 @@ export class SkillDefinition extends jspb.Message {
   getPurchasable(): string;
   setPurchasable(value: string): SkillDefinition;
 
-  getRanksperpurchase(): number;
-  setRanksperpurchase(value: number): SkillDefinition;
-  hasRanksperpurchase(): boolean;
-  clearRanksperpurchase(): SkillDefinition;
+  getRanksPerPurchase(): number;
+  setRanksPerPurchase(value: number): SkillDefinition;
+  hasRanksPerPurchase(): boolean;
+  clearRanksPerPurchase(): SkillDefinition;
 
-  getCostperpurchase(): number;
-  setCostperpurchase(value: number): SkillDefinition;
-  hasCostperpurchase(): boolean;
-  clearCostperpurchase(): SkillDefinition;
+  getCostPerPurchase(): number;
+  setCostPerPurchase(value: number): SkillDefinition;
+  hasCostPerPurchase(): boolean;
+  clearCostPerPurchase(): SkillDefinition;
 
   getIterationsList(): Array<string>;
   setIterationsList(value: Array<string>): SkillDefinition;
@@ -44,19 +44,19 @@ export namespace SkillDefinition {
     title: string,
     pb_class: string,
     purchasable: string,
-    ranksperpurchase?: number,
-    costperpurchase?: number,
+    ranksPerPurchase?: number,
+    costPerPurchase?: number,
     iterationsList: Array<string>,
   }
 
-  export enum RanksperpurchaseCase { 
-    _RANKSPERPURCHASE_NOT_SET = 0,
-    RANKSPERPURCHASE = 5,
+  export enum RanksPerPurchaseCase { 
+    _RANKS_PER_PURCHASE_NOT_SET = 0,
+    RANKS_PER_PURCHASE = 5,
   }
 
-  export enum CostperpurchaseCase { 
-    _COSTPERPURCHASE_NOT_SET = 0,
-    COSTPERPURCHASE = 6,
+  export enum CostPerPurchaseCase { 
+    _COST_PER_PURCHASE_NOT_SET = 0,
+    COST_PER_PURCHASE = 6,
   }
 }
 

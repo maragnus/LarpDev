@@ -25,8 +25,7 @@
     "name": "Apprenticeship",
     "title": "Apprenticeship",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Armor Repair",
@@ -54,8 +53,7 @@
     "name": "Artistry",
     "title": "Artistry",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Bardic Magic",
@@ -76,15 +74,13 @@
     "name": "Basic Weaponry",
     "title": "Basic Weaponry",
     "class": "Free",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Battle Rage",
     "title": "Battle Rage",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Battlemage",
@@ -97,8 +93,7 @@
     "name": "Begging",
     "title": "Begging",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Beloved of the Forest",
@@ -111,8 +106,7 @@
     "name": "Bestow Favor",
     "title": "Bestow Favor",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Blessed",
@@ -147,8 +141,7 @@
     "name": "Carry Wounded",
     "title": "Carry Wounded",
     "class": "Free",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Commerce",
@@ -211,8 +204,7 @@
     "name": "Drinks on the House",
     "title": "Drinks on the House",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Duelist",
@@ -260,15 +252,13 @@
     "name": "Fence",
     "title": "Fence",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Flee",
     "title": "Flee",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Fortune Telling",
@@ -295,8 +285,7 @@
     "name": "Guild Wages",
     "title": "Guild Wages",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Hagsblood",
@@ -443,8 +432,7 @@
     "name": "Literacy",
     "title": "Literacy",
     "class": "Free",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Livery",
@@ -457,8 +445,7 @@
     "name": "Loremaster",
     "title": "Loremaster",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Mage Lore",
@@ -471,22 +458,19 @@
     "name": "Master Entertainer",
     "title": "Master Entertainer",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Masterwork",
     "title": "Masterwork",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Medicine",
     "title": "Medicine",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Metalworking",
@@ -507,8 +491,7 @@
     "name": "Occupational Spells",
     "title": "Occupational Spells",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Pathfinding",
@@ -521,8 +504,7 @@
     "name": "Patronage",
     "title": "Patronage X",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Poisoner",
@@ -543,99 +525,85 @@
     "name": "Production (Cloth)",
     "title": "Production X (Cloth)",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Production (Food)",
     "title": "Production X (Food)",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Production (Metal)",
     "title": "Production X (Metal)",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Production (Parchment)",
     "title": "Production X (Parchment)",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Production (Wood)",
     "title": "Production X (Wood)",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Production (Air)",
     "title": "Production X (Air)",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Production (Earth)",
     "title": "Production X (Earth)",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Production (Fire)",
     "title": "Production X (Fire)",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Production (Water)",
     "title": "Production X (Water)",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Production (Chaos)",
     "title": "Production X (Chaos)",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Production (Death)",
     "title": "Production X (Death)",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Production (Life)",
     "title": "Production X (Life)",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Production (Time)",
     "title": "Production X (Time)",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Quick Learner",
     "title": "Quick Learner",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Religious Ceremony",
@@ -648,8 +616,7 @@
     "name": "Research",
     "title": "Research",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Retainers",
@@ -663,8 +630,7 @@
     "name": "Room for More",
     "title": "Room for More",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Scavenging",
@@ -685,8 +651,7 @@
     "name": "Sell Drinks",
     "title": "Sell Drinks",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Serene Contemplation",
@@ -721,8 +686,7 @@
     "name": "Slayer (Type)",
     "title": "Slayer (Type)",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Standard Bearer",
@@ -749,8 +713,7 @@
     "name": "Swarm Magic",
     "title": "Swarm Magic",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Tarot Mortis Punchinello",
@@ -770,15 +733,13 @@
     "name": "Tavern Share",
     "title": "Tavern Share",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Tinkering",
     "title": "Tinkering",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   },
   {
     "name": "Toughness",
@@ -1122,7 +1083,6 @@
     "name": "Work Rhythm",
     "title": "Work Rhythm",
     "class": "Unavailable",
-    "purchasable": "Unavailable",
-    "costPerPurchase": null
+    "purchasable": "Unavailable"
   }
 ]

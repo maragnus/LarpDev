@@ -3,11 +3,10 @@ using Larp.Data.Services;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Mongo2Go;
 
-namespace Larp.Data.TextFixture;
+namespace Larp.Data.TestFixture;
 
 public class LarpDataTestFixture : IDisposable
 {
