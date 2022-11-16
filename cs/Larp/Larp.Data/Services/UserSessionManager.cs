@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
@@ -36,9 +35,10 @@ public interface IUserSessionManager
 
 public class UserSessionManager : IUserSessionManager
 {
-    private readonly LarpContext _larpContext;
+    private static readonly SemaphoreSlim TokenLock = new(1);
     private readonly LarpDataCache _cache;
     private readonly ISystemClock _clock;
+    private readonly LarpContext _larpContext;
     private readonly UserSessionManagerOptions _options;
     private readonly SemaphoreSlim _semaphore = new(1);
 
@@ -50,29 +50,6 @@ public class UserSessionManager : IUserSessionManager
         _clock = clock;
         _options = options.Value;
     }
-
-    private static string RandomReadableString(int length)
-    {
-        const string chars = "23456789CEFHKLPTX"; // Most readable characters
-        var token = new char[length];
-        for (var i = 0; i < length; i++)
-            token[i] = chars[Random.Shared.Next(0, chars.Length)];
-        return new string(token);
-    }
-
-    private async Task<string> GetUnusedToken()
-    {
-        while (true)
-        {
-            var token = RandomReadableString(_options.TokenLength);
-            // Make sure we always have a unique token
-            var isUsed = await _larpContext.Sessions.Find(x => x.Token == token).AnyAsync();
-            if (isUsed) continue;
-            return token;
-        }
-    }
-
-    private static readonly SemaphoreSlim TokenLock = new(1);
 
     public async Task<string> GenerateToken(string accountId, string email, string deviceId)
     {
@@ -141,23 +118,23 @@ public class UserSessionManager : IUserSessionManager
     {
         var normalizedEmail = email.ToLowerInvariant();
 
+        var accountFilter = Builders<Account>.Filter;
+
         // Unset previously preferred email
         {
-            var accountFilter = Builders<Account>.Filter.And(
-                Builders<Account>.Filter.Eq(x => x.AccountId, accountId),
-                Builders<Account>.Filter.ElemMatch(x => x.Emails,
-                    x => x.NormalizedEmail == normalizedEmail && x.IsPreferred));
-            var accountUpdate = Builders<Account>.Update.Set(x => x.Emails[-1].IsPreferred, false);
-            await _larpContext.Accounts.UpdateOneAsync(accountFilter, accountUpdate);
+            var filter = accountFilter.Eq(x => x.AccountId, accountId)
+                         & accountFilter.ElemMatch(x => x.Emails,
+                             x => x.NormalizedEmail != normalizedEmail && x.IsPreferred);
+            var update = Builders<Account>.Update.Set(x => x.Emails[-1].IsPreferred, false);
+            await _larpContext.Accounts.UpdateOneAsync(filter, update);
         }
 
         // Set newly preferred email
         {
-            var accountFilter = Builders<Account>.Filter.And(
-                Builders<Account>.Filter.Eq(x => x.AccountId, accountId),
-                Builders<Account>.Filter.ElemMatch(x => x.Emails, x => x.NormalizedEmail == normalizedEmail));
-            var accountUpdate = Builders<Account>.Update.Set(x => x.Emails[-1].IsPreferred, true);
-            await _larpContext.Accounts.UpdateOneAsync(accountFilter, accountUpdate);
+            var filter = accountFilter.Eq(x => x.AccountId, accountId)
+                         & accountFilter.ElemMatch(x => x.Emails, x => x.NormalizedEmail == normalizedEmail);
+            var update = Builders<Account>.Update.Set(x => x.Emails[-1].IsPreferred, true);
+            await _larpContext.Accounts.UpdateOneAsync(filter, update);
         }
 
         UserAccountChanged(accountId);
@@ -297,5 +274,26 @@ public class UserSessionManager : IUserSessionManager
         }
 
         return new UserSessionValidationResult(UserSessionValidationResultStatusCode.NotConfirmed);
+    }
+
+    private static string RandomReadableString(int length)
+    {
+        const string chars = "23456789CEFHKLPTX"; // Most readable characters
+        var token = new char[length];
+        for (var i = 0; i < length; i++)
+            token[i] = chars[Random.Shared.Next(0, chars.Length)];
+        return new string(token);
+    }
+
+    private async Task<string> GetUnusedToken()
+    {
+        while (true)
+        {
+            var token = RandomReadableString(_options.TokenLength);
+            // Make sure we always have a unique token
+            var isUsed = await _larpContext.Sessions.Find(x => x.Token == token).AnyAsync();
+            if (isUsed) continue;
+            return token;
+        }
     }
 }

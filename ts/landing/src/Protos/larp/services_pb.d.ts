@@ -1,7 +1,6 @@
 import * as jspb from 'google-protobuf'
 
 import * as larp_accounts_pb from '../larp/accounts_pb';
-import * as larp_common_pb from '../larp/common_pb';
 import * as larp_events_pb from '../larp/events_pb';
 
 
@@ -133,25 +132,105 @@ export namespace EventRsvpRequest {
   export type AsObject = {
     eventId: string,
     characterId?: string,
-    rsvp: larp_events_pb.EventRsvp,
-    componentsList: Array<EventComponentRsvp.AsObject>,
+      rsvp: larp_events_pb.EventRsvp,
+      componentsList: Array<EventComponentRsvp.AsObject>,
   }
 
-  export enum CharacterIdCase { 
-    _CHARACTER_ID_NOT_SET = 0,
-    CHARACTER_ID = 2,
-  }
+    export enum CharacterIdCase {
+        _CHARACTER_ID_NOT_SET = 0,
+        CHARACTER_ID = 2,
+    }
+}
+
+export class UpdateProfileRequest extends jspb.Message {
+    static toObject(includeInstance: boolean, msg: UpdateProfileRequest): UpdateProfileRequest.AsObject;
+
+    static serializeBinaryToWriter(message: UpdateProfileRequest, writer: jspb.BinaryWriter): void;
+
+    static deserializeBinary(bytes: Uint8Array): UpdateProfileRequest;
+
+    static deserializeBinaryFromReader(message: UpdateProfileRequest, reader: jspb.BinaryReader): UpdateProfileRequest;
+
+    getName(): string;
+
+    setName(value: string): UpdateProfileRequest;
+
+    hasName(): boolean;
+
+    clearName(): UpdateProfileRequest;
+
+    getPhone(): string;
+
+    setPhone(value: string): UpdateProfileRequest;
+
+    hasPhone(): boolean;
+
+    clearPhone(): UpdateProfileRequest;
+
+    getLocation(): string;
+
+    setLocation(value: string): UpdateProfileRequest;
+
+    hasLocation(): boolean;
+
+    clearLocation(): UpdateProfileRequest;
+
+    getNotes(): string;
+
+    setNotes(value: string): UpdateProfileRequest;
+
+    hasNotes(): boolean;
+
+    clearNotes(): UpdateProfileRequest;
+
+    serializeBinary(): Uint8Array;
+
+    toObject(includeInstance?: boolean): UpdateProfileRequest.AsObject;
+}
+
+export namespace UpdateProfileRequest {
+    export type AsObject = {
+        name?: string,
+        phone?: string,
+        location?: string,
+        notes?: string,
+    }
+
+    export enum NameCase {
+        _NAME_NOT_SET = 0,
+        NAME = 1,
+    }
+
+    export enum PhoneCase {
+        _PHONE_NOT_SET = 0,
+        PHONE = 2,
+    }
+
+    export enum LocationCase {
+        _LOCATION_NOT_SET = 0,
+        LOCATION = 3,
+    }
+
+    export enum NotesCase {
+        _NOTES_NOT_SET = 0,
+        NOTES = 4,
+    }
 }
 
 export class AccountRequest extends jspb.Message {
-  getAccount(): larp_accounts_pb.Account | undefined;
-  setAccount(value?: larp_accounts_pb.Account): AccountRequest;
-  hasAccount(): boolean;
-  clearAccount(): AccountRequest;
+    static toObject(includeInstance: boolean, msg: AccountRequest): AccountRequest.AsObject;
 
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): AccountRequest.AsObject;
-  static toObject(includeInstance: boolean, msg: AccountRequest): AccountRequest.AsObject;
+    getAccount(): larp_accounts_pb.Account | undefined;
+
+    setAccount(value?: larp_accounts_pb.Account): AccountRequest;
+
+    hasAccount(): boolean;
+
+    clearAccount(): AccountRequest;
+
+    serializeBinary(): Uint8Array;
+
+    toObject(includeInstance?: boolean): AccountRequest.AsObject;
   static serializeBinaryToWriter(message: AccountRequest, writer: jspb.BinaryWriter): void;
   static deserializeBinary(bytes: Uint8Array): AccountRequest;
   static deserializeBinaryFromReader(message: AccountRequest, reader: jspb.BinaryReader): AccountRequest;

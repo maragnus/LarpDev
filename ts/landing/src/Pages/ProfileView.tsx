@@ -1,21 +1,25 @@
 import * as React from "react";
 import {
+    Alert,
+    AlertTitle,
     Box,
-    Tabs,
-    Tab,
-    Typography,
-    Container,
     Button,
+    Container,
+    IconButton,
     List,
     ListItem,
-    IconButton,
+    ListItemIcon,
     ListItemText,
-    Alert, AlertTitle
+    Tab,
+    Tabs,
+    Typography
 } from "@mui/material";
 import sessionService from "../SessionService";
 import {useNavigate} from "react-router-dom";
 import TextField from "@mui/material/TextField";
 import DeleteIcon from '@mui/icons-material/Delete';
+import StarIcon from '@mui/icons-material/Star';
+import StarOutlineIcon from '@mui/icons-material/StarOutline';
 import {BusyButton} from "../Common/BusyButton";
 import {useMountEffect} from "./UseMountEffect";
 import AwesomeSpinner from "../Common/AwesomeSpinner";
@@ -48,12 +52,14 @@ function tabProps(index: number) {
     };
 }
 
-/*
-function EditProfile() {
-    const [busy, setBusy] = React.useState(false);
-    const [profile, setProfile] = React.useState(new Account().toObject);
+interface AccountProps {
+    account: Account.AsObject
+    updateAccount: (account: Account.AsObject) => any;
+}
 
-    //let profile = await sessionService.getAccount();
+function EditProfile(props: AccountProps) {
+    const [busy, setBusy] = React.useState(false);
+
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
@@ -62,16 +68,15 @@ function EditProfile() {
         let name: string = (data.get('name') as string ?? "").trim();
         let location: string = (data.get('location') as string ?? "").trim();
         let phone: string = (data.get('phone') as string ?? "").trim();
+        let notes: string = (data.get('notes') as string ?? "").trim();
 
         try {
-            //await sessionService.setName(name);
-            //await sessionService.setLocation(location);
-            //await sessionService.setPhone(phone);
+            const newAccount = await sessionService.setProfile(name, location, phone, notes);
+            props.updateAccount(newAccount);
         } catch (e: any) {
             alert(e);
         } finally {
             setBusy(false);
-            //profile = await sessionService.getAccount();
         }
     }
 
@@ -85,7 +90,7 @@ function EditProfile() {
                 label="Full Name"
                 name="name"
                 autoComplete="name"
-                defaultValue={profile.name}
+                defaultValue={props.account.name}
             />
             <TextField
                 margin="normal"
@@ -95,7 +100,7 @@ function EditProfile() {
                 label="Location"
                 name="location"
                 autoComplete="street-address"
-                defaultValue={profile.location}
+                defaultValue={props.account.location}
             />
             <TextField
                 margin="normal"
@@ -105,7 +110,15 @@ function EditProfile() {
                 label="Phone Number"
                 name="phone"
                 autoComplete="tel"
-                defaultValue={profile.phone}
+                defaultValue={props.account.phone}
+            />
+            <TextField
+                margin="normal"
+                fullWidth
+                id="notes"
+                label="Notes"
+                name="notes"
+                defaultValue={props.account.notes}
             />
 
             <BusyButton label="Save" busy={busy} sx={{mt: 3, mb: 2}}/>
@@ -113,21 +126,29 @@ function EditProfile() {
     );
 }
 
-
-function EditEmail() {
+function EditEmail(props: AccountProps) {
     const [busy, setBusy] = React.useState(false);
-    const [profile, setProfile] = React.useState(new Account().toObject);
 
     async function remove(email: string) {
         setBusy(true);
         try {
-            //await sessionService.removeEmail(email);
+            props.updateAccount(await sessionService.removeEmail(email));
         } catch (e: any) {
             alert(e);
-        }
-        finally {
+        } finally {
             setBusy(false);
-            setProfile(await sessionService.getAccount());
+        }
+    }
+
+
+    async function prefer(email: string) {
+        setBusy(true);
+        try {
+            props.updateAccount(await sessionService.preferredEmail(email));
+        } catch (e: any) {
+            alert(e);
+        } finally {
+            setBusy(false);
         }
     }
 
@@ -139,25 +160,28 @@ function EditEmail() {
         let email: string = (data.get('email') as string ?? "").trim();
 
         try {
-            //await sessionService.addEmail(email);
+            props.updateAccount(await sessionService.addEmail(email));
         } catch (e: any) {
             alert(e);
-        }
-        finally {
+        } finally {
             setBusy(false);
-            setProfile(await sessionService.getAccount());
         }
     }
 
-    const addresses = profile.emailsList.map(email => (
-        <ListItem
-            secondaryAction={
+    const addresses = props.account.emailsList.map(email => (
+        <ListItem>
+            <ListItemText primary={email.email} secondary={email.isVerified ? "Verified" : "Unverified"}/>
+            <ListItemIcon>
+                <IconButton edge="end" aria-label="star" onClick={() => prefer(email.email)} disabled={busy}
+                            color={email.isPreferred ? "success" : "primary"}>
+                    {email.isPreferred ? <StarIcon/> : <StarOutlineIcon/>}
+                </IconButton>
+            </ListItemIcon>
+            <ListItemIcon>
                 <IconButton edge="end" aria-label="delete" onClick={() => remove(email.email)} disabled={busy}>
                     <DeleteIcon/>
                 </IconButton>
-            }
-        >
-            <ListItemText primary={email.email} secondary="Unverified"/>
+            </ListItemIcon>
         </ListItem>
     ));
 
@@ -182,7 +206,6 @@ function EditEmail() {
         </Box>
     );
 }
-*/
 
 export default function ProfileView() {
     let navigate = useNavigate();
@@ -203,6 +226,10 @@ export default function ProfileView() {
         setAccount(await sessionService.getAccount());
         setBusy(false);
     });
+
+    function updateAccount(account: Account.AsObject) {
+        setAccount(account);
+    }
 
     if (busy) {
         return <Container maxWidth="md">
@@ -232,13 +259,11 @@ export default function ProfileView() {
                 </Tabs>
                 <TabPanel value={value} index={0}>
                     <Typography variant="h5" sx={{my: 2}} align="center">Personal Profile</Typography>
-
-
+                    <EditProfile account={account} updateAccount={updateAccount}/>
                 </TabPanel>
                 <TabPanel value={value} index={1}>
                     <Typography variant="h5" sx={{my: 2}} align="center">Authorized Emails</Typography>
-
-
+                    <EditEmail account={account} updateAccount={updateAccount}/>
                 </TabPanel>
                 <TabPanel value={value} index={2}>
                     <Typography variant="h5" sx={{my: 2}} align="center">Event Attendance</Typography>

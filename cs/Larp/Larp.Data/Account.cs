@@ -7,6 +7,7 @@ public class Account
 {
     [BsonId, BsonRepresentation(BsonType.ObjectId)]
     public string AccountId { get; set; } = null!;
+
     public string? Name { get; set; }
     public string? Location { get; set; }
     public string? Phone { get; set; }
@@ -14,6 +15,7 @@ public class Account
     public bool IsSuperAdmin { get; set; }
     public string? Notes { get; set; }
     public DateTimeOffset Created { get; set; }
+    public DateTimeOffset? LastUpdate { get; set; }
 
     public Protos.Account ToProto()
     {
@@ -30,10 +32,11 @@ public class Account
             Created = Created.ToString("O"),
             Location = Location ?? "",
             Name = Name ?? "",
-            Phone = Phone ?? ""
+            Phone = Phone ?? "",
+            Notes = Notes ?? ""
         };
         result.Emails.AddRange(emails);
-        
+
         return result;
     }
 }

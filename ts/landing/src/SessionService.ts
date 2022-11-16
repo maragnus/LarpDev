@@ -6,12 +6,13 @@ import {
     ValidateSessionRequest,
     ValidationResponseCode
 } from "./Protos/larp/authorization_pb";
-import {Empty} from "./Protos/larp/common_pb";
+import {Empty, StringRequest} from "./Protos/larp/common_pb";
 import {Account} from "./Protos/larp/accounts_pb";
 import {Metadata} from "grpc-web";
 import {GameState} from "./Protos/larp/mw5e/fifthedition_pb";
 import {UpdateCacheRequest} from "./Protos/larp/mw5e/services_pb";
 import {CachedGameState} from "./CachedGameState";
+import {AccountResponse, UpdateProfileRequest} from "./Protos/larp/services_pb";
 
 export interface SessionCallback {
     callback: (() => void);
@@ -37,6 +38,7 @@ export class SessionService {
     private _email?: string;
     private _sessionId?: string;
     private _mw5eGameState = new CachedGameState<GameState.AsObject>("mw5e");
+    private _account: Account.AsObject = new Account().toObject();
 
     private static readonly SessionIdKey = "MWL_SESSION_ID";
     private static readonly AccountKey = "MWL_PROFILE";
@@ -185,7 +187,7 @@ export class SessionService {
     }
 
     isAdmin() {
-        return false;
+        return this._account.isSuperAdmin;
     }
 
     getMetadata(): Metadata {
@@ -196,7 +198,7 @@ export class SessionService {
 
     async getAccount(): Promise<Account.AsObject> {
         const result = await larpUserClient.getAccount(new Empty(), this.getMetadata());
-        return (result.getAccount() ?? new Account()).toObject();
+        return this.returnAccount(result);
     }
 
     async getGameState(): Promise<GameState.AsObject> {
@@ -228,6 +230,46 @@ export class SessionService {
         }
     }
 
+    async setProfile(name?: string, phone?: string, location?: string, notes?: string): Promise<Account.AsObject> {
+        const account = new Account().toObject();
+
+        const request = new UpdateProfileRequest();
+        if (name && name !== account.name)
+            request.setName(name);
+        if (phone && phone !== account.phone)
+            request.setPhone(phone);
+        if (location && location !== account.location)
+            request.setLocation(location);
+        if (notes && notes !== account.notes)
+            request.setNotes(notes);
+
+        const result = await larpUserClient.updateProfile(request, this.getMetadata());
+        return this.returnAccount(result);
+    }
+
+    returnAccount(response: AccountResponse): Account.AsObject {
+        const account = (response.getAccount() ?? new Account()).toObject();
+        this._account = account;
+        return account;
+    }
+
+    async addEmail(email: string): Promise<Account.AsObject> {
+        const request = new StringRequest().setValue(email);
+        const result = await larpUserClient.addEmail(request, this.getMetadata());
+        return this.returnAccount(result);
+    }
+
+    async removeEmail(email: string): Promise<Account.AsObject> {
+        const request = new StringRequest().setValue(email);
+        const result = await larpUserClient.removeEmail(request, this.getMetadata());
+        return this.returnAccount(result);
+    }
+
+    async preferredEmail(email: string): Promise<Account.AsObject> {
+        const request = new StringRequest().setValue(email);
+        const result = await larpUserClient.preferEmail(request, this.getMetadata());
+        return this.returnAccount(result);
+    }
 }
 
 const sessionService: SessionService = new SessionService();

@@ -62,6 +62,27 @@ export class LarpUserClient {
     callback: (err: grpcWeb.RpcError,
                response: larp_services_pb.AccountResponse) => void): grpcWeb.ClientReadableStream<larp_services_pb.AccountResponse>;
 
+    methodDescriptorUpdateProfile = new grpcWeb.MethodDescriptor(
+        '/larp.services.LarpUser/UpdateProfile',
+        grpcWeb.MethodType.UNARY,
+        larp_services_pb.UpdateProfileRequest,
+        larp_services_pb.AccountResponse,
+        (request: larp_services_pb.UpdateProfileRequest) => {
+            return request.serializeBinary();
+        },
+        larp_services_pb.AccountResponse.deserializeBinary
+    );
+    methodDescriptorAddEmail = new grpcWeb.MethodDescriptor(
+        '/larp.services.LarpUser/AddEmail',
+        grpcWeb.MethodType.UNARY,
+        larp_common_pb.StringRequest,
+        larp_services_pb.AccountResponse,
+        (request: larp_common_pb.StringRequest) => {
+            return request.serializeBinary();
+        },
+        larp_services_pb.AccountResponse.deserializeBinary
+  );
+
   getAccount(
     request: larp_common_pb.Empty,
     metadata: grpcWeb.Metadata | null,
@@ -74,26 +95,47 @@ export class LarpUserClient {
         request,
         metadata || {},
         this.methodDescriptorGetAccount,
-        callback);
+          callback);
     }
-    return this.client_.unaryCall(
-    this.hostname_ +
-      '/larp.services.LarpUser/GetAccount',
-    request,
-    metadata || {},
-    this.methodDescriptorGetAccount);
+      return this.client_.unaryCall(
+          this.hostname_ +
+          '/larp.services.LarpUser/GetAccount',
+          request,
+          metadata || {},
+          this.methodDescriptorGetAccount);
   }
 
-  methodDescriptorAddEmail = new grpcWeb.MethodDescriptor(
-    '/larp.services.LarpUser/AddEmail',
-    grpcWeb.MethodType.UNARY,
-    larp_common_pb.StringRequest,
-    larp_services_pb.AccountResponse,
-    (request: larp_common_pb.StringRequest) => {
-      return request.serializeBinary();
-    },
-    larp_services_pb.AccountResponse.deserializeBinary
-  );
+    updateProfile(
+        request: larp_services_pb.UpdateProfileRequest,
+        metadata: grpcWeb.Metadata | null): Promise<larp_services_pb.AccountResponse>;
+
+    updateProfile(
+        request: larp_services_pb.UpdateProfileRequest,
+        metadata: grpcWeb.Metadata | null,
+        callback: (err: grpcWeb.RpcError,
+                   response: larp_services_pb.AccountResponse) => void): grpcWeb.ClientReadableStream<larp_services_pb.AccountResponse>;
+
+    updateProfile(
+        request: larp_services_pb.UpdateProfileRequest,
+        metadata: grpcWeb.Metadata | null,
+        callback?: (err: grpcWeb.RpcError,
+                    response: larp_services_pb.AccountResponse) => void) {
+        if (callback !== undefined) {
+            return this.client_.rpcCall(
+                this.hostname_ +
+                '/larp.services.LarpUser/UpdateProfile',
+                request,
+                metadata || {},
+                this.methodDescriptorUpdateProfile,
+                callback);
+        }
+        return this.client_.unaryCall(
+            this.hostname_ +
+            '/larp.services.LarpUser/UpdateProfile',
+            request,
+            metadata || {},
+            this.methodDescriptorUpdateProfile);
+    }
 
   addEmail(
     request: larp_common_pb.StringRequest,
@@ -211,92 +253,6 @@ export class LarpUserClient {
     request,
     metadata || {},
     this.methodDescriptorPreferEmail);
-  }
-
-  methodDescriptorSetLocation = new grpcWeb.MethodDescriptor(
-    '/larp.services.LarpUser/SetLocation',
-    grpcWeb.MethodType.UNARY,
-    larp_common_pb.StringRequest,
-    larp_services_pb.AccountResponse,
-    (request: larp_common_pb.StringRequest) => {
-      return request.serializeBinary();
-    },
-    larp_services_pb.AccountResponse.deserializeBinary
-  );
-
-  setLocation(
-    request: larp_common_pb.StringRequest,
-    metadata: grpcWeb.Metadata | null): Promise<larp_services_pb.AccountResponse>;
-
-  setLocation(
-    request: larp_common_pb.StringRequest,
-    metadata: grpcWeb.Metadata | null,
-    callback: (err: grpcWeb.RpcError,
-               response: larp_services_pb.AccountResponse) => void): grpcWeb.ClientReadableStream<larp_services_pb.AccountResponse>;
-
-  setLocation(
-    request: larp_common_pb.StringRequest,
-    metadata: grpcWeb.Metadata | null,
-    callback?: (err: grpcWeb.RpcError,
-               response: larp_services_pb.AccountResponse) => void) {
-    if (callback !== undefined) {
-      return this.client_.rpcCall(
-        this.hostname_ +
-          '/larp.services.LarpUser/SetLocation',
-        request,
-        metadata || {},
-        this.methodDescriptorSetLocation,
-        callback);
-    }
-    return this.client_.unaryCall(
-    this.hostname_ +
-      '/larp.services.LarpUser/SetLocation',
-    request,
-    metadata || {},
-    this.methodDescriptorSetLocation);
-  }
-
-  methodDescriptorSetPhone = new grpcWeb.MethodDescriptor(
-    '/larp.services.LarpUser/SetPhone',
-    grpcWeb.MethodType.UNARY,
-    larp_common_pb.StringRequest,
-    larp_services_pb.AccountResponse,
-    (request: larp_common_pb.StringRequest) => {
-      return request.serializeBinary();
-    },
-    larp_services_pb.AccountResponse.deserializeBinary
-  );
-
-  setPhone(
-    request: larp_common_pb.StringRequest,
-    metadata: grpcWeb.Metadata | null): Promise<larp_services_pb.AccountResponse>;
-
-  setPhone(
-    request: larp_common_pb.StringRequest,
-    metadata: grpcWeb.Metadata | null,
-    callback: (err: grpcWeb.RpcError,
-               response: larp_services_pb.AccountResponse) => void): grpcWeb.ClientReadableStream<larp_services_pb.AccountResponse>;
-
-  setPhone(
-    request: larp_common_pb.StringRequest,
-    metadata: grpcWeb.Metadata | null,
-    callback?: (err: grpcWeb.RpcError,
-               response: larp_services_pb.AccountResponse) => void) {
-    if (callback !== undefined) {
-      return this.client_.rpcCall(
-        this.hostname_ +
-          '/larp.services.LarpUser/SetPhone',
-        request,
-        metadata || {},
-        this.methodDescriptorSetPhone,
-        callback);
-    }
-    return this.client_.unaryCall(
-    this.hostname_ +
-      '/larp.services.LarpUser/SetPhone',
-    request,
-    metadata || {},
-    this.methodDescriptorSetPhone);
   }
 
   methodDescriptorGetEvents = new grpcWeb.MethodDescriptor(

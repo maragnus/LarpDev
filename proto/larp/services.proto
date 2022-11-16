@@ -37,14 +37,20 @@ message EventRsvpRequest {
 
 service LarpUser {
     rpc GetAccount(Empty) returns (AccountResponse);
+    rpc UpdateProfile(UpdateProfileRequest) returns (AccountResponse);
     rpc AddEmail(StringRequest) returns (AccountResponse);
     rpc RemoveEmail(StringRequest) returns (AccountResponse);
     rpc PreferEmail(StringRequest) returns (AccountResponse);
-    rpc SetLocation(StringRequest) returns (AccountResponse);
-    rpc SetPhone(StringRequest) returns (AccountResponse);
 
     rpc GetEvents(EventListRequest) returns (EventListResponse);
     rpc RsvpEvent(EventRsvpRequest) returns (Event);
+}
+
+message UpdateProfileRequest {
+    optional string name = 1;
+    optional string phone = 2;
+    optional string location = 3;
+    optional string notes = 4;
 }
 
 message AccountRequest {
