@@ -12,7 +12,8 @@ import {Metadata} from "grpc-web";
 import {GameState} from "./Protos/larp/mw5e/fifthedition_pb";
 import {UpdateCacheRequest} from "./Protos/larp/mw5e/services_pb";
 import {CachedGameState} from "./CachedGameState";
-import {AccountResponse, UpdateProfileRequest} from "./Protos/larp/services_pb";
+import {AccountResponse, EventListRequest, EventRsvpRequest, UpdateProfileRequest} from "./Protos/larp/services_pb";
+import {Event, EventRsvp} from "./Protos/larp/events_pb";
 
 export interface SessionCallback {
     callback: (() => void);
@@ -269,6 +270,22 @@ export class SessionService {
         const request = new StringRequest().setValue(email);
         const result = await larpUserClient.preferEmail(request, this.getMetadata());
         return this.returnAccount(result);
+    }
+
+    async rsvp(id: string, rsvp: EventRsvp) {
+        const request = new EventRsvpRequest()
+            .setEventId(id)
+            .setRsvp(rsvp);
+        await larpUserClient.rsvpEvent(request, this.getMetadata());
+    }
+
+    async getEvents(includePast: boolean, includeFuture: boolean, includeAttendance: boolean): Promise<Event.AsObject[]> {
+        const request = new EventListRequest()
+            .setIncludePast(includePast)
+            .setIncludeFuture(includeFuture)
+            .setIncludeAttendance(includeAttendance);
+        const response = await larpUserClient.getEvents(request, this.getMetadata());
+        return response.toObject().eventList;
     }
 }
 

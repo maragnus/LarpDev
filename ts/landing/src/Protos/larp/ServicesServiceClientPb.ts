@@ -81,29 +81,7 @@ export class LarpUserClient {
             return request.serializeBinary();
         },
         larp_services_pb.AccountResponse.deserializeBinary
-  );
-
-  getAccount(
-    request: larp_common_pb.Empty,
-    metadata: grpcWeb.Metadata | null,
-    callback?: (err: grpcWeb.RpcError,
-               response: larp_services_pb.AccountResponse) => void) {
-    if (callback !== undefined) {
-      return this.client_.rpcCall(
-        this.hostname_ +
-          '/larp.services.LarpUser/GetAccount',
-        request,
-        metadata || {},
-        this.methodDescriptorGetAccount,
-          callback);
-    }
-      return this.client_.unaryCall(
-          this.hostname_ +
-          '/larp.services.LarpUser/GetAccount',
-          request,
-          metadata || {},
-          this.methodDescriptorGetAccount);
-  }
+    );
 
     updateProfile(
         request: larp_services_pb.UpdateProfileRequest,
@@ -137,15 +115,37 @@ export class LarpUserClient {
             this.methodDescriptorUpdateProfile);
     }
 
-  addEmail(
-    request: larp_common_pb.StringRequest,
-    metadata: grpcWeb.Metadata | null): Promise<larp_services_pb.AccountResponse>;
-
-  addEmail(
-    request: larp_common_pb.StringRequest,
+  getAccount(
+    request: larp_common_pb.Empty,
     metadata: grpcWeb.Metadata | null,
-    callback: (err: grpcWeb.RpcError,
-               response: larp_services_pb.AccountResponse) => void): grpcWeb.ClientReadableStream<larp_services_pb.AccountResponse>;
+    callback?: (err: grpcWeb.RpcError,
+               response: larp_services_pb.AccountResponse) => void) {
+      if (callback !== undefined) {
+          return this.client_.rpcCall(
+              this.hostname_ +
+              '/larp.services.LarpUser/GetAccount',
+              request,
+              metadata || {},
+              this.methodDescriptorGetAccount,
+              callback);
+      }
+      return this.client_.unaryCall(
+          this.hostname_ +
+          '/larp.services.LarpUser/GetAccount',
+          request,
+          metadata || {},
+          this.methodDescriptorGetAccount);
+  }
+
+    addEmail(
+        request: larp_common_pb.StringRequest,
+        metadata: grpcWeb.Metadata | null): Promise<larp_services_pb.AccountResponse>;
+
+    addEmail(
+        request: larp_common_pb.StringRequest,
+        metadata: grpcWeb.Metadata | null,
+        callback: (err: grpcWeb.RpcError,
+                   response: larp_services_pb.AccountResponse) => void): grpcWeb.ClientReadableStream<larp_services_pb.AccountResponse>;
 
   addEmail(
     request: larp_common_pb.StringRequest,

@@ -12,7 +12,10 @@ import {
     DialogActions,
     DialogContent,
     DialogContentText,
-    DialogTitle, Grid, TextField, Typography
+    DialogTitle,
+    Grid,
+    TextField,
+    Typography
 } from "@mui/material";
 import {BusyButton} from "../Common/BusyButton";
 import {Copyright} from "../Common/Copyright";
@@ -108,7 +111,7 @@ export default function LoginPage() {
                             autoComplete="email"
                             autoFocus
                         />
-                        <BusyButton label="Sign In or Register" busy={busy}/>
+                        <BusyButton label="Sign In or Register" $busy={busy}/>
                         <Grid container>
                             <Grid item xs>
                                 <NavLink to="/confirm">

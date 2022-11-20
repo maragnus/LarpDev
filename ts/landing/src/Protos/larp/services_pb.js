@@ -364,9 +364,9 @@ proto.larp.services.EventListRequest.prototype.toObject = function(opt_includeIn
  */
 proto.larp.services.EventListRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
-    includepast: jspb.Message.getBooleanFieldWithDefault(msg, 1, false),
-    includefuture: jspb.Message.getBooleanFieldWithDefault(msg, 2, false),
-    includeattendance: jspb.Message.getBooleanFieldWithDefault(msg, 3, false)
+      includePast: jspb.Message.getBooleanFieldWithDefault(msg, 1, false),
+      includeFuture: jspb.Message.getBooleanFieldWithDefault(msg, 2, false),
+      includeAttendance: jspb.Message.getBooleanFieldWithDefault(msg, 3, false)
   };
 
   if (includeInstance) {
@@ -405,15 +405,15 @@ proto.larp.services.EventListRequest.deserializeBinaryFromReader = function(msg,
     switch (field) {
     case 1:
       var value = /** @type {boolean} */ (reader.readBool());
-      msg.setIncludepast(value);
+        msg.setIncludePast(value);
       break;
     case 2:
       var value = /** @type {boolean} */ (reader.readBool());
-      msg.setIncludefuture(value);
+        msg.setIncludeFuture(value);
       break;
     case 3:
       var value = /** @type {boolean} */ (reader.readBool());
-      msg.setIncludeattendance(value);
+        msg.setIncludeAttendance(value);
       break;
     default:
       reader.skipField();
@@ -444,21 +444,21 @@ proto.larp.services.EventListRequest.prototype.serializeBinary = function() {
  */
 proto.larp.services.EventListRequest.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = message.getIncludepast();
+    f = message.getIncludePast();
   if (f) {
     writer.writeBool(
       1,
       f
     );
   }
-  f = message.getIncludefuture();
+    f = message.getIncludeFuture();
   if (f) {
     writer.writeBool(
       2,
       f
     );
   }
-  f = message.getIncludeattendance();
+    f = message.getIncludeAttendance();
   if (f) {
     writer.writeBool(
       3,
@@ -469,11 +469,11 @@ proto.larp.services.EventListRequest.serializeBinaryToWriter = function(message,
 
 
 /**
- * optional bool includePast = 1;
+ * optional bool include_past = 1;
  * @return {boolean}
  */
-proto.larp.services.EventListRequest.prototype.getIncludepast = function() {
-  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 1, false));
+proto.larp.services.EventListRequest.prototype.getIncludePast = function () {
+    return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 1, false));
 };
 
 
@@ -481,17 +481,17 @@ proto.larp.services.EventListRequest.prototype.getIncludepast = function() {
  * @param {boolean} value
  * @return {!proto.larp.services.EventListRequest} returns this
  */
-proto.larp.services.EventListRequest.prototype.setIncludepast = function(value) {
-  return jspb.Message.setProto3BooleanField(this, 1, value);
+proto.larp.services.EventListRequest.prototype.setIncludePast = function (value) {
+    return jspb.Message.setProto3BooleanField(this, 1, value);
 };
 
 
 /**
- * optional bool includeFuture = 2;
+ * optional bool include_future = 2;
  * @return {boolean}
  */
-proto.larp.services.EventListRequest.prototype.getIncludefuture = function() {
-  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 2, false));
+proto.larp.services.EventListRequest.prototype.getIncludeFuture = function () {
+    return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 2, false));
 };
 
 
@@ -499,17 +499,17 @@ proto.larp.services.EventListRequest.prototype.getIncludefuture = function() {
  * @param {boolean} value
  * @return {!proto.larp.services.EventListRequest} returns this
  */
-proto.larp.services.EventListRequest.prototype.setIncludefuture = function(value) {
-  return jspb.Message.setProto3BooleanField(this, 2, value);
+proto.larp.services.EventListRequest.prototype.setIncludeFuture = function (value) {
+    return jspb.Message.setProto3BooleanField(this, 2, value);
 };
 
 
 /**
- * optional bool includeAttendance = 3;
+ * optional bool include_attendance = 3;
  * @return {boolean}
  */
-proto.larp.services.EventListRequest.prototype.getIncludeattendance = function() {
-  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 3, false));
+proto.larp.services.EventListRequest.prototype.getIncludeAttendance = function () {
+    return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 3, false));
 };
 
 
@@ -517,8 +517,8 @@ proto.larp.services.EventListRequest.prototype.getIncludeattendance = function()
  * @param {boolean} value
  * @return {!proto.larp.services.EventListRequest} returns this
  */
-proto.larp.services.EventListRequest.prototype.setIncludeattendance = function(value) {
-  return jspb.Message.setProto3BooleanField(this, 3, value);
+proto.larp.services.EventListRequest.prototype.setIncludeAttendance = function (value) {
+    return jspb.Message.setProto3BooleanField(this, 3, value);
 };
 
 
@@ -1455,11 +1455,11 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
      * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
      * For the list of reserved names please see:
      *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
- * @param {boolean=} opt_includeInstance Deprecated. whether to include the
- *     JSPB instance for transitional soy proto support:
- *     http://goto/soy-param-migration
- * @return {!Object}
- */
+     * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+     *     JSPB instance for transitional soy proto support:
+     *     http://goto/soy-param-migration
+     * @return {!Object}
+     */
 proto.larp.services.AccountRequest.prototype.toObject = function(opt_includeInstance) {
   return proto.larp.services.AccountRequest.toObject(opt_includeInstance, this);
 };

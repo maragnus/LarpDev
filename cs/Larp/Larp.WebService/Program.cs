@@ -3,12 +3,10 @@ using Larp.Common.LifeCycle;
 using Larp.Data;
 using Larp.Data.Seeder;
 using Larp.Data.Services;
-using Larp.WebService;
 using Larp.WebService.GrpcServices;
 using Larp.WebService.LarpServices;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using ISystemClock = Microsoft.Extensions.Internal.ISystemClock;
-using SystemClock = Microsoft.Extensions.Internal.SystemClock;
+using Microsoft.Extensions.Internal;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,8 +44,10 @@ builder.Services.AddCors(cors =>
 
 // Larp.Data
 builder.Services.AddSingleton<LarpDataCache>();
+builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IUserSessionManager, UserSessionManager>();
-builder.Services.Configure<UserSessionManagerOptions>(builder.Configuration.GetSection(UserSessionManagerOptions.SectionName));
+builder.Services.Configure<UserSessionManagerOptions>(
+    builder.Configuration.GetSection(UserSessionManagerOptions.SectionName));
 builder.Services.AddScoped<LarpContext>();
 builder.Services.Configure<LarpDataOptions>(builder.Configuration.GetSection(LarpDataOptions.SectionName));
 

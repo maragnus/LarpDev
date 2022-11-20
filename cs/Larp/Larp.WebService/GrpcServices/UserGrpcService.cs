@@ -1,6 +1,5 @@
 using System.Security.Authentication;
 using Grpc.Core;
-using Larp.Data;
 using Larp.Data.Services;
 using Larp.Protos;
 using Larp.Protos.Services;
@@ -41,13 +40,13 @@ public class ResponseException : Exception
 public class UserGrpcService : LarpUser.LarpUserBase
 {
     private readonly ISystemClock _clock;
-    private readonly LarpContext _larpContext;
+    private readonly IEventService _eventService;
     private readonly IUserSessionManager _userSessionManager;
 
-    public UserGrpcService(LarpContext larpContext, IUserSessionManager userSessionManager, ISystemClock clock)
+    public UserGrpcService(IUserSessionManager userSessionManager, IEventService eventService, ISystemClock clock)
     {
-        _larpContext = larpContext;
         _userSessionManager = userSessionManager;
+        _eventService = eventService;
         _clock = clock;
     }
 
@@ -105,16 +104,37 @@ public class UserGrpcService : LarpUser.LarpUserBase
         return new AccountResponse() { Account = context.GetAccount().ToProto() };
     }
 
-    public override Task<AccountResponse> GetAccount(Empty request, ServerCallContext context)
+    public override async Task<AccountResponse> GetAccount(Empty request, ServerCallContext context)
     {
-        return Task.FromResult(new AccountResponse() { Account = context.GetAccount().ToProto() });
+        var account = await _userSessionManager.GetUserAccount(context.GetAccountId())
+                      ?? throw new ResponseException("Account not found");
+        return new AccountResponse() { Account = account.ToProto() };
+    }
+
+    public override async Task<EventListResponse> GetEvents(EventListRequest request, ServerCallContext context)
+    {
+        var events = await _eventService.ListEventsForAccount(
+            context.GetAccountId(),
+            request.IncludePast,
+            request.IncludeFuture,
+            request.IncludeAttendance);
+
+        var response = new EventListResponse();
+        response.Event.AddRange(events);
+        return response;
+    }
+
+    public override async Task<Event> RsvpEvent(EventRsvpRequest request, ServerCallContext context)
+    {
+        var ev = await _eventService.Rsvp(context.GetAccountId(), request.EventId, request.Rsvp);
+        return ev;
     }
 }
 
-public class AdminGrpcService : Larp.Protos.Services.LarpAdmin.LarpAdminBase
+public class AdminGrpcService : LarpAdmin.LarpAdminBase
 {
     public override Task<AccountResponse> SetAccount(AccountRequest request, ServerCallContext context)
     {
-        return base.SetAccount(request, context);
+        throw new NotImplementedException("TBD");
     }
 }

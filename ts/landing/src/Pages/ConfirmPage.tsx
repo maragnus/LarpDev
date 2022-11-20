@@ -5,14 +5,19 @@ import sessionService, {ConfirmStatus} from "../SessionService";
 import {NavLink, useNavigate} from "react-router-dom";
 import {
     Box,
-    Button, Checkbox,
+    Button,
+    Checkbox,
     Container,
     CssBaseline,
     Dialog,
     DialogActions,
     DialogContent,
     DialogContentText,
-    DialogTitle, FormControlLabel, Grid, TextField, Typography
+    DialogTitle,
+    FormControlLabel,
+    Grid,
+    TextField,
+    Typography
 } from "@mui/material";
 import {BusyButton} from "../Common/BusyButton";
 import {Copyright} from "../Common/Copyright";
@@ -135,7 +140,7 @@ export default function ConfirmPage() {
                             control={<Checkbox value="remember" color="primary"/>}
                             label="Remember me"
                         />
-                        <BusyButton label="Sign In" busy={busy}/>
+                        <BusyButton label="Sign In" $busy={busy}/>
                         <Grid container>
                             <Grid item xs>
                                 <NavLink to="/login">

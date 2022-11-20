@@ -13,9 +13,9 @@ message AccountResponse {
 }
 
 message EventListRequest {
-    bool includePast = 1;
-    bool includeFuture = 2;
-    bool includeAttendance = 3;
+    bool include_past = 1;
+    bool include_future = 2;
+    bool include_attendance = 3;
 }
 
 message EventListResponse {

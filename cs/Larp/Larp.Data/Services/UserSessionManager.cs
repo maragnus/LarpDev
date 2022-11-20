@@ -112,6 +112,7 @@ public class UserSessionManager : IUserSessionManager
             Builders<Account>.Filter.ElemMatch(x => x.Emails, x => x.NormalizedEmail == normalizedEmail));
         var accountUpdate = Builders<Account>.Update.Set(x => x.Emails[-1].IsVerified, true);
         await _larpContext.Accounts.UpdateOneAsync(accountFilter, accountUpdate);
+        UserAccountChanged(accountId);
     }
 
     public async Task PreferEmailAddress(string accountId, string email)

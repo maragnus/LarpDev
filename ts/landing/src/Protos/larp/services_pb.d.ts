@@ -25,28 +25,36 @@ export namespace AccountResponse {
 }
 
 export class EventListRequest extends jspb.Message {
-  getIncludepast(): boolean;
-  setIncludepast(value: boolean): EventListRequest;
+    static toObject(includeInstance: boolean, msg: EventListRequest): EventListRequest.AsObject;
 
-  getIncludefuture(): boolean;
-  setIncludefuture(value: boolean): EventListRequest;
+    static serializeBinaryToWriter(message: EventListRequest, writer: jspb.BinaryWriter): void;
 
-  getIncludeattendance(): boolean;
-  setIncludeattendance(value: boolean): EventListRequest;
+    static deserializeBinary(bytes: Uint8Array): EventListRequest;
 
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): EventListRequest.AsObject;
-  static toObject(includeInstance: boolean, msg: EventListRequest): EventListRequest.AsObject;
-  static serializeBinaryToWriter(message: EventListRequest, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): EventListRequest;
-  static deserializeBinaryFromReader(message: EventListRequest, reader: jspb.BinaryReader): EventListRequest;
+    static deserializeBinaryFromReader(message: EventListRequest, reader: jspb.BinaryReader): EventListRequest;
+
+    getIncludePast(): boolean;
+
+    setIncludePast(value: boolean): EventListRequest;
+
+    getIncludeFuture(): boolean;
+
+    setIncludeFuture(value: boolean): EventListRequest;
+
+    getIncludeAttendance(): boolean;
+
+    setIncludeAttendance(value: boolean): EventListRequest;
+
+    serializeBinary(): Uint8Array;
+
+    toObject(includeInstance?: boolean): EventListRequest.AsObject;
 }
 
 export namespace EventListRequest {
   export type AsObject = {
-    includepast: boolean,
-    includefuture: boolean,
-    includeattendance: boolean,
+      includePast: boolean,
+      includeFuture: boolean,
+      includeAttendance: boolean,
   }
 }
 
@@ -129,12 +137,12 @@ export class EventRsvpRequest extends jspb.Message {
 }
 
 export namespace EventRsvpRequest {
-  export type AsObject = {
-    eventId: string,
-    characterId?: string,
-      rsvp: larp_events_pb.EventRsvp,
-      componentsList: Array<EventComponentRsvp.AsObject>,
-  }
+    export type AsObject = {
+        eventId: string,
+        characterId?: string,
+        rsvp: larp_events_pb.EventRsvp,
+        componentsList: Array<EventComponentRsvp.AsObject>,
+    }
 
     export enum CharacterIdCase {
         _CHARACTER_ID_NOT_SET = 0,
@@ -143,14 +151,6 @@ export namespace EventRsvpRequest {
 }
 
 export class UpdateProfileRequest extends jspb.Message {
-    static toObject(includeInstance: boolean, msg: UpdateProfileRequest): UpdateProfileRequest.AsObject;
-
-    static serializeBinaryToWriter(message: UpdateProfileRequest, writer: jspb.BinaryWriter): void;
-
-    static deserializeBinary(bytes: Uint8Array): UpdateProfileRequest;
-
-    static deserializeBinaryFromReader(message: UpdateProfileRequest, reader: jspb.BinaryReader): UpdateProfileRequest;
-
     getName(): string;
 
     setName(value: string): UpdateProfileRequest;
@@ -186,6 +186,14 @@ export class UpdateProfileRequest extends jspb.Message {
     serializeBinary(): Uint8Array;
 
     toObject(includeInstance?: boolean): UpdateProfileRequest.AsObject;
+
+    static toObject(includeInstance: boolean, msg: UpdateProfileRequest): UpdateProfileRequest.AsObject;
+
+    static serializeBinaryToWriter(message: UpdateProfileRequest, writer: jspb.BinaryWriter): void;
+
+    static deserializeBinary(bytes: Uint8Array): UpdateProfileRequest;
+
+    static deserializeBinaryFromReader(message: UpdateProfileRequest, reader: jspb.BinaryReader): UpdateProfileRequest;
 }
 
 export namespace UpdateProfileRequest {
@@ -218,8 +226,6 @@ export namespace UpdateProfileRequest {
 }
 
 export class AccountRequest extends jspb.Message {
-    static toObject(includeInstance: boolean, msg: AccountRequest): AccountRequest.AsObject;
-
     getAccount(): larp_accounts_pb.Account | undefined;
 
     setAccount(value?: larp_accounts_pb.Account): AccountRequest;
@@ -231,9 +237,14 @@ export class AccountRequest extends jspb.Message {
     serializeBinary(): Uint8Array;
 
     toObject(includeInstance?: boolean): AccountRequest.AsObject;
-  static serializeBinaryToWriter(message: AccountRequest, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): AccountRequest;
-  static deserializeBinaryFromReader(message: AccountRequest, reader: jspb.BinaryReader): AccountRequest;
+
+    static toObject(includeInstance: boolean, msg: AccountRequest): AccountRequest.AsObject;
+
+    static serializeBinaryToWriter(message: AccountRequest, writer: jspb.BinaryWriter): void;
+
+    static deserializeBinary(bytes: Uint8Array): AccountRequest;
+
+    static deserializeBinaryFromReader(message: AccountRequest, reader: jspb.BinaryReader): AccountRequest;
 }
 
 export namespace AccountRequest {
