@@ -1,5 +1,5 @@
 import {AccountProps} from "./AccountProps";
-import {Event, EventRsvp} from "../../Protos/larp/events_pb";
+import {Event, EventAttendance, EventRsvp} from "../../Protos/larp/events_pb";
 import {Box, IconButton, List, ListItem, ListItemIcon, ListItemText, ListSubheader, Typography} from "@mui/material";
 import * as React from "react";
 import Menu from '@mui/material/Menu';
@@ -168,7 +168,7 @@ export function EditAttendance(props: AccountProps): any {
     };
 
     const eventList = events.map(event => {
-        const attendee = event.attendeesList[0];
+        const attendee = event.attendeesList[0] ?? new EventAttendance().toObject();
         return {
             id: event.eventId,
             title: event.title,
@@ -183,7 +183,7 @@ export function EditAttendance(props: AccountProps): any {
     });
 
     const upcomingEvents = eventList
-        .filter(event => event.isPast)
+        .filter(event => !event.isPast)
         .map(event => (<EventListItem event={event} busy={busy} updateRsvp={updateRsvp}/>));
 
     const pastEvents = eventList

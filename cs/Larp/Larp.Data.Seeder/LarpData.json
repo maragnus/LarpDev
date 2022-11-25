@@ -1,5 +1,275 @@
 {
-  "Games": [
-    { "Name": "mw5e", "Title": "Mystwood 5e", "Description": "Mystwood 5th Edition"}
+  "games": [
+    {
+      "name": "mw5e",
+      "title": "Mystwood 5e",
+      "description": "Mystwood 5th Edition"
+    }
+  ],
+  "events": [
+    {
+      "gameId": "mw5e",
+      "title": "Burgundar IV",
+      "location": "Burgundar, Harrison, ME",
+      "date": "2022-10-28",
+      "rsvp": true,
+      "eventType": "Game",
+      "components": [
+        {
+          "name": "Friday",
+          "date": "2022-10-28"
+        },
+        {
+          "name": "Chronicle 1",
+          "date": "2022-10-29"
+        },
+        {
+          "name": "Chronicle 2",
+          "date": "2022-10-29"
+        },
+        {
+          "name": "Chronicle 3",
+          "date": "2022-10-30"
+        }
+      ]
+    },
+    {
+      "gameId": "mw5e",
+      "title": "Keep III",
+      "location": "The Keep, Jefferson, ME",
+      "date": "2022-09-30",
+      "rsvp": true,
+      "eventType": "Game",
+      "components": [
+        {
+          "name": "Friday",
+          "date": "2022-09-30"
+        },
+        {
+          "name": "Chronicle 1",
+          "date": "2022-10-01"
+        },
+        {
+          "name": "Chronicle 2",
+          "date": "2022-10-01"
+        },
+        {
+          "name": "Chronicle 3",
+          "date": "2022-10-02"
+        }
+      ]
+    },
+    {
+      "gameId": "mw5e",
+      "title": "Burgundar I",
+      "location": "Burgundar, Harrison, ME",
+      "date": "2023-06-02",
+      "rsvp": true,
+      "eventType": "Game",
+      "components": [
+        {
+          "name": "Friday",
+          "date": "2023-06-02"
+        },
+        {
+          "name": "Chronicle 1",
+          "date": "2023-06-03"
+        },
+        {
+          "name": "Chronicle 2",
+          "date": "2023-06-03"
+        },
+        {
+          "name": "Chronicle 3",
+          "date": "2023-06-04"
+        }
+      ]
+    },
+    {
+      "gameId": "mw5e",
+      "title": "Burgundar II",
+      "location": "Burgundar, Harrison, ME",
+      "date": "2023-07-21",
+      "rsvp": true,
+      "eventType": "Game",
+      "components": [
+        {
+          "name": "Friday",
+          "date": "2023-07-21"
+        },
+        {
+          "name": "Chronicle 1",
+          "date": "2023-07-22"
+        },
+        {
+          "name": "Chronicle 2",
+          "date": "2023-07-22"
+        },
+        {
+          "name": "Chronicle 3",
+          "date": "2023-07-23"
+        }
+      ]
+    },
+    {
+      "gameId": "mw5e",
+      "title": "Burgundar III",
+      "location": "Burgundar, Harrison, ME",
+      "date": "2023-08-25",
+      "rsvp": true,
+      "eventType": "Game",
+      "components": [
+        {
+          "name": "Friday",
+          "date": "2023-08-25"
+        },
+        {
+          "name": "Chronicle 1",
+          "date": "2023-08-26"
+        },
+        {
+          "name": "Chronicle 2",
+          "date": "2023-08-26"
+        },
+        {
+          "name": "Chronicle 3",
+          "date": "2023-08-27"
+        }
+      ]
+    },
+    {
+      "gameId": "mw5e",
+      "title": "Burgundar IV",
+      "location": "Burgundar, Harrison, ME",
+      "date": "2023-10-20",
+      "rsvp": true,
+      "eventType": "Game",
+      "components": [
+        {
+          "name": "Friday",
+          "date": "2023-10-20"
+        },
+        {
+          "name": "Chronicle 1",
+          "date": "2023-10-21"
+        },
+        {
+          "name": "Chronicle 2",
+          "date": "2023-10-21"
+        },
+        {
+          "name": "Chronicle 3",
+          "date": "2023-10-22"
+        }
+      ]
+    },
+    {
+      "gameId": "mw5e",
+      "title": "The Keep I",
+      "location": "The Keep, Jefferson, ME",
+      "date": "2023-07-07",
+      "rsvp": true,
+      "eventType": "Game",
+      "components": [
+        {
+          "name": "Friday",
+          "date": "2023-07-07"
+        },
+        {
+          "name": "Chronicle 1",
+          "date": "2023-07-08"
+        },
+        {
+          "name": "Chronicle 2",
+          "date": "2023-07-08"
+        },
+        {
+          "name": "Chronicle 3",
+          "date": "2023-07-09"
+        }
+      ]
+    },
+    {
+      "gameId": "mw5e",
+      "title": "The Keep II",
+      "location": "The Keep, Jefferson, ME",
+      "date": "2023-08-11",
+      "rsvp": true,
+      "eventType": "Game",
+      "components": [
+        {
+          "name": "Friday",
+          "date": "2023-08-11"
+        },
+        {
+          "name": "Chronicle 1",
+          "date": "2023-08-12"
+        },
+        {
+          "name": "Chronicle 2",
+          "date": "2023-08-12"
+        },
+        {
+          "name": "Chronicle 3",
+          "date": "2023-08-13"
+        }
+      ]
+    },
+    {
+      "gameId": "mw5e",
+      "title": "Novgorond I",
+      "location": "The Keep, Jefferson, ME",
+      "date": "2023-01-07",
+      "rsvp": true,
+      "eventType": "Game",
+      "components": [
+        {
+          "name": "Chronicle",
+          "date": "2023-01-07"
+        }
+      ]
+    },
+    {
+      "gameId": "mw5e",
+      "title": "Novgorond II",
+      "location": "The Keep, Jefferson, ME",
+      "date": "2023-02-04",
+      "rsvp": true,
+      "eventType": "Game",
+      "components": [
+        {
+          "name": "Chronicle",
+          "date": "2023-02-04"
+        }
+      ]
+    },
+    {
+      "gameId": "mw5e",
+      "title": "Novgorond III",
+      "location": "The Keep, Jefferson, ME",
+      "date": "2023-03-04",
+      "rsvp": true,
+      "eventType": "Game",
+      "components": [
+        {
+          "name": "Chronicle",
+          "date": "2023-03-04"
+        }
+      ]
+    },
+    {
+      "gameId": "mw5e",
+      "title": "Novgorond I",
+      "location": "The Keep, Jefferson, ME",
+      "date": "2023-12-02",
+      "rsvp": true,
+      "eventType": "Game",
+      "components": [
+        {
+          "name": "Chronicle",
+          "date": "2023-12-02"
+        }
+      ]
+    }
   ]
 }

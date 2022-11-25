@@ -1,17 +1,62 @@
 ﻿using Larp.Protos;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedMember.Global
+// ReSharper disable ClassNeverInstantiated.Global
 
 namespace Larp.Data;
 
 public class EventComponent
 {
+    public EventComponent()
+    {
+    }
+
+    public EventComponent(Protos.EventComponent ec)
+    {
+        Name = ec.Name;
+        Date = DateTimeOffset.Parse(ec.Date);
+    }
+
     public string ComponentId { get; set; } = null!;
     public string? Name { get; set; }
     public DateTimeOffset Date { get; set; }
+
+    public Protos.EventComponent ToProto()
+    {
+        return new Protos.EventComponent()
+        {
+            Name = Name,
+            Date = Date.ToString("O")
+        };
+    }
 }
 
 public class Event
 {
-    public string EventId { get; set; } = null!;
+    public Event()
+    {
+    }
+
+    public Event(Protos.Event e)
+    {
+        Id = e.EventId;
+        Components.AddRange(e.Components.Select(x => new EventComponent(x)));
+        Date = DateTimeOffset.Parse(e.Date);
+        Location = e.Location;
+        Title = e.Title;
+        CanRsvp = e.Rsvp;
+        EventType = e.EventType;
+        GameId = e.GameId;
+        IsHidden = e.Hidden;
+    }
+
+    [BsonId, BsonRepresentation(BsonType.ObjectId)]
+    public string Id { get; set; } = null!;
+
     public string GameId { get; set; } = null!;
     public string? Title { get; set; }
     public string? Location { get; set; }
@@ -23,7 +68,20 @@ public class Event
 
     public Protos.Event ToProto()
     {
-        throw new NotImplementedException();
+        var ev = new Protos.Event()
+        {
+            Date = Date.ToString("O"),
+            Hidden = IsHidden,
+            Location = Location,
+            Rsvp = CanRsvp,
+            Title = Title,
+            EventId = Id,
+            EventType = EventType,
+            GameId = GameId
+        };
+        ev.Components
+            .AddRange(Components.Select(x => x.ToProto()));
+        return ev;
     }
 }
 

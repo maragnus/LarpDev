@@ -21,6 +21,7 @@ enum EventAttendanceType {
 
 message EventComponent {
     string name = 1;
+    string date = 2;
 }
 
 message EventComponentAttendance {
