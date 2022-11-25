@@ -131,7 +131,7 @@ export function EditAttendance(props: AccountProps): any {
     async function refresh() {
         console.log('Refreshing event list for ' + props.account.name);
         try {
-            const response = await sessionService.getEvents(true, true, true);
+            const response = await sessionService.getEvents(true, false, true);
             setEvents(response);
         } catch (e) {
             alert('Failed to load events list: ' + e);
@@ -182,36 +182,26 @@ export function EditAttendance(props: AccountProps): any {
         } as EventDetails
     });
 
-    const upcomingEvents = eventList
-        .filter(event => !event.isPast)
+    var pastEvents = eventList
+        .filter(event => event.isPast)
+        .filter(event => event.rsvp === EventRsvp.EVENT_RSVP_APPROVED)
         .map(event => (<EventListItem event={event} busy={busy} updateRsvp={updateRsvp}/>));
 
-    const pastEvents = eventList
-        .filter(event => event.isPast)
-        .map(event => (<EventListItem event={event} busy={busy} updateRsvp={updateRsvp}/>));
+    if (pastEvents.length === 0) {
+        pastEvents = [<ListItem key={0}>You have not attended any Mystwood Events.</ListItem>];
+    }
 
     const result =
         (<Box>
+            <Typography variant="body1" align="left" sx={{mb:2}}>These are the events that Mystwood knows you attended.</Typography>
+            <Typography variant="body2" align="left">If you do not see an event here, first make sure that it's been marked as "Yes, I have attended" in the events list, then reach out to mystwood@mystwood.org to approve it. Filling out a PEL (Post Event Letter) is the best way to get your attendance approved.</Typography>
             <List
                 sx={{width: '100%', maxWidth: 360, bgcolor: 'background.paper'}}
                 component="nav"
                 aria-labelledby="nested-list-subheader"
                 subheader={
                     <ListSubheader component="div" id="nested-list-subheader">
-                        Upcoming Events
-                    </ListSubheader>
-                }
-            >
-                {upcomingEvents}
-            </List>
-
-            <List
-                sx={{width: '100%', maxWidth: 360, bgcolor: 'background.paper'}}
-                component="nav"
-                aria-labelledby="nested-list-subheader"
-                subheader={
-                    <ListSubheader component="div" id="nested-list-subheader">
-                        Past Events
+                        Approved Attendance
                     </ListSubheader>
                 }
             >

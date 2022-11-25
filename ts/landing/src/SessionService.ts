@@ -287,6 +287,10 @@ export class SessionService {
         const response = await larpUserClient.getEvents(request, this.getMetadata());
         return response.toObject().eventList;
     }
+
+    async getEvent(id: number): Promise<Event.AsObject> {
+        return new Event().toObject();
+    }
 }
 
 const sessionService: SessionService = new SessionService();
