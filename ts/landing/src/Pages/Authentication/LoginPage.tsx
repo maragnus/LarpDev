@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
-import logo from '../logo.webp';
-import sessionService, {LoginStatus} from "../SessionService";
+import logo from '../../logo.webp';
+import sessionService, {LoginStatus} from "../../SessionService";
 import {NavLink, useNavigate} from "react-router-dom";
 import {
     Box,
@@ -17,8 +17,8 @@ import {
     TextField,
     Typography
 } from "@mui/material";
-import {BusyButton} from "../Common/BusyButton";
-import {Copyright} from "../Common/Copyright";
+import {BusyButton} from "../../Common/BusyButton";
+import {Copyright} from "../../Common/Copyright";
 
 const theme = createTheme();
 
@@ -77,7 +77,7 @@ export default function LoginPage() {
 
     async function handleClose() {
         setOpen(false);
-        if (await sessionService.isAuthenticated()) {
+        if (sessionService.isAuthenticated()) {
             navigate("/");
         }
     }

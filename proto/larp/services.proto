@@ -22,6 +22,10 @@ message EventListResponse {
     repeated Event event = 1;
 }
 
+message EventRequest {
+    string event_id = 1;
+}
+
 message EventComponentRsvp {
     string component_name = 1;
     EventAttendanceType type = 2;
@@ -44,6 +48,7 @@ service LarpUser {
 
     rpc GetEvents(EventListRequest) returns (EventListResponse);
     rpc RsvpEvent(EventRsvpRequest) returns (Event);
+    rpc GetEvent(EventRequest) returns (Event);
 }
 
 message UpdateProfileRequest {

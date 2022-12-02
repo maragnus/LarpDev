@@ -1,13 +1,13 @@
 import * as React from "react";
 import {Alert, AlertTitle, Box, Button, Container, Tab, Tabs, Typography} from "@mui/material";
-import sessionService from "../SessionService";
+import sessionService from "../../SessionService";
 import {useNavigate} from "react-router-dom";
-import {useMountEffect} from "./UseMountEffect";
-import AwesomeSpinner from "../Common/AwesomeSpinner";
-import {Account} from "../Protos/larp/accounts_pb";
-import {EditProfile} from "./Profile/EditProfile";
-import {EditEmail} from "./Profile/EditEmail";
-import {EditAttendance} from "./Profile/EditAttendance";
+import {useMountEffect} from "../UseMountEffect";
+import AwesomeSpinner from "../../Common/AwesomeSpinner";
+import {Account} from "../../Protos/larp/accounts_pb";
+import {EditProfile} from "./EditProfile";
+import {EditEmail} from "./EditEmail";
+import {EditAttendance} from "./EditAttendance";
 
 function TabPanel(props: any) {
     const {children, value, index, ...other} = props;

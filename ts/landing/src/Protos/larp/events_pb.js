@@ -1,4 +1,6 @@
 // source: larp/events.proto
+// noinspection ES6ConvertVarToLetConst
+
 /**
  * @fileoverview
  * @enhanceable
@@ -143,7 +145,8 @@ proto.larp.EventComponent.prototype.toObject = function(opt_includeInstance) {
  */
 proto.larp.EventComponent.toObject = function(includeInstance, msg) {
   var f, obj = {
-    name: jspb.Message.getFieldWithDefault(msg, 1, "")
+    name: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    date: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
 
   if (includeInstance) {
@@ -184,6 +187,10 @@ proto.larp.EventComponent.deserializeBinaryFromReader = function(msg, reader) {
       var value = /** @type {string} */ (reader.readString());
       msg.setName(value);
       break;
+    case 2:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setDate(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -220,6 +227,13 @@ proto.larp.EventComponent.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getDate();
+  if (f.length > 0) {
+    writer.writeString(
+      2,
+      f
+    );
+  }
 };
 
 
@@ -238,6 +252,24 @@ proto.larp.EventComponent.prototype.getName = function() {
  */
 proto.larp.EventComponent.prototype.setName = function(value) {
   return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional string date = 2;
+ * @return {string}
+ */
+proto.larp.EventComponent.prototype.getDate = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.larp.EventComponent} returns this
+ */
+proto.larp.EventComponent.prototype.setDate = function(value) {
+  return jspb.Message.setProto3StringField(this, 2, value);
 };
 
 

@@ -12,8 +12,15 @@ import {Metadata} from "grpc-web";
 import {GameState} from "./Protos/larp/mw5e/fifthedition_pb";
 import {UpdateCacheRequest} from "./Protos/larp/mw5e/services_pb";
 import {CachedGameState} from "./CachedGameState";
-import {AccountResponse, EventListRequest, EventRsvpRequest, UpdateProfileRequest} from "./Protos/larp/services_pb";
+import {
+    AccountResponse,
+    EventListRequest,
+    EventRequest,
+    EventRsvpRequest,
+    UpdateProfileRequest
+} from "./Protos/larp/services_pb";
 import {Event, EventRsvp} from "./Protos/larp/events_pb";
+import {Character} from "./Protos/larp/mw5e/character_pb";
 
 export interface SessionCallback {
     callback: (() => void);
@@ -42,7 +49,6 @@ export class SessionService {
     private _account: Account.AsObject = new Account().toObject();
 
     private static readonly SessionIdKey = "MWL_SESSION_ID";
-    private static readonly AccountKey = "MWL_PROFILE";
 
     constructor() {
         const sessionId = localStorage.getItem(SessionService.SessionIdKey) ?? "";
@@ -288,8 +294,13 @@ export class SessionService {
         return response.toObject().eventList;
     }
 
-    async getEvent(id: number): Promise<Event.AsObject> {
-        return new Event().toObject();
+    async getEvent(id: string): Promise<Event.AsObject> {
+        const response = await larpUserClient.getEvent(new EventRequest().setEventId(id), this.getMetadata())
+        return response.toObject();
+    }
+
+    async getCharacters(): Promise<Character.AsObject[]> {
+        return [] as Character.AsObject[];
     }
 }
 

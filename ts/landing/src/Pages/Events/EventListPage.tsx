@@ -13,13 +13,13 @@ import {
 } from "@mui/material";
 import EventIcon from '@mui/icons-material/Event';
 import {Link, NavLink, useNavigate} from "react-router-dom";
-import AwesomeSpinner from "../Common/AwesomeSpinner";
-import {useMountEffect} from "./UseMountEffect";
+import AwesomeSpinner from "../../Common/AwesomeSpinner";
+import {useMountEffect} from "../UseMountEffect";
 import Enumerable from 'linq';
 import ReceiptIcon from '@mui/icons-material/Receipt';
-import PatreonLogo from '../PatreonLogo.svg';
-import { Event } from '../Protos/larp/events_pb';
-import sessionService from "../SessionService";
+import PatreonLogo from '../../PatreonLogo.svg';
+import { Event } from '../../Protos/larp/events_pb';
+import sessionService from "../../SessionService";
 
 function EventItems(props: { events: Event.AsObject[] }): any {
     function getCategory(event: Event.AsObject): string {
@@ -93,7 +93,7 @@ function EventItems(props: { events: Event.AsObject[] }): any {
     </List>;
 }
 
-export default function EventList() {
+export default function EventListPage() {
     const navigate = useNavigate();
     const [busy, setBusy] = React.useState(true);
     const [events, setEvents] = React.useState<Event.AsObject[]>([]);

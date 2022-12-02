@@ -1,10 +1,10 @@
 import * as React from 'react';
 import {useNavigate} from "react-router-dom";
-import {useMountEffect} from "./UseMountEffect";
+import {useMountEffect} from "../UseMountEffect";
 import {Container, Typography} from "@mui/material";
-import AwesomeSpinner from "../Common/AwesomeSpinner";
-import {Event} from "../Protos/larp/events_pb";
-import sessionService from "../SessionService";
+import AwesomeSpinner from "../../Common/AwesomeSpinner";
+import {Event} from "../../Protos/larp/events_pb";
+import sessionService from "../../SessionService";
 
 function EventViewItem(params: {event: Event.AsObject}) {
     const ev = params.event;
@@ -13,7 +13,7 @@ function EventViewItem(params: {event: Event.AsObject}) {
     </div>;
 }
 
-export default function EventView(params: { id: number }) {
+export default function EventViewPage(params: { id: string }) {
     const navigate = useNavigate();
     const [busy, setBusy] = React.useState(true);
     const [event, setEvent] = React.useState<Event.AsObject>({} as Event.AsObject);

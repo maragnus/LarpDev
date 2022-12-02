@@ -1,6 +1,5 @@
 import {LarpAuthenticationClient} from "./Protos/larp/AuthorizationServiceClientPb";
 import {
-    LarpAdminClient,
     LarpUserClient,
 } from "./Protos/larp/ServicesServiceClientPb";
 import {Mw5eClient} from "./Protos/larp/mw5e/ServicesServiceClientPb";
@@ -12,5 +11,5 @@ const host = location.hostname === 'localhost'
 
 export const larpAuthClient = new LarpAuthenticationClient(host, null, null);
 export const larpUserClient = new LarpUserClient(host, null, null);
-export const larpAdminClient = new LarpAdminClient(host, null, null);
 export const larpMw5eClient = new Mw5eClient(host, null, null);
+
