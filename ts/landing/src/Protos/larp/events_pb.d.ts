@@ -6,6 +6,9 @@ export class EventComponent extends jspb.Message {
   getName(): string;
   setName(value: string): EventComponent;
 
+  getDate(): string;
+  setDate(value: string): EventComponent;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): EventComponent.AsObject;
   static toObject(includeInstance: boolean, msg: EventComponent): EventComponent.AsObject;
@@ -17,6 +20,7 @@ export class EventComponent extends jspb.Message {
 export namespace EventComponent {
   export type AsObject = {
     name: string,
+    date: string,
   }
 }
 

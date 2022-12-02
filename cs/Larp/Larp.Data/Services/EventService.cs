@@ -10,6 +10,7 @@ public interface IEventService
         bool includeAttendance);
 
     Task<Protos.Event> Rsvp(string accountId, string eventId, EventRsvp rsvp);
+    Task<Protos.Event> GetEvent(string eventId);
 }
 
 public class EventService : IEventService
@@ -45,5 +46,13 @@ public class EventService : IEventService
     public Task<Protos.Event> Rsvp(string accountId, string eventId, EventRsvp rsvp)
     {
         throw new NotImplementedException();
+    }
+
+    public async Task<Protos.Event> GetEvent(string eventId)
+    {
+        var e = await _larpContext.Events
+            .Find(x => x.Id == eventId)
+            .FirstOrDefaultAsync();
+        return e.ToProto();
     }
 }

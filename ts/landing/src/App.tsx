@@ -1,16 +1,23 @@
 import React from 'react';
-import {Route, Routes} from 'react-router-dom';
+import {Route, Routes, useParams} from 'react-router-dom';
 import {Container, Paper} from "@mui/material";
 import './App.css';
 import Landing from "./Pages/Landing";
 import LandingNavigation from "./Common/LandingNavigation";
-import LoginPage from "./Pages/LoginPage";
-import ConfirmPage from "./Pages/ConfirmPage";
-import ProfilePage from "./Pages/ProfilePage";
+import LoginPage from "./Pages/Authentication/LoginPage";
+import ConfirmPage from "./Pages/Authentication/ConfirmPage";
+import ProfilePage from "./Pages/Profile/ProfilePage";
 import {useMountEffect} from "./Pages/UseMountEffect";
 import sessionService from "./SessionService";
 import AwesomeSpinner from "./Common/AwesomeSpinner";
-import EventList from "./Pages/EventList";
+import EventListPage from "./Pages/Events/EventListPage";
+import CharactersPage from "./Pages/Characters/CharactersPage";
+import EventViewPage from "./Pages/Events/EventViewPage";
+
+function EventViewPageProxy() {
+    const {eventId} = useParams();
+    return (<EventViewPage id={eventId!}/>);
+}
 
 function App() {
     const [busy, setBusy] = React.useState(true);
@@ -34,7 +41,9 @@ function App() {
                 <Route path="/login" element={<LoginPage/>}/>
                 <Route path="/confirm" element={<ConfirmPage/>}/>
                 <Route path="/profile" element={<ProfilePage/>}/>
-                <Route path="/events" element={<EventList/>}/>
+                <Route path="/events" element={<EventListPage/>}/>
+                <Route path="/events/:eventId" element={<EventViewPageProxy />}/>
+                <Route path="/characters" element={<CharactersPage/>}/>
             </Routes>
             <Paper sx={{position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000}} elevation={3}>
                 <LandingNavigation/>

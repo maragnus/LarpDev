@@ -129,6 +129,11 @@ public class UserGrpcService : LarpUser.LarpUserBase
         var ev = await _eventService.Rsvp(context.GetAccountId(), request.EventId, request.Rsvp);
         return ev;
     }
+
+    public override async Task<Event> GetEvent(EventRequest request, ServerCallContext context)
+    {
+        return await _eventService.GetEvent(request.EventId);
+    }
 }
 
 public class AdminGrpcService : LarpAdmin.LarpAdminBase

@@ -13,6 +13,7 @@ namespace Larp.Data.Seeder;
 public class LarpDataSeeder
 {
     private const string LarpResourceNamePrefix = "Larp.Data.Seeder.";
+    // ReSharper disable once InconsistentNaming
     private const string Mw5eResourceNamePrefix = LarpResourceNamePrefix + "Mw5e";
     private readonly ISystemClock _clock;
 
