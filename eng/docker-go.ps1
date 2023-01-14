@@ -1,0 +1,1 @@
+docker build -t larpdev -f Dockerfile .
