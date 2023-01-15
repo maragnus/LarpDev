@@ -11,78 +11,63 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddEnvironmentVariables();
 
-builder.Services.AddSingleton<ISystemClock, SystemClock>();
-
-builder.Services.AddGrpc(o =>
 {
-    o.EnableDetailedErrors = true;
-    o.ResponseCompressionLevel = CompressionLevel.SmallestSize;
-    o.Interceptors.Add<AuthInterceptor>();
-});
+    var services = builder.Services;
 
-builder.Services.AddCors(cors =>
-{
-    cors.AddDefaultPolicy(policy => policy
-        .AllowAnyMethod()
-        .AllowAnyOrigin()
-        .AllowAnyHeader());
-    cors.AddPolicy("GrpcCors", policy => policy
-        .WithMethods("POST", "OPTIONS")
-        .AllowAnyHeader()
-        .WithOrigins("https://localhost:5002", "https://mystwoodlanding.azurewebsites.net")
-        .WithExposedHeaders("Grpc-Status", "Grpc-Message"));
-});
+    services.AddSingleton<ISystemClock, SystemClock>();
 
-// Larp.Data
-builder.Services.AddSingleton<LarpDataCache>();
-builder.Services.AddScoped<IEventService, EventService>();
-builder.Services.AddScoped<IUserSessionManager, UserSessionManager>();
-builder.Services.Configure<UserSessionManagerOptions>(
-    builder.Configuration.GetSection(UserSessionManagerOptions.SectionName));
-builder.Services.AddScoped<LarpContext>();
-builder.Services.Configure<LarpDataOptions>(builder.Configuration.GetSection(LarpDataOptions.SectionName));
+    services.AddCors(cors =>
+    {
+        cors.AddDefaultPolicy(policy => policy
+            .AllowAnyMethod()
+            .AllowAnyOrigin()
+            .AllowAnyHeader());
+        cors.AddPolicy("ApiCors", policy => policy
+            .WithMethods("POST", "OPTIONS")
+            .AllowAnyHeader()
+            .WithOrigins("https://localhost:5002", "https://larp.maragnus.com")
+            .WithExposedHeaders("Grpc-Status", "Grpc-Message"));
+    });
 
-// Larp.Data.Seeder
-builder.Services.AddScoped<LarpDataSeeder>();
-builder.Services.AddStartupTask<LarpDataSeederStartupTask>();
+    // Larp.Data
+    services.AddSingleton<LarpDataCache>();
+    services.AddScoped<IEventService, EventService>();
+    services.AddScoped<IUserSessionManager, UserSessionManager>();
+    services.Configure<UserSessionManagerOptions>(
+        builder.Configuration.GetSection(UserSessionManagerOptions.SectionName));
+    services.AddScoped<LarpContext>();
+    services.Configure<LarpDataOptions>(builder.Configuration.GetSection(LarpDataOptions.SectionName));
 
-// Larp.WebService
-builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
-builder.Services.AddScoped<AuthenticationGrpcService>();
-builder.Services.AddScoped<IUserNotificationService, UserNotificationService>();
+    // Larp.Data.Seeder
+    services.AddScoped<LarpDataSeeder>();
+    services.AddStartupTask<LarpDataSeederStartupTask>();
+
+    // Larp.WebService
+    services.AddScoped<IAuthenticationService, AuthenticationService>();
+    services.AddScoped<AuthenticationGrpcService>();
+    services.AddScoped<IUserNotificationService, UserNotificationService>();
+}
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
+{
     app.UseDeveloperExceptionPage();
+    app.UseHsts();
+}
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-app.UseCors();
-app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true });
+async Task MessageHandler(HttpContext context)
+{
+    await context.Response.WriteAsJsonAsync(new { Success = true });
+}
 
+app.MapPost("/msg", MessageHandler);
 app.MapFallbackToFile("index.html");
 
-app.MapGrpcService<AuthenticationGrpcService>()
-    .EnableGrpcWeb()
-    .RequireCors("GrpcCors")
-    .AllowAnonymous();
-
-app.MapGrpcService<Mystwood5eGrpcService>()
-    .EnableGrpcWeb()
-    .RequireCors("GrpcCors")
-    .AllowAnonymous();
-
-app.MapGrpcService<UserGrpcService>()
-    .EnableGrpcWeb()
-    .RequireCors("GrpcCors")
-    .AllowAnonymous();
-
-app.MapGrpcService<AdminGrpcService>()
-    .EnableGrpcWeb()
-    .RequireCors("GrpcCors")
-    .AllowAnonymous();
+//app.MapControllers();
 
 app.Run();
