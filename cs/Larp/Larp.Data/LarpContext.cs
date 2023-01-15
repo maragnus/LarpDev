@@ -1,4 +1,5 @@
 ﻿using Larp.Data.Services;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
@@ -6,7 +7,7 @@ namespace Larp.Data;
 
 public class LarpContext
 {
-    public LarpContext(IOptions<LarpDataOptions> options, LarpDataCache cache)
+    public LarpContext(IOptions<LarpDataOptions> options, LarpDataCache cache, ILogger<LarpContext> logger)
     {
         var client = new MongoClient(options.Value.ConnectionString ??
                                      throw new MongoConfigurationException(
@@ -14,6 +15,10 @@ public class LarpContext
         var database = client.GetDatabase(options.Value.Database ??
                                           throw new MongoConfigurationException(
                                               "Database must be provided in options"));
+
+        logger.LogInformation("Configured MongoDB to connect to \"{ConnectionString}\" with \"{Database}\" database",
+            options.Value.ConnectionString, options.Value.Database );
+
         Accounts = database.GetCollection<Account>(nameof(Accounts));
         Attendances = database.GetCollection<Attendance>(nameof(Attendances));
         Events = database.GetCollection<Event>(nameof(Events));
