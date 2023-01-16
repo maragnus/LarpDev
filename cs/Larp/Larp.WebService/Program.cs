@@ -17,6 +17,15 @@ builder.Configuration.AddEnvironmentVariables();
 
     services.AddSingleton<ISystemClock, SystemClock>();
 
+    services.AddCors(cors =>
+        cors.AddPolicy("Default", policy => policy
+            .AllowCredentials()
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .WithOrigins("https://localhost:5002", "https://localhost:5001", "http://localhost:5000")
+        )
+    );
+
     // Larp.Data
     services.AddSingleton<LarpDataCache>();
     services.AddScoped<IEventService, EventService>();
@@ -36,6 +45,8 @@ builder.Configuration.AddEnvironmentVariables();
     services.AddScoped<IUserNotificationService, UserNotificationService>();
     services.AddSingleton<ProtobufControllerHub>();
     services.AddProtobufController<AuthController>();
+    services.AddProtobufController<UserController>();
+    services.AddProtobufController<Mw5eController>();
 }
 
 var app = builder.Build();
@@ -45,6 +56,8 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
     app.UseHsts();
 }
+
+app.UseCors("Default");
 
 var protobufHub = app.Services.GetRequiredService<ProtobufControllerHub>();
 app.MapPost("/msg/{service:alpha}/{method:alpha}", protobufHub.HandleRequest);

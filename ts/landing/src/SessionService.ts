@@ -1,4 +1,4 @@
-import {larpAuthClient, larpMw5eClient, larpUserClient} from "./LarpService";
+import {authRestService, larpMw5eService, userRestService} from "./LarpService";
 import {
     ConfirmLoginRequest,
     InitiateLoginRequest,
@@ -6,11 +6,9 @@ import {
     ValidateSessionRequest,
     ValidationResponseCode
 } from "./Protos/larp/authorization_pb";
-import {Empty, StringRequest} from "./Protos/larp/common_pb";
 import {Account} from "./Protos/larp/accounts_pb";
 import {Metadata} from "grpc-web";
 import {GameState} from "./Protos/larp/mw5e/fifthedition_pb";
-import {UpdateCacheRequest} from "./Protos/larp/mw5e/services_pb";
 import {CachedGameState} from "./CachedGameState";
 import {
     AccountResponse,
@@ -125,7 +123,8 @@ export class SessionService {
             return true;
 
         try {
-            await larpAuthClient.logout(new LogoutRequest().setSessionId(this._sessionId), null);
+            const request = new LogoutRequest().setSessionId(this._sessionId);
+            await authRestService.logout(request);
         }
         catch (e) {
             console.log("Logout failed");
@@ -142,7 +141,9 @@ export class SessionService {
         if (!isAuthenticated)
             return false;
 
-        const result = await larpAuthClient.validateSession(new ValidateSessionRequest().setSessionId(this._sessionId ?? ""), null);
+        const request = new ValidateSessionRequest().setSessionId(this._sessionId ?? "");
+        const result = await authRestService.validateSession(request);
+
         console.log("Validation result: " + result.getStatusCode());
         if (result.getStatusCode() === ValidationResponseCode.SUCCESS)
             return true;
@@ -165,7 +166,7 @@ export class SessionService {
 
     async login(email: string): Promise<LoginStatus> {
         this._email = email;
-        const result = await larpAuthClient.initiateLogin(new InitiateLoginRequest().setEmail(email), null);
+        const result = await authRestService.initiateLogin(new InitiateLoginRequest().setEmail(email));
         switch (result.getStatusCode()) {
             case ValidationResponseCode.SUCCESS:
                 return LoginStatus.Success;
@@ -176,7 +177,7 @@ export class SessionService {
 
     async confirm(email: string, code: string): Promise<ConfirmStatus> {
         const req = new ConfirmLoginRequest().setEmail(email).setCode(code);
-        const result = await larpAuthClient.confirmLogin( req, null);
+        const result = await authRestService.confirmLogin(req);
         switch (result.getStatusCode()) {
             case ValidationResponseCode.SUCCESS:
                 // TODO cache profile
@@ -204,7 +205,7 @@ export class SessionService {
     }
 
     async getAccount(): Promise<Account.AsObject> {
-        const result = await larpUserClient.getAccount(new Empty(), this.getMetadata());
+        const result = await userRestService.getAccount();
         return this.returnAccount(result);
     }
 
@@ -217,8 +218,7 @@ export class SessionService {
         // Initial load or check for updates
         try {
             const lastRevision = this._mw5eGameState.getRevision() ?? "";
-            const req = new UpdateCacheRequest().setLastUpdated(lastRevision)
-            const response = await larpMw5eClient.getGameState(req, null);
+            const response = await larpMw5eService.getGameState(lastRevision);
             if (response.hasGameState()) {
                 console.log("Cached GameState updated for " + cacheName)
                 const newState: GameState.AsObject = response.getGameState()?.toObject()!;
@@ -250,7 +250,7 @@ export class SessionService {
         if (notes && notes !== account.notes)
             request.setNotes(notes);
 
-        const result = await larpUserClient.updateProfile(request, this.getMetadata());
+        const result = await userRestService.updateProfile(request);
         return this.returnAccount(result);
     }
 
@@ -261,20 +261,17 @@ export class SessionService {
     }
 
     async addEmail(email: string): Promise<Account.AsObject> {
-        const request = new StringRequest().setValue(email);
-        const result = await larpUserClient.addEmail(request, this.getMetadata());
+        const result = await userRestService.addEmail(email);
         return this.returnAccount(result);
     }
 
     async removeEmail(email: string): Promise<Account.AsObject> {
-        const request = new StringRequest().setValue(email);
-        const result = await larpUserClient.removeEmail(request, this.getMetadata());
+        const result = await userRestService.removeEmail(email);
         return this.returnAccount(result);
     }
 
     async preferredEmail(email: string): Promise<Account.AsObject> {
-        const request = new StringRequest().setValue(email);
-        const result = await larpUserClient.preferEmail(request, this.getMetadata());
+        const result = await userRestService.preferEmail(email);
         return this.returnAccount(result);
     }
 
@@ -282,7 +279,7 @@ export class SessionService {
         const request = new EventRsvpRequest()
             .setEventId(id)
             .setRsvp(rsvp);
-        await larpUserClient.rsvpEvent(request, this.getMetadata());
+        await userRestService.rsvpEvent(request);
     }
 
     async getEvents(includePast: boolean, includeFuture: boolean, includeAttendance: boolean): Promise<Event.AsObject[]> {
@@ -290,12 +287,12 @@ export class SessionService {
             .setIncludePast(includePast)
             .setIncludeFuture(includeFuture)
             .setIncludeAttendance(includeAttendance);
-        const response = await larpUserClient.getEvents(request, this.getMetadata());
+        const response = await userRestService.getEvents(request);
         return response.toObject().eventList;
     }
 
     async getEvent(id: string): Promise<Event.AsObject> {
-        const response = await larpUserClient.getEvent(new EventRequest().setEventId(id), this.getMetadata())
+        const response = await userRestService.getEvent(new EventRequest().setEventId(id))
         return response.toObject();
     }
 
