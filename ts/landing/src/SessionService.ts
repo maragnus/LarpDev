@@ -1,4 +1,4 @@
-import {authRestService, larpMw5eService, userRestService} from "./LarpService";
+import {authRestService, larpMw5eService, larpRestService, userRestService} from "./LarpService";
 import {
     ConfirmLoginRequest,
     InitiateLoginRequest,
@@ -7,7 +7,6 @@ import {
     ValidationResponseCode
 } from "./Protos/larp/authorization_pb";
 import {Account} from "./Protos/larp/accounts_pb";
-import {Metadata} from "grpc-web";
 import {GameState} from "./Protos/larp/mw5e/fifthedition_pb";
 import {CachedGameState} from "./CachedGameState";
 import {
@@ -42,7 +41,6 @@ export class SessionService {
     private _callbacks: SessionCallback[] = [];
     private _nextSubscriptionId: number = 0;
     private _email?: string;
-    private _sessionId?: string;
     private _mw5eGameState = new CachedGameState<GameState.AsObject>("mw5e");
     private _account: Account.AsObject = new Account().toObject();
 
@@ -50,27 +48,26 @@ export class SessionService {
 
     constructor() {
         const sessionId = localStorage.getItem(SessionService.SessionIdKey) ?? "";
-        if (sessionId !== undefined)
-            this._sessionId = sessionId;
+        larpRestService.sessionId = sessionId ?? "";
 
-        this.startInterval();
+        this.startIntervals();
     }
 
     getEmail(): string | undefined {
         return this._email;
     }
 
-    startInterval() {
-        // Make sure that all sessions identify if we are signed out
+    startIntervals() {
+        // Make sure that all sessions across tabs identify if we are signed out
         setInterval(function () {
             let sessionId: string | undefined = localStorage.getItem(SessionService.SessionIdKey) ?? "";
             if (sessionId === "") sessionId = undefined;
 
-            if (sessionId !== sessionService._sessionId)
+            if (sessionId !== larpRestService.sessionId)
                 sessionService.updateState(sessionId);
         }, 1000);
 
-        setTimeout(async function() {
+        setTimeout(async function () {
             await sessionService.validateSession();
         }, 1);
 
@@ -80,11 +77,11 @@ export class SessionService {
     }
 
     isAuthenticated(): boolean {
-        return this._sessionId !== undefined && this._sessionId !== "";
+        return larpRestService !== undefined && larpRestService.sessionId !== "" && larpRestService.sessionId !== "bypass";
     }
 
     updateState(sessionId?: string): void {
-        this._sessionId = sessionId;
+        larpRestService.sessionId = sessionId ?? "";
         localStorage.setItem(SessionService.SessionIdKey, sessionId ?? "");
         this.notifySubscribers();
     }
@@ -119,11 +116,11 @@ export class SessionService {
     }
 
     async logout(): Promise<boolean> {
-        if (this._sessionId === undefined)
+        if (!this.isAuthenticated())
             return true;
 
         try {
-            const request = new LogoutRequest().setSessionId(this._sessionId);
+            const request = new LogoutRequest().setSessionId(larpRestService.sessionId);
             await authRestService.logout(request);
         }
         catch (e) {
@@ -137,11 +134,10 @@ export class SessionService {
     }
 
     async validateSession(): Promise<boolean> {
-        const isAuthenticated = (this._sessionId?.length ?? 0) > 0;
-        if (!isAuthenticated)
+        if (!this.isAuthenticated())
             return false;
 
-        const request = new ValidateSessionRequest().setSessionId(this._sessionId ?? "");
+        const request = new ValidateSessionRequest().setSessionId(larpRestService.sessionId);
         const result = await authRestService.validateSession(request);
 
         console.log("Validation result: " + result.getStatusCode());
@@ -196,12 +192,6 @@ export class SessionService {
 
     isAdmin() {
         return this._account.isSuperAdmin;
-    }
-
-    getMetadata(): Metadata {
-        return {
-            "x-session-id": this._sessionId ?? "invalid"
-        };
     }
 
     async getAccount(): Promise<Account.AsObject> {

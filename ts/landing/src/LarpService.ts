@@ -26,13 +26,16 @@ const host = location.hostname === 'localhost'
     : 'http://larp.maragnus.com/msg/';
 
 class LarpRestService {
+    public sessionId: string = 'bypass';
+
     async get<TResponse = any>(url: string, request: any, deserialize: (data: Uint8Array) => TResponse): Promise<TResponse> {
         const response = await fetch(host + url, {
             method: 'POST',
             mode: 'cors',
             cache: 'no-cache',
             headers: {
-                'Content-Type': 'application/x-protobuf'
+                'Content-Type': 'application/x-protobuf',
+                'x-session-id': this.sessionId
             },
             redirect: 'error',
             referrerPolicy: 'no-referrer',
@@ -48,7 +51,8 @@ class LarpRestService {
             mode: 'cors',
             cache: 'no-cache',
             headers: {
-                'Content-Type': 'application/x-protobuf'
+                'Content-Type': 'application/x-protobuf',
+                'x-session-id': this.sessionId
             },
             redirect: 'error',
             referrerPolicy: 'no-referrer',
@@ -57,65 +61,65 @@ class LarpRestService {
     }
 }
 
-const rest = new LarpRestService();
+export const larpRestService = new LarpRestService();
 
 class AuthRestService {
     async initiateLogin(request: InitiateLoginRequest): Promise<InitiateLoginResponse> {
-        return await rest.get("Auth/InitiateLogin", request, InitiateLoginResponse.deserializeBinary)
+        return await larpRestService.get("Auth/InitiateLogin", request, InitiateLoginResponse.deserializeBinary)
     }
 
     async confirmLogin(request: ConfirmLoginRequest): Promise<ConfirmLoginResponse> {
-        return await rest.get("Auth/ConfirmLogin", request, ConfirmLoginResponse.deserializeBinary)
+        return await larpRestService.get("Auth/ConfirmLogin", request, ConfirmLoginResponse.deserializeBinary)
     }
 
     async validateSession(request: ValidateSessionRequest): Promise<ValidateSessionResponse> {
-        return await rest.get("Auth/ValidateSession", request, ValidateSessionResponse.deserializeBinary)
+        return await larpRestService.get("Auth/ValidateSession", request, ValidateSessionResponse.deserializeBinary)
     }
 
     async logout(request: LogoutRequest): Promise<LogoutResponse> {
-        return await rest.get("Auth/Logout", request, LogoutResponse.deserializeBinary)
+        return await larpRestService.get("Auth/Logout", request, LogoutResponse.deserializeBinary)
     }
 
 }
 
 class UserRestService {
     async addEmail(request: string): Promise<AccountResponse> {
-        return await rest.get("User/AddEmail", new StringRequest().setValue(request), AccountResponse.deserializeBinary)
+        return await larpRestService.get("User/AddEmail", new StringRequest().setValue(request), AccountResponse.deserializeBinary)
     }
 
     async removeEmail(request: string): Promise<AccountResponse> {
-        return await rest.get("User/PreferEmail", new StringRequest().setValue(request), AccountResponse.deserializeBinary)
+        return await larpRestService.get("User/PreferEmail", new StringRequest().setValue(request), AccountResponse.deserializeBinary)
     }
 
     async preferEmail(request: string): Promise<AccountResponse> {
-        return await rest.get("User/PreferEmail", new StringRequest().setValue(request), AccountResponse.deserializeBinary)
+        return await larpRestService.get("User/PreferEmail", new StringRequest().setValue(request), AccountResponse.deserializeBinary)
     }
 
     async updateProfile(request: UpdateProfileRequest): Promise<AccountResponse> {
-        return await rest.get("User/UpdateProfile", request, AccountResponse.deserializeBinary)
+        return await larpRestService.get("User/UpdateProfile", request, AccountResponse.deserializeBinary)
     }
 
     async getAccount(): Promise<AccountResponse> {
-        return await rest.get("User/GetAccount", new Empty(), AccountResponse.deserializeBinary)
+        return await larpRestService.get("User/GetAccount", new Empty(), AccountResponse.deserializeBinary)
     }
 
     async getEvents(request: EventListRequest): Promise<EventListResponse> {
-        return await rest.get("User/GetEvents", request, EventListResponse.deserializeBinary)
+        return await larpRestService.get("User/GetEvents", request, EventListResponse.deserializeBinary)
     }
 
     async rsvpEvent(request: EventRsvpRequest): Promise<Event> {
-        return await rest.get("User/RsvpEvent", request, Event.deserializeBinary)
+        return await larpRestService.get("User/RsvpEvent", request, Event.deserializeBinary)
     }
 
     async getEvent(request: EventRequest): Promise<Event> {
-        return await rest.get("User/GetEvent", request, Event.deserializeBinary)
+        return await larpRestService.get("User/GetEvent", request, Event.deserializeBinary)
     }
 }
 
 class LarpMw5eService {
     async getGameState(lastRevision: string): Promise<GameStateResponse> {
         const request = new UpdateCacheRequest().setLastUpdated(lastRevision);
-        return await rest.get("Mw5e/GetGameState", request, GameStateResponse.deserializeBinary);
+        return await larpRestService.get("Mw5e/GetGameState", request, GameStateResponse.deserializeBinary);
     }
 }
 

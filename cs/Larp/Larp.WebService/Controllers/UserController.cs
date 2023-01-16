@@ -3,26 +3,13 @@ using Larp.Data.Services;
 using Larp.Protos;
 using Larp.Protos.Services;
 using Larp.WebService.GrpcServices;
-using Larp.WebService.ProtobufControllers;
 using Microsoft.Extensions.Internal;
 using MongoDB.Driver;
 
 namespace Larp.WebService.Controllers;
 
-public class SessionContext
-{
-    public string SessionId => "";
-    public string GetAccountId() => SessionId;
-    public Data.Account GetAccount() => null!;
-}
-
-public abstract class SessionProtobufController : ProtobufController
-{
-    protected SessionContext SessionContext { get; } = new SessionContext();
-}
-
 [PublicAPI]
-public class UserController : SessionProtobufController
+public class UserController : SessionController
 {
     private readonly ISystemClock _clock;
     private readonly IEventService _eventService;
@@ -37,21 +24,21 @@ public class UserController : SessionProtobufController
 
     public async Task<AccountResponse> AddEmail(StringRequest request)
     {
-        var accountId = SessionContext.GetAccountId();
+        var accountId = SessionContext.AccountId;
         await _userSessionManager.AddEmailAddress(accountId, request.Value);
         return await GetAccountResponse(accountId);
     }
 
     public async Task<AccountResponse> PreferEmail(StringRequest request)
     {
-        var accountId = SessionContext.GetAccountId();
+        var accountId = SessionContext.AccountId;
         await _userSessionManager.PreferEmailAddress(accountId, request.Value);
         return await GetAccountResponse(accountId);
     }
 
     public async Task<AccountResponse> RemoveEmail(StringRequest request)
     {
-        var accountId = SessionContext.GetAccountId();
+        var accountId = SessionContext.AccountId;
         await _userSessionManager.RemoveEmailAddress(accountId, request.Value);
         return await GetAccountResponse(accountId);
     }
@@ -67,10 +54,10 @@ public class UserController : SessionProtobufController
 
     public async Task<AccountResponse> UpdateProfile(UpdateProfileRequest request)
     {
-        var accountId = SessionContext.GetAccountId();
+        var accountId = SessionContext.AccountId;
 
         if (!request.HasName && !request.HasPhone && !request.HasLocation)
-            return new AccountResponse() { Account = SessionContext.GetAccount().ToProto() };
+            return new AccountResponse() { Account = SessionContext.Account!.ToProto() };
 
         await _userSessionManager.UpdateUserAccount(accountId, builder =>
         {
@@ -86,12 +73,12 @@ public class UserController : SessionProtobufController
             return update;
         });
 
-        return new AccountResponse() { Account = SessionContext.GetAccount().ToProto() };
+        return new AccountResponse() { Account = SessionContext.Account!.ToProto() };
     }
 
     public async Task<AccountResponse> GetAccount(Empty request)
     {
-        var account = await _userSessionManager.GetUserAccount(SessionContext.GetAccountId())
+        var account = await _userSessionManager.GetUserAccount(SessionContext.AccountId)
                       ?? throw new ResponseException("Account not found");
         return new AccountResponse() { Account = account.ToProto() };
     }
@@ -99,7 +86,7 @@ public class UserController : SessionProtobufController
     public async Task<EventListResponse> GetEvents(EventListRequest request)
     {
         var events = await _eventService.ListEventsForAccount(
-            SessionContext.GetAccountId(),
+            SessionContext.AccountId,
             request.IncludePast,
             request.IncludeFuture,
             request.IncludeAttendance);
@@ -111,7 +98,7 @@ public class UserController : SessionProtobufController
 
     public async Task<Event> RsvpEvent(EventRsvpRequest request)
     {
-        var ev = await _eventService.Rsvp(SessionContext.GetAccountId(), request.EventId, request.Rsvp);
+        var ev = await _eventService.Rsvp(SessionContext.AccountId, request.EventId, request.Rsvp);
         return ev;
     }
 
