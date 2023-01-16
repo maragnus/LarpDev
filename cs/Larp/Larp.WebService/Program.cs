@@ -25,7 +25,7 @@ builder.Configuration.AddEnvironmentVariables();
             .AllowAnyHeader()
             .AllowAnyMethod()
             .WithOrigins("https://localhost:5002", "https://localhost:5001", "http://localhost:5000",
-                "http://larp.maragnus.com", "https://larp.maragnus.com")
+                "https://larp.maragnus.com")
         )
     );
 

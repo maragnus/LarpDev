@@ -23,7 +23,7 @@ import {GameStateResponse, UpdateCacheRequest} from "./Protos/larp/mw5e/services
 // eslint-disable-next-line no-restricted-globals
 const host = location.hostname === 'localhost'
     ? 'https://localhost:5001/msg/'
-    : 'http://larp.maragnus.com/msg/';
+    : 'https://larp.maragnus.com/msg/';
 
 class LarpRestService {
     public sessionId: string = 'bypass';
