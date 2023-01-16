@@ -125,8 +125,9 @@ public static class ProtobufControllerExtensions
     public static IServiceCollection AddProtobufController<TController>(this IServiceCollection serviceCollection)
         where TController : ProtobufController
     {
-        if (serviceCollection.FirstOrDefault(x => x.ImplementationType == typeof(ProtobufControllerMap))
-                ?.ImplementationInstance is not ProtobufControllerMap map)
+        if (serviceCollection
+                .FirstOrDefault(x => x.ServiceType == typeof(ProtobufControllerMap))?
+                .ImplementationInstance is not ProtobufControllerMap map)
         {
             map = new ProtobufControllerMap();
             serviceCollection.AddSingleton(map);
