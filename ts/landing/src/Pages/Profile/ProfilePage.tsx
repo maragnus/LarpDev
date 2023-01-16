@@ -42,6 +42,9 @@ export default function ProfilePage() {
     const [value, setValue] = React.useState(0);
     const [account, setAccount] = React.useState((new Account()).toObject(true));
 
+    if (!sessionService.isAuthenticated())
+        navigate("/");
+
     const handleChange = (event: any, newValue: number) => {
         setValue(newValue);
     };

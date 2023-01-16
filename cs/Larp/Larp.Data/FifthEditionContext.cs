@@ -8,10 +8,10 @@ namespace Larp.Data;
 
 public class FifthEditionContext
 {
-    private readonly LarpDataCache _cache;
     public const string PrefixName = "Mw5e";
     private const string GameStateCacheName = PrefixName + "." + nameof(GameState);
-    
+    private readonly LarpDataCache _cache;
+
     public FifthEditionContext(IMongoDatabase database, LarpDataCache cache)
     {
         _cache = cache;
@@ -25,20 +25,21 @@ public class FifthEditionContext
 
     public async ValueTask<GameState> GetGameState()
     {
-        if (_cache.TryGetValue(GameStateCacheName, out GameState gameState)) 
+        if (_cache.TryGetValue(GameStateCacheName, out GameState gameState))
             return gameState;
-        
+
         var bson = await GameStates.Find(FilterDefinition<BsonDocument>.Empty).FirstAsync();
+        bson.Remove("_id");
         return _cache.Set(GameStateCacheName, bson.ToMessage<GameState>());
     }
 
     public async Task SetGameState(GameState gameState)
     {
         _cache.Set(GameStateCacheName, gameState);
-        
+
         await GameStates.ReplaceOneAsync(
             Builders<BsonDocument>.Filter.Empty,
             gameState.ToBsonDocument(),
-            new ReplaceOptions { IsUpsert = true});
+            new ReplaceOptions { IsUpsert = true });
     }
 }

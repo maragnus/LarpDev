@@ -1,23 +1,23 @@
 ﻿using System.Collections.Concurrent;
+using System.Net;
 using Google.Protobuf;
 
 namespace Larp.WebService.ProtobufControllers;
 
 public class ProtobufControllerHub
 {
+    private const string ProtobufContentType = "application/x-protobuf";
     private readonly ProtobufControllerMap _map;
     private readonly ConcurrentDictionary<Type, Func<Stream, IMessage>> _parsers = new();
-    private readonly IServiceProvider _serviceProvider;
 
-    public ProtobufControllerHub(ProtobufControllerMap map, IServiceProvider serviceProvider)
+    public ProtobufControllerHub(ProtobufControllerMap map)
     {
         _map = map;
-        _serviceProvider = serviceProvider;
     }
 
     private async Task<object> ReadRequestMessage(Type type, HttpRequest request)
     {
-        if (!_parsers!.TryGetValue(type, out var parse))
+        if (!_parsers.TryGetValue(type, out var parse))
             parse = FindParserMethod(type);
 
         var memory = new MemoryStream((int)(request.ContentLength ?? 512));
@@ -30,7 +30,7 @@ public class ProtobufControllerHub
     {
         var parserProperty = messageType.GetProperty("Parser")!;
         var parser = parserProperty.GetValue(parserProperty)!;
-        var method = parserProperty.PropertyType.GetMethod("ParseFrom", new Type[] { typeof(Stream) })!;
+        var method = parserProperty.PropertyType.GetMethod("ParseFrom", new[] { typeof(Stream) })!;
         IMessage Parse(Stream s) => (IMessage)method.Invoke(parser, new[] { (object)s })!;
         _parsers.TryAdd(messageType, Parse);
         return Parse;
@@ -38,28 +38,37 @@ public class ProtobufControllerHub
 
     private async Task WriteResponseMessage(IMessage response, HttpContext context)
     {
-        context.Response.ContentType = "application/x-protobuf";
+        context.Response.ContentType = ProtobufContentType;
         await context.Response.Body.WriteAsync(response.ToByteArray());
     }
 
     public async Task HandleRequest(string service, string method, HttpContext context,
+        IServiceProvider serviceProvider,
         CancellationToken cancellationToken)
     {
         // Find the Controller and Method
         var info = _map.Get(service, method);
         if (info == null)
         {
-            context.Response.StatusCode = 404;
+            context.Response.StatusCode = (int)HttpStatusCode.NotFound;
             return;
         }
 
-        // Create a scoped area
-        await using var scope = _serviceProvider.CreateAsyncScope();
+        var logger =
+            (ILogger)serviceProvider.GetRequiredService(typeof(ILogger<>).MakeGenericType(info.ControllerType));
 
         // Instantiate the Controller
-        var controller = (ProtobufController)scope.ServiceProvider.GetRequiredService(info.ControllerType);
+        var controller = (ProtobufController)serviceProvider.GetRequiredService(info.ControllerType);
 
-        await controller.BeforeRequest(context);
+        controller.LoggerInternal = logger;
+        controller.HttpContextInternal = context;
+
+        {
+            var beforeRequestHandler = new RequestHandler(context);
+            await controller.BeforeRequest(beforeRequestHandler);
+            if (beforeRequestHandler.IsRequestCompleted)
+                return;
+        }
 
         var parameters = info.HasRequestMessage
             ? new[] { await ReadRequestMessage(info.RequestMessageType!, context.Request) }
@@ -78,16 +87,20 @@ public class ProtobufControllerHub
             response = info.MethodInfo.Invoke(controller, parameters);
         }
 
-        var handled = await controller.BeforeResponse(context);
-
-        if (!handled)
         {
-            // Write the response
-            context.Response.StatusCode = 200;
-
-            if (info.HasResponseMessage)
-                await WriteResponseMessage(response, context);
+            var beforeResponseHandler = new RequestHandler(context);
+            await controller.BeforeResponse(beforeResponseHandler);
+            if (beforeResponseHandler.IsRequestCompleted)
+                return;
         }
+
+        // Write the response
+        context.Response.StatusCode = info.HasResponseMessage
+            ? (int)HttpStatusCode.OK
+            : (int)HttpStatusCode.NoContent;
+
+        if (info.HasResponseMessage)
+            await WriteResponseMessage(response, context);
 
         await controller.AfterResponse(context);
     }

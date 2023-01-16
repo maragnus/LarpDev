@@ -1,4 +1,4 @@
-import {larpAuthClient, larpMw5eClient, larpUserClient} from "./LarpService";
+import {authRestService, larpMw5eService, larpRestService, userRestService} from "./LarpService";
 import {
     ConfirmLoginRequest,
     InitiateLoginRequest,
@@ -6,11 +6,8 @@ import {
     ValidateSessionRequest,
     ValidationResponseCode
 } from "./Protos/larp/authorization_pb";
-import {Empty, StringRequest} from "./Protos/larp/common_pb";
 import {Account} from "./Protos/larp/accounts_pb";
-import {Metadata} from "grpc-web";
 import {GameState} from "./Protos/larp/mw5e/fifthedition_pb";
-import {UpdateCacheRequest} from "./Protos/larp/mw5e/services_pb";
 import {CachedGameState} from "./CachedGameState";
 import {
     AccountResponse,
@@ -44,7 +41,6 @@ export class SessionService {
     private _callbacks: SessionCallback[] = [];
     private _nextSubscriptionId: number = 0;
     private _email?: string;
-    private _sessionId?: string;
     private _mw5eGameState = new CachedGameState<GameState.AsObject>("mw5e");
     private _account: Account.AsObject = new Account().toObject();
 
@@ -52,27 +48,26 @@ export class SessionService {
 
     constructor() {
         const sessionId = localStorage.getItem(SessionService.SessionIdKey) ?? "";
-        if (sessionId !== undefined)
-            this._sessionId = sessionId;
+        larpRestService.sessionId = sessionId ?? "";
 
-        this.startInterval();
+        this.startIntervals();
     }
 
     getEmail(): string | undefined {
         return this._email;
     }
 
-    startInterval() {
-        // Make sure that all sessions identify if we are signed out
+    startIntervals() {
+        // Make sure that all sessions across tabs identify if we are signed out
         setInterval(function () {
             let sessionId: string | undefined = localStorage.getItem(SessionService.SessionIdKey) ?? "";
             if (sessionId === "") sessionId = undefined;
 
-            if (sessionId !== sessionService._sessionId)
+            if (sessionId !== larpRestService.sessionId)
                 sessionService.updateState(sessionId);
         }, 1000);
 
-        setTimeout(async function() {
+        setTimeout(async function () {
             await sessionService.validateSession();
         }, 1);
 
@@ -82,11 +77,11 @@ export class SessionService {
     }
 
     isAuthenticated(): boolean {
-        return this._sessionId !== undefined && this._sessionId !== "";
+        return larpRestService !== undefined && larpRestService.sessionId !== "" && larpRestService.sessionId !== "bypass";
     }
 
     updateState(sessionId?: string): void {
-        this._sessionId = sessionId;
+        larpRestService.sessionId = sessionId ?? "";
         localStorage.setItem(SessionService.SessionIdKey, sessionId ?? "");
         this.notifySubscribers();
     }
@@ -121,11 +116,12 @@ export class SessionService {
     }
 
     async logout(): Promise<boolean> {
-        if (this._sessionId === undefined)
+        if (!this.isAuthenticated())
             return true;
 
         try {
-            await larpAuthClient.logout(new LogoutRequest().setSessionId(this._sessionId), null);
+            const request = new LogoutRequest().setSessionId(larpRestService.sessionId);
+            await authRestService.logout(request);
         }
         catch (e) {
             console.log("Logout failed");
@@ -138,11 +134,12 @@ export class SessionService {
     }
 
     async validateSession(): Promise<boolean> {
-        const isAuthenticated = (this._sessionId?.length ?? 0) > 0;
-        if (!isAuthenticated)
+        if (!this.isAuthenticated())
             return false;
 
-        const result = await larpAuthClient.validateSession(new ValidateSessionRequest().setSessionId(this._sessionId ?? ""), null);
+        const request = new ValidateSessionRequest().setSessionId(larpRestService.sessionId);
+        const result = await authRestService.validateSession(request);
+
         console.log("Validation result: " + result.getStatusCode());
         if (result.getStatusCode() === ValidationResponseCode.SUCCESS)
             return true;
@@ -165,7 +162,7 @@ export class SessionService {
 
     async login(email: string): Promise<LoginStatus> {
         this._email = email;
-        const result = await larpAuthClient.initiateLogin(new InitiateLoginRequest().setEmail(email), null);
+        const result = await authRestService.initiateLogin(new InitiateLoginRequest().setEmail(email));
         switch (result.getStatusCode()) {
             case ValidationResponseCode.SUCCESS:
                 return LoginStatus.Success;
@@ -176,7 +173,7 @@ export class SessionService {
 
     async confirm(email: string, code: string): Promise<ConfirmStatus> {
         const req = new ConfirmLoginRequest().setEmail(email).setCode(code);
-        const result = await larpAuthClient.confirmLogin( req, null);
+        const result = await authRestService.confirmLogin(req);
         switch (result.getStatusCode()) {
             case ValidationResponseCode.SUCCESS:
                 // TODO cache profile
@@ -197,14 +194,8 @@ export class SessionService {
         return this._account.isSuperAdmin;
     }
 
-    getMetadata(): Metadata {
-        return {
-            "x-session-id": this._sessionId ?? "invalid"
-        };
-    }
-
     async getAccount(): Promise<Account.AsObject> {
-        const result = await larpUserClient.getAccount(new Empty(), this.getMetadata());
+        const result = await userRestService.getAccount();
         return this.returnAccount(result);
     }
 
@@ -217,8 +208,7 @@ export class SessionService {
         // Initial load or check for updates
         try {
             const lastRevision = this._mw5eGameState.getRevision() ?? "";
-            const req = new UpdateCacheRequest().setLastUpdated(lastRevision)
-            const response = await larpMw5eClient.getGameState(req, null);
+            const response = await larpMw5eService.getGameState(lastRevision);
             if (response.hasGameState()) {
                 console.log("Cached GameState updated for " + cacheName)
                 const newState: GameState.AsObject = response.getGameState()?.toObject()!;
@@ -250,7 +240,7 @@ export class SessionService {
         if (notes && notes !== account.notes)
             request.setNotes(notes);
 
-        const result = await larpUserClient.updateProfile(request, this.getMetadata());
+        const result = await userRestService.updateProfile(request);
         return this.returnAccount(result);
     }
 
@@ -261,20 +251,17 @@ export class SessionService {
     }
 
     async addEmail(email: string): Promise<Account.AsObject> {
-        const request = new StringRequest().setValue(email);
-        const result = await larpUserClient.addEmail(request, this.getMetadata());
+        const result = await userRestService.addEmail(email);
         return this.returnAccount(result);
     }
 
     async removeEmail(email: string): Promise<Account.AsObject> {
-        const request = new StringRequest().setValue(email);
-        const result = await larpUserClient.removeEmail(request, this.getMetadata());
+        const result = await userRestService.removeEmail(email);
         return this.returnAccount(result);
     }
 
     async preferredEmail(email: string): Promise<Account.AsObject> {
-        const request = new StringRequest().setValue(email);
-        const result = await larpUserClient.preferEmail(request, this.getMetadata());
+        const result = await userRestService.preferEmail(email);
         return this.returnAccount(result);
     }
 
@@ -282,7 +269,7 @@ export class SessionService {
         const request = new EventRsvpRequest()
             .setEventId(id)
             .setRsvp(rsvp);
-        await larpUserClient.rsvpEvent(request, this.getMetadata());
+        await userRestService.rsvpEvent(request);
     }
 
     async getEvents(includePast: boolean, includeFuture: boolean, includeAttendance: boolean): Promise<Event.AsObject[]> {
@@ -290,12 +277,12 @@ export class SessionService {
             .setIncludePast(includePast)
             .setIncludeFuture(includeFuture)
             .setIncludeAttendance(includeAttendance);
-        const response = await larpUserClient.getEvents(request, this.getMetadata());
+        const response = await userRestService.getEvents(request);
         return response.toObject().eventList;
     }
 
     async getEvent(id: string): Promise<Event.AsObject> {
-        const response = await larpUserClient.getEvent(new EventRequest().setEventId(id), this.getMetadata())
+        const response = await userRestService.getEvent(new EventRequest().setEventId(id))
         return response.toObject();
     }
 
