@@ -24,7 +24,8 @@ builder.Configuration.AddEnvironmentVariables();
             .AllowCredentials()
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .WithOrigins("https://localhost:5002", "https://localhost:5001", "http://localhost:5000")
+            .WithOrigins("https://localhost:5002", "https://localhost:5001", "http://localhost:5000",
+                "http://larp.maragnus.com", "https://larp.maragnus.com")
         )
     );
 
@@ -60,6 +61,9 @@ if (app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
 app.UseCors("Default");
 
 app.MapPost("/msg/{service}/{method}",
