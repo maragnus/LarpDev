@@ -16,9 +16,6 @@ public class LarpContext
                                           throw new MongoConfigurationException(
                                               "Database must be provided in options"));
 
-        logger.LogInformation("Configured MongoDB to connect to \"{ConnectionString}\" with \"{Database}\" database",
-            options.Value.ConnectionString, options.Value.Database );
-
         Accounts = database.GetCollection<Account>(nameof(Accounts));
         Attendances = database.GetCollection<Attendance>(nameof(Attendances));
         Events = database.GetCollection<Event>(nameof(Events));
