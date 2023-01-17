@@ -3,7 +3,6 @@ using Larp.Data;
 using Larp.Data.Seeder;
 using Larp.Data.Services;
 using Larp.WebService.Controllers;
-using Larp.WebService.GrpcServices;
 using Larp.WebService.LarpServices;
 using Larp.WebService.ProtobufControllers;
 using Larp.WebService.Services;
@@ -44,7 +43,6 @@ builder.Configuration.AddEnvironmentVariables();
 
     // Larp.WebService
     services.AddScoped<IAuthenticationService, AuthenticationService>();
-    services.AddScoped<AuthenticationGrpcService>();
     services.AddScoped<IUserNotificationService, UserNotificationService>();
     services.AddSingleton<ProtobufControllerHub>();
     services.AddProtobufController<AuthController>();

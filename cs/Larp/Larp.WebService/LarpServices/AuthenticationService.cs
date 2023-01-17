@@ -17,25 +17,26 @@ public interface IAuthenticationService
 
 public class AuthenticationService : IAuthenticationService
 {
-    private readonly LarpContext _larpContext;
-    private readonly IUserSessionManager _sessions;
-    private readonly IUserNotificationService _notificationService;
     private readonly ISystemClock _clock;
+    private readonly LarpContext _larpContext;
+    private readonly IUserNotificationService _notificationService;
+    private readonly IUserSessionManager _sessions;
 
-    public AuthenticationService(LarpContext larpContext, IUserSessionManager sessions, IUserNotificationService notificationService, ISystemClock clock)
+    public AuthenticationService(LarpContext larpContext, IUserSessionManager sessions,
+        IUserNotificationService notificationService, ISystemClock clock)
     {
         _larpContext = larpContext;
         _sessions = sessions;
         _notificationService = notificationService;
         _clock = clock;
     }
-    
+
     public async Task<AuthenticationResult> InitiateLogin(string email, string deviceId)
     {
         var filter = Builders<Data.Account>.Filter.ElemMatch(x => x.Emails, e => e.Email == email);
         var accountId =
             await _larpContext.Accounts.Find(filter)
-                .Project(x=>x.AccountId)
+                .Project(x => x.AccountId)
                 .FirstOrDefaultAsync();
 
         if (accountId == null)
@@ -43,7 +44,13 @@ public class AuthenticationService : IAuthenticationService
             var account = new Data.Account()
             {
                 Created = _clock.UtcNow,
-                Emails = { new Data.AccountEmail() { Email = email } }
+                Emails =
+                {
+                    new Data.AccountEmail()
+                    {
+                        Email = email, NormalizedEmail = email.ToLowerInvariant(), IsPreferred = true, IsVerified = true
+                    }
+                }
             };
             await _larpContext.Accounts.InsertOneAsync(account, new InsertOneOptions(), CancellationToken.None);
             accountId = account.AccountId;
@@ -52,7 +59,7 @@ public class AuthenticationService : IAuthenticationService
         var token = await _sessions.GenerateToken(accountId, email, deviceId);
 
         await _notificationService.SendAuthenticationToken(accountId, token);
-        
+
         return new(true, "Code is required to continue", "");
     }
 

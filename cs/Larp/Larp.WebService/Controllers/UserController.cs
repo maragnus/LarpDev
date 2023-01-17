@@ -2,7 +2,6 @@
 using Larp.Data.Services;
 using Larp.Protos;
 using Larp.Protos.Services;
-using Larp.WebService.GrpcServices;
 using Microsoft.Extensions.Internal;
 using MongoDB.Driver;
 
@@ -79,7 +78,7 @@ public class UserController : SessionController
     public async Task<AccountResponse> GetAccount(Empty request)
     {
         var account = await _userSessionManager.GetUserAccount(SessionContext.AccountId)
-                      ?? throw new ResponseException("Account not found");
+                      ?? throw new Exception("Account not found");
         return new AccountResponse() { Account = account.ToProto() };
     }
 

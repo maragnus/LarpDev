@@ -7,7 +7,7 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <Protobuf Include="../../../proto/**/*.proto" GrpcServices="Server" ProtoRoot="../../../proto/">
+        <Protobuf Include="../../../proto/**/*.proto" GrpcServices="None" ProtoRoot="../../../proto/">
             <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
         </Protobuf>
         <Protobuf Update="..\..\..\proto\larp\mw5e\services.proto">
