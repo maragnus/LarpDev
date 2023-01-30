@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using Larp.Notify;
 using Larp.Protos;
 using Larp.Protos.Authorization;
 using Larp.WebService.LarpServices;
@@ -10,10 +11,12 @@ namespace Larp.WebService.Controllers;
 public class AuthController : ProtobufController
 {
     private readonly IAuthenticationService _authenticationService;
+    private readonly INotifyService _notifyService;
 
-    public AuthController(IAuthenticationService authenticationService)
+    public AuthController(IAuthenticationService authenticationService, INotifyService notifyService)
     {
         _authenticationService = authenticationService;
+        _notifyService = notifyService;
     }
 
     public async Task<InitiateLoginResponse> InitiateLogin(InitiateLoginRequest request)

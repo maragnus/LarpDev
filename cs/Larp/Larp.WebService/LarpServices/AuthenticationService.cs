@@ -58,7 +58,7 @@ public class AuthenticationService : IAuthenticationService
 
         var token = await _sessions.GenerateToken(accountId, email, deviceId);
 
-        await _notificationService.SendAuthenticationToken(accountId, token);
+        await _notificationService.SendAuthenticationToken(accountId, email, token);
 
         return new(true, "Code is required to continue", "");
     }

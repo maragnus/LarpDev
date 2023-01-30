@@ -2,6 +2,7 @@ using Larp.Common.LifeCycle;
 using Larp.Data;
 using Larp.Data.Seeder;
 using Larp.Data.Services;
+using Larp.Notify;
 using Larp.WebService.Controllers;
 using Larp.WebService.LarpServices;
 using Larp.WebService.ProtobufControllers;
@@ -11,7 +12,9 @@ using Microsoft.Extensions.Internal;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddEnvironmentVariables();
+builder.Configuration
+    .AddEnvironmentVariables()
+    .AddUserSecrets<Program>();
 
 {
     var services = builder.Services!;
@@ -27,6 +30,11 @@ builder.Configuration.AddEnvironmentVariables();
                 "https://larp.maragnus.com")
         )
     );
+
+    // Larp.Notify
+    services.AddScoped<INotifyService, NotifyService>();
+    services.Configure<NotifyServiceOptions>(
+        builder.Configuration.GetSection(NotifyServiceOptions.SectionName));
 
     // Larp.Data
     services.AddSingleton<LarpDataCache>();

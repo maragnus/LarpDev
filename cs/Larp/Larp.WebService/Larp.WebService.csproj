@@ -42,6 +42,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Larp.Data.Seeder\Larp.Data.Seeder.csproj" />
       <ProjectReference Include="..\Larp.Data\Larp.Data.csproj" />
+        <ProjectReference Include="..\Larp.Notify\Larp.Notify.csproj"/>
       <ProjectReference Include="..\Larp.Protos\Larp.Protos.csproj" />
     </ItemGroup>
 
