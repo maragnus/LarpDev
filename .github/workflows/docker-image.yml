@@ -35,5 +35,7 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: larpdev:$(date +%s),larpdev:${{ env.GITHUB_REF_NAME }},larpdev:latest
-
+        tags: |
+          larpdev:latest
+          larpdev:$(date +%s)
+          larpdev:${{ env.GITHUB_REF_NAME }}
