@@ -38,9 +38,6 @@ jobs:
         push: ${{ false && github.event_name != 'pull_request' }}
         file: ./Dockerfile
         tags: |
-          delos.maragnus.com/larpdev:${{ env.BUILD_NUMBER }}
-          delos.maragnus.com/larpdev:${{ env.BRANCH }}
+          delos.maragnus.com/larpdev:${{ github.run_id }}
+          delos.maragnus.com/larpdev:${{ github.ref_name }}
           delos.maragnus.com/larpdev:latest
-        build-args: |
-          BUILD_NUMBER=${{ env.GITHUB_RUN_NUMBER }}
-          BRANCH=${{ env.BRANCH }}
