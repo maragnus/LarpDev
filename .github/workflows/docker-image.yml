@@ -7,6 +7,9 @@ on:
     branches: [ "main", "dev" ]
   workflow_dispatch:
 
+env:
+  REGISTRY_URL=${{ env.REGISTRY_URL }}
+
 jobs:
 
   build:
