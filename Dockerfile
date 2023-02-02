@@ -29,6 +29,7 @@ COPY ["cs/Larp/Larp.Data/Larp.Data.csproj", "cs/Larp/Larp.Data/Larp.Data.csproj"
 COPY ["cs/Larp/Larp.Data.Seeder/Larp.Data.Seeder.csproj", "cs/Larp/Larp.Data.Seeder/Larp.Data.Seeder.csproj"]
 COPY ["cs/Larp/Larp.Data.TestFixture/Larp.Data.TestFixture.csproj", "cs/Larp/Larp.Data.TestFixture/Larp.Data.TestFixture.csproj"]
 COPY ["cs/Larp/Larp.Data.Tests/Larp.Data.Tests.csproj", "cs/Larp/Larp.Data.Tests/Larp.Data.Tests.csproj"]
+COPY ["cs/Larp/Larp.Notify/Larp.Notify.csproj", "cs/Larp/Larp.Notify/Larp.Notify.csproj"]
 COPY ["cs/Larp/Larp.Protos/Larp.Protos.csproj", "cs/Larp/Larp.Protos/Larp.Protos.csproj"]
 COPY ["cs/Larp/Larp.Test.Common/Larp.Test.Common.csproj", "cs/Larp/Larp.Test.Common/Larp.Test.Common.csproj"]
 COPY ["cs/Larp/Larp.WebService/Larp.WebService.csproj", "cs/Larp/Larp.WebService/Larp.WebService.csproj"]
