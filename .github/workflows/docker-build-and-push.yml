@@ -1,0 +1,21 @@
+name: Build and Push via Docker
+
+on:
+  push:
+    branches: [ "main", "dev" ]
+  pull_request:
+    branches: [ "main", "dev" ]
+  workflow_dispatch:
+
+jobs:
+
+  build:
+
+    runs-on: self-hosted
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: |
+        docker build . --file Dockerfile --tag cr.maragnus.com/larpdev:${{ github.run_id }} --tag cr.maragnus.com/larpdev:${{ github.ref_name }} --tag cr.maragnus.com/larpdev:latest && \
+        docker image push -a cr.maragnus.com/larpdev
