@@ -18,4 +18,7 @@ jobs:
     - name: Build the Docker image
       run: |
         docker build . --file Dockerfile --tag cr.maragnus.com/larpdev:${{ github.run_id }} --tag cr.maragnus.com/larpdev:${{ github.ref_name }} --tag cr.maragnus.com/larpdev:latest && \
-        docker push -a cr.maragnus.com/larpdev
+        docker image push cr.maragnus.com/larpdev:${{ github.run_id }} 
+        docker image push cr.maragnus.com/larpdev:${{ github.ref_name }}
+        docker image push cr.maragnus.com/larpdev:latest
+        
