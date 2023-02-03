@@ -19,7 +19,6 @@ jobs:
       uses: actions/checkout@v3
     
     - name: Authenticate with Container Registry
-      if: false && github.event_name != 'pull_request'
       uses: docker/login-action@v2
       with: 
         registry: ${{ env.REGISTRY_URL }}
@@ -30,14 +29,13 @@ jobs:
       uses: docker/setup-buildx-action@v2
     
     - name: Build and Push Docker Image
-      if: github.event_name != 'pull_request'
       id: docker_build
       uses: docker/build-push-action@v4
       with:
         context: .
-        push: ${{ false && github.event_name != 'pull_request' }}
+        push: true
         file: ./Dockerfile
         tags: |
-          delos.maragnus.com/larpdev:${{ github.run_id }}
-          delos.maragnus.com/larpdev:${{ github.ref_name }}
-          delos.maragnus.com/larpdev:latest
+          cr.maragnus.com/larpdev:${{ github.run_id }}
+          cr.maragnus.com/larpdev:${{ github.ref_name }}
+          cr.maragnus.com/larpdev:latest
