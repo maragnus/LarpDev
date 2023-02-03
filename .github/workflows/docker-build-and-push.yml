@@ -19,4 +19,6 @@ jobs:
       run: |
         docker login cr.maragnus.com -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
         docker build . --file Dockerfile --tag cr.maragnus.com/larpdev:${{ github.run_id }} --tag cr.maragnus.com/larpdev:${{ github.ref_name }} --tag cr.maragnus.com/larpdev:latest && \
-        docker image push -a cr.maragnus.com/larpdev
+        docker image push cr.maragnus.com/larpdev:${{ github.run_id }} 
+        docker image push cr.maragnus.com/larpdev:${{ github.ref_name }}
+        docker image push cr.maragnus.com/larpdev:latest
