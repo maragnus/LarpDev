@@ -30,6 +30,7 @@ public class UserNotificationService : IUserNotificationService
         var account = await _userSessionManager.GetUserAccount(accountId);
         var emailAddress = account.Emails.Single(x => x.NormalizedEmail == email.ToLowerInvariant()).Email;
 
+        // TODO -- put account name in email address!
         await _notifyService.SendEmailAsync(emailAddress, "Your Login Code",
             $"Your verification code is {token}");
     }

@@ -5,7 +5,7 @@ namespace Larp.Notify.Sendinblue;
 
 public record EmailAddress(
     [property: JsonPropertyName("email")] string Address,
-    [property: JsonPropertyName("name")] string? DisplayName)
+    [property: JsonPropertyName("name"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] string? DisplayName)
 {
     public static EmailAddress Parse(string value)
     {

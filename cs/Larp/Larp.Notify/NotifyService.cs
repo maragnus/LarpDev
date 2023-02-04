@@ -1,5 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Net.Mail;
+using System.Text.Json;
 using Larp.Notify.Sendinblue;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -15,7 +17,7 @@ public class NotifyServiceOptions
 
 public class EmailOptions
 {
-    public List<EmailAddress> Senders { get; set; } = new();
+    public List<string> Senders { get; set; } = new();
     public string ApiKey { get; set; } = null!;
     public string ApiEndPoint { get; set; } = null!;
 }
@@ -31,10 +33,10 @@ public class NotifyService : INotifyService
     private readonly ILogger<NotifyService> _logger;
     private readonly EmailOptions _options;
 
-    public NotifyService(IOptions<EmailOptions> options, ILogger<NotifyService> logger)
+    public NotifyService(IOptions<NotifyServiceOptions> options, ILogger<NotifyService> logger)
     {
         _logger = logger;
-        _options = options.Value;
+        _options = options.Value.Email;
         _client = new HttpClient();
         _client.DefaultRequestHeaders.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
         _client.DefaultRequestHeaders.Add("api-key", _options.ApiKey);
@@ -42,12 +44,19 @@ public class NotifyService : INotifyService
 
     public async Task SendEmailAsync(string recipient, string subject, string body)
     {
-        var sender = _options.Senders.First();
+        var sender = EmailAddress.Parse(_options.Senders.First());
         var to = EmailAddress.Parse(recipient);
-        var email = new Email(sender, to, subject, body);
+
+        if (string.IsNullOrWhiteSpace(to.DisplayName))
+            to = to with { DisplayName = null };
+        
+        var email = new Email(sender, new() { to }, subject, body);
 
         try
         {
+            var data = JsonSerializer.SerializeToDocument(email);
+            _logger.LogWarning(data.RootElement.ToString());
+            
             var result = await _client.PostAsJsonAsync(_options.ApiEndPoint, email);
             if (!result.IsSuccessStatusCode)
             {
