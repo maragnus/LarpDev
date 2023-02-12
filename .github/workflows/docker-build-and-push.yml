@@ -17,8 +17,11 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build the Docker image
       run: |
-        docker login cr.maragnus.com -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
-        docker build . --file Dockerfile --tag cr.maragnus.com/larpdev:${{ github.run_id }} --tag cr.maragnus.com/larpdev:${{ github.ref_name }} --tag cr.maragnus.com/larpdev:latest && \
-        docker image push cr.maragnus.com/larpdev:${{ github.run_id }} 
-        docker image push cr.maragnus.com/larpdev:${{ github.ref_name }}
+        docker login cr.maragnus.com -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }} && \
+        docker build . --file Dockerfile \
+            --tag cr.maragnus.com/larpdev:${{ github.run_number }} \
+            --tag cr.maragnus.com/larpdev:${{ github.ref_name }} \
+            --tag cr.maragnus.com/larpdev:latest && \
+        docker image push cr.maragnus.com/larpdev:${{ github.run_number }} && \
+        docker image push cr.maragnus.com/larpdev:${{ github.ref_name }} && \
         docker image push cr.maragnus.com/larpdev:latest
