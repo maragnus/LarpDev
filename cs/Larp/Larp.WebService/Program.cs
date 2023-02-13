@@ -21,13 +21,16 @@ builder.Configuration
 
     services.AddSingleton<ISystemClock, SystemClock>();
 
+    var corsOrigins = builder.Configuration
+        .GetSection("Cors:Origins")
+        .Get<string[]>();
+
     services.AddCors(cors =>
         cors.AddPolicy("Default", policy => policy
             .AllowCredentials()
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .WithOrigins("https://localhost:5002", "https://localhost:5001", "http://localhost:5000",
-                "https://larp.maragnus.com")
+            .WithOrigins(corsOrigins)
         )
     );
 
