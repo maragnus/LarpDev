@@ -12,39 +12,17 @@ import {
     Typography
 } from "@mui/material";
 import AwesomeSpinner from "../../Common/AwesomeSpinner";
-import {Event, EventComponent, EventRsvp} from "../../Protos/larp/events_pb";
+import {Event, EventComponent} from "../../Protos/larp/events_pb";
 import sessionService from "../../SessionService";
 import ExtensionIcon from '@mui/icons-material/Extension';
-import MenuItem from "@mui/material/MenuItem";
 import RsvpIcon from "@mui/icons-material/Rsvp";
 
 function ComponentItem(props: {key: number, event: Event.AsObject, component: EventComponent.AsObject, busy: boolean}) {
-    const eventId = props.event.eventId;
-    const isApproved = false;
     const name = props.component.name;
     const when = new Date(props.component.date).toDateString();
 
-    function select(id: string, rsvp: EventRsvp) {
-    }
-
     function handleClick() {
 
-    }
-
-    let rsvpOptions: any;
-    if (isApproved) {
-        rsvpOptions = undefined;
-    } else if (false) {
-        rsvpOptions = [
-            <MenuItem onClick={() => select(eventId, EventRsvp.EVENT_RSVP_CONFIRMED)}>Yes, I attended</MenuItem>,
-            <MenuItem onClick={() => select(eventId, EventRsvp.EVENT_RSVP_UNANSWERED)}>No, I did not attend</MenuItem>,
-        ]
-    } else {
-        rsvpOptions = [
-            <MenuItem onClick={() => select(eventId, EventRsvp.EVENT_RSVP_YES)}>Going</MenuItem>,
-            <MenuItem onClick={() => select(eventId, EventRsvp.EVENT_RSVP_MAYBE)}>Maybe</MenuItem>,
-            <MenuItem onClick={() => select(eventId, EventRsvp.EVENT_RSVP_NO)}>Not Going</MenuItem>
-        ]
     }
 
     return (

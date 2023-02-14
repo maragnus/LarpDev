@@ -1,6 +1,7 @@
 import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
 import * as React from "react";
+import {Revision} from "../revision";
 
 export function Copyright(props: any) {
     return (
@@ -16,6 +17,7 @@ export function Copyright(props: any) {
             <Link color="inherit" href="https://github.com/maragnus/Mystwood.Landing" target="_blank">
                 Josh Brown
             </Link>
+            <div>Revision {Revision}</div>
         </Typography>
     );
 }
