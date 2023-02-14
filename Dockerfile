@@ -16,7 +16,7 @@ RUN npm install -g pnpm
 # Update npm packages first (changes rarely)
 WORKDIR /src
 COPY ["ts/landing/package.json", "ts/landing/package.json"]
-COPY ["ts/landing/pnpm-lock.lock", "ts/landing/pnpm-lock.lock"]
+COPY ["ts/landing/pnpm-lock.yaml", "ts/landing/pnpm-lock.yaml"]
 WORKDIR /src/ts/landing
 RUN pnpm install
 
