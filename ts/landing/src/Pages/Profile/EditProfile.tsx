@@ -19,7 +19,7 @@ export function EditProfile(props: AccountProps) {
         let notes: string = (data.get('notes') as string ?? "").trim();
 
         try {
-            const newAccount = await sessionService.setProfile(name, location, phone, notes);
+            const newAccount = await sessionService.setProfile(name, phone, location, notes);
             props.updateAccount(newAccount);
         } catch (e: any) {
             alert(e);
