@@ -11,14 +11,14 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 RUN apt-get update -y
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash --debug
 RUN apt-get install nodejs -yq
-RUN npm install -g yarn
+RUN npm install -g pnpm
 
 # Update npm packages first (changes rarely)
 WORKDIR /src
 COPY ["ts/landing/package.json", "ts/landing/package.json"]
-COPY ["ts/landing/yarn.lock", "ts/landing/yarn.lock"]
+COPY ["ts/landing/pnpm-lock.lock", "ts/landing/pnpm-lock.lock"]
 WORKDIR /src/ts/landing
-RUN yarn install
+RUN pnpm install
 
 # Update nuget packages first (changes rarely)
 WORKDIR /src
