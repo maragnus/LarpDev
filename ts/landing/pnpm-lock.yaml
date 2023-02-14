@@ -17,6 +17,7 @@ specifiers:
   '@types/node': ^16.18.12
   '@types/react': ^18.0.28
   '@types/react-dom': ^18.0.10
+  '@types/testing-library__jest-dom': ^5.14.5
   ajv: ^8.12.0
   bootstrap: ^5.2.3
   cross-env: ^7.0.3
@@ -108,6 +109,7 @@ devDependencies:
   '@types/node': 16.18.12
   '@types/react': 18.0.28
   '@types/react-dom': 18.0.10
+  '@types/testing-library__jest-dom': 5.14.5
   ajv: 8.12.0
   cross-env: 7.0.3
   eslint: 8.34.0
