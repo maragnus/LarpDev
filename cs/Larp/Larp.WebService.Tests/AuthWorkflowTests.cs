@@ -12,16 +12,16 @@ namespace Larp.WebService.Tests;
 public class AuthWorkflowTests
 {
     private TestDataHelper Helper { get; set; } = null!;
-    private TimeTravelClock Clock { get; set; }= null!;
+    private TimeTravelClock Clock { get; set; } = null!;
     private string? Token { get; set; }
-    private AuthenticationService AuthService { get; set; }= null!;
+    private AuthenticationService AuthService { get; set; } = null!;
 
     [TestInitialize]
     public async Task TestInitialize()
     {
         Clock = new TimeTravelClock(new DateTimeOffset(2022, 6, 1, 12, 0, 0, TimeSpan.FromHours(-5)));
         Token = null;
-        
+
         var larpDataCache = new LarpDataCache(new MemoryCacheOptions() { Clock = Clock });
         var testDataFixture = await LarpDataTestFixture.CreateTestFixtureAsync(false, Clock);
         var userSessionService = new UserSessionManager(testDataFixture.Context, larpDataCache, Clock,
@@ -33,44 +33,45 @@ public class AuthWorkflowTests
         var context = testDataFixture.Context;
         var notificationService = new Mock<IUserNotificationService>();
         notificationService
-            .Setup(x => x.SendAuthenticationToken(It.IsAny<string>(), It.IsAny<string>()))
-            .Callback<string, string>((_, tokenCode) => Token = tokenCode);
-        AuthService = new AuthenticationService(testDataFixture.Context, userSessionService, notificationService.Object, Clock);
+            .Setup(x => x.SendAuthenticationToken(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            .Callback<string, string, string>((_, _, tokenCode) => Token = tokenCode);
+        AuthService = new AuthenticationService(testDataFixture.Context, userSessionService, notificationService.Object,
+            Clock);
         Helper = new TestDataHelper(context);
     }
-    
+
     [TestMethod]
     public async Task AuthenticationWorkflow_Works()
     {
-        await Helper.AddAccount("Josh", "acrion@gmail.com", Clock.UtcNow.AddDays(-30));
+        await Helper.AddAccount("Josh", "test@maragnus.com", Clock.UtcNow.AddDays(-30));
 
         AuthenticationResult result = null!;
-        
-        result = await AuthService.InitiateLogin("acrion@gmail.com", "test");
+
+        result = await AuthService.InitiateLogin("test@maragnus.com", "test");
         Assert.IsTrue(result.IsSuccess, result.Message);
         Assert.IsNotNull(Token);
-        
-        result = await AuthService.ConfirmLogin("acrion@gmail.com", Token);
+
+        result = await AuthService.ConfirmLogin("test@maragnus.com", Token);
         Assert.IsTrue(result.IsSuccess, result.Message);
         Assert.IsNotNull(result.SessionId);
-        
+
         result = await AuthService.ValidateSession(result.SessionId);
         Assert.IsTrue(result.IsSuccess, result.Message);
         Assert.IsNotNull(result.SessionId);
     }
-    
+
     [TestMethod]
     public async Task AuthenticationWorkflow_Expires()
     {
-        await Helper.AddAccount("Josh", "acrion@gmail.com", Clock.UtcNow.AddDays(-30));
+        await Helper.AddAccount("Josh", "test@maragnus.com", Clock.UtcNow.AddDays(-30));
 
         AuthenticationResult result = null!;
-        
-        result = await AuthService.InitiateLogin("acrion@gmail.com", "test");
+
+        result = await AuthService.InitiateLogin("test@maragnus.com", "test");
         Assert.IsTrue(result.IsSuccess, result.Message);
         Assert.IsNotNull(Token);
-        
-        result = await AuthService.ConfirmLogin("acrion@gmail.com", Token);
+
+        result = await AuthService.ConfirmLogin("test@maragnus.com", Token);
         Assert.IsTrue(result.IsSuccess, result.Message);
         Assert.IsNotNull(result.SessionId);
 
@@ -81,47 +82,47 @@ public class AuthWorkflowTests
         Assert.IsNotNull(result.SessionId);
 
         Clock.AddDays(1000);
-        
+
         result = await AuthService.ValidateSession(result.SessionId);
         Assert.IsFalse(result.IsSuccess, result.Message);
         StringAssert.Contains(result.Message, "expire");
     }
-    
+
     [TestMethod]
     public async Task AuthenticationWorkflow_NotExists()
     {
         // This will create a new account
-        var result = await AuthService.InitiateLogin("acrion@gmail.com", "test");
+        var result = await AuthService.InitiateLogin("test@maragnus.com", "test");
         Assert.IsTrue(result.IsSuccess, result.Message);
         Assert.IsNotNull(Token);
     }
-    
+
     [TestMethod]
     public async Task AuthenticationWorkflow_WrongToken()
     {
-        await Helper.AddAccount("Josh", "acrion@gmail.com", Clock.UtcNow.AddDays(-30));
+        await Helper.AddAccount("Josh", "test@maragnus.com", Clock.UtcNow.AddDays(-30));
 
         AuthenticationResult result = null!;
-        
-        result = await AuthService.InitiateLogin("acrion@gmail.com", "test");
+
+        result = await AuthService.InitiateLogin("test@maragnus.com", "test");
         Assert.IsTrue(result.IsSuccess, result.Message);
         Assert.IsNotNull(Token);
-        
-        result = await AuthService.ConfirmLogin("acrion@gmail.com", "ABCDEF");
+
+        result = await AuthService.ConfirmLogin("test@maragnus.com", "ABCDEF");
         Assert.IsFalse(result.IsSuccess, result.Message);
         Assert.IsNull(result.SessionId);
     }
-    
+
     [TestMethod]
     public async Task AuthenticationWorkflow_NoInitiate()
     {
-        await Helper.AddAccount("Josh", "acrion@gmail.com", Clock.UtcNow.AddDays(-30));
+        await Helper.AddAccount("Josh", "test@maragnus.com", Clock.UtcNow.AddDays(-30));
 
         // This code isn't possible to generate but meets entry criteria
-        const string code = "AB0O1L"; 
-        
+        const string code = "AB0O1L";
+
         // Attempt to authenticate with the wrong code
-        var result = await AuthService.ConfirmLogin("acrion@gmail.com", code);
+        var result = await AuthService.ConfirmLogin("test@maragnus.com", code);
         Assert.IsFalse(result.IsSuccess, result.Message);
         Assert.IsNull(result.SessionId);
     }

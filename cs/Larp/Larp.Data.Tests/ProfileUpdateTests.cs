@@ -44,16 +44,16 @@ public class ProfileUpdateTests
     [TestMethod]
     public async Task AddEmailOnce_Works()
     {
-        var accountId = await Helper.AddAccount("Bob Dylan", "acrion@gmail.com", Clock.UtcNow);
-        await UserSessionManager.AddEmailAddress(accountId, "bob@dylan.com");
+        var accountId = await Helper.AddAccount("Bob Dylan", "test+bob@maragnus.com", Clock.UtcNow);
+        await UserSessionManager.AddEmailAddress(accountId, "test+rob@maragnus.com");
         var account = await UserSessionManager.GetUserAccount(accountId);
         Assert.AreEqual(2, account.Emails.Count);
-        Assert.IsTrue(account.Emails.Any(x => x.Email == "acrion@gmail.com"));
-        Assert.IsTrue(account.Emails.Any(x => x.Email == "bob@dylan.com"));
+        Assert.IsTrue(account.Emails.Any(x => x.Email == "test+bob@maragnus.com"));
+        Assert.IsTrue(account.Emails.Any(x => x.Email == "test+rob@maragnus.com"));
 
         // Add duplicates
-        await UserSessionManager.AddEmailAddress(accountId, "acrion@gmail.com");
-        await UserSessionManager.AddEmailAddress(accountId, "bob@dylan.com");
+        await UserSessionManager.AddEmailAddress(accountId, "test+bob@maragnus.com");
+        await UserSessionManager.AddEmailAddress(accountId, "test+rob@maragnus.com");
         account = await UserSessionManager.GetUserAccount(accountId);
         Assert.AreEqual(2, account.Emails.Count);
     }
@@ -61,55 +61,53 @@ public class ProfileUpdateTests
     [TestMethod]
     public async Task AddEmailDuplicateDoesntResetFlags_Works()
     {
-        var accountId = await Helper.AddAccount("Bob Dylan", "acrion@gmail.com", Clock.UtcNow);
+        var accountId = await Helper.AddAccount("Bob Dylan", "test+bob@maragnus.com", Clock.UtcNow);
         var account = await UserSessionManager.GetUserAccount(accountId);
         Assert.IsFalse(account.Emails[0].IsPreferred);
 
         // Flip Preferred to True
-        await UserSessionManager.PreferEmailAddress(accountId, "acrion@gmail.com");
+        await UserSessionManager.PreferEmailAddress(accountId, "test+bob@maragnus.com");
         account = await UserSessionManager.GetUserAccount(accountId);
         Assert.IsTrue(account.Emails[0].IsPreferred);
 
         // Add duplicate email, IsPreferred stays true
-        await UserSessionManager.AddEmailAddress(accountId, "acrion@gmail.com");
+        await UserSessionManager.AddEmailAddress(accountId, "test+bob@maragnus.com");
         account = await UserSessionManager.GetUserAccount(accountId);
         Assert.IsTrue(account.Emails[0].IsPreferred);
         Assert.AreEqual(1, account.Emails.Count);
     }
 
-
     [TestMethod]
     public async Task AddEmailPreventDuplicatesAcrossAccounts_Works()
     {
-        var accountId1 = await Helper.AddAccount("Bob Dylan", "bob@example.com", Clock.UtcNow);
-        var accountId2 = await Helper.AddAccount("Robert Zimmerman", "robert@example.com", Clock.UtcNow);
+        var accountId1 = await Helper.AddAccount("Bob Dylan", "test+bob@maragnus.com", Clock.UtcNow);
+        var accountId2 = await Helper.AddAccount("Robert Zimmerman", "test+rob@maragnus.com", Clock.UtcNow);
 
         await Assert.ThrowsExceptionAsync<Exception>(async () =>
         {
-            await UserSessionManager.AddEmailAddress(accountId2, "bob@example.com");
+            await UserSessionManager.AddEmailAddress(accountId2, "test+bob@maragnus.com");
         });
 
-
         var account1 = await UserSessionManager.GetUserAccount(accountId1);
-        Assert.IsTrue(account1.Emails.Any(x => x.Email == "bob@example.com"));
+        Assert.IsTrue(account1.Emails.Any(x => x.Email == "test+bob@maragnus.com"));
 
         var account2 = await UserSessionManager.GetUserAccount(accountId2);
-        Assert.IsTrue(account2.Emails.Any(x => x.Email == "robert@example.com"));
+        Assert.IsTrue(account2.Emails.Any(x => x.Email == "test+rob@maragnus.com"));
     }
 
     [TestMethod]
     public async Task EmailCanChangeAccounts_Works()
     {
-        var accountId1 = await Helper.AddAccount("Bob Dylan", "bob@example.com", Clock.UtcNow);
-        var accountId2 = await Helper.AddAccount("Robert Zimmerman", "robert@example.com", Clock.UtcNow);
+        var accountId1 = await Helper.AddAccount("Bob Dylan", "test+bob@maragnus.com", Clock.UtcNow);
+        var accountId2 = await Helper.AddAccount("Robert Zimmerman", "test+rob@maragnus.com", Clock.UtcNow);
 
-        await UserSessionManager.RemoveEmailAddress(accountId1, "bob@example.com");
-        await UserSessionManager.AddEmailAddress(accountId2, "bob@example.com");
+        await UserSessionManager.RemoveEmailAddress(accountId1, "test+bob@maragnus.com");
+        await UserSessionManager.AddEmailAddress(accountId2, "test+bob@maragnus.com");
 
         var account1 = await UserSessionManager.GetUserAccount(accountId1);
         var account2 = await UserSessionManager.GetUserAccount(accountId2);
 
-        Assert.IsFalse(account1.Emails.Any(x => x.Email == "bob@example.com"));
-        Assert.IsTrue(account2.Emails.Any(x => x.Email == "bob@example.com"));
+        Assert.IsFalse(account1.Emails.Any(x => x.Email == "test+bob@maragnus.com"));
+        Assert.IsTrue(account2.Emails.Any(x => x.Email == "test+bob@maragnus.com"));
     }
 }
