@@ -4,15 +4,15 @@ import {useMountEffect} from "../UseMountEffect";
 import sessionService from "../../SessionService";
 import {Container, List, ListItem, Typography} from "@mui/material";
 import AwesomeSpinner from "../../Common/AwesomeSpinner";
-import {Character} from "../../Protos/larp/mw5e/character_pb";
+import {Character} from "../../Protos/larp/mw5e/character";
 
-function CharacterListItem(props: {key: number, character: Character.AsObject}) {
+function CharacterListItem(props: {key: number, character: Character}) {
     return (<ListItem key={props.key}>
-        {props.character.charactername}
+        {props.character.characterName}
     </ListItem>);
 }
 
-function CharacterItems(props: {characters: Character.AsObject[]}) {
+function CharacterItems(props: {characters: Character[]}) {
     const items = props.characters
         .map((character, index)=>
             <CharacterListItem key={index} character={character}/>);
@@ -23,7 +23,7 @@ function CharacterItems(props: {characters: Character.AsObject[]}) {
 export default function CharactersPage() {
     const navigate = useNavigate();
     const [busy, setBusy] = React.useState(true);
-    const [characters, setCharacters] = React.useState<Character.AsObject[]>([]);
+    const [characters, setCharacters] = React.useState<Character[]>([]);
 
     useMountEffect(async () => {
         try {

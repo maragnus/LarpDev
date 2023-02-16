@@ -4,7 +4,7 @@ import sessionService from "../../SessionService";
 import {useNavigate} from "react-router-dom";
 import {useMountEffect} from "../UseMountEffect";
 import AwesomeSpinner from "../../Common/AwesomeSpinner";
-import {Account} from "../../Protos/larp/accounts_pb";
+import {Account} from "../../Protos/larp/accounts";
 import {EditProfile} from "./EditProfile";
 import {EditEmail} from "./EditEmail";
 import {EditAttendance} from "./EditAttendance";
@@ -40,7 +40,7 @@ export default function ProfilePage() {
     let navigate = useNavigate();
     const [busy, setBusy] = React.useState(true);
     const [value, setValue] = React.useState(0);
-    const [account, setAccount] = React.useState((new Account()).toObject(true));
+    const [account, setAccount] = React.useState({} as Account);
 
     if (!sessionService.isAuthenticated())
         navigate("/");
@@ -59,7 +59,7 @@ export default function ProfilePage() {
         setBusy(false);
     });
 
-    function updateAccount(account: Account.AsObject) {
+    function updateAccount(account: Account) {
         setAccount(account);
     }
 

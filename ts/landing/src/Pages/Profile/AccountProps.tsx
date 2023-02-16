@@ -1,6 +1,6 @@
-import {Account} from "../../Protos/larp/accounts_pb";
+import {Account} from "../../Protos/larp/accounts";
 
 export interface AccountProps {
-    account: Account.AsObject
-    updateAccount: (account: Account.AsObject) => any;
+    account: Account
+    updateAccount: (account: Account) => any;
 }

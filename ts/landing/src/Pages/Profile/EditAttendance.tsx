@@ -1,5 +1,5 @@
 import {AccountProps} from "./AccountProps";
-import {Event, EventAttendance, EventRsvp} from "../../Protos/larp/events_pb";
+import {Event, EventAttendance, EventRsvp} from "../../Protos/larp/events";
 import {Box, IconButton, List, ListItem, ListItemIcon, ListItemText, ListSubheader, Typography} from "@mui/material";
 import * as React from "react";
 import Menu from '@mui/material/Menu';
@@ -126,7 +126,7 @@ function EventListItem(props: { event: EventDetails, busy: boolean, updateRsvp: 
 
 export function EditAttendance(props: AccountProps): any {
     const [busy, setBusy] = React.useState(true);
-    const [events, setEvents] = React.useState([] as Event.AsObject[]);
+    const [events, setEvents] = React.useState([] as Event[]);
 
     async function refresh() {
         console.log('Refreshing event list for ' + props.account.name);
@@ -168,7 +168,7 @@ export function EditAttendance(props: AccountProps): any {
     };
 
     const eventList = events.map(event => {
-        const attendee = event.attendeesList[0] ?? new EventAttendance().toObject();
+        const attendee = event.attendees[0] ?? {} as EventAttendance;
         return {
             id: event.eventId,
             title: event.title,

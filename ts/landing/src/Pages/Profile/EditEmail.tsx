@@ -56,7 +56,7 @@ export function EditEmail(props: AccountProps) {
         setAddEmail(event.target.value)
     }
 
-    const addresses = props.account.emailsList.map((email, index) => (
+    const addresses = props.account.emails.map((email, index) => (
         <ListItem key={index}>
             <ListItemText primary={email.email} secondary={email.isVerified ? "Verified" : "Unverified"}/>
             <ListItemIcon sx={{m: 0, p: 0, mx: 1, minWidth: 0}}>

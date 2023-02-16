@@ -12,12 +12,12 @@ import {
     Typography
 } from "@mui/material";
 import AwesomeSpinner from "../../Common/AwesomeSpinner";
-import {Event, EventComponent} from "../../Protos/larp/events_pb";
+import {Event, EventComponent} from "../../Protos/larp/events";
 import sessionService from "../../SessionService";
 import ExtensionIcon from '@mui/icons-material/Extension';
 import RsvpIcon from "@mui/icons-material/Rsvp";
 
-function ComponentItem(props: {key: number, event: Event.AsObject, component: EventComponent.AsObject, busy: boolean}) {
+function ComponentItem(props: {key: number, event: Event, component: EventComponent, busy: boolean}) {
     const name = props.component.name;
     const when = new Date(props.component.date).toDateString();
 
@@ -38,9 +38,9 @@ function ComponentItem(props: {key: number, event: Event.AsObject, component: Ev
     );
 }
 
-function EventViewItem(props: {event: Event.AsObject, busy: boolean}) {
+function EventViewItem(props: {event: Event, busy: boolean}) {
     const ev = props.event;
-    const components = ev.componentsList.map((c, i) =>
+    const components = ev.components.map((c, i) =>
         (<ComponentItem key={i} event={ev} component={c} busy={props.busy} />));
 
     return <div>
@@ -57,7 +57,7 @@ function EventViewItem(props: {event: Event.AsObject, busy: boolean}) {
 export default function EventViewPage(params: { id: string }) {
     const navigate = useNavigate();
     const [busy, setBusy] = React.useState(true);
-    const [event, setEvent] = React.useState<Event.AsObject>({} as Event.AsObject);
+    const [event, setEvent] = React.useState<Event>({} as Event);
 
     useMountEffect(async () => {
         try {
