@@ -18,15 +18,15 @@ import {useMountEffect} from "../UseMountEffect";
 import Enumerable from 'linq';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import PatreonLogo from '../../PatreonLogo.svg';
-import { Event } from '../../Protos/larp/events_pb';
+import { Event } from '../../Protos/larp/events';
 import sessionService from "../../SessionService";
 
-function EventItems(props: { events: Event.AsObject[] }): any {
-    function getCategory(event: Event.AsObject): string {
+function EventItems(props: { events: Event[] }): any {
+    function getCategory(event: Event): string {
         return event.date === "" ? "General" : event.date.slice(0, 4);
     }
 
-    function getLocationAvatar(event: Event.AsObject): any {
+    function getLocationAvatar(event: Event): any {
         const location = event.location.toUpperCase().trim();
 
         if (event.title.toUpperCase().includes("PATREON"))
@@ -39,7 +39,7 @@ function EventItems(props: { events: Event.AsObject[] }): any {
         return <Avatar sx={{bgcolor: "#e4dd1b"}}><EventIcon/></Avatar>;
     }
 
-    function getLocation(event: Event.AsObject): any {
+    function getLocation(event: Event): any {
         return event.location;
     }
 
@@ -96,7 +96,7 @@ function EventItems(props: { events: Event.AsObject[] }): any {
 export default function EventListPage() {
     const navigate = useNavigate();
     const [busy, setBusy] = React.useState(true);
-    const [events, setEvents] = React.useState<Event.AsObject[]>([]);
+    const [events, setEvents] = React.useState<Event[]>([]);
 
     useMountEffect(async () => {
         try {
