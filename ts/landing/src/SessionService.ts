@@ -1,13 +1,11 @@
 import {authRestService, larpMw5eService, larpRestService, userRestService} from "./LarpService";
 import {
-    ConfirmLoginRequest,
-    InitiateLoginRequest,
     LogoutRequest,
     ValidateSessionRequest,
     ValidationResponseCode
-} from "./Protos/larp/authorization_pb";
-import {Account} from "./Protos/larp/accounts_pb";
-import {GameState} from "./Protos/larp/mw5e/fifthedition_pb";
+} from "./Protos/larp/authorization";
+import {Account} from "./Protos/larp/accounts";
+import {GameState} from "./Protos/larp/mw5e/fifthedition";
 import {CachedGameState} from "./CachedGameState";
 import {
     AccountResponse,
@@ -15,9 +13,9 @@ import {
     EventRequest,
     EventRsvpRequest,
     UpdateProfileRequest
-} from "./Protos/larp/services_pb";
-import {Event, EventRsvp} from "./Protos/larp/events_pb";
-import {Character} from "./Protos/larp/mw5e/character_pb";
+} from "./Protos/larp/services";
+import {Event, EventRsvp} from "./Protos/larp/events";
+import {Character} from "./Protos/larp/mw5e/character";
 
 export interface SessionCallback {
     callback: (() => void);
@@ -41,8 +39,8 @@ export class SessionService {
     private _callbacks: SessionCallback[] = [];
     private _nextSubscriptionId: number = 0;
     private _email?: string;
-    private _mw5eGameState = new CachedGameState<GameState.AsObject>("mw5e");
-    private _account: Account.AsObject = new Account().toObject();
+    private _mw5eGameState = new CachedGameState<GameState>("mw5e");
+    private _account: Account = {} as Account;
 
     private static readonly SessionIdKey = "MWL_SESSION_ID";
 
@@ -120,7 +118,7 @@ export class SessionService {
             return true;
 
         try {
-            const request = new LogoutRequest().setSessionId(larpRestService.sessionId);
+            const request = {sessionId: larpRestService.sessionId} as LogoutRequest;
             await authRestService.logout(request);
         }
         catch (e) {
@@ -137,14 +135,14 @@ export class SessionService {
         if (!this.isAuthenticated())
             return false;
 
-        const request = new ValidateSessionRequest().setSessionId(larpRestService.sessionId);
+        const request = { sessionId: larpRestService.sessionId } as ValidateSessionRequest;
         const result = await authRestService.validateSession(request);
 
-        console.log("Validation result: " + result.getStatusCode());
-        if (result.getStatusCode() === ValidationResponseCode.SUCCESS)
+        console.log("Validation result: " + result.statusCode);
+        if (result.statusCode === ValidationResponseCode.SUCCESS)
             return true;
 
-        switch (result.getStatusCode()) {
+        switch (result.statusCode) {
             case ValidationResponseCode.INVALID:
                 console.log("Session is invalid!");
                 break;
@@ -162,8 +160,8 @@ export class SessionService {
 
     async login(email: string): Promise<LoginStatus> {
         this._email = email;
-        const result = await authRestService.initiateLogin(new InitiateLoginRequest().setEmail(email));
-        switch (result.getStatusCode()) {
+        const result = await authRestService.initiateLogin({ email: email });
+        switch (result.statusCode) {
             case ValidationResponseCode.SUCCESS:
                 return LoginStatus.Success;
             default:
@@ -172,12 +170,11 @@ export class SessionService {
     }
 
     async confirm(email: string, code: string): Promise<ConfirmStatus> {
-        const req = new ConfirmLoginRequest().setEmail(email).setCode(code);
-        const result = await authRestService.confirmLogin(req);
-        switch (result.getStatusCode()) {
+        const result = await authRestService.confirmLogin({email: email, code: code});
+        switch (result.statusCode) {
             case ValidationResponseCode.SUCCESS:
                 // TODO cache profile
-                this.updateState(result.getSessionId());
+                this.updateState(result.sessionId);
                 return ConfirmStatus.Success;
             case ValidationResponseCode.EXPIRED:
                 return ConfirmStatus.Expired;
@@ -194,12 +191,12 @@ export class SessionService {
         return this._account.isSuperAdmin;
     }
 
-    async getAccount(): Promise<Account.AsObject> {
+    async getAccount(): Promise<Account> {
         const result = await userRestService.getAccount();
         return this.returnAccount(result);
     }
 
-    async getGameState(): Promise<GameState.AsObject> {
+    async getGameState(): Promise<GameState> {
         const cacheName = "mw5e";
 
         if (!this._mw5eGameState.isExpired())
@@ -209,9 +206,9 @@ export class SessionService {
         try {
             const lastRevision = this._mw5eGameState.getRevision() ?? "";
             const response = await larpMw5eService.getGameState(lastRevision);
-            if (response.hasGameState()) {
+            if (response.gameState !== undefined) {
                 console.log("Cached GameState updated for " + cacheName)
-                const newState: GameState.AsObject = response.getGameState()?.toObject()!;
+                const newState: GameState = response.gameState;
                 this._mw5eGameState.set(newState);
             } else {
                 // Cache is current
@@ -227,67 +224,62 @@ export class SessionService {
         }
     }
 
-    async setProfile(name?: string, phone?: string, location?: string, notes?: string): Promise<Account.AsObject> {
-        const account = new Account().toObject();
+    async setProfile(name?: string, phone?: string, location?: string, notes?: string): Promise<Account> {
+        const account = {} as Account;
 
-        const request = new UpdateProfileRequest();
+        const request = {} as UpdateProfileRequest;
         if (name && name !== account.name)
-            request.setName(name);
+            request.name = name;
         if (phone && phone !== account.phone)
-            request.setPhone(phone);
+            request.phone = phone;
         if (location && location !== account.location)
-            request.setLocation(location);
+            request.location = location;
         if (notes && notes !== account.notes)
-            request.setNotes(notes);
+            request.notes = notes;
 
         const result = await userRestService.updateProfile(request);
         return this.returnAccount(result);
     }
 
-    returnAccount(response: AccountResponse): Account.AsObject {
-        const account = (response.getAccount() ?? new Account()).toObject();
+    returnAccount(response: AccountResponse): Account {
+        const account = (response.account ?? {} as Account);
         this._account = account;
         return account;
     }
 
-    async addEmail(email: string): Promise<Account.AsObject> {
+    async addEmail(email: string): Promise<Account> {
         const result = await userRestService.addEmail(email);
         return this.returnAccount(result);
     }
 
-    async removeEmail(email: string): Promise<Account.AsObject> {
+    async removeEmail(email: string): Promise<Account> {
         const result = await userRestService.removeEmail(email);
         return this.returnAccount(result);
     }
 
-    async preferredEmail(email: string): Promise<Account.AsObject> {
+    async preferredEmail(email: string): Promise<Account> {
         const result = await userRestService.preferEmail(email);
         return this.returnAccount(result);
     }
 
     async rsvp(id: string, rsvp: EventRsvp) {
-        const request = new EventRsvpRequest()
-            .setEventId(id)
-            .setRsvp(rsvp);
+        const request = {eventId: id, rsvp: rsvp } as EventRsvpRequest;
         await userRestService.rsvpEvent(request);
     }
 
-    async getEvents(includePast: boolean, includeFuture: boolean, includeAttendance: boolean): Promise<Event.AsObject[]> {
-        const request = new EventListRequest()
-            .setIncludePast(includePast)
-            .setIncludeFuture(includeFuture)
-            .setIncludeAttendance(includeAttendance);
+    async getEvents(includePast: boolean, includeFuture: boolean, includeAttendance: boolean): Promise<Event[]> {
+        const request = { includePast: includePast, includeFuture:includeFuture, includeAttendance:includeAttendance } as EventListRequest;
         const response = await userRestService.getEvents(request);
-        return response.toObject().eventList;
+        return response.event;
     }
 
-    async getEvent(id: string): Promise<Event.AsObject> {
-        const response = await userRestService.getEvent(new EventRequest().setEventId(id))
-        return response.toObject();
+    async getEvent(id: string): Promise<Event> {
+        const response = await userRestService.getEvent({eventId: id} as EventRequest)
+        return response;
     }
 
-    async getCharacters(): Promise<Character.AsObject[]> {
-        return [] as Character.AsObject[];
+    async getCharacters(): Promise<Character[]> {
+        return [] as Character[];
     }
 }
 

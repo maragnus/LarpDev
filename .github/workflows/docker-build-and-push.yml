@@ -21,7 +21,8 @@ jobs:
         docker build . --file Dockerfile \
             --tag cr.maragnus.com/larpdev:${{ github.run_number }} \
             --tag cr.maragnus.com/larpdev:${{ github.ref_name }} \
-            --tag cr.maragnus.com/larpdev:latest && \
+            --tag cr.maragnus.com/larpdev:latest \
+            --build-arg BUILD_REVISION=${{ github.run_number }} && \
         docker image push cr.maragnus.com/larpdev:${{ github.run_number }} && \
         docker image push cr.maragnus.com/larpdev:${{ github.ref_name }} && \
         docker image push cr.maragnus.com/larpdev:latest

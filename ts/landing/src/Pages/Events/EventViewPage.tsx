@@ -12,39 +12,17 @@ import {
     Typography
 } from "@mui/material";
 import AwesomeSpinner from "../../Common/AwesomeSpinner";
-import {Event, EventComponent, EventRsvp} from "../../Protos/larp/events_pb";
+import {Event, EventComponent} from "../../Protos/larp/events";
 import sessionService from "../../SessionService";
 import ExtensionIcon from '@mui/icons-material/Extension';
-import MenuItem from "@mui/material/MenuItem";
 import RsvpIcon from "@mui/icons-material/Rsvp";
 
-function ComponentItem(props: {key: number, event: Event.AsObject, component: EventComponent.AsObject, busy: boolean}) {
-    const eventId = props.event.eventId;
-    const isApproved = false;
+function ComponentItem(props: {key: number, event: Event, component: EventComponent, busy: boolean}) {
     const name = props.component.name;
     const when = new Date(props.component.date).toDateString();
 
-    function select(id: string, rsvp: EventRsvp) {
-    }
-
     function handleClick() {
 
-    }
-
-    let rsvpOptions: any;
-    if (isApproved) {
-        rsvpOptions = undefined;
-    } else if (false) {
-        rsvpOptions = [
-            <MenuItem onClick={() => select(eventId, EventRsvp.EVENT_RSVP_CONFIRMED)}>Yes, I attended</MenuItem>,
-            <MenuItem onClick={() => select(eventId, EventRsvp.EVENT_RSVP_UNANSWERED)}>No, I did not attend</MenuItem>,
-        ]
-    } else {
-        rsvpOptions = [
-            <MenuItem onClick={() => select(eventId, EventRsvp.EVENT_RSVP_YES)}>Going</MenuItem>,
-            <MenuItem onClick={() => select(eventId, EventRsvp.EVENT_RSVP_MAYBE)}>Maybe</MenuItem>,
-            <MenuItem onClick={() => select(eventId, EventRsvp.EVENT_RSVP_NO)}>Not Going</MenuItem>
-        ]
     }
 
     return (
@@ -60,9 +38,9 @@ function ComponentItem(props: {key: number, event: Event.AsObject, component: Ev
     );
 }
 
-function EventViewItem(props: {event: Event.AsObject, busy: boolean}) {
+function EventViewItem(props: {event: Event, busy: boolean}) {
     const ev = props.event;
-    const components = ev.componentsList.map((c, i) =>
+    const components = ev.components.map((c, i) =>
         (<ComponentItem key={i} event={ev} component={c} busy={props.busy} />));
 
     return <div>
@@ -79,7 +57,7 @@ function EventViewItem(props: {event: Event.AsObject, busy: boolean}) {
 export default function EventViewPage(params: { id: string }) {
     const navigate = useNavigate();
     const [busy, setBusy] = React.useState(true);
-    const [event, setEvent] = React.useState<Event.AsObject>({} as Event.AsObject);
+    const [event, setEvent] = React.useState<Event>({} as Event);
 
     useMountEffect(async () => {
         try {
