@@ -33,8 +33,8 @@ public class AuthWorkflowTests
         var context = testDataFixture.Context;
         var notificationService = new Mock<IUserNotificationService>();
         notificationService
-            .Setup(x => x.SendAuthenticationToken(It.IsAny<string>(), It.IsAny<string>()))
-            .Callback<string, string>((_, tokenCode) => Token = tokenCode);
+            .Setup(x => x.SendAuthenticationToken(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            .Callback<string, string, string>((_, _, tokenCode) => Token = tokenCode);
         AuthService = new AuthenticationService(testDataFixture.Context, userSessionService, notificationService.Object, Clock);
         Helper = new TestDataHelper(context);
     }

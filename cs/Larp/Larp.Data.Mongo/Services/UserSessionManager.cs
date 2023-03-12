@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace Larp.Data.Services;
+namespace Larp.Data.Mongo.Services;
 
 public enum UserSessionValidationResultStatusCode
 {

@@ -1,9 +1,9 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.Json;
-using Google.Protobuf;
-using Google.Protobuf.Collections;
-using Larp.Protos.Mystwood5e;
+using System.Text.Json.Serialization;
+using Larp.Data.Mongo;
+using Larp.Data.MwFifth;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
@@ -13,9 +13,17 @@ namespace Larp.Data.Seeder;
 public class LarpDataSeeder
 {
     private const string LarpResourceNamePrefix = "Larp.Data.Seeder.";
+
     // ReSharper disable once InconsistentNaming
     private const string Mw5eResourceNamePrefix = LarpResourceNamePrefix + "Mw5e";
     private readonly ISystemClock _clock;
+
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        Converters = { new JsonStringEnumConverter() }
+    };
 
     private readonly JsonDocumentOptions _jsonDocumentOptions = new()
     {
@@ -53,16 +61,16 @@ public class LarpDataSeeder
 
         await ImportCommonData();
 
-        await ImportData(() => gameState.Advantages);
-        await ImportData(() => gameState.Disadvantages);
-        await ImportData(() => gameState.Gifts);
-        await ImportData(() => gameState.HomeChapters);
-        await ImportData(() => gameState.Occupations);
-        await ImportData(() => gameState.Religions);
-        await ImportData(() => gameState.Skills);
-        await ImportData(() => gameState.Spells);
+        await ImportData(gameState, () => gameState.Advantages);
+        await ImportData(gameState, () => gameState.Disadvantages);
+        await ImportData(gameState, () => gameState.Gifts);
+        await ImportData(gameState, () => gameState.HomeChapters);
+        await ImportData(gameState, () => gameState.Occupations);
+        await ImportData(gameState, () => gameState.Religions);
+        await ImportData(gameState, () => gameState.Skills);
+        await ImportData(gameState, () => gameState.Spells);
 
-        await _larpContext.FifthEdition.SetGameState(gameState);
+        await _larpContext.MwFifthGame.SetGameState(gameState);
     }
 
     private async Task ImportCommonData()
@@ -74,21 +82,16 @@ public class LarpDataSeeder
 
     private async Task ImportGames(JsonElement json)
     {
-        var games = Import<Protos.Game>(json)
-            .Select(x => new Data.Game(x))
-            .ToList();
-
+        var games = Import<Game>(json);
         await _larpContext.Games.InsertManyAsync(games, new InsertManyOptions());
     }
 
     private async Task ImportEvents(JsonElement json)
     {
-        var gameIds = (await _larpContext.Games.Find(_ => true).ToListAsync())
+        var gameIds = (await _larpContext.Games.Find(FilterDefinition<Game>.Empty).ToListAsync())
             .ToDictionary(x => x.Name, x => x.Id);
 
-        var events = Import<Protos.Event>(json)
-            .Select(x => new Data.Event(x))
-            .ToList();
+        var events = Import<Event>(json).ToList();
 
         foreach (var ev in events)
             ev.GameId = gameIds[ev.GameId];
@@ -105,8 +108,8 @@ public class LarpDataSeeder
         return await JsonDocument.ParseAsync(jsonFile, _jsonDocumentOptions);
     }
 
-    private async Task ImportData<TEntity>(Expression<Func<RepeatedField<TEntity>>> expression)
-        where TEntity : IMessage<TEntity>, new()
+    private async Task ImportData<TEntity>(GameState gameState, Expression<Func<TEntity[]>> expression)
+        where TEntity : class, new()
     {
         var lambda = (LambdaExpression)expression;
         var operand = (MemberExpression)lambda.Body;
@@ -114,24 +117,24 @@ public class LarpDataSeeder
 
         _logger.LogInformation("Seeding {CollectionName}", name);
 
-        var entities = expression.Compile().Invoke();
-        entities.AddRange(Import<TEntity>((await GetJsonDocument(name)).RootElement));
+        var json = await GetJsonDocument(name);
+        var items = Import<TEntity>(json.RootElement);
+        ((PropertyInfo)operand.Member).SetValue(gameState, items.ToArray());
     }
 
     private IEnumerable<TEntity> Import<TEntity>(JsonElement json)
-        where TEntity : IMessage<TEntity>, new()
+        where TEntity : class
     {
-        foreach (var element in json.EnumerateArray())
+        foreach (var j in json.EnumerateArray().Select(element => element.GetRawText()))
         {
-            var j = element.GetRawText();
             TEntity e;
             try
             {
-                e = Google.Protobuf.JsonParser.Default.Parse<TEntity>(j);
+                e = JsonSerializer.Deserialize<TEntity>(j, _jsonSerializerOptions)!;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, j);
+                _logger.LogError(ex, "JSON: {Json}", j);
                 throw;
             }
 

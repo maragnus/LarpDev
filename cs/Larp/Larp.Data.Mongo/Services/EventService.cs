@@ -1,16 +1,15 @@
-﻿using Larp.Protos;
-using Microsoft.Extensions.Internal;
+﻿using Microsoft.Extensions.Internal;
 using MongoDB.Driver;
 
-namespace Larp.Data.Services;
+namespace Larp.Data.Mongo.Services;
 
 public interface IEventService
 {
-    Task<IEnumerable<Protos.Event>> ListEventsForAccount(string accountId, bool includePast, bool includeFuture,
+    Task<IEnumerable<Event>> ListEventsForAccount(string accountId, bool includePast, bool includeFuture,
         bool includeAttendance);
 
-    Task<Protos.Event> Rsvp(string accountId, string eventId, EventRsvp rsvp);
-    Task<Protos.Event> GetEvent(string eventId);
+    Task<Event> Rsvp(string accountId, string eventId, EventRsvp rsvp);
+    Task<Event> GetEvent(string eventId);
 }
 
 public class EventService : IEventService
@@ -24,7 +23,7 @@ public class EventService : IEventService
         _clock = clock;
     }
 
-    public async Task<IEnumerable<Protos.Event>> ListEventsForAccount(string accountId, bool includePast,
+    public async Task<IEnumerable<Event>> ListEventsForAccount(string accountId, bool includePast,
         bool includeFuture,
         bool includeAttendance)
     {
@@ -40,19 +39,18 @@ public class EventService : IEventService
             where (isPast || includeFuture)
             select ev;
 
-        return events.Select(e => e.ToProto());
+        return events;
     }
 
-    public Task<Protos.Event> Rsvp(string accountId, string eventId, EventRsvp rsvp)
+    public Task<Event> Rsvp(string accountId, string eventId, EventRsvp rsvp)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<Protos.Event> GetEvent(string eventId)
+    public async Task<Event> GetEvent(string eventId)
     {
-        var e = await _larpContext.Events
+        return await _larpContext.Events
             .Find(x => x.Id == eventId)
             .FirstOrDefaultAsync();
-        return e.ToProto();
     }
 }

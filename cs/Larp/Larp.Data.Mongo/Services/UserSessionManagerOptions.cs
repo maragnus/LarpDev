@@ -1,4 +1,4 @@
-﻿namespace Larp.Data.Services;
+﻿namespace Larp.Data.Mongo.Services;
 
 public class UserSessionManagerOptions
 {

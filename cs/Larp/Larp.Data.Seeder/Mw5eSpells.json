@@ -716,7 +716,7 @@
     {
         "category": "Bardic",
         "name": "Song of Courage",
-        "type": "Gesture/Voice",
+        "type": "GestureOrVoice",
         "mana": 1,
         "effect": "You may sing for at least a 60 count (1 minutes) to call “Bestow Resist Will” on a target. 1 Bardic Voice CP: You may sing for at least a 60 count (1 minutes) to call “By my Voice, Purge Will”."
     }

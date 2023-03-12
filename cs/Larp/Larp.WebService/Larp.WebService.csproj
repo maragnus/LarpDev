@@ -31,7 +31,7 @@
     </ItemGroup>
     
     <ItemGroup>
-        <PackageReference Include="JetBrains.Annotations" Version="2022.3.1"/>
+        <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" />
         <PackageReference Include="Microsoft.AspNetCore.SpaProxy" Version="6.0.10" />
         <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.5.2">
             <PrivateAssets>all</PrivateAssets>
@@ -42,8 +42,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Larp.Data.Seeder\Larp.Data.Seeder.csproj" />
       <ProjectReference Include="..\Larp.Data\Larp.Data.csproj" />
-        <ProjectReference Include="..\Larp.Notify\Larp.Notify.csproj"/>
-      <ProjectReference Include="..\Larp.Protos\Larp.Protos.csproj" />
+        <ProjectReference Include="..\Larp.Notify\Larp.Notify.csproj" />
     </ItemGroup>
 
     <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

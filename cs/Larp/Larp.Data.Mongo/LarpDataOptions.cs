@@ -1,4 +1,4 @@
-﻿namespace Larp.Data;
+﻿namespace Larp.Data.Mongo;
 
 public class LarpDataOptions
 {

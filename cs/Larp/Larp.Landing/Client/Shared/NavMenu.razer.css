@@ -1,0 +1,17 @@
+.NavActive {
+    color: red;
+}
+
+.NavLink {
+    align-items: center;
+    text-decoration: none;
+    position: relative;
+    justify-content: flex-start;
+    color: inherit;
+    width: 100%;
+    padding: 10px 8px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    justify-content: flex-start;
+}

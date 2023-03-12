@@ -1,0 +1,41 @@
+@page "/characters"
+@using Larp.Data
+
+@inject LandingService LandingService
+
+<List>
+    @if (Characters == null)
+    {
+        <ListItem key=@{0}>
+            <CircularProgress
+                    Style="margin: 16px;" />
+        </ListItem>
+    }
+    else
+    {
+        foreach (var (character, key) in Characters.Select((c, i) => (c, i)))
+        {
+            <ListItem key=@{key}>
+                <ListItemIcon>
+                    <PersonIcon/>
+                </ListItemIcon>
+                <ListItemText>@character.Name</ListItemText>
+            </ListItem>
+        }
+        
+        <ListItem key=@{Characters.Length}>
+            <ListItemIcon><AddIcon/></ListItemIcon>
+            <ListItemText>Add new character</ListItemText>
+        </ListItem>
+    }
+</List>
+
+@code {
+    CharacterSummary[]? Characters;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        Characters = await LandingService.GetCharacters();
+    }
+
+}

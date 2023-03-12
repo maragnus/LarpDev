@@ -7,10 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Larp.Protos\Larp.Protos.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
+      <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" />
       <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.0" />
       <PackageReference Include="MongoDB.Driver" Version="2.18.0" />
     </ItemGroup>

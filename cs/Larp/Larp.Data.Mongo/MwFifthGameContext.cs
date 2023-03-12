@@ -1,25 +1,24 @@
-﻿using Larp.Data.Services;
-using Larp.Protos.Mystwood5e;
+﻿using Larp.Data.Mongo.Services;
+using Larp.Data.MwFifth;
 using Microsoft.Extensions.Caching.Memory;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace Larp.Data;
+namespace Larp.Data.Mongo;
 
-public class FifthEditionContext
+public class MwFifthGameContext
 {
-    public const string PrefixName = "Mw5e";
+    private const string PrefixName = "Mw5e";
     private const string GameStateCacheName = PrefixName + "." + nameof(GameState);
     private readonly LarpDataCache _cache;
+    private readonly IMongoCollection<BsonDocument> _gameStates;
 
-    public FifthEditionContext(IMongoDatabase database, LarpDataCache cache)
+    public MwFifthGameContext(IMongoDatabase database, LarpDataCache cache)
     {
         _cache = cache;
         Characters = database.GetCollection<Character>($"{PrefixName}.{nameof(Characters)}");
-        GameStates = database.GetCollection<BsonDocument>($"{PrefixName}.{nameof(GameStates)}");
+        _gameStates = database.GetCollection<BsonDocument>(nameof(LarpContext.GameStates));
     }
-
-    public IMongoCollection<BsonDocument> GameStates { get; }
 
     public IMongoCollection<Character> Characters { get; }
 
@@ -28,16 +27,20 @@ public class FifthEditionContext
         if (_cache.TryGetValue(GameStateCacheName, out GameState gameState))
             return gameState;
 
-        var bson = await GameStates.Find(FilterDefinition<BsonDocument>.Empty).FirstAsync();
+        var bson = await _gameStates.
+            Find(x => x["name"] == GameState.GameName)
+            .FirstAsync();
+        
         bson.Remove("_id");
-        return _cache.Set(GameStateCacheName, bson.ToMessage<GameState>());
+        var json = bson.ToJson();
+        return _cache.Set(GameStateCacheName, System.Text.Json.JsonSerializer.Deserialize<GameState>(json)!);
     }
 
     public async Task SetGameState(GameState gameState)
     {
         _cache.Set(GameStateCacheName, gameState);
 
-        await GameStates.ReplaceOneAsync(
+        await _gameStates.ReplaceOneAsync(
             Builders<BsonDocument>.Filter.Empty,
             gameState.ToBsonDocument(),
             new ReplaceOptions { IsUpsert = true });

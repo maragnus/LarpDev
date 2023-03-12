@@ -1,9 +1,10 @@
-﻿using Larp.Data.Services;
+﻿using Larp.Data.Mongo.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace Larp.Data;
+namespace Larp.Data.Mongo;
 
 public class LarpContext
 {
@@ -21,13 +22,15 @@ public class LarpContext
         Events = database.GetCollection<Event>(nameof(Events));
         Games = database.GetCollection<Game>(nameof(Games));
         Sessions = database.GetCollection<Session>(nameof(Sessions));
-        FifthEdition = new FifthEditionContext(database, cache);
+        GameStates = database.GetCollection<BsonDocument>(nameof(GameStates));
+        MwFifthGame = new MwFifthGameContext(database, cache);
     }
 
     public IMongoCollection<Account> Accounts { get; }
     public IMongoCollection<Event> Events { get; }
     public IMongoCollection<Attendance> Attendances { get; }
-    public FifthEditionContext FifthEdition { get; }
+    public MwFifthGameContext MwFifthGame { get; }
     public IMongoCollection<Game> Games { get; }
     public IMongoCollection<Session> Sessions { get; }
+    public IMongoCollection<BsonDocument> GameStates { get; }
 }
