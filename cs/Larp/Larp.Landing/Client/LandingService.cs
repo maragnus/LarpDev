@@ -81,4 +81,10 @@ public class LandingService
             return cachedState;
         }
     }
+
+    public async Task<Game[]> GetGames()
+    {
+        // TODO -- cache this
+        return await _landing.GetGames();
+    }
 }

@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Larp.Landing.Server.Controllers;
 
-
 [ApiController]
 [Route("api/[controller]")]
 public class LarpController : ControllerBase, ILandingService, IMwFifthGameService

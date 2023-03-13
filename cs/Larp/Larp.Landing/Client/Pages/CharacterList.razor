@@ -1,41 +1,73 @@
 @page "/characters"
 @using Larp.Data
+@using Larp.Data.MwFifth
 
 @inject LandingService LandingService
 
-<List>
-    @if (Characters == null)
-    {
-        <ListItem key=@{0}>
-            <CircularProgress
-                    Style="margin: 16px;" />
-        </ListItem>
-    }
-    else
-    {
-        foreach (var (character, key) in Characters.Select((c, i) => (c, i)))
+<Container MaxWidth="MaxWidth.Medium">
+    <Paper Elevation="2" Style="padding-top: 1em">
+        <Typography Variant="TypographyVariant.H4" Style="padding: 1em">Your Characters</Typography>
+        @if (Characters == null || Games == null)
         {
-            <ListItem key=@{key}>
-                <ListItemIcon>
-                    <PersonIcon/>
-                </ListItemIcon>
-                <ListItemText>@character.Name</ListItemText>
-            </ListItem>
+            <List>
+                <ChildContent>
+                    <ListItem key=@{0}>
+                        <CircularProgress Style="margin: 32px;"/>
+                    </ListItem>
+                </ChildContent>
+            </List>
         }
-        
-        <ListItem key=@{Characters.Length}>
-            <ListItemIcon><AddIcon/></ListItemIcon>
-            <ListItemText>Add new character</ListItemText>
-        </ListItem>
-    }
-</List>
+
+        @if (Characters != null && Games != null)
+        {
+            <List>
+                <SubheaderContent>
+                    <ListSubheader>
+                        <li/>
+                    </ListSubheader>
+                </SubheaderContent>
+                <ChildContent>
+                    @foreach (var game in Games)
+                    {
+                        <li key="@($"{game.Name}-section")">
+                            <ul>
+                                <ListSubheader>@game.Title</ListSubheader>
+                                @foreach (var character in Characters.Where(x => x.GameName == game.Name).OrderBy(x => x.Name))
+                                {
+                                    <Hyperlink href=@($"/characters/{character.Id}") key="@($"{game.Name}-{character.Id}")">
+                                        <ListItem Button>
+                                            <ListItemIcon>
+                                                <AddIcon/>
+                                            </ListItemIcon>
+                                            <ListItemText Primary="Draft a new Mystwood 5th Edition character"/>
+                                        </ListItem>
+                                    </Hyperlink>
+                                }
+                                <ListItemLink Button href="/characters/new" key="@($"{game.Name}-new")">
+                                    <ListItemIcon>
+                                        <AddIcon/>
+                                    </ListItemIcon>
+                                    <ListItemText Primary=@($"Draft a new {game.Title} character") />
+                                </ListItemLink>
+                            </ul>
+                        </li>
+                    }
+                </ChildContent>
+            </List>
+        }
+    </Paper>
+</Container>
 
 @code {
+    // ReSharper disable InconsistentNaming
     CharacterSummary[]? Characters;
-    
+    Game[]? Games;
+
     protected override async Task OnInitializedAsync()
     {
         Characters = await LandingService.GetCharacters();
+        Games = await LandingService.GetGames();
     }
+
 
 }

@@ -55,6 +55,7 @@ public class LarpDataSeeder
 
         var gameState = new GameState
         {
+            Name = GameState.GameName,
             LastUpdated = _clock.UtcNow.ToString("O"),
             Revision = Guid.NewGuid().ToString("N")
         };

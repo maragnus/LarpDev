@@ -65,7 +65,12 @@ app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.MapGet("/api/larp/{*rest}", async (string rest, HttpContext context) =>
+{
+    context.Response.StatusCode = 200;
+    await context.Response.WriteAsJsonAsync(new { Value = "this is a response" });
+    await context.Response.CompleteAsync();
+});
 app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");

@@ -28,7 +28,7 @@ public class MwFifthGameContext
             return gameState;
 
         var bson = await _gameStates.
-            Find(x => x["name"] == GameState.GameName)
+            Find(x => x["Name"] == GameState.GameName)
             .FirstAsync();
         
         bson.Remove("_id");
