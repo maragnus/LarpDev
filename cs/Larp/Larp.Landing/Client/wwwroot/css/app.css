@@ -99,3 +99,5 @@ a, .btn-link {
     .loading-progress-text:after {
         content: var(--blazor-load-percentage-text, "Loading");
     }
+
+ul, li { margin: 0; padding: 0; padding-inline-start: 0 !important; }

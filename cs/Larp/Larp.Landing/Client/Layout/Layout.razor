@@ -1,0 +1,13 @@
+﻿@using JetBrains.Annotations
+@inherits LayoutComponentBase
+
+<CascadingValue Value="@PageInfo">
+    <NavMenu/>
+    @Body
+</CascadingValue>
+
+@code {
+    // ReSharper disable InconsistentNaming
+    [UsedImplicitly]
+    private PageInfo PageInfo = new() { HeaderText = @<RenderFragment>LARP Landing</RenderFragment> };
+}

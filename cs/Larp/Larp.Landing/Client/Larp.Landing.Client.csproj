@@ -37,9 +37,6 @@
       <None Include="wwwroot\tree.webp">
         <Link>ClientApp\src\tree.webp</Link>
       </None>
-      <None Update="Shared\NavMenu.razer.css">
-        <DependentUpon>NavMenu.razor</DependentUpon>
-      </None>
     </ItemGroup>
 
 </Project>

@@ -1,3 +1,4 @@
+using System.Reflection;
 using Larp.Common.LifeCycle;
 using Larp.Data.Mongo;
 using Larp.Data.Mongo.Services;
@@ -5,6 +6,7 @@ using Larp.Data.Seeder;
 using Larp.Landing.Server.Services;
 using Larp.Landing.Shared;
 using Larp.Notify;
+using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Extensions.Internal;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -65,14 +67,8 @@ app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
 app.UseRouting();
-app.MapGet("/api/larp/{*rest}", async (string rest, HttpContext context) =>
-{
-    context.Response.StatusCode = 200;
-    await context.Response.WriteAsJsonAsync(new { Value = "this is a response" });
-    await context.Response.CompleteAsync();
-});
-app.MapRazorPages();
 app.MapControllers();
+app.MapRazorPages();
 app.MapFallbackToFile("index.html");
 
 app.Run();

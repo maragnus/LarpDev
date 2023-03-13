@@ -1,6 +1,51 @@
-@page "/characters/:characterId/edit"
-<h3>CharacterEdit</h3>
+@page "/characters/{characterId}/edit"
+@using Larp.Data.MwFifth
+@inject LandingService LandingService
+
+<PageHeader>Editing @_character?.CharacterName</PageHeader>
+
+@switch (_loadingState)
+{
+    case LoadingState.Loaded:
+        <span>This is the editor!!!</span>
+        break;
+    case LoadingState.Loading:
+        <LinearProgress />
+        break;
+    case LoadingState.Failed:
+        <Alert Severity="">
+            Failed to connect to server, please try again.
+        </Alert>
+        break;
+    case LoadingState.NotFound:
+    default:
+        <Alert Severity="">
+            Character was not found.
+        </Alert>
+        break;
+}
 
 @code {
-    
+    [Parameter]
+    public string? CharacterId { get; set; }
+
+    private LoadingState _loadingState = LoadingState.Loading;
+
+    private Character? _character;
+    private GameState? _gameState;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _gameState = await LandingService.GetMwFifthGameState();
+            _character = await LandingService.MwFifth.GetCharacter(CharacterId);
+            _loadingState = _character == null ? LoadingState.NotFound : LoadingState.Loaded;
+        }
+        catch
+        {
+            _loadingState = LoadingState.Failed;
+        }
+    }
+
 }

@@ -5,6 +5,24 @@ using Larp.Landing.Shared;
 
 namespace Larp.Landing.Client;
 
+public class MwFifthService
+{
+    private readonly IMwFifthGameService _mwFifth;
+
+    public MwFifthService(IMwFifthGameService mwFifth)
+    {
+        _mwFifth = mwFifth;
+    }
+
+    public async Task<Character?> GetCharacter(string? characterId)
+    {
+        if (string.IsNullOrWhiteSpace(characterId))
+            return null;
+        
+        return await _mwFifth.GetCharacter(characterId);
+    }
+}
+
 public class LandingService
 {
     private readonly ILandingService _landing;
@@ -21,7 +39,10 @@ public class LandingService
         _mwFifth = mwFifth;
         _localStorage = localStorage;
         _logger = logger;
+        MwFifth = new MwFifthService(_mwFifth);
     }
+
+    public MwFifthService MwFifth { get; }
 
     public async Task Refresh()
     {

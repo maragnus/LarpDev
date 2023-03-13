@@ -15,3 +15,7 @@
     text-transform: none;
     justify-content: flex-start;
 }
+
+header.AppBar-Root {
+    background-color: #112d1e;
+}

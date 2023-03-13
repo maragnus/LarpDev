@@ -1,12 +1,13 @@
 @page "/characters"
 @using Larp.Data
-@using Larp.Data.MwFifth
 
 @inject LandingService LandingService
+@inject NavigationManager NavigationManager
+
+<PageHeader>Your Characters</PageHeader>
 
 <Container MaxWidth="MaxWidth.Medium">
-    <Paper Elevation="2" Style="padding-top: 1em">
-        <Typography Variant="TypographyVariant.H4" Style="padding: 1em">Your Characters</Typography>
+    <Paper Elevation="2" Style="margin-top: 1em;">
         @if (Characters == null || Games == null)
         {
             <List>
@@ -20,7 +21,7 @@
 
         @if (Characters != null && Games != null)
         {
-            <List>
+            <List Style="width: 100%; margin: 0">
                 <SubheaderContent>
                     <ListSubheader>
                         <li/>
@@ -30,18 +31,16 @@
                     @foreach (var game in Games)
                     {
                         <li key="@($"{game.Name}-section")">
-                            <ul>
+                            <ul style="padding: 0">
                                 <ListSubheader>@game.Title</ListSubheader>
                                 @foreach (var character in Characters.Where(x => x.GameName == game.Name).OrderBy(x => x.Name))
                                 {
-                                    <Hyperlink href=@($"/characters/{character.Id}") key="@($"{game.Name}-{character.Id}")">
-                                        <ListItem Button>
-                                            <ListItemIcon>
-                                                <PersonIcon />
-                                            </ListItemIcon>
-                                            <ListItemText Primary="Draft a new Mystwood 5th Edition character"/>
-                                        </ListItem>
-                                    </Hyperlink>
+                                    <ListItem Button key="@($"{game.Name}-{character.Id}")" OnClick=@(() => NavigationManager.NavigateTo($"/characters/{character.Id}")) }>
+                                        <ListItemIcon>
+                                            <PersonIcon />
+                                        </ListItemIcon>
+                                        <ListItemText Primary="Draft a new Mystwood 5th Edition character"/>
+                                    </ListItem>
                                 }
                                 <ListItem Button key="@($"{game.Name}-new")" Component="a" href="/characters/new">
                                     <ListItemIcon>

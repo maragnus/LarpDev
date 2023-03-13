@@ -1,6 +1,6 @@
 namespace Larp.Landing.Shared;
 
-[AttributeUsage(AttributeTargets.Method)]
+[AttributeUsage(AttributeTargets.Method, Inherited = true)]
 public class ApiPathAttribute : Attribute
 {
     public string ApiPath { get; }
