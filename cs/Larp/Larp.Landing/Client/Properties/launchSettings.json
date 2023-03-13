@@ -8,6 +8,10 @@
     }
   },
   "profiles": {
+    "dotnet": {
+      "commandName": "Project",
+      "hotReloadProfile": "aspnetcore"
+    },
     "http": {
       "commandName": "Project",
       "dotnetRunMessages": true,

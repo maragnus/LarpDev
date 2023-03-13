@@ -1,4 +1,3 @@
-using System.Reflection;
 using Larp.Common.LifeCycle;
 using Larp.Data.Mongo;
 using Larp.Data.Mongo.Services;
@@ -6,7 +5,6 @@ using Larp.Data.Seeder;
 using Larp.Landing.Server.Services;
 using Larp.Landing.Shared;
 using Larp.Notify;
-using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Extensions.Internal;
 
 var builder = WebApplication.CreateBuilder(args);

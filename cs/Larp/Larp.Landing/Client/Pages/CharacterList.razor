@@ -32,14 +32,14 @@
                     {
                         <li key="@($"{game.Name}-section")">
                             <ul style="padding: 0">
-                                <ListSubheader>@game.Title</ListSubheader>
+                                <ListSubheader><div style="padding-left: 1em">@game.Title</div></ListSubheader>
                                 @foreach (var character in Characters.Where(x => x.GameName == game.Name).OrderBy(x => x.Name))
                                 {
                                     <ListItem Button key="@($"{game.Name}-{character.Id}")" OnClick=@(() => NavigationManager.NavigateTo($"/characters/{character.Id}")) }>
                                         <ListItemIcon>
                                             <PersonIcon />
                                         </ListItemIcon>
-                                        <ListItemText Primary="Draft a new Mystwood 5th Edition character"/>
+                                    <ListItemText Primary=@($"{character.Name}") Secondary=@($"{character.Summary}") />
                                     </ListItem>
                                 }
                                 <ListItem Button key="@($"{game.Name}-new")" Component="a" href="/characters/new">

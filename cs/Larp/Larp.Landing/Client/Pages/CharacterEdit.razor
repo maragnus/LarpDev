@@ -1,5 +1,6 @@
 @page "/characters/{characterId}/edit"
 @using Larp.Data.MwFifth
+
 @inject LandingService LandingService
 
 <PageHeader>Editing @_character?.CharacterName</PageHeader>
@@ -13,15 +14,15 @@
         <LinearProgress />
         break;
     case LoadingState.Failed:
-        <Alert Severity="">
+        <div Severity="">
             Failed to connect to server, please try again.
-        </Alert>
+        </div>
         break;
     case LoadingState.NotFound:
     default:
-        <Alert Severity="">
+        <div Severity="">
             Character was not found.
-        </Alert>
+        </div>
         break;
 }
 

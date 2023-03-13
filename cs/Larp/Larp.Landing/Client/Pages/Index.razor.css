@@ -14,3 +14,6 @@ div.background {
 div.buffer {
     height: 10vw;
 }
+.Typography-Root {
+    color: white !important;
+}
