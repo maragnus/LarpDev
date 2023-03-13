@@ -37,18 +37,18 @@
                                     <Hyperlink href=@($"/characters/{character.Id}") key="@($"{game.Name}-{character.Id}")">
                                         <ListItem Button>
                                             <ListItemIcon>
-                                                <AddIcon/>
+                                                <PersonIcon />
                                             </ListItemIcon>
                                             <ListItemText Primary="Draft a new Mystwood 5th Edition character"/>
                                         </ListItem>
                                     </Hyperlink>
                                 }
-                                <ListItemLink Button href="/characters/new" key="@($"{game.Name}-new")">
+                                <ListItem Button key="@($"{game.Name}-new")" Component="a" href="/characters/new">
                                     <ListItemIcon>
                                         <AddIcon/>
                                     </ListItemIcon>
                                     <ListItemText Primary=@($"Draft a new {game.Title} character") />
-                                </ListItemLink>
+                                </ListItem>
                             </ul>
                         </li>
                     }
