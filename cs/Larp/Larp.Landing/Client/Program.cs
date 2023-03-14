@@ -3,9 +3,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Larp.Landing.Client;
 using Larp.Landing.Shared;
-using Skclusive.Core.Component;
-using Skclusive.Material.Component;
-using Skclusive.Material.Core;
+using MudBlazor.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -24,16 +22,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
     services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
-    services.TryAddMaterialServices
-    (
-        new MaterialConfigBuilder()
-            .WithIsServer(false)
-            .WithIsPreRendering(false)
-            .WithTheme(Theme.Light)
-            .WithDisableBinding(false)
-            .WithDisableConfigurer(false)
-            .Build()
-    );
+    services.AddMudServices();
 }
 
 builder.Logging.SetMinimumLevel(LogLevel.Trace);

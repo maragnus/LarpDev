@@ -3,70 +3,55 @@
 
 @inject LandingService LandingService
 @inject NavigationManager NavigationManager
+@inject ILogger<CharacterList> Logger
 
 <PageHeader>Your Characters</PageHeader>
 
-<Container MaxWidth="MaxWidth.Medium">
-    <Paper Elevation="2" Style="margin-top: 1em;">
+<MudContainer MaxWidth="MaxWidth.Medium">
+    <MudPaper Elevation="2" Style="margin-top: 1em;">
         @if (Characters == null || Games == null)
         {
-            <List>
-                <ChildContent>
-                    <ListItem key=@{0}>
-                        <CircularProgress Style="margin: 32px;"/>
-                    </ListItem>
-                </ChildContent>
-            </List>
+            <MudList>
+                <MudListItem>
+                    <MudProgressCircular Style="margin: 32px;"/>
+                </MudListItem>
+            </MudList>
         }
 
         @if (Characters != null && Games != null)
         {
-            <List Style="width: 100%; margin: 0">
-                <SubheaderContent>
-                    <ListSubheader>
-                        <li/>
-                    </ListSubheader>
-                </SubheaderContent>
-                <ChildContent>
+            <MudList Clickable Style="width: 100%; margin: 0" SelectedValueChanged="href => NavigationManager.NavigateTo((string)href)">
                     @foreach (var game in Games)
                     {
-                        <li key="@($"{game.Name}-section")">
-                            <ul style="padding: 0">
-                                <ListSubheader><div style="padding-left: 1em">@game.Title</div></ListSubheader>
-                                @foreach (var character in Characters.Where(x => x.GameName == game.Name).OrderBy(x => x.Name))
-                                {
-                                    <ListItem Button key="@($"{game.Name}-{character.Id}")" OnClick=@(() => NavigationManager.NavigateTo($"/characters/{character.Id}")) }>
-                                        <ListItemIcon>
-                                            <PersonIcon />
-                                        </ListItemIcon>
-                                    <ListItemText Primary=@($"{character.Name}") Secondary=@($"{character.Summary}") />
-                                    </ListItem>
-                                }
-                                <ListItem Button key="@($"{game.Name}-new")" Component="a" href="/characters/new">
-                                    <ListItemIcon>
-                                        <AddIcon/>
-                                    </ListItemIcon>
-                                    <ListItemText Primary=@($"Draft a new {game.Title} character") />
-                                </ListItem>
-                            </ul>
-                        </li>
+                        <MudListSubheader><div style="padding-left: 1em">@game.Title</div></MudListSubheader>
+                        @foreach (var character in Characters.Where(x => x.GameName == game.Name).OrderBy(x => x.Name))
+                        {
+                            <MudListItem
+                                Icon="@Icons.Material.Filled.Person"
+                                Value="@($"/characters/{game.Name}/{character.Id}")">
+                                <MudText Typo="Typo.body1">@character.Name</MudText>
+                                <MudText Typo="Typo.body2">@character.Summary</MudText>
+                            </MudListItem>
+                        }
+                        <MudListItem 
+                            Icon="@Icons.Material.Filled.Add"
+                            Value="@($"/characters/{game.Name}/new")"
+                            Text="@($"Draft a new {game.Title} character")"
+                            />
                     }
-                </ChildContent>
-            </List>
+            </MudList>
         }
-    </Paper>
-</Container>
+    </MudPaper>
+</MudContainer>
 
 @code {
     // ReSharper disable InconsistentNaming
     CharacterSummary[]? Characters;
     Game[]? Games;
-
+    
     protected override async Task OnInitializedAsync()
     {
         Characters = await LandingService.GetCharacters();
         Games = await LandingService.GetGames();
     }
-
-
 }

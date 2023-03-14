@@ -1,151 +1,47 @@
-﻿@using Larp.Landing.Client.Icons
-
-<!--suppress CssUnusedSymbol -->
-<style>
-    .Navigation-Item {
-        display: flex;
-        padding-top: 0;
-        padding-bottom: 0;
-    }
-    
-    .Navigation-Link {
-        display: flex;
-        align-items: center;
-        text-decoration: none;
-        position: relative;
-        justify-content: flex-start;
-        color: inherit;
-        width: 100%;
-        padding: 10px 8px;
-        font-weight: 500;
-        letter-spacing: 0;
-        text-transform: none;
-    }
-    
-    .Navigation-Icon {
-        color: inherit;
-        height: 24px;
-    }
-    
-    .Navigation-Active {
-        color: green;
-        font-weight: 500;
-    }
-    
-    .Navigation-Active .Navigation-Icon {
-        color: green;
-    }
-</style>
+﻿@inject NavigationManager NavigationManager
 
 @code {
+    IDisposable? _navChange;
+    protected override void OnInitialized()
+    {
+        _navChange = NavigationManager.RegisterLocationChangingHandler(_ =>
+        {
+            IsDrawerOpen = false;
+            return ValueTask.CompletedTask;
+        });
+    }
+
     private bool IsDrawerOpen { get; set; }
 
-    private void OpenDrawer()
+    private void DrawerToggle()
     {
-        IsDrawerOpen = true;
+        IsDrawerOpen = !IsDrawerOpen;
         StateHasChanged();
     }
-
-    private void CloseDrawer()
-    {
-        IsDrawerOpen = false;
-        StateHasChanged();
-    }
-
-    record NavItem(string Label, RenderFragment Icon, string Path, NavLinkMatch Match);
-
-    private readonly NavItem[] _topItems =
-    {
-        new("Home", @<HomeIcon/>, "/", NavLinkMatch.All),
-        new("Characters", @<PeopleIcon/>, "/characters", NavLinkMatch.Prefix),
-        new("Events", @<EventIcon/>, "/events", NavLinkMatch.Prefix),
-        new("Clarify", @<BookIcon/>, "/clarify", NavLinkMatch.Prefix),
-    };
-    
-    private readonly NavItem[] _bottomItems =
-    {
-        new("Profile", @<PersonIcon/>, "/profile", NavLinkMatch.All),
-        new("Settings", @<SettingsIcon/>, "/settings", NavLinkMatch.Prefix),
-    };
 }
 
-<div
-    Style="flex-grow: 1;">
-    <AppBar
-        Color="Color.Primary"
-        Position="@AppBarPosition.Static">
-        <Toolbar>
-            <IconButton
-                Edge="@IconButtonEdge.Start"
-                Style="margin-right: 16px;"
-                Color="@Color.Inherit"
-                OnClick="@OpenDrawer"
-                aria-label="menu">
-                <MenuIcon />
-            </IconButton>
-            <Typography
-                Variant="@TypographyVariant.H6"
-                Style="flex-grow: 1;">
-                @PageInfo?.HeaderText
-            </Typography>
-            <Button
-                Color="@Color.Inherit">
-                Login
-            </Button>
-        </Toolbar>
-    </AppBar>
-</div>
-<Drawer
-    Absolute
-    PaperStyle="width: 240px;"
-    Variant="@DrawerVariant.Temporary"
-    Anchor="@Anchor.Left"
-    Open="@IsDrawerOpen"
-    OnClose="@CloseDrawer">
-    <List Style="width: 240px" @key="1">
-        <ListItem Button>
-            <NavLink
-                 ActiveClass="Navigation-Active"
-                 class="Navigation-Link"
-                 href="/login">
-                <ListItemIcon Class="Navigation-Icon"><Avatar><PersonIcon/></Avatar></ListItemIcon>
-                <ListItemText Primary="Guest" Secondary="Click to log in"/>
-            </NavLink>
-        </ListItem>
-    </List>
-    <Divider/>
-    <List Style="width: 240px">
-        @foreach (var (key, item) in _topItems.Select((item, key) => (key, item)))
-        {
-            <ListItem Button @key="@key" Class="Navigation-Item">
-                <NavLink
-                     ActiveClass="Navigation-Active"
-                     class="Navigation-Link"
-                     href="@item.Path"
-                     Match="@(item.Match)">
-                    <ListItemIcon Class="Navigation-Icon">@item.Icon</ListItemIcon>
-                    <ListItemText Primary="@item.Label"/>
-                </NavLink>
-            </ListItem>
-        }
-    </List>
-    <Divider/>
-    <List>
-       @foreach (var (key, item) in _bottomItems.Select((item, key) => (key, item)))
-       {
-           <ListItem Button @key="@key" Class="Navigation-Item">
-               <NavLink
-                    ActiveClass="Navigation-Active"
-                    class="Navigation-Link"
-                    href="@item.Path"
-                    Match="@(item.Match)">
-                   <ListItemIcon Class="Navigation-Icon">@item.Icon</ListItemIcon>
-                   <ListItemText Primary="@item.Label"/>
-               </NavLink>
-           </ListItem>
-       }
-    </List>
-</Drawer>
+<MudAppBar Color="Color.Primary" Fixed="false" Dense="true">
+    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+    <MudText>@PageInfo?.HeaderText</MudText>
+    <MudSpacer />
+    <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" />
+</MudAppBar>
+<MudDrawer @bind-Open="@IsDrawerOpen">
+    <MudNavMenu>
+        <MudNavLink Href="/login" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AccountCircle">
+            <MudText Typo="Typo.body1">Guest</MudText>
+            <MudText Typo="Typo.body2">Click to log in</MudText>
+        </MudNavLink>
+        <MudDivider/>
+        <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+        <MudNavLink Href="/characters" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.People">Characters</MudNavLink>
+        <MudNavLink Href="/events" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Event">Events</MudNavLink>
+        <MudNavLink Href="/clarify" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Book">Clarify</MudNavLink>
+        <MudDivider/>
+        <MudNavLink Href="/profile" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person">Profile</MudNavLink>
+        <MudNavLink Href="/admin" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Shield">Administration</MudNavLink>
+    </MudNavMenu>
+</MudDrawer>
 
 @code {
     [CascadingParameter]

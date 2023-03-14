@@ -5,43 +5,12 @@
     {
         await LandingService.Refresh();
     }
-    public static ThemeValue Light = ThemeFactory.CreateTheme(new ThemeConfig
-        {
-            Palette = new PaletteConfig
-            {
-                Type = PaletteType.Light,
-
-                Primary = new PaletteColorConfig
-                {
-                    Main = "#112d1e"
-                },
-
-                Secondary = new PaletteColorConfig
-                {
-                    Main = PaletteColors.Green.A400.Darken(0.1m)
-                },
-
-                Background = new PaletteBackground
-                {
-                    Default = "#fff",
-
-                    Custom = new Dictionary<string, string>
-                {
-                    { "level1", "#fff" },
-
-                    { "level2", PaletteColors.Grey.X100 },
-
-                    { "appbar-color", "var(--theme-palette-primary-contrast-text)" },
-
-                    { "appbar-background-color", "var(--theme-palette-primary-main)" },
-                },
-                }
-            }
-        });
 }
+<MudThemeProvider/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
 
-<ThemeProvider Light="@Light">
-    <Router AppAssembly="@typeof(Program).Assembly">
+<Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.Layout)"/>
         <FocusOnNavigate RouteData="@routeData" Selector="h1"/>
@@ -52,4 +21,3 @@
         </LayoutView>
     </NotFound>
 </Router>
-</ThemeProvider>

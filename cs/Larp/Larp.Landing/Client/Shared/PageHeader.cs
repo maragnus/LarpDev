@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Components;
-using Skclusive.Material.Avatar;
 
 namespace Larp.Landing.Client.Shared;
 

@@ -8,10 +8,12 @@ namespace Larp.Landing.Client;
 public class MwFifthService
 {
     private readonly IMwFifthGameService _mwFifth;
+    private readonly LandingService _landingService;
 
-    public MwFifthService(IMwFifthGameService mwFifth)
+    public MwFifthService(IMwFifthGameService mwFifth, LandingService landingService)
     {
         _mwFifth = mwFifth;
+        _landingService = landingService;
     }
 
     public async Task<Character?> GetCharacter(string? characterId)
@@ -21,6 +23,10 @@ public class MwFifthService
         
         return await _mwFifth.GetCharacter(characterId);
     }
+    
+    public async Task<GameState> GetGameState() =>
+        await _landingService.GetMwFifthGameState();
+
 }
 
 public class LandingService
@@ -39,7 +45,7 @@ public class LandingService
         _mwFifth = mwFifth;
         _localStorage = localStorage;
         _logger = logger;
-        MwFifth = new MwFifthService(_mwFifth);
+        MwFifth = new MwFifthService(_mwFifth, this);
     }
 
     public MwFifthService MwFifth { get; }
@@ -83,7 +89,7 @@ public class LandingService
         {
             var newState = await fetch(cachedState.Revision);
 
-            if (newState == null)
+            if (newState == null || newState.Revision == cachedState.Revision)
             {
                 _logger.LogInformation("GameState is current up-to-date");
                 return cachedState;

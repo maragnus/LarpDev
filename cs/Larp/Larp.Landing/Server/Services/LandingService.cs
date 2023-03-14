@@ -40,7 +40,9 @@ public class MwFifthGameService : IMwFifthGameService
     public async Task<GameState?> GetGameState(string lastRevision)
     {
         var state = await _mwFifth.GetGameState();
-        return state.Revision == lastRevision ? null : state;
+        return state.Revision == lastRevision 
+            ? new GameState() { Revision = state.Revision } 
+            : state;
     }
 
     public async Task<Character?> GetCharacter(string characterId)

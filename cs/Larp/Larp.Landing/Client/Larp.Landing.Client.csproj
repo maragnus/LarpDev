@@ -11,8 +11,7 @@
         <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.0" PrivateAssets="all" />
-        <PackageReference Include="Skclusive.Material.Component" Version="5.2.0" />
-        <PackageReference Include="Skclusive.Material.Layout" Version="5.2.0" />
+        <PackageReference Include="MudBlazor" Version="6.1.9" />
     </ItemGroup>
 
     <ItemGroup>
@@ -37,6 +36,11 @@
       <None Include="wwwroot\tree.webp">
         <Link>ClientApp\src\tree.webp</Link>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Icons\BookIcon.razor" />
+      <_ContentIncludedByDefault Remove="Icons\EventIcon.razor" />
     </ItemGroup>
 
 </Project>

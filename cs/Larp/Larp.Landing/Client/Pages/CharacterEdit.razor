@@ -1,4 +1,4 @@
-@page "/characters/{characterId}/edit"
+@page "/characters/{gameName}/{characterId}/edit"
 @using Larp.Data.MwFifth
 
 @inject LandingService LandingService
@@ -11,18 +11,18 @@
         <span>This is the editor!!!</span>
         break;
     case LoadingState.Loading:
-        <LinearProgress />
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
         break;
     case LoadingState.Failed:
-        <div Severity="">
+        <MudAlert Severity="Severity.Error">
             Failed to connect to server, please try again.
-        </div>
+        </MudAlert>
         break;
     case LoadingState.NotFound:
     default:
-        <div Severity="">
+        <MudAlert Severity="Severity.Error">
             Character was not found.
-        </div>
+        </MudAlert>
         break;
 }
 
