@@ -1,0 +1,116 @@
+@using MongoDB.Bson
+@using Larp.Landing.Shared.MwFifth
+@using MongoDB.Bson.IO
+@inject LandingService LandingService
+
+@code {
+    private LoadingState _loadingState = LoadingState.Loading;
+    private Game _game = new Game();
+    private GameState _gameState = null!;
+    private Character _character = null!;
+    private CharacterValidator _characterValidator = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _game = LandingService.MwFifth.Game;
+        _gameState = LandingService.MwFifth.GameState;
+        _characterValidator = new CharacterValidator(_gameState);
+
+        _character = await LandingService.MwFifth.GetDraftCharacter();
+
+        _steps = new Step[]
+        {
+            new(
+                "Home Chapter",
+                @<StepHomeChapter GameState="_gameState" Character="_character" />, 
+                @<MudIcon Icon="@Icons.Material.Outlined.Flag" />,
+                () => _characterValidator.IsHomeChapterValid(_character)),
+            
+            new(
+                "Homeland", 
+                @<StepHomeland GameState="_gameState" Character="_character" />,
+                @<MudIcon Icon="@Icons.Material.Outlined.Home" />,            
+                () => _characterValidator.IsHomelandValid(_character)),
+
+            new(
+                "Occupation", 
+                @<StepOccupation GameState="_gameState" Character="_character" />,
+                @<MudIcon Icon="@Icons.Material.Outlined.Work" />,         
+                () => _characterValidator.IsOccupationValid(_character).isSuccess),
+            
+            new(
+                "Gifts", 
+                @<StepGifts GameState="_gameState" Character="_character" />,
+                @<MudIcon Icon="@Icons.Material.Outlined.FitnessCenter" />,         
+                () => _characterValidator.IsGiftsValid(_character)),
+            
+            new(
+                "Religion", 
+                @<StepReligion GameState="_gameState" Character="_character" />,
+                @<MudIcon Icon="@Icons.Material.Outlined.GroupWork" />,         
+                () => _characterValidator.IsReligionValid(_character)),
+            
+            new(
+                "Spells", 
+                @<StepSpells GameState="_gameState" Character="_character" />,
+                @<MudIcon Icon="@Icons.Material.Outlined.Book" />,         
+                () => _characterValidator.IsSpellsValid(_character)),
+            
+            new(
+                "Advantages", 
+                @<StepVantages GameState="_gameState" Character="_character" />,
+                @<MudIcon Icon="@Icons.Material.Outlined.Blind" />,         
+                () => _characterValidator.IsVantagesValid(_character)),
+            
+            new(
+                "History", 
+                @<StepHistory GameState="_gameState" Character="_character" />,
+                @<MudIcon Icon="@Icons.Material.Outlined.History" />,         
+                () => _characterValidator.IsHistoryValid(_character)),
+            
+            new("Json", @<pre>@_character.ToJson(new JsonWriterSettings() {Indent = true})</pre>, @<MudIcon Icon="@Icons.Material.Outlined.Code" />, () => false),
+        };
+        
+        _currentStep = _steps[0];
+        _loadingState = LoadingState.Loaded;
+    }
+
+    record Step(string Title, RenderFragment Content, RenderFragment Icon, Func<bool> IsComplete);
+
+    private Step[] _steps = Array.Empty<Step>();
+
+    private Step? _currentStep = null;
+}
+
+@if (_loadingState != LoadingState.Loaded)
+{
+    <MudProgressLinear Indeterminate />
+    return;
+}
+
+<MudGrid Style="margin-top: 1em">
+    <MudItem md="12" sm="12">
+        <MudText Typo="Typo.h6">New @_game.Title Character</MudText>
+    </MudItem>
+    <MudItem md="3" sm="12">
+        <MudTimeline TimelinePosition="TimelinePosition.Left">
+            @foreach (var step in _steps)
+            {
+                var isCurrentStep = _currentStep == step;
+                var isComplete = step.IsComplete();
+                <MudTimelineItem Color="isCurrentStep ? Color.Primary : (isComplete ? Color.Success : Color.Default)">
+                    <MudButton OnClick="() => _currentStep = step">
+                        @step.Icon&nbsp;
+                        <MudText Typo="Typo.caption" Style="margin-left: 1em">@step.Title</MudText>
+                    </MudButton>
+                </MudTimelineItem>
+            }
+        </MudTimeline>
+    </MudItem>
+    <MudItem xs="9">
+        <MudPaper Elevation="2" Style="padding: 2em">
+            @_currentStep?.Content
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+

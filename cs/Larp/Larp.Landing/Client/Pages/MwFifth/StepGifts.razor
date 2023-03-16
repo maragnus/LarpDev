@@ -1,0 +1,13 @@
+<MudText Typo="Typo.h6">Select your gifts</MudText>
+<MudText Typo="Typo.body2">Choose and customize a Basic Occupation or a Chapter-Specific Basic Occupation</MudText>
+
+<div style="margin-top: 2em"></div>
+
+
+@code {
+    [Parameter]
+    public GameState GameState { get; set; } = null!;
+
+    [Parameter]
+    public Character Character { get; set; } = null!;
+}

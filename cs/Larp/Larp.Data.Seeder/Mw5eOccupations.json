@@ -1535,5 +1535,24 @@
         ]
       }
     ]
+  },
+  {
+    "type": "Basic",
+    "name": "Drengr",
+    "chapters": ["burgundar"],
+    "skills": [
+      "Iron Will",
+      "Unarmed Combat",
+      "Wear Armor 2"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Weapon Specialization (One Handed Axe)",
+          "Weapon Specialization (One Handed Sword)"
+        ]
+      }
+    ]
   }
 ]

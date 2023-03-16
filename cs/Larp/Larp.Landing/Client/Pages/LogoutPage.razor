@@ -1,0 +1,37 @@
+@page "/logout"
+@inject LandingService LandingService
+@inject NavigationManager NavigationManager
+
+<PageHeader>Logout</PageHeader>
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudPaper Style="margin-top: 2em; padding: 2em">
+        @if (_loadingState == LoadingState.Loading)
+        {
+            <MudText Typo="Typo.body1">Logging out...</MudText>
+            <MudProgressLinear Indeterminate></MudProgressLinear>
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Error">Logout failed, please try again.</MudAlert>
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private LoadingState _loadingState = LoadingState.Loading;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await LandingService.Logout();
+            NavigationManager.NavigateTo("/");
+        }
+        catch
+        {
+            _loadingState = LoadingState.Failed;
+        }
+    }
+
+}

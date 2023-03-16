@@ -1,52 +1,20 @@
-@page "/characters/{gameName}/{characterId}/edit"
-@using Larp.Data.MwFifth
+@using Larp.Landing.Client.Pages.MwFifth
 
+@page "/characters/{gameName}/{characterId}/edit"
 @inject LandingService LandingService
 
-<PageHeader>Editing @_character?.CharacterName</PageHeader>
-
-@switch (_loadingState)
-{
-    case LoadingState.Loaded:
-        <span>This is the editor!!!</span>
-        break;
-    case LoadingState.Loading:
-        <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
-        break;
-    case LoadingState.Failed:
-        <MudAlert Severity="Severity.Error">
-            Failed to connect to server, please try again.
-        </MudAlert>
-        break;
-    case LoadingState.NotFound:
-    default:
-        <MudAlert Severity="Severity.Error">
-            Character was not found.
-        </MudAlert>
-        break;
-}
+<MudContainer MaxWidth="MaxWidth.Medium">
+    <MudPaper Elevation="2" Style="margin-top: 1em;">
+		@if (GameName == "mw5e") {
+			<MwFifthCharacterEdit CharacterId="@CharacterId" />	
+		}
+    </MudPaper>
+</MudContainer>
 
 @code {
     [Parameter]
+    public string? GameName { get; set; }
+
+    [Parameter]
     public string? CharacterId { get; set; }
-
-    private LoadingState _loadingState = LoadingState.Loading;
-
-    private Character? _character;
-    private GameState? _gameState;
-
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            _gameState = await LandingService.GetMwFifthGameState();
-            _character = await LandingService.MwFifth.GetCharacter(CharacterId);
-            _loadingState = _character == null ? LoadingState.NotFound : LoadingState.Loaded;
-        }
-        catch
-        {
-            _loadingState = LoadingState.Failed;
-        }
-    }
-
 }

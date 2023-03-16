@@ -1,4 +1,4 @@
-@page "/characters"
+@page "/characters/{gameName?}"
 @using Larp.Data
 
 @inject LandingService LandingService
@@ -9,7 +9,7 @@
 
 <MudContainer MaxWidth="MaxWidth.Medium">
     <MudPaper Elevation="2" Style="margin-top: 1em;">
-        @if (Characters == null || Games == null)
+        @if (_characters == null || _games == null)
         {
             <MudList>
                 <MudListItem>
@@ -18,40 +18,60 @@
             </MudList>
         }
 
-        @if (Characters != null && Games != null)
+        @if (_characters != null && _games != null)
         {
             <MudList Clickable Style="width: 100%; margin: 0" SelectedValueChanged="href => NavigationManager.NavigateTo((string)href)">
-                    @foreach (var game in Games)
+                @foreach (var game in _games)
+                {
+                    var characters = _characters
+                        .Where(x => x.GameName == game.Name)
+                        .OrderBy(x => x.Name)
+                        .ToList();
+
+                    <MudListSubheader>
+                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                            <div style="padding-left: 1em">@game.Description</div>
+                            @if (characters.Count == 0)
+                            {
+                                <MudAlert Severity="Severity.Info">You don't currently have any characters</MudAlert>
+                            }
+                        </MudStack>
+                    </MudListSubheader>
+
+                    @foreach (var character in characters)
                     {
-                        <MudListSubheader><div style="padding-left: 1em">@game.Title</div></MudListSubheader>
-                        @foreach (var character in Characters.Where(x => x.GameName == game.Name).OrderBy(x => x.Name))
-                        {
-                            <MudListItem
-                                Icon="@Icons.Material.Filled.Person"
-                                Value="@($"/characters/{game.Name}/{character.Id}")">
-                                <MudText Typo="Typo.body1">@character.Name</MudText>
-                                <MudText Typo="Typo.body2">@character.Summary</MudText>
-                            </MudListItem>
-                        }
-                        <MudListItem 
-                            Icon="@Icons.Material.Filled.Add"
-                            Value="@($"/characters/{game.Name}/new")"
-                            Text="@($"Draft a new {game.Title} character")"
-                            />
+                        <MudListItem
+                            Icon="@Icons.Material.Filled.Person"
+                            Value="@($"/characters/{game.Name}/{character.Id}")">
+                            <MudText Typo="Typo.body1">@character.Name</MudText>
+                            <MudText Typo="Typo.body2">@character.Summary</MudText>
+                        </MudListItem>
                     }
+                    <MudListItem
+                        Icon="@Icons.Material.Filled.Add"
+                        Value="@($"/characters/{game.Name}/new")"
+                        Text="@($"Draft a new {game.Title} character")"/>
+                }
             </MudList>
         }
     </MudPaper>
 </MudContainer>
 
 @code {
-    // ReSharper disable InconsistentNaming
-    CharacterSummary[]? Characters;
-    Game[]? Games;
-    
+
+    [Parameter]
+    public string? GameName { get; set; }
+
+    CharacterSummary[]? _characters;
+    Game[] _games = null!;
+
     protected override async Task OnInitializedAsync()
     {
-        Characters = await LandingService.GetCharacters();
-        Games = await LandingService.GetGames();
+        _characters = await LandingService.GetCharacters();
+        _games = LandingService.Games.Values.ToArray();
+
+        if (GameName != null)
+            _games = _games.Where(x => x.Name == GameName).ToArray();
     }
+
 }

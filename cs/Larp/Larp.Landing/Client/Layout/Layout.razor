@@ -1,13 +1,39 @@
-﻿@using JetBrains.Annotations
-@inherits LayoutComponentBase
-
-<CascadingValue Value="@PageInfo">
+﻿@inherits LayoutComponentBase
+@inject LandingService LandingService
+<CascadingValue Value="@_pageInfo">
     <NavMenu/>
-    @Body
+    @if (_loadingState == LoadingState.Loading)
+    {
+        <MudProgressLinear Indeterminate />
+    }
+    else if (_loadingState == LoadingState.Failed)
+    {
+        <MudAlert Severity="Severity.Error">
+            Unable to access server, please refresh and try again. 
+        </MudAlert>
+    }
+    else
+    {
+        @Body   
+    }
 </CascadingValue>
 
 @code {
-    // ReSharper disable InconsistentNaming
     [UsedImplicitly]
-    private PageInfo PageInfo = new() { HeaderText = @<span>LARP Landing</span> };
+    private PageInfo _pageInfo = new() { HeaderText = @<span>LARP Landing</span> };
+    private LoadingState _loadingState = LoadingState.Loading;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await LandingService.Refresh();
+            _loadingState = LoadingState.Loaded;
+        }
+        catch
+        {
+            _loadingState = LoadingState.Failed;
+
+        }
+    }
 }

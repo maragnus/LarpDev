@@ -1,32 +1,41 @@
 ﻿@inject NavigationManager NavigationManager
+@inject LandingService LandingService
 
 @code {
-    IDisposable? _navChange;
+    [CascadingParameter]
+    protected PageInfo? PageInfo { get; set; }
+    private IDisposable? _navChange;
+    private bool _isDrawerOpen;
+
     protected override void OnInitialized()
     {
         _navChange = NavigationManager.RegisterLocationChangingHandler(_ =>
         {
-            IsDrawerOpen = false;
+            _isDrawerOpen = false;
             return ValueTask.CompletedTask;
         });
     }
 
-    private bool IsDrawerOpen { get; set; }
-
     private void DrawerToggle()
     {
-        IsDrawerOpen = !IsDrawerOpen;
+        _isDrawerOpen = !_isDrawerOpen;
         StateHasChanged();
     }
+    
+    private void AccountClick()
+    {
+        NavigationManager.NavigateTo(LandingService.IsLoggedIn ? "/profile" : "/login");
+    }
+
 }
 
 <MudAppBar Color="Color.Primary" Fixed="false" Dense="true">
-    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle" />
     <MudText>@PageInfo?.HeaderText</MudText>
     <MudSpacer />
-    <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" />
+    <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" OnClick="AccountClick" />
 </MudAppBar>
-<MudDrawer @bind-Open="@IsDrawerOpen">
+<MudDrawer @bind-Open="@_isDrawerOpen">
     <MudNavMenu>
         <MudNavLink Href="/login" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AccountCircle">
             <MudText Typo="Typo.body1">Guest</MudText>
@@ -42,8 +51,3 @@
         <MudNavLink Href="/admin" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Shield">Administration</MudNavLink>
     </MudNavMenu>
 </MudDrawer>
-
-@code {
-    [CascadingParameter]
-    protected PageInfo? PageInfo { get; set; }
-}

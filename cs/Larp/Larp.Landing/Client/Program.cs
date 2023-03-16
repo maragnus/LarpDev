@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Larp.Landing.Client;
 using Larp.Landing.Shared;
 using MudBlazor.Services;
+using MudExtensions.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -16,6 +17,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
     services.AddBlazoredLocalStorage();
     
     // Larp.Landing.Server
+    services.AddScoped<DataCacheService>();
     services.AddScoped<LandingService>();
     services.AddScoped<ILandingService, LandingInteropService>();
     services.AddScoped<IMwFifthGameService, LandingInteropService>();
@@ -23,6 +25,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
     services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
     services.AddMudServices();
+    services.AddMudExtensions();
 }
 
 builder.Logging.SetMinimumLevel(LogLevel.Trace);

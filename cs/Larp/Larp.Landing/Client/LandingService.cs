@@ -8,11 +8,17 @@ namespace Larp.Landing.Client;
 public class MwFifthService
 {
     private readonly IMwFifthGameService _mwFifth;
+    private readonly ILocalStorageService _localStorage;
+    private readonly DataCacheService _dataCache;
     private readonly LandingService _landingService;
 
-    public MwFifthService(IMwFifthGameService mwFifth, LandingService landingService)
+    private const string DraftCharacterStorageKey = "MwFifth.NewCharacter";
+    
+    public MwFifthService(LandingService landingService, IMwFifthGameService mwFifth, ILocalStorageService localStorage, DataCacheService dataCache)
     {
         _mwFifth = mwFifth;
+        _localStorage = localStorage;
+        _dataCache = dataCache;
         _landingService = landingService;
     }
 
@@ -20,98 +26,90 @@ public class MwFifthService
     {
         if (string.IsNullOrWhiteSpace(characterId))
             return null;
-        
+
         return await _mwFifth.GetCharacter(characterId);
     }
-    
-    public async Task<GameState> GetGameState() =>
-        await _landingService.GetMwFifthGameState();
 
+    public Game Game => _landingService.Games[GameState.GameName];
+    public GameState GameState { get; private set; } = null!;
+
+    public async Task Refresh()
+    {
+        await GetMwFifthGameState();
+    }
+    
+    private async Task GetMwFifthGameState()
+    {
+        GameState = await _dataCache.CacheGameState<GameState>(GameState.GameName,
+            async revision => await _mwFifth.GetGameState(revision));
+    }
+
+    public async Task StoreDraftCharacter(Character character)
+    {
+        await _localStorage.SetItemAsync(DraftCharacterStorageKey, character);
+    }
+    
+    public async Task<Character> GetDraftCharacter()
+    {
+        try
+        {
+            if (!await _localStorage.ContainKeyAsync(DraftCharacterStorageKey))
+                return new Character();
+
+            return await _localStorage.GetItemAsync<Character>(DraftCharacterStorageKey);
+        }
+        catch
+        {
+            return new Character();
+        }
+    }
 }
 
 public class LandingService
 {
     private readonly ILandingService _landing;
-    private readonly IMwFifthGameService _mwFifth;
-    private readonly ILocalStorageService _localStorage;
+    private readonly DataCacheService _dataCache;
     private readonly ILogger<LandingService> _logger;
 
-    private const string MwFifthGameState = "MwFifthGameState";
-    private const int GameStateUpdateFrequencyHours = 2;
-    
-    public LandingService(ILandingService landing, IMwFifthGameService mwFifth, ILocalStorageService localStorage, ILogger<LandingService> logger)
+    private const int GameStateUpdateFrequencyHours = 4;
+
+    public LandingService(ILandingService landing,
+        IMwFifthGameService mwFifth,
+        DataCacheService dataCache,
+        ILogger<LandingService> logger, ILocalStorageService localStorage)
     {
         _landing = landing;
-        _mwFifth = mwFifth;
-        _localStorage = localStorage;
+        _dataCache = dataCache;
         _logger = logger;
-        MwFifth = new MwFifthService(_mwFifth, this);
+        MwFifth = new MwFifthService(this, mwFifth, localStorage, dataCache);
     }
 
+    public IReadOnlyDictionary<string, Game> Games { get; private set; } = null!;
     public MwFifthService MwFifth { get; }
+    public bool IsLoggedIn => false;
+
+    public async Task<CharacterSummary[]> GetCharacters() => await _landing.GetCharacters();
 
     public async Task Refresh()
     {
         _logger.LogInformation("Refresh starting...");
-        await GetMwFifthGameState();
+        await GetGames();
+        await MwFifth.Refresh();
         _logger.LogInformation("Refresh complete");
     }
 
-    public async Task<CharacterSummary[]> GetCharacters() => await _landing.GetCharacters();
-
-    public async Task<GameState> GetMwFifthGameState() =>
-        await GetGameState<GameState>(MwFifthGameState, async revision => await _mwFifth.GetGameState(revision));
-
-    private async Task<TGameState> GetGameState<TGameState> (string key, Func<string, Task<TGameState?>> fetch)
-        where TGameState : GameStateBase
+    private async Task GetGames()
     {
-        var timeStampKey = $"{key}.TimeStamp";
-        
-        if (!await _localStorage.ContainKeyAsync(key))
-        {
-            _logger.LogInformation("GameState is not present and will be fetched");
-            var state = await fetch(string.Empty);
-            await _localStorage.SetItemAsync(key, state);
-            await _localStorage.SetItemAsync(timeStampKey, DateTime.UtcNow);
-            return state!;
-        }
-
-        var cachedState = await _localStorage.GetItemAsync<TGameState>(key);
-        var lastUpdate = await _localStorage.GetItemAsync<DateTime>(timeStampKey);
-
-        _logger.LogInformation("GameState was cached {LastCache}", lastUpdate.ToLocalTime());
-
-        // Only update every few hours
-        if (DateTime.UtcNow - lastUpdate < TimeSpan.FromHours(GameStateUpdateFrequencyHours))
-            return cachedState;
-        
-        try
-        {
-            var newState = await fetch(cachedState.Revision);
-
-            if (newState == null || newState.Revision == cachedState.Revision)
+        Games = await _dataCache
+            .CacheItem(nameof(Games), TimeSpan.FromHours(GameStateUpdateFrequencyHours), async () =>
             {
-                _logger.LogInformation("GameState is current up-to-date");
-                return cachedState;
-            }
-
-            _logger.LogInformation("GameState updated with new revision {OldRevision} to {NewRevision}", cachedState.Revision, newState.Revision);
-            await _localStorage.SetItemAsync(key, newState);
-            await _localStorage.SetItemAsync(timeStampKey, DateTime.UtcNow);
-            return newState;
-        }
-        
-        // If update fails, log it but return the cached copy
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "GameState failed to update");
-            return cachedState;
-        }
+                var games = await _landing.GetGames();
+                return games.ToDictionary(x => x.Name);
+            });
     }
 
-    public async Task<Game[]> GetGames()
+    public async Task Logout()
     {
-        // TODO -- cache this
-        return await _landing.GetGames();
+        await Task.Delay(TimeSpan.FromSeconds(10));
     }
 }

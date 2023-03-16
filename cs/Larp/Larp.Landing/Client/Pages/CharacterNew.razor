@@ -1,22 +1,16 @@
 @page "/characters/{gameName}/new"
-@using Larp.Data.MwFifth
-@inject LandingService LandingService
+@using Larp.Landing.Client.Pages.MwFifth
+
+<PageHeader>New Character</PageHeader>
 
 <MudContainer MaxWidth="MaxWidth.Medium">
-    <MudPaper Elevation="2" Style="margin-top: 1em;">
-        Start your new character
-    </MudPaper>
+    @if (GameName == "mw5e")
+    {
+        <MwFifthCharacterNew/>
+    }
 </MudContainer>
-
 
 @code {
     [Parameter]
     public string? GameName { get; set; }
-
-    private GameState? _gameState;
-
-    protected override async Task OnInitializedAsync()
-    {
-        _gameState = await LandingService.MwFifth.GetGameState();
-    }
 }

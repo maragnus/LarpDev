@@ -1,26 +1,37 @@
 [
     {
+        "name": "none",
+        "title": "Not Religious",
+        "description": ""
+    },
+    {
         "name": "justice",
-        "title": "Follower of Justice"
+        "title": "Follower of Justice",
+        "description": "Wisdom, the Keeper of the Scales"
     },
     {
         "name": "mercy",
-        "title": "Follower of Mercy"
+        "title": "Follower of Mercy",
+        "description": "Courage, Fortune, the Maiden, Brave Sister, the Iron Dove"
     },
     {
         "name": "wild",
-        "title": "Follower of the Wild"
+        "title": "Follower of the Wild",
+        "description": "Nature, the Huntsman, the Keeper of the Dead, the Lord of Gold"
     },
     {
         "name": "old",
-        "title": "Old Faith"
+        "title": "Old Faith",
+        "description": ""
     },
     {
         "name": "chaos",
-        "title": "Chaos"
+        "title": "Chaos",
+        "description": ""
     },
     {
         "name": "all",
-        "title": "All Gods Equally"
+        "title": "All Gods Equally",
+        "description": ""
     }
 ]

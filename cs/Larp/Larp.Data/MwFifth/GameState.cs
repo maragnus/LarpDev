@@ -120,6 +120,7 @@ public class Occupation
     public SkillChoice[] Choices { get; set; } = Array.Empty<SkillChoice>();
     public string? Duty { get; set; }
     public string? Livery { get; set; }
+    public string[] Chapters { get; set; } = Array.Empty<string>();
 }
 
 [PublicAPI]
@@ -129,6 +130,7 @@ public class Vantage
     public string Title { get; set; } = null!;
     public int Rank { get; set; }
     public bool Physical { get; set; }
+    public string? Description { get; set; }
 }
 
 [PublicAPI]
@@ -136,6 +138,7 @@ public class Religion
 {
     public string Name { get; set; } = null!;
     public string Title { get; set; } = null!;
+    public string? Description { get; set; }
 }
 
 [PublicAPI]
@@ -143,6 +146,8 @@ public class HomeChapter
 {
     public string Name { get; set; } = null!;
     public string Title { get; set; } = null!;
+    public string Location { get; set; } = null!;
+    public string[] Homelands { get; set; } = Array.Empty<string>();
 }
 
 [PublicAPI]

@@ -1,0 +1,23 @@
+<MudText Typo="Typo.h6">Select your home chapter</MudText>
+<MudText Typo="Typo.body2">
+    Your character's Home Chapter is where you expect to play the most Events, and where Research or Pathfinding requests will be honored. You can change home Chapter once per year.
+</MudText>
+<MudListExtended 
+    Clickable="true" T="string" 
+    SelectedValue="Character.HomeChapter" 
+    SelectedValueChanged="(selected) => Character.HomeChapter = selected">
+    <ChildContent>
+        @foreach (var chapter in GameState.HomeChapters)
+        {
+            <MudListItemExtended T="string" Icon="@Icons.Material.Outlined.Flag" Text="@chapter.Title" SecondaryText="@chapter.Location" Value="@chapter.Name"/>
+        }
+    </ChildContent>
+</MudListExtended>
+
+@code {
+    [Parameter]
+    public GameState GameState { get; set; } = null!;
+
+    [Parameter]
+    public Character Character { get; set; } = null!;
+}

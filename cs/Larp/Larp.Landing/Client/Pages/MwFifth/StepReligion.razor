@@ -1,0 +1,13 @@
+<MudText Typo="Typo.h6">Select your religion(s)</MudText>
+<MudText Typo="Typo.body2">Does your character follow the in-game religion?</MudText>
+
+<div style="margin-top: 2em"></div>
+
+
+@code {
+    [Parameter]
+    public GameState GameState { get; set; } = null!;
+
+    [Parameter]
+    public Character Character { get; set; } = null!;
+}

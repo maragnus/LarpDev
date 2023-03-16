@@ -1,0 +1,136 @@
+<MudText Typo="Typo.h6">Select your occupation</MudText>
+<MudText Typo="Typo.body2">Choose and customize a Basic Occupation or a Chapter-Specific Basic Occupation</MudText>
+
+<div style="margin-top: 2em"></div>
+
+<MudSelectExtended
+    Label="Occupation"
+    T="string"
+    Value="Character.Occupation"
+    ValueChanged="OnSelectOccupation"
+    SearchFunc="SearchList"
+    SearchBox="true"
+    SearchBoxAutoFocus="true"
+    SearchBoxClearable="true"
+    Variant="Variant.Outlined"
+    ItemCollection="_occupations"/>
+
+@if (_occupation?.Specialties.Length > 0)
+{
+    <MudSelectExtended
+        Label="Specialty"
+        T="string"
+        Value="Character.Specialty"
+        ValueChanged="OnSelectSpecialty"
+        ItemCollection="_occupation.Specialties"
+        Variant="Variant.Outlined"
+        Style="margin: 2em 0"/>
+}
+
+@if (_occupation?.Skills.Length > 0)
+{
+    <div style="margin-top: 2em"></div>
+    <MudText Typo="Typo.caption">Occupational Skills</MudText>
+    <MudChipSet>
+        @foreach (var skill in _occupation.Skills)
+        {
+            <MudChip>@skill</MudChip>
+        }
+    </MudChipSet>
+}
+
+@if (_skillSelectors.Length > 0)
+{
+    foreach (var skillChoice in _skillSelectors)
+    {
+        <div style="margin-top: 2em"></div>
+        <MudText Typo="Typo.caption">Choose @skillChoice.Count</MudText>
+        <MudChipSet T="string" MultiSelection="true" Filter SelectedValues="@skillChoice.SelectedSkills" SelectedValuesChanged="(skills) => OnSkillsChange(skillChoice, skills)">
+            @foreach (var skill in skillChoice.Skills)
+            {
+                <MudChip Color="Color.Primary" Value="@skill">@skill</MudChip>
+            }
+        </MudChipSet>
+        @if (skillChoice.IsError)
+        {
+            <MudAlert Severity="Severity.Warning">You must select exactly @skillChoice.Count @(skillChoice.Count == 1 ? "skill" : "skills")</MudAlert>
+        }
+    }
+}
+
+@code {
+
+    [Parameter]
+    public GameState GameState { get; set; } = null!;
+
+    [Parameter]
+    public Character Character { get; set; } = null!;
+
+    private Occupation? _occupation;
+    private string[] _occupations = Array.Empty<string>();
+    private SkillSelector[] _skillSelectors = Array.Empty<SkillSelector>();
+
+    class SkillSelector
+    {
+        public string[] Skills { get; }
+        public string[] SelectedSkills { get; private set; } = null!;
+        public int Count { get; }
+        public bool IsError { get; private set; }
+
+        public SkillSelector(SkillChoice skillChoice, Character character)
+        {
+            Skills = skillChoice.Choices;
+            Count = skillChoice.Count;
+            SelectSkills(character.Skills.Where(skill => skill.Type == SkillPurchase.Occupation).Select(x=>x.Name));
+        }
+
+        public void SelectSkills(IEnumerable<string> skills)
+        {
+            SelectedSkills = skills.Intersect(Skills).ToArray();
+            IsError = SelectedSkills.Length != Count;
+        }
+    }
+
+    private void Update()
+    {
+        _occupation = GameState.Occupations.FirstOrDefault(x => x.Name == Character.Occupation);
+        _skillSelectors = _occupation?.Choices
+            .Select(x => new SkillSelector(x, Character)).ToArray()
+                          ?? Array.Empty<SkillSelector>();
+    }
+
+    protected override void OnInitialized()
+    {
+        _occupations = GameState.Occupations
+            .Where(x => x.Chapters.Length == 0 || x.Chapters.Any(chapterName => chapterName == Character.HomeChapter))
+            .Select(x => x.Name)
+            .ToArray();
+
+        Update();
+    }
+
+    private bool SearchList(string occupationName, string searchString)
+    {
+        return searchString == "" || occupationName.Contains(searchString, StringComparison.InvariantCultureIgnoreCase);
+    }
+
+    private void OnSelectOccupation(string newOccupation)
+    {
+        _occupation = GameState.Occupations.FirstOrDefault(x => x.Name == newOccupation);
+        Character.Occupation = _occupation?.Name;
+        Update();
+    }
+
+    private void OnSelectSpecialty(string newSpecialty)
+    {
+        Character.Specialty = newSpecialty;
+    }
+
+    private void OnSkillsChange(SkillSelector skillChoice, ICollection<object> newSelection)
+    {
+        skillChoice.SelectSkills(newSelection.Cast<string>());
+        var skills = _occupation?.Skills.Concat(_skillSelectors.SelectMany(x => x.SelectedSkills));
+        Character.ReplaceOccupationalSkills(skills?.ToArray());
+    }
+
+}
