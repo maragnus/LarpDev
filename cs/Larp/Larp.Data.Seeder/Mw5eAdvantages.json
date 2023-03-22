@@ -53,14 +53,14 @@
         "name": "Elemental Fury (Air)",
         "rank": 1,
         "physical": true,
-        "description": "You may throw one “2 Damage by Air burst once per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
+        "description": "You may throw one “2 Damage by Air” burst once per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
     },
     {
         "title": "Elemental Fury (Air) 2",
         "name": "Elemental Fury (Air)",
         "rank": 2,
         "physical": true,   
-        "description": "You may throw one “2 Damage by Air burst twice per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
+        "description": "You may throw one “2 Damage by Air” burst twice per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
 
     },
     {
@@ -68,21 +68,21 @@
         "name": "Elemental Fury (Air)",
         "rank": 3,
         "physical": true,
-        "description": "You may throw one “2 Damage by Air burst three times per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
+        "description": "You may throw one “2 Damage by Air” burst three times per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
     },
     {
         "title": "Elemental Fury (Earth) 1",
         "name": "Elemental Fury (Earth)",
         "rank": 1,
         "physical": true,
-        "description": "You may throw one “2 Damage by Earth burst once per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
+        "description": "You may throw one “2 Damage by Earth” burst once per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
     },
     {
         "title": "Elemental Fury (Earth) 2",
         "name": "Elemental Fury (Earth)",
         "rank": 2,
         "physical": true,
-        "description": "You may throw one “2 Damage by Earth burst twice per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
+        "description": "You may throw one “2 Damage by Earth” burst twice per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
 
     },
     {
@@ -90,21 +90,21 @@
         "name": "Elemental Fury (Earth)",
         "rank": 3,
         "physical": true,
-        "description": "You may throw one “2 Damage by Earth burst three times per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
+        "description": "You may throw one “2 Damage by Earth” burst three times per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
     },
     {
         "title": "Elemental Fury (Fire) 1",
         "name": "Elemental Fury (Fire)",
         "rank": 1,
         "physical": true,
-        "description": "You may throw one “2 Damage by Fire burst once per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
+        "description": "You may throw one “2 Damage by Fire” burst once per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
     },
     {
         "title": "Elemental Fury (Fire) 2",
         "name": "Elemental Fury (Fire)",
         "rank": 2,
         "physical": true,
-        "description": "You may throw one “2 Damage by Fire burst twice per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
+        "description": "You may throw one “2 Damage by Fire” burst twice per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
 
     },
     {
@@ -112,21 +112,21 @@
         "name": "Elemental Fury (Fire)",
         "rank": 3,
         "physical": true,
-        "description": "You may throw one “2 Damage by Fire burst three times per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
+        "description": "You may throw one “2 Damage by Fire” burst three times per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
     },
     {
         "title": "Elemental Fury (Water) 1",
         "name": "Elemental Fury (Water)",
         "rank": 1,
         "physical": true,
-        "description": "You may throw one “2 Damage by Water burst once per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
+        "description": "You may throw one “2 Damage by Water” burst once per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
     },
     {
         "title": "Elemental Fury (Water) 2",
         "name": "Elemental Fury (Water)",
         "rank": 2,
         "physical": true,
-        "description": "You may throw one “2 Damage by Water burst twice per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
+        "description": "You may throw one “2 Damage by Water” burst twice per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
 
     },
     {
@@ -134,7 +134,7 @@
         "name": "Elemental Fury (Water)",
         "rank": 3,
         "physical": true,
-        "description": "You may throw one “2 Damage by Water burst three times per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
+        "description": "You may throw one “2 Damage by Water” burst three times per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
     },
     {
         "title": "Elemental Resistance (Air) 1",

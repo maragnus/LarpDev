@@ -1,13 +1,39 @@
+@using Larp.Landing.Shared.MwFifth
 <MudText Typo="Typo.h6">Review your character</MudText>
 <MudText Typo="Typo.body2">Choose and customize a Basic Occupation or a Chapter-Specific Basic Occupation</MudText>
 
-<div style="margin-top: 2em"></div>
+<StepDivider />
+
+@if (!Character.IsHomeChapterValid)
+{
+    <MudAlert Severity="Severity.Warning">You must choose a home chapter for this character. This can be changed once per year, but must have an initial chapter.</MudAlert>
+}
+else if (!Character.IsHomelandValid)
+{
+    <MudAlert Severity="Severity.Warning">You must choose a homeland.</MudAlert>
+}
+
+@if (Character.GetOccupation() == null)
+{
+    <MudAlert Severity="Severity.Info">You have chosen not to select an Occupation. This is optional, but must be chosen prior to the third event.</MudAlert>
+}
+else if (Character.Specialty == null && Character.AllSpecialties.Length > 0)
+{
+    <MudAlert Severity="Severity.Warning">You must choose the Specialty of your occupation.</MudAlert>
+}
+else if (!Character.IsChosenSkillsValid)
+{
+    <MudAlert Severity="Severity.Warning">You must choose the Specialty of your occupation.</MudAlert>
+}
+
+@if (Character.IsGiftsValid)
+{
+    <MudAlert Severity="Severity.Warning">You allocate all points into your Gifts. You have 6 points <strong>if you added backstory</strong>, otherwise your have 5 points.</MudAlert>
+}
+
 
 
 @code {
     [Parameter]
-    public GameState GameState { get; set; } = null!;
-
-    [Parameter]
-    public Character Character { get; set; } = null!;
+    public CharacterBuilder Character { get; set; } = null!;
 }

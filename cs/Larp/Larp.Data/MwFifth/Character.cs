@@ -1,16 +1,28 @@
-using System.Text.RegularExpressions;
-using Larp.Data.MwFifth;
+using Larp.Common;
+using MongoDB.Bson.Serialization.Serializers;
 
 namespace Larp.Data.MwFifth;
 
-internal static class Utility
+[PublicAPI]
+public class CharacterProperty
 {
-    public static (string Name, int Rank) SplitNameAndRank(string name)
+    public string Name { get; set; }
+    public string Value { get; set; }
+
+    public CharacterProperty(string name, string value)
     {
-        var match = Regex.Match(name, @"^(.*) (\d+)$", RegexOptions.Compiled);
-        return match.Success
-            ? (match.Groups[1].Value, int.Parse(match.Groups[2].Value)) 
-            : (name, 0);
+        Name = name;
+        Value = value;
+    }
+
+    public CharacterProperty(KeyValuePair<string, string> keyValuePair) : this(keyValuePair.Key, keyValuePair.Value)
+    {
+    }
+
+    public void Deconstruct(out string name, out string value)
+    {
+        name = Name;
+        value = Value;
     }
 }
 
@@ -19,6 +31,7 @@ public enum SkillPurchase
 {
     Free,
     Occupation,
+    OccupationChoice,
     Purchased,
     Bestowed
 }
@@ -37,9 +50,10 @@ public class CharacterSkill
             Type = type
         };
     }
-    
+
     public string Name { get; set; } = null!;
     public int Rank { get; set; }
+    public string Title => Rank == 0 ? Name : $"{Name} {Rank}";
     public SkillPurchase Type { get; set; }
     public int? Purchases { get; set; }
 }
@@ -57,10 +71,10 @@ public class CharacterVantage
             Rank = rank
         };
     }
-    
+
     public string Name { get; set; } = null!;
-    public int Rank { get; set; }
-    public string Title => $"{Name} {Rank}";
+    public int Rank { get; set; }  
+    public string Title => Rank == 0 ? Name : $"{Name} {Rank}";
 }
 
 [PublicAPI]
@@ -72,13 +86,13 @@ public class Character
     public string AccountId { get; set; } = null!;
 
     public string? CharacterName { get; set; }
-    public string[] Religions { get; set; } = Array.Empty<string>();
+    public string? Religion { get; set; }
     public string? Occupation { get; set; }
     public string? Specialty { get; set; }
     public string? Enhancement { get; set; }
     public string? HomeChapter { get; set; }
-    public string? PublicStory { get; set; }
-    public string? PrivateStory { get; set; }
+    public string? PublicHistory { get; set; }
+    public string? PrivateHistory { get; set; }
     public string? Homeland { get; set; }
 
     public int StartingMoonstone { get; set; }
@@ -93,6 +107,24 @@ public class Character
     public int Wisdom { get; set; }
 
     public CharacterSkill[] Skills { get; set; } = Array.Empty<CharacterSkill>();
+
+    public void SetOccupationSkills(IEnumerable<CharacterSkill> skills)
+    {
+        Skills = Skills.Where(x => x.Type != SkillPurchase.Occupation).Concat(skills).ToArray();
+    }
+
+    public void SetOccupationChoicesSkills(IEnumerable<CharacterSkill> skills)
+    {
+    }
+
+    public void SetFreeSkills(IEnumerable<CharacterSkill> skills)
+    {
+    }
+
+    public void SetPurchasedSkills(IEnumerable<CharacterSkill> skills)
+    {
+    }
+
     public CharacterVantage[] Advantages { get; set; } = Array.Empty<CharacterVantage>();
     public CharacterVantage[] Disadvantages { get; set; } = Array.Empty<CharacterVantage>();
     public string[] Spells { get; set; } = Array.Empty<string>();
@@ -102,6 +134,11 @@ public class Character
     public string? Cures { get; set; }
     public string? Documents { get; set; }
     public string? Notes { get; set; }
+
+    public bool UnlockedAllSpells { get; set; }
+    public bool IsYouth { get; set; }
+    public bool NoHistory { get; set; }
+    public bool NoAdvantages { get; set; }
 
     public CharacterSummary ToSummary() =>
         new CharacterSummary(

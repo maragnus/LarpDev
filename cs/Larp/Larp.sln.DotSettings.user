@@ -3,4 +3,5 @@
   &lt;Assembly Path="/Users/josh/.nuget/packages/skclusive.core.component/5.2.0/lib/net5.0/Skclusive.Core.Component.dll" /&gt;
   &lt;Assembly Path="/Users/josh/.nuget/packages/skclusive.material.link/5.2.0/lib/net5.0/Skclusive.Material.Link.dll" /&gt;
 &lt;/AssemblyExplorer&gt;</s:String>
+	<s:Boolean x:Key="/Default/Environment/Hierarchy/Build/SolutionBuilderNext/ShouldRestoreNugetPackages/@EntryValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UnloadedProject/UnloadedProjects/=854139e2_002D11fb_002D4d5b_002D8199_002D2817a579542c_0023Larp_002EData_002ETests/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>

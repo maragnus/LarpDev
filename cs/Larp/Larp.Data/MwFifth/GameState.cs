@@ -115,12 +115,15 @@ public class Occupation
 {
     public string Name { get; set; } = null!;
     public string[] Specialties { get; set; } = Array.Empty<string>();
-    public string Type { get; set; } = null!;
+    public OccupationType Type { get; set; }
     public string[] Skills { get; set; } = Array.Empty<string>();
     public SkillChoice[] Choices { get; set; } = Array.Empty<SkillChoice>();
     public string? Duty { get; set; }
     public string? Livery { get; set; }
     public string[] Chapters { get; set; } = Array.Empty<string>();
+    
+    // ReSharper disable once NonReadonlyMemberInGetHashCode
+    public override int GetHashCode() => Name.GetHashCode();
 }
 
 [PublicAPI]
@@ -131,6 +134,9 @@ public class Vantage
     public int Rank { get; set; }
     public bool Physical { get; set; }
     public string? Description { get; set; }
+    
+    // ReSharper disable once NonReadonlyMemberInGetHashCode
+    public override int GetHashCode() => Title.GetHashCode();
 }
 
 [PublicAPI]
@@ -139,6 +145,9 @@ public class Religion
     public string Name { get; set; } = null!;
     public string Title { get; set; } = null!;
     public string? Description { get; set; }
+    
+    // ReSharper disable once NonReadonlyMemberInGetHashCode
+    public override int GetHashCode() => Name.GetHashCode();
 }
 
 [PublicAPI]
@@ -148,6 +157,9 @@ public class HomeChapter
     public string Title { get; set; } = null!;
     public string Location { get; set; } = null!;
     public string[] Homelands { get; set; } = Array.Empty<string>();
+
+    // ReSharper disable once NonReadonlyMemberInGetHashCode
+    public override int GetHashCode() => Name.GetHashCode();
 }
 
 [PublicAPI]
@@ -170,4 +182,12 @@ public class Spell
     public string Category { get; set; } = null!;
     public int Mana { get; set; }
     public string Effect { get; set; } = null!;
+
+    public bool IsBardic => Category is "Bardic";
+    public bool IsDivine => Category.StartsWith("Divine");
+    public bool IsGiftOfWisdom => Category is "Gift of Wisdom";
+    public bool IsOccupational => !IsBardic && !IsDivine && !IsGiftOfWisdom;
+    
+    // ReSharper disable once NonReadonlyMemberInGetHashCode
+    public override int GetHashCode() => Name.GetHashCode();
 }

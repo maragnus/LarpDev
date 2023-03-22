@@ -1,13 +1,48 @@
+@using Larp.Landing.Shared.MwFifth
 <MudText Typo="Typo.h6">Enter your history</MudText>
-<MudText Typo="Typo.body2">Choose and customize a Basic Occupation or a Chapter-Specific Basic Occupation</MudText>
 
-<div style="margin-top: 2em"></div>
+<StepDivider/>
 
+<MudSwitch T="bool" Checked="Character.NoHistory" CheckedChanged="NoStoryChanged">No Public or Private History</MudSwitch>
+
+@if (!Character.NoHistory)
+{
+    <StepDivider/>
+    <MudText Typo="Typo.body2">Your public history is what people from your home area would know about you. Mystwood is a world of small, close knit communities, and you would be well known “back home”. You should read only the histories of those who are from your own homeland.</MudText>
+
+    <StepDivider/>
+    <MudTextField T="string?" Lines="6" Label="Public History" Value="@Character.PublicHistory" ValueChanged="OnPublicHistory" Variant="Variant.Outlined"/>
+
+    <StepDivider/>
+    <MudText Typo="Typo.body2">You may also write a “private history” for yourself detailing the darkest and most secret details of your character’s past. This is primarily for your enjoyment and role playing only, and should never be shared except during game. Different Chapters and different Triads may make use of your public or private histories, but this is not guaranteed.</MudText>
+
+    <StepDivider/>
+    <MudTextField T="string?" Lines="6" Label="Private Backstory" Value="@Character.PrivateHistory" ValueChanged="OnPrivateHistory" Variant="Variant.Outlined"/>
+}
 
 @code {
-    [Parameter]
-    public GameState GameState { get; set; } = null!;
 
     [Parameter]
-    public Character Character { get; set; } = null!;
+    public CharacterBuilder Character { get; set; } = null!;
+
+    private void OnPublicHistory(string? history)
+    {
+        Character.PublicHistory = history;
+    }
+
+    private void OnPrivateHistory(string? history)
+    {
+        Character.PrivateHistory = history;
+    }
+
+    private void NoStoryChanged(bool noStory)
+    {
+        if (noStory)
+        {
+            Character.PublicHistory = null;
+            Character.PrivateHistory = null;
+        }
+        Character.NoHistory = noStory;
+    }
+
 }

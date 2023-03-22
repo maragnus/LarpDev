@@ -1,5 +1,7 @@
+@using Larp.Landing.Shared.MwFifth
 <MudText Typo="Typo.h6">Select your homeland</MudText>
 <MudText Typo="Typo.body2">Remember that you may be from anywhere in Europa. If your character is not local, choose Other.</MudText>
+<StepDivider/>
 
 @if (_homelands.Length == 0)
 {
@@ -23,10 +25,7 @@
 
 @code {
     [Parameter]
-    public GameState GameState { get; set; } = null!;
-
-    [Parameter]
-    public Character Character { get; set; } = null!;
+    public CharacterBuilder Character { get; set; } = null!;
 
     private string[] _homelands = Array.Empty<string>();
     private string? _selected;
@@ -34,17 +33,13 @@
     
     protected override void OnInitialized()
     {
-        var homelands = GameState.HomeChapters
-            .FirstOrDefault(x => x.Name == Character.HomeChapter)?
-            .Homelands;
-        _homelands = homelands ?? Array.Empty<string>();
-
-        if (homelands == null) return;
+        _homelands = Character.AvailableHomelands;
+        if (_homelands.Length == 0) return;
 
         if (Character.Homeland == null)
             return;
         
-        if (homelands.Contains(Character.Homeland))
+        if (_homelands.Contains(Character.Homeland))
         {
             _selected = Character.Homeland;
             _other = null;

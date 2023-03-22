@@ -1,7 +1,8 @@
+@using Larp.Landing.Shared.MwFifth
 <MudText Typo="Typo.h6">Select your occupation</MudText>
 <MudText Typo="Typo.body2">Choose and customize a Basic Occupation or a Chapter-Specific Basic Occupation</MudText>
 
-<div style="margin-top: 2em"></div>
+<StepDivider/>
 
 <MudSelectExtended
     Label="Occupation"
@@ -15,21 +16,22 @@
     Variant="Variant.Outlined"
     ItemCollection="_occupations"/>
 
-@if (_occupation?.Specialties.Length > 0)
+@if (Character.AllSpecialties.Length > 0)
 {
     <MudSelectExtended
         Label="Specialty"
         T="string"
         Value="Character.Specialty"
         ValueChanged="OnSelectSpecialty"
-        ItemCollection="_occupation.Specialties"
+        ItemCollection="Character.AllSpecialties"
         Variant="Variant.Outlined"
         Style="margin: 2em 0"/>
 }
 
 @if (_occupation?.Skills.Length > 0)
 {
-    <div style="margin-top: 2em"></div>
+    <StepDivider/>
+
     <MudText Typo="Typo.caption">Occupational Skills</MudText>
     <MudChipSet>
         @foreach (var skill in _occupation.Skills)
@@ -43,7 +45,8 @@
 {
     foreach (var skillChoice in _skillSelectors)
     {
-        <div style="margin-top: 2em"></div>
+        <StepDivider/>
+
         <MudText Typo="Typo.caption">Choose @skillChoice.Count</MudText>
         <MudChipSet T="string" MultiSelection="true" Filter SelectedValues="@skillChoice.SelectedSkills" SelectedValuesChanged="(skills) => OnSkillsChange(skillChoice, skills)">
             @foreach (var skill in skillChoice.Skills)
@@ -59,12 +62,8 @@
 }
 
 @code {
-
     [Parameter]
-    public GameState GameState { get; set; } = null!;
-
-    [Parameter]
-    public Character Character { get; set; } = null!;
+    public CharacterBuilder Character { get; set; } = null!;
 
     private Occupation? _occupation;
     private string[] _occupations = Array.Empty<string>();
@@ -81,7 +80,7 @@
         {
             Skills = skillChoice.Choices;
             Count = skillChoice.Count;
-            SelectSkills(character.Skills.Where(skill => skill.Type == SkillPurchase.Occupation).Select(x=>x.Name));
+            SelectSkills(character.Skills.Where(skill => skill.Type == SkillPurchase.OccupationChoice).Select(x=>x.Name));
         }
 
         public void SelectSkills(IEnumerable<string> skills)
@@ -93,19 +92,15 @@
 
     private void Update()
     {
-        _occupation = GameState.Occupations.FirstOrDefault(x => x.Name == Character.Occupation);
-        _skillSelectors = _occupation?.Choices
-            .Select(x => new SkillSelector(x, Character)).ToArray()
-                          ?? Array.Empty<SkillSelector>();
+        _occupation = Character.GetOccupation();
+        _skillSelectors = Character.OccupationalSkillsChoices
+            .Select(x => new SkillSelector(x, Character.Character))
+            .ToArray();
     }
 
     protected override void OnInitialized()
     {
-        _occupations = GameState.Occupations
-            .Where(x => x.Chapters.Length == 0 || x.Chapters.Any(chapterName => chapterName == Character.HomeChapter))
-            .Select(x => x.Name)
-            .ToArray();
-
+        _occupations = Character.AvailableOccupations.Select(x => x.Value.Name).ToArray();
         Update();
     }
 
@@ -116,8 +111,9 @@
 
     private void OnSelectOccupation(string newOccupation)
     {
-        _occupation = GameState.Occupations.FirstOrDefault(x => x.Name == newOccupation);
-        Character.Occupation = _occupation?.Name;
+        Character.Occupation = newOccupation;
+        Character.OccupationalChosenSkills = Array.Empty<string>();
+        Character.Specialty = null;
         Update();
     }
 
@@ -129,8 +125,7 @@
     private void OnSkillsChange(SkillSelector skillChoice, ICollection<object> newSelection)
     {
         skillChoice.SelectSkills(newSelection.Cast<string>());
-        var skills = _occupation?.Skills.Concat(_skillSelectors.SelectMany(x => x.SelectedSkills));
-        Character.ReplaceOccupationalSkills(skills?.ToArray());
+        Character.OccupationalChosenSkills = _skillSelectors.SelectMany(x => x.SelectedSkills).ToArray();
     }
 
 }
