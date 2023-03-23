@@ -23,15 +23,35 @@ else if (Character.Specialty == null && Character.AllSpecialties.Length > 0)
 }
 else if (!Character.IsChosenSkillsValid)
 {
-    <MudAlert Severity="Severity.Warning">You must choose the Specialty of your occupation.</MudAlert>
+    <MudAlert Severity="Severity.Warning">You must make the Skill Choices for your occupation.</MudAlert>
 }
 
-@if (Character.IsGiftsValid)
+@if (!Character.IsGiftsValid)
 {
     <MudAlert Severity="Severity.Warning">You allocate all points into your Gifts. You have 6 points <strong>if you added backstory</strong>, otherwise your have 5 points.</MudAlert>
 }
 
+@if (!Character.IsReligionValid)
+{
+    <MudAlert Severity="Severity.Warning">You must make a religion select or select no religion</MudAlert>
+}
 
+@if (!Character.IsSpellsValid)
+{
+    <MudAlert Severity="Severity.Warning">You must select one spell for each level in Wisdom. You have @Character.ChosenSpells spells selected and need to have @Character.Wisdom spells selected.</MudAlert>
+}
+
+@if (!Character.IsVantagesValid)
+{
+    <MudAlert Severity="Severity.Warning">You must make a balanced Advantages/Disadvantages selection, or choose No Advantages or Disadvantages.</MudAlert>
+}
+
+@if (!Character.IsHistoryValid)
+{
+    <MudAlert Severity="Severity.Warning">You must either provide a public history or choose No History.</MudAlert>
+}
+
+<MudButton StartIcon="@Icons.Material.Outlined.Verified" Variant="Variant.Outlined">Submit this character</MudButton>
 
 @code {
     [Parameter]

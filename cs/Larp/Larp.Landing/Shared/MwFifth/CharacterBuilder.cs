@@ -258,6 +258,9 @@ public class CharacterBuilder
         nameof(Specialty))]
     public bool IsOccupationValid { get; private set; }
 
+    [DependsOn(nameof(PopulateIsOccupationValid), nameof(Occupation), nameof(OccupationalSkillsChoices))]
+    public bool IsChosenSkillsValid { get; private set; }
+    
     public bool IsGiftsValid => Level is >= 5 and <= 6;
     public bool IsReligionValid => !string.IsNullOrEmpty(Character.Religion);
 
@@ -280,8 +283,6 @@ public class CharacterBuilder
     [DependsOn(nameof(PopulateAbilities), nameof(Courage), nameof(Dexterity), nameof(Empathy), nameof(Passion),
         nameof(Prowess), nameof(Wisdom))]
     public CharacterProperty[] Properties { get; private set; } = Array.Empty<CharacterProperty>();
-
-    public bool IsChosenSkillsValid { get; }
 
     #endregion
 
@@ -415,8 +416,11 @@ public class CharacterBuilder
                 _logger.LogInformation("Occupational skills choices not selected {Json}, {Choices}",
                     chosenSkills.ToJson(), OccupationalSkillsChoices.ToJson());
                 IsOccupationValid = false;
+                IsChosenSkillsValid = false;
                 return;
             }
+
+            IsChosenSkillsValid = true;
         }
 
         if (AllSpecialties.Length > 0)

@@ -96,6 +96,7 @@
         _skillSelectors = Character.OccupationalSkillsChoices
             .Select(x => new SkillSelector(x, Character.Character))
             .ToArray();
+        StateHasChanged();
     }
 
     protected override void OnInitialized()
