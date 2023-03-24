@@ -1,0 +1,18 @@
+<div class="mw5e-gift">
+    <div class="mw5e-gift-name">@GiftName</div>
+    <div class="mw5e-gift-level">@Level</div>
+    <div class="mw5e-gift-stars">
+        @for (var i = 0; i < Level; i++)
+        {
+            <MudIcon Icon="@Icons.Material.Filled.Star" />
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string GiftName { get; set; } = null!;
+
+    [Parameter]
+    public int Level { get; set; }
+}

@@ -4,6 +4,10 @@
 
 <StepDivider />
 
+<style>
+    .mud-alert { margin-top: 2em }
+</style>
+
 @if (!Character.IsHomeChapterValid)
 {
     <MudAlert Severity="Severity.Warning">You must choose a home chapter for this character. This can be changed once per year, but must have an initial chapter.</MudAlert>
@@ -28,7 +32,7 @@ else if (!Character.IsChosenSkillsValid)
 
 @if (!Character.IsGiftsValid)
 {
-    <MudAlert Severity="Severity.Warning">You allocate all points into your Gifts. You have 6 points <strong>if you added backstory</strong>, otherwise your have 5 points.</MudAlert>
+    <MudAlert Severity="Severity.Warning">You must allocate all points into your Gifts. You have 6 points <strong>if you added backstory</strong>, otherwise your have 5 points. You have allocated @Character.Level points.</MudAlert>
 }
 
 @if (!Character.IsReligionValid)
@@ -50,6 +54,12 @@ else if (!Character.IsChosenSkillsValid)
 {
     <MudAlert Severity="Severity.Warning">You must either provide a public history or choose No History.</MudAlert>
 }
+
+<StepDivider />
+
+<CharacterSheet Character="Character" />
+
+<StepDivider />
 
 <MudButton StartIcon="@Icons.Material.Outlined.Verified" Variant="Variant.Outlined">Submit this character</MudButton>
 

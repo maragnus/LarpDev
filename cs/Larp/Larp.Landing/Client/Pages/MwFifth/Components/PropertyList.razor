@@ -1,0 +1,13 @@
+@foreach (var property in Properties)
+{
+    <div class="mw5e-property">
+        <div class="mw5e-property-name">@property.Name</div>
+        <div class="mw5e-property-value">@property.Value</div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public CharacterProperty[] Properties { get; set; } = null!;
+
+}

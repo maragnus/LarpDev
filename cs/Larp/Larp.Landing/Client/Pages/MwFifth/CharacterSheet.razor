@@ -1,0 +1,33 @@
+@using Larp.Landing.Shared.MwFifth
+@using Larp.Landing.Client.Pages.MwFifth.Components
+
+<div class="mw5e-character-sheet">
+    <MudGrid>
+        <MudItem>
+            <MudGrid>
+                <MudItem><Gift GiftName="Courage" Level="@Character.Courage" /></MudItem>
+                <MudItem><Gift GiftName="Dexterity" Level="@Character.Dexterity" /></MudItem>
+                <MudItem><Gift GiftName="Empathy" Level="@Character.Empathy" /></MudItem>
+                <MudItem><Gift GiftName="Passion" Level="@Character.Passion" /></MudItem>
+                <MudItem><Gift GiftName="Prowess" Level="@Character.Prowess" /></MudItem>
+                <MudItem><Gift GiftName="Wisdom" Level="@Character.Wisdom" /></MudItem>
+            </MudGrid>
+        </MudItem>
+        <MudItem>
+            <PropertyList Properties="@Character.Properties" />
+        </MudItem>
+    </MudGrid>
+
+</div>
+
+
+@code {
+    [Parameter]
+    public CharacterBuilder Character { get; set; } = null!;
+
+    protected override void OnInitialized()
+    {
+        
+    }
+
+}

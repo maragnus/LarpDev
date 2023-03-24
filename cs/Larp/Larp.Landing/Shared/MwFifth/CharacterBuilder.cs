@@ -260,8 +260,8 @@ public class CharacterBuilder
 
     [DependsOn(nameof(PopulateIsOccupationValid), nameof(Occupation), nameof(OccupationalSkillsChoices))]
     public bool IsChosenSkillsValid { get; private set; }
-    
-    public bool IsGiftsValid => Level is >= 5 and <= 6;
+
+    public bool IsGiftsValid => NoHistory && Level == 5 || !NoHistory && Level == 6;
     public bool IsReligionValid => !string.IsNullOrEmpty(Character.Religion);
 
     [DependsOn(nameof(PopulateSpells), nameof(Wisdom), nameof(Occupation), nameof(ChosenSpells))]
@@ -401,7 +401,10 @@ public class CharacterBuilder
             return;
         }
 
-        if (OccupationalSkillsChoices.Length > 0)
+        if (OccupationalSkillsChoices.Length == 0)
+            IsChosenSkillsValid = true;
+
+        else if (OccupationalSkillsChoices.Length > 0)
         {
             var chosenSkills = Character.Skills
                 .Where(x => x.Type == SkillPurchase.OccupationChoice)
