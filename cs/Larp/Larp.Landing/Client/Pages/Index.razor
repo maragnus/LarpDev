@@ -1,0 +1,24 @@
+﻿@page "/"
+
+<PageHeader>LARP Landing</PageHeader>
+
+<div class="background"></div>
+<div class="buffer"></div>
+
+<style>
+     .index a { color: #fff; text-decoration: underline }
+</style>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="index">
+     <MudText Typo="Typo.h4" Align="Align.Center" Style="color: white">Welcome to the Landing!</MudText>
+
+     <MudPaper Elevation="2" Style="background-color: rgba(255, 255, 255, 0.25); margin: 4em 0; padding: 2em">
+          <MudText Typo="Typo.body1" Align="Align.Center" Style="color: #fff">
+               Check the menu to <a href="/login">sign in</a>, access your <a href="/characters">characters</a>, check <a href="/events">upcoming events</a>, or <a href="/clarify">clarify</a> game terminology!<br/>
+               <br/>
+               Visit the <a href="http://mystwood.org/">Mystwood</a> homepage for more information.
+          </MudText>
+     </MudPaper>
+     <MudText Typo="Typo.body2" Align="Align.Center" Style="color: #ccc;">Revision <Revision /></MudText>
+</MudContainer>
+

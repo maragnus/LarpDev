@@ -1,14 +1,37 @@
 [
     {
         "name": "burgundar",
-        "title": "Burgundar"
+        "title": "Burgundar",
+        "location": "45 Upton Rd, Harrison, ME 04040",
+        "homelands": [
+            "Barony of Pelancia, Navarre",
+            "County of Burgundar, Navarre",
+            "Hold of Kriegsgrab, The League",
+            "County of Land's End, Burgundy"
+        ]
     },
     {
         "name": "keep",
-        "title": "The Keep"
+        "title": "The Keep",
+        "location": "42 Stalkers Way, Jefferson, ME, United States, Maine",
+        "homelands": [
+            "Barony of Dragonshire",
+            "Barony of Fenwyck",
+            "Barony of Pelancia",
+            "Ducal Barony of Eastmarch",
+            "Mystwood Local"
+        ]
     },
     {
         "name": "novgorond",
-        "title": "Novgorond"
+        "title": "Novgorond",
+        "location": "45 Upton Rd, Harrison, ME 04040",
+        "homelands": [
+            "Free City of Novgorond",
+            "Black Rus",
+            "Red Rus",
+            "Prelacy of Kyiv",
+            "Voivod of Muscowy"
+        ]
     }
 ]

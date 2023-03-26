@@ -1,0 +1,44 @@
+@using Larp.Landing.Shared.MwFifth
+<MudText Typo="Typo.h6">Select your spells for the Gift of Wisdom</MudText>
+<MudText Typo="Typo.body2">You must select one spell per level in Wisdom</MudText>
+
+<StepDivider/>
+
+@if (Character.HasBardicSpells)
+{
+    <MudAlert Severity="Severity.Info">Your Bardic Voice spells will be added automatically.</MudAlert>
+}
+
+@if (Character.HasDivineSpells)
+{
+    <MudAlert Severity="Severity.Info">Your Divine spells will be added automatically.</MudAlert>
+}
+
+@if (Character.HasOccupationalSpells)
+{
+    <MudAlert Severity="Severity.Info">Your @Character.Occupation Occupational spells will be added automatically.</MudAlert>
+}
+
+@if (Character.ChosenSpells.Length != Character.Wisdom)
+{
+    <MudAlert Severity="Severity.Warning">You need to select a number of spells equal to your Wisdom. You have selected @Character.ChosenSpells.Length spells and need to have @Character.Wisdom spells.</MudAlert>
+}
+
+<MudListExtended MultiSelection T="string?" SelectedValues="Character.ChosenSpells" SelectedValuesChanged="SelectionChanged">
+    @foreach (var spell in Character.AllWisdomSpells)
+    {
+        <MudListItemExtended T="string?" Value="@spell.Name" Text="@spell.Name" SecondaryText="@spell.Effect"/>
+    }
+</MudListExtended>
+
+@code {
+
+    [Parameter]
+    public CharacterBuilder Character { get; set; } = null!;
+
+    private void SelectionChanged(IEnumerable<string?> spells)
+    {
+        Character.ChosenSpells = spells.Cast<string>().ToArray();
+    }
+
+}

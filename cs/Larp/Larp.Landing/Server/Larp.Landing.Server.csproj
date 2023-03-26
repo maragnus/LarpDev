@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Larp.Data.Mongo\Larp.Data.Mongo.csproj" />
+        <ProjectReference Include="..\..\Larp.Data.Seeder\Larp.Data.Seeder.csproj" />
+        <ProjectReference Include="..\..\Larp.Data\Larp.Data.csproj" />
+        <ProjectReference Include="..\..\Larp.Notify\Larp.Notify.csproj" />
+        <ProjectReference Include="..\Client\Larp.Landing.Client.csproj" />
+        <ProjectReference Include="..\Shared\Larp.Landing.Shared.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
+    </ItemGroup>
+
+
+</Project>

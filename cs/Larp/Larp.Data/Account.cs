@@ -1,8 +1,6 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+﻿namespace Larp.Data;
 
-namespace Larp.Data;
-
+[PublicAPI]
 public class Account
 {
     [BsonId, BsonRepresentation(BsonType.ObjectId)]
@@ -16,31 +14,9 @@ public class Account
     public string? Notes { get; set; }
     public DateTimeOffset Created { get; set; }
     public DateTimeOffset? LastUpdate { get; set; }
-
-    public Protos.Account ToProto()
-    {
-        var emails = Emails.Select(e => new Protos.AccountEmail()
-        {
-            Email = e.Email,
-            IsPreferred = e.IsPreferred,
-            IsVerified = e.IsVerified
-        });
-
-        var result = new Protos.Account()
-        {
-            AccountId = AccountId,
-            Created = Created.ToString("O"),
-            Location = Location ?? "",
-            Name = Name ?? "",
-            Phone = Phone ?? "",
-            Notes = Notes ?? ""
-        };
-        result.Emails.AddRange(emails);
-
-        return result;
-    }
 }
 
+[PublicAPI]
 public class AccountEmail
 {
     public string Email { get; set; } = null!;

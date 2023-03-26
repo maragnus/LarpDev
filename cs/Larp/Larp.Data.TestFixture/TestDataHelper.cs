@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using Larp.Data.Mongo;
+using MongoDB.Bson;
 
 namespace Larp.Data.TestFixture;
 
@@ -13,11 +14,11 @@ public class TestDataHelper
 
     public async Task<string> AddAccount(string name, string email, DateTimeOffset created)
     {
-        var account = new Data.Account()
+        var account = new Account()
         {
             AccountId = ObjectId.GenerateNewId().ToString(),
             Name = name,
-            Emails = { new Data.AccountEmail()
+            Emails = { new AccountEmail()
             {
                 Email = email,
                 NormalizedEmail = email.ToLowerInvariant(),

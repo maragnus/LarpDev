@@ -1,59 +1,26 @@
-﻿using Larp.Protos;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+﻿namespace Larp.Data;
 
-// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
-// ReSharper disable MemberCanBePrivate.Global
-// ReSharper disable UnusedMember.Global
-// ReSharper disable ClassNeverInstantiated.Global
+[PublicAPI]
+public enum EventRsvp {
+    Unanswered,
+    No, // Will not attend
+    Maybe, // Potentially attending
+    Yes, // Intention to attend
+    Confirmed, // User confirmed their attendance (post letter)
+    Approved, // Admin has approved user's attendance
+}
 
-namespace Larp.Data;
-
+[PublicAPI]
 public class EventComponent
 {
-    public EventComponent()
-    {
-    }
-
-    public EventComponent(Protos.EventComponent ec)
-    {
-        Name = ec.Name;
-        Date = DateTimeOffset.Parse(ec.Date);
-    }
-
     public string ComponentId { get; set; } = null!;
     public string? Name { get; set; }
     public DateTimeOffset Date { get; set; }
-
-    public Protos.EventComponent ToProto()
-    {
-        return new Protos.EventComponent()
-        {
-            Name = Name,
-            Date = Date.ToString("O")
-        };
-    }
 }
 
+[PublicAPI]
 public class Event
 {
-    public Event()
-    {
-    }
-
-    public Event(Protos.Event e)
-    {
-        Id = e.EventId;
-        Components.AddRange(e.Components.Select(x => new EventComponent(x)));
-        Date = DateTimeOffset.Parse(e.Date);
-        Location = e.Location;
-        Title = e.Title;
-        CanRsvp = e.Rsvp;
-        EventType = e.EventType;
-        GameId = e.GameId;
-        IsHidden = e.Hidden;
-    }
-
     [BsonId, BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; } = null!;
 
@@ -65,26 +32,17 @@ public class Event
     public bool CanRsvp { get; set; }
     public bool IsHidden { get; set; }
     public List<EventComponent> Components { get; set; } = new();
-
-    public Protos.Event ToProto()
-    {
-        var ev = new Protos.Event()
-        {
-            Date = Date.ToString("O"),
-            Hidden = IsHidden,
-            Location = Location,
-            Rsvp = CanRsvp,
-            Title = Title,
-            EventId = Id,
-            EventType = EventType,
-            GameId = GameId
-        };
-        ev.Components
-            .AddRange(Components.Select(x => x.ToProto()));
-        return ev;
-    }
 }
 
+[PublicAPI]
+public enum EventAttendanceType
+{
+    Player,
+    Staff,
+    Mixed
+}
+
+[PublicAPI]
 public class ComponentAttendance
 {
     public string ComponentId { get; set; } = null!;
@@ -92,6 +50,7 @@ public class ComponentAttendance
     public EventAttendanceType Type { get; set; }
 }
 
+[PublicAPI]
 public class Attendance
 {
     public string EventId { get; set; } = null!;

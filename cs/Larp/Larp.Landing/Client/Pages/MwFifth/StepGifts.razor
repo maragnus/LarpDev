@@ -1,0 +1,100 @@
+@using Larp.Landing.Shared.MwFifth
+<MudText Typo="Typo.h6">Select your gifts</MudText>
+<MudText Typo="Typo.body2">Gifts provide various abilities. Some gifts provide usable as often as you like, some of which are more limited.</MudText>
+
+<StepDivider/>
+
+<MudGrid>
+    @foreach (var gift in _gifts)
+    {
+        <MudItem xs="12" sm="6" md="6" Class="align-center">
+            <MudStack Row="true">
+                <MudAvatar>@gift.Value</MudAvatar>
+                <div>
+                    <MudText Typo="Typo.h6">@gift.Name</MudText>
+                    <MudRating SelectedValue="@gift.Value" MaxValue="10" SelectedValueChanged="@gift.Update"/>
+                </div>
+            </MudStack>
+        </MudItem>
+    }
+</MudGrid>
+
+@if (_abilities.Length > 0)
+{
+    <StepDivider/>
+    <MudText Typo="Typo.h6">Your abilities</MudText>
+    <MudChipSet>
+        @foreach (var ability in _abilities)
+        {
+            <MudChip>@ability</MudChip>
+        }
+    </MudChipSet>
+}
+
+@if (_properties.Length > 0)
+{
+    <StepDivider/>
+    <MudText Typo="Typo.h6">Your properties</MudText>
+    <MudTable T="CharacterProperty" Items="_properties">
+        <HeaderContent>
+            <MudTh>Property</MudTh>
+            <MudTh>Value</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Property">@context.Name</MudTd>
+            <MudTd DataLabel="Value">@context.Value</MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+
+    [Parameter]
+    public CharacterBuilder Character { get; set; } = null!;
+
+    class GiftInfo
+    {
+        private readonly Action<int> _update;
+        private readonly Action _changed;
+        public string Name { get; }
+        public int Value { get; set; }
+
+        public GiftInfo(string name, int value, Action<int> update, Action changed)
+        {
+            _update = update;
+            _changed = changed;
+            Name = name;
+            Value = value;
+        }
+
+        public void Update(int newValue)
+        {
+            Value = newValue;
+            _update(newValue);
+            _changed();
+        }
+    }
+
+    private GiftInfo[] _gifts = Array.Empty<GiftInfo>();
+    private string[] _abilities = Array.Empty<string>();
+    private CharacterProperty[] _properties = Array.Empty<CharacterProperty>();
+
+    protected override void OnInitialized()
+    {
+        _gifts = new[]
+        {
+            new GiftInfo("Courage", Character.Courage, value => Character.Courage = value, GiftChanged),
+            new GiftInfo("Dexterity", Character.Dexterity, value => Character.Dexterity = value, GiftChanged),
+            new GiftInfo("Empathy", Character.Empathy, value => Character.Empathy = value, GiftChanged),
+            new GiftInfo("Passion", Character.Passion, value => Character.Passion = value, GiftChanged),
+            new GiftInfo("Prowess", Character.Prowess, value => Character.Prowess = value, GiftChanged),
+            new GiftInfo("Wisdom", Character.Wisdom, value => Character.Wisdom = value, GiftChanged)
+        };
+    }
+
+    private void GiftChanged()
+    {
+        _abilities = Character.Abilities;
+        _properties = Character.Properties;
+    }
+}

@@ -1,0 +1,29 @@
+@using Larp.Landing.Shared.MwFifth
+<MudText Typo="Typo.h6">Select your religion(s)</MudText>
+<MudText Typo="Typo.body2">Does your character follow the in-game religion?</MudText>
+
+<StepDivider/>
+
+<MudListExtended 
+    Clickable="true" T="string" 
+    SelectedValue="Character.Religion" 
+    SelectedValueChanged="value => Character.Religion = value">
+    <ChildContent>
+        @foreach (var religion in _religions)
+        {
+            <MudListItemExtended T="string" Icon="@Icons.Material.Outlined.GroupWork" Text="@religion.Title" SecondaryText="@religion.Description" Value="@religion.Name"/>
+        }
+    </ChildContent>
+</MudListExtended>
+
+@code {
+    [Parameter]
+    public CharacterBuilder Character { get; set; } = null!;
+
+    private Religion[] _religions = Array.Empty<Religion>();
+    
+    protected override void OnInitialized()
+    {
+        _religions = Character.AllReligions;
+    }
+}

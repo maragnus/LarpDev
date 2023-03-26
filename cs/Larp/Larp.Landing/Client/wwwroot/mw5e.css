@@ -1,0 +1,31 @@
+.mw5e-character-sheet {
+    border: 1px solid black;
+}
+
+.mw5e-gift {
+    position: relative;
+    border: 1px solid black;
+}
+
+.mw5e-gift-name {
+    font-weight: bold;
+}
+
+.mw5e-gift-level {
+    position: absolute;
+    border: 1px solid black;
+    border-radius: 12em;
+    padding: 0.5em;
+    left: 0.5em;
+    width: 2em;
+    height: 2em;
+    bottom: -0.5em;
+    text-align: center;
+    padding-top: 1.3em;
+    font-weight: bold;
+    font-size: 250%;
+}
+
+.mw5e-gift-stars {
+    margin-left: 10em;
+}

@@ -3,192 +3,312 @@
         "title": "Advantageous Gluttony 1",
         "name": "Advantageous Gluttony",
         "rank": 1,
-        "physical": false
+        "physical": false,
+        "description": "A character with this Advantage may consume two units of Food to gain +1 maximum Hit Point for the next six hours. This extra Hit Point is not a Bestow, and stacks with other Hit Point sources."
     },
     {
         "title": "Call of Freedom 1",
         "name": "Call of Freedom",
         "rank": 1,
-        "physical": true
+        "physical": true,
+        "description": "Restraints cannot hold you. You may use this Advantage once per Renew to call “Resist” against the “Bind”, “Paralyze”, or “Root” Effects, or to escape from mundane bindings such as manacles."
     },
     {
         "title": "Caustic Blood 2",
         "name": "Caustic Blood",
         "rank": 2,
-        "physical": true
+        "physical": true,
+        "description": "Whenever you take 3 or more points of Damage from a single weapon hit, or suffer the “Maim”, “Lethal”, or “Death” Effect from a melee attack, you may call “Return 2 Damage by Poison” as your blood sprays out and burns your attacker. You still take the effect of the hit."
     },
     {
         "title": "Crushing Strength 1",
         "name": "Crushing Strength",
         "rank": 1,
-        "physical": false
+        "physical": false,
+        "description": "You may use one “2 Crushing” melee attack once per Renew."
     },
     {
         "title": "Crushing Strength 2",
         "name": "Crushing Strength",
         "rank": 2,
-        "physical": false
+        "physical": false,
+        "description": "You may use one “2 Crushing” melee attack twice per Renew."
     },
     {
         "title": "Crushing Strength 3",
         "name": "Crushing Strength",
         "rank": 3,
-        "physical": false
+        "physical": false,
+        "description": "You may use one “2 Crushing” melee attack three times per Renew."
     },
     {
         "title": "Durability 1",
         "name": "Durability",
         "rank": 1,
-        "physical": false
+        "physical": false,
+        "description": "Once per Renew, you may call “Resist” to a “Maim” Effect."
     },
     {
-        "title": "Elemental Fury 1",
-        "name": "Elemental Fury",
+        "title": "Elemental Fury (Air) 1",
+        "name": "Elemental Fury (Air)",
         "rank": 1,
-        "physical": true
+        "physical": true,
+        "description": "You may throw one “2 Damage by Air” burst once per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
     },
     {
-        "title": "Elemental Fury 2",
-        "name": "Elemental Fury",
+        "title": "Elemental Fury (Air) 2",
+        "name": "Elemental Fury (Air)",
         "rank": 2,
-        "physical": true
+        "physical": true,   
+        "description": "You may throw one “2 Damage by Air” burst twice per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
+
     },
     {
-        "title": "Elemental Fury 3",
-        "name": "Elemental Fury",
+        "title": "Elemental Fury (Air) 3",
+        "name": "Elemental Fury (Air)",
         "rank": 3,
-        "physical": true
+        "physical": true,
+        "description": "You may throw one “2 Damage by Air” burst three times per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
     },
     {
-        "title": "Elemental Resistance 1",
-        "name": "Elemental Resistance",
+        "title": "Elemental Fury (Earth) 1",
+        "name": "Elemental Fury (Earth)",
         "rank": 1,
-        "physical": true
+        "physical": true,
+        "description": "You may throw one “2 Damage by Earth” burst once per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
+    },
+    {
+        "title": "Elemental Fury (Earth) 2",
+        "name": "Elemental Fury (Earth)",
+        "rank": 2,
+        "physical": true,
+        "description": "You may throw one “2 Damage by Earth” burst twice per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
+
+    },
+    {
+        "title": "Elemental Fury (Earth) 3",
+        "name": "Elemental Fury (Earth)",
+        "rank": 3,
+        "physical": true,
+        "description": "You may throw one “2 Damage by Earth” burst three times per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
+    },
+    {
+        "title": "Elemental Fury (Fire) 1",
+        "name": "Elemental Fury (Fire)",
+        "rank": 1,
+        "physical": true,
+        "description": "You may throw one “2 Damage by Fire” burst once per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
+    },
+    {
+        "title": "Elemental Fury (Fire) 2",
+        "name": "Elemental Fury (Fire)",
+        "rank": 2,
+        "physical": true,
+        "description": "You may throw one “2 Damage by Fire” burst twice per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
+
+    },
+    {
+        "title": "Elemental Fury (Fire) 3",
+        "name": "Elemental Fury (Fire)",
+        "rank": 3,
+        "physical": true,
+        "description": "You may throw one “2 Damage by Fire” burst three times per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
+    },
+    {
+        "title": "Elemental Fury (Water) 1",
+        "name": "Elemental Fury (Water)",
+        "rank": 1,
+        "physical": true,
+        "description": "You may throw one “2 Damage by Water” burst once per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
+    },
+    {
+        "title": "Elemental Fury (Water) 2",
+        "name": "Elemental Fury (Water)",
+        "rank": 2,
+        "physical": true,
+        "description": "You may throw one “2 Damage by Water” burst twice per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
+
+    },
+    {
+        "title": "Elemental Fury (Water) 3",
+        "name": "Elemental Fury (Water)",
+        "rank": 3,
+        "physical": true,
+        "description": "You may throw one “2 Damage by Water” burst three times per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
+    },
+    {
+        "title": "Elemental Resistance (Air) 1",
+        "name": "Elemental Resistance (Air)",
+        "rank": 1,
+        "physical": true,
+        "description": ""
+    },
+    {
+        "title": "Elemental Resistance (Earth) 1",
+        "name": "Elemental Resistance (Earth)",
+        "rank": 1,
+        "physical": true,
+        "description": ""
+    },
+    {
+        "title": "Elemental Resistance (Fire) 1",
+        "name": "Elemental Resistance (Fire)",
+        "rank": 1,
+        "physical": true,
+        "description": ""
+    },
+    {
+        "title": "Elemental Resistance (Water) 1",
+        "name": "Elemental Resistance (Water)",
+        "rank": 1,
+        "physical": true,
+        "description": ""
     },
     {
         "title": "Evil Eye 1",
         "name": "Evil Eye",
         "rank": 1,
-        "physical": false
+        "physical": false,
+        "description": "Once per Day, you may curse someone with an annoying but not incapacitating effect."
     },
     {
         "title": "Feign Death 1",
         "name": "Feign Death",
         "rank": 1,
-        "physical": false
+        "physical": false,
+        "description": "Once per Day, you may fall down in a deathlike state. While in this state, which may last for up to 30 minutes, you cannot be harmed in any way, but cannot move or speak. Call “No Effect”."
     },
     {
         "title": "Forest Ally 1",
         "name": "Forest Ally",
         "rank": 1,
-        "physical": true
+        "physical": true,
+        "description": "You may use this advantage when out in the wild, out of town, outside of any walls. You may throw one “Bind by Magic” packet and one “Root by Magic” packet per Renew, as the trees rise up and snare your foes."
     },
     {
         "title": "Healing Blood 1",
         "name": "Healing Blood",
         "rank": 1,
-        "physical": true
+        "physical": true,
+        "description": "You have powerful blood, possibly the result of vampiric ancestry. Twice per Renew, you may use a few drops of your blood to provide the “Heal 2” Effect to an injured person. If any individual character receives this healing Effect from you more than 3 times, ever, you must also state “Afflict with Blood Bond”."
     },
     {
         "title": "Hunter's Senses 1",
         "name": "Hunter's Senses",
         "rank": 1,
-        "physical": false
+        "physical": false,
+        "description": ""
     },
     {
         "title": "Natural Armor 2",
         "name": "Natural Armor",
         "rank": 2,
-        "physical": true
+        "physical": true,
+        "description": ""
     },
     {
         "title": "Old Blood 1",
         "name": "Old Blood",
         "rank": 1,
-        "physical": false
+        "physical": false,
+        "description": ""
     },
     {
         "title": "Poison Spittle 2",
         "name": "Poison Spittle",
         "rank": 2,
-        "physical": true
+        "physical": true,
+        "description": ""
     },
     {
         "title": "Purity 1",
         "name": "Purity",
         "rank": 1,
-        "physical": false
+        "physical": false,
+        "description": ""
     },
     {
         "title": "Skin Changer 2",
         "name": "Skin Changer",
         "rank": 2,
-        "physical": false
+        "physical": false,
+        "description": ""
     },
     {
         "title": "Stonefast 1",
         "name": "Stonefast",
         "rank": 1,
-        "physical": true
+        "physical": true,
+        "description": ""
     },
     {
         "title": "Stubborn Courage 1",
         "name": "Stubborn Courage",
         "rank": 1,
-        "physical": false
+        "physical": false,
+        "description": ""
     },
     {
         "title": "Talent 1",
         "name": "Talent",
         "rank": 1,
-        "physical": false
+        "physical": false,
+        "description": ""
     },
     {
         "title": "Talent 2",
         "name": "Talent",
         "rank": 2,
-        "physical": false
+        "physical": false,
+        "description": ""
     },
     {
         "title": "Talent 3",
         "name": "Talent",
         "rank": 3,
-        "physical": false
+        "physical": false,
+        "description": ""
     },
     {
         "title": "Treewalk 1",
         "name": "Treewalk",
         "rank": 1,
-        "physical": true
+        "physical": true,
+        "description": ""
     },
     {
         "title": "Undead Bane 1",
         "name": "Undead Bane",
         "rank": 1,
-        "physical": false
+        "physical": false,
+        "description": ""
     },
     {
         "title": "Witchblood 1",
         "name": "Witchblood",
         "rank": 1,
-        "physical": true
+        "physical": true,
+        "description": ""
     },
     {
         "title": "Witchblood 2",
         "name": "Witchblood",
         "rank": 2,
-        "physical": true
+        "physical": true,
+        "description": ""
     },
     {
         "title": "Witchblood 3",
         "name": "Witchblood",
         "rank": 3,
-        "physical": true
+        "physical": true,
+        "description": ""
     },
     {
         "title": "Witchblood 4",
         "name": "Witchblood",
         "rank": 4,
-        "physical": true
+        "physical": true,
+        "description": ""
     }
 ]

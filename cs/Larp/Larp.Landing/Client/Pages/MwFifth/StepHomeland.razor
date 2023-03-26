@@ -1,0 +1,66 @@
+@using Larp.Landing.Shared.MwFifth
+<MudText Typo="Typo.h6">Select your homeland</MudText>
+<MudText Typo="Typo.body2">Remember that you may be from anywhere in Europa. If your character is not local, choose Other.</MudText>
+<StepDivider/>
+
+@if (_homelands.Length == 0)
+{
+    <MudAlert Severity="Severity.Info">Select your <strong>Home Chapter</strong> before selecting your Homeland.</MudAlert>
+    return;
+}
+<MudListExtended 
+    Clickable="true" T="string" 
+    SelectedValue="_selected" 
+    SelectedValueChanged="OnSelected">
+    <ChildContent>
+        @foreach (var landName in _homelands)
+        {
+            <MudListItemExtended T="string" Icon="@Icons.Material.Outlined.Home" Text="@landName" Value="@landName"/>
+        }
+        <MudListItemExtended T="string" Icon="@Icons.Material.Outlined.Edit" Text="Other" Value="@("Other")">
+            <MudTextField Label="Other Homeland" T="string?" Text="@_other" TextChanged="OnOther" Variant="Variant.Outlined" Margin="Margin.Dense" />
+        </MudListItemExtended>
+    </ChildContent>
+</MudListExtended>
+
+@code {
+    [Parameter]
+    public CharacterBuilder Character { get; set; } = null!;
+
+    private string[] _homelands = Array.Empty<string>();
+    private string? _selected;
+    private string? _other;
+    
+    protected override void OnInitialized()
+    {
+        _homelands = Character.AvailableHomelands;
+        if (_homelands.Length == 0) return;
+
+        if (Character.Homeland == null)
+            return;
+        
+        if (_homelands.Contains(Character.Homeland))
+        {
+            _selected = Character.Homeland;
+            _other = null;
+            return;
+        }
+        
+        _selected = "Other";
+        _other = Character.Homeland;
+    }
+
+    private void OnSelected(string value)
+    {
+        _selected = value;
+        Character.Homeland = value == "Other" ? _other : value;
+    }
+    
+    private void OnOther(string value)
+    {
+        _selected = "Other";
+        _other = value;
+        Character.Homeland = value;
+    }
+
+}

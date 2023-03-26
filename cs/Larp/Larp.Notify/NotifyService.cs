@@ -12,7 +12,7 @@ public class NotifyServiceOptions
 {
     public const string SectionName = "Notifications";
 
-    public EmailOptions Email { get; set; }
+    public EmailOptions Email { get; set; } = new EmailOptions();
 }
 
 public class EmailOptions
