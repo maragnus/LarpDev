@@ -1,14 +1,6 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+﻿namespace Larp.Data;
 
-// ReSharper disable UnusedAutoPropertyAccessor.Global
-// ReSharper disable MemberCanBePrivate.Global
-// ReSharper disable UnusedMember.Global
-// ReSharper disable ClassNeverInstantiated.Global
-// ReSharper disable PropertyCanBeMadeInitOnly.Global
-
-namespace Larp.Data;
-
+[PublicAPI]
 public class Session
 {
     [BsonId, BsonRepresentation(BsonType.ObjectId)]

@@ -1,0 +1,16 @@
+@page "/characters/{gameName}/new"
+@using Larp.Landing.Client.Pages.MwFifth
+
+<PageHeader>New Character</PageHeader>
+
+<MudContainer MaxWidth="MaxWidth.Medium">
+    @if (GameName == "mw5e")
+    {
+        <MwFifthCharacterNew/>
+    }
+</MudContainer>
+
+@code {
+    [Parameter]
+    public string? GameName { get; set; }
+}

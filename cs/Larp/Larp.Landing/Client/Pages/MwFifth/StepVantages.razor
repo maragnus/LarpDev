@@ -1,0 +1,131 @@
+@using Larp.Landing.Shared.MwFifth
+<MudText Typo="Typo.h6">Select your advantages and disadvantages</MudText>
+<MudText Typo="Typo.body2">You may optionally choose to take disadvantages and advantages. You must select an equal or greater disadvantage score to your advantage score.</MudText>
+
+<StepDivider/>
+
+<MudSwitch T="bool" Checked="Character.NoAdvantages" CheckedChanged="CheckChanged">No Advantages or Disadvantages</MudSwitch>
+
+@if (!Character.NoAdvantages)
+{
+    <MudSwitch @bind-Checked="@ShowDescriptions" Label="Show Descriptions" Color="Color.Info"/>
+    <StepDivider/>
+
+    <MudGrid>
+        <MudItem xs="6">
+            <MudStack AlignItems="AlignItems.Center">
+                <MudAvatar Size="Size.Large">@_advantageScore</MudAvatar>
+                <MudText Typo="Typo.caption" Align="Align.Center">Advantage<br/>Score</MudText>
+            </MudStack>
+        </MudItem>
+        <MudItem xs="6">
+            <MudStack AlignItems="AlignItems.Center">
+                <MudAvatar Size="Size.Large">@_disadvantageScore</MudAvatar>
+                <MudText Typo="Typo.caption" Align="Align.Center">Disadvantage<br/>Score</MudText>
+            </MudStack>
+        </MudItem>
+        @if (_advantageScore != _disadvantageScore)
+        {
+            <MudItem xs="12">
+                @if (_advantageScore > _disadvantageScore)
+                {
+                    <MudAlert Severity="Severity.Warning">Your Disadvantage Score must be equal or greater than your Advantage Score</MudAlert>
+                }
+                else if (_advantageScore < _disadvantageScore)
+                {
+                    <MudAlert Severity="Severity.Info">You have @(_disadvantageScore - _advantageScore) Advantage Points remaining</MudAlert>
+                }
+            </MudItem>
+        }
+        <MudItem xs="6">
+            <MudText Typo="Typo.body2">Advantages</MudText>
+            <MudListExtended Clickable MultiSelection T="string" SelectedValues="_advantages" SelectedValuesChanged="OnAdvantagesChange">
+                @foreach (var vantage in Character.GameState.Advantages)
+                {
+                    <MudListItemExtended Disabled="@(_selectedNames.Contains(vantage.Name) && !_selectedTitles.Contains(vantage.Title))" Text="@vantage.Title" SecondaryText="@(ShowDescriptions ? vantage.Description : "")" Value="@vantage.Title" T="string"/>
+                }
+            </MudListExtended>
+        </MudItem>
+        <MudItem xs="6">
+            <MudText Typo="Typo.body2">Disadvantages</MudText>
+            <MudListExtended Clickable MultiSelection T="string" SelectedValues="_disadvantages" SelectedValuesChanged="OnDisadvantagesChange">
+                @foreach (var vantage in Character.GameState.Disadvantages)
+                {
+                    <MudListItemExtended Disabled="@(_selectedNames.Contains(vantage.Name) && !_selectedTitles.Contains(vantage.Title))" Text="@vantage.Title" SecondaryText="@(ShowDescriptions ? vantage.Description : "")" Value="@vantage.Title" T="string"/>
+                }
+            </MudListExtended>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    [Parameter]
+    public CharacterBuilder Character { get; set; } = null!;
+
+    private HashSet<string> _selectedTitles = new();
+    private HashSet<string> _selectedNames = new();
+    private int _advantageScore = 0;
+    private int _disadvantageScore = 0;
+    private string[] _advantages = Array.Empty<string>();
+    private string[] _disadvantages = Array.Empty<string>();
+    private bool ShowDescriptions { get; set; }
+
+    protected override void OnInitialized()
+    {
+        _advantages = Character.Advantages.Select(x => x.Title).ToArray();
+        _disadvantages = Character.Disadvantages.Select(x => x.Title).ToArray();
+        Update();
+    }
+
+    private void Update()
+    {
+        if (Character.NoAdvantages)
+        {
+            Character.Advantages = Array.Empty<CharacterVantage>();
+            Character.Disadvantages = Array.Empty<CharacterVantage>();
+        }
+        
+        _advantageScore = Character.Advantages.Sum(x => x.Rank);
+        _disadvantageScore = Character.Disadvantages.Sum(x => x.Rank);
+        _selectedNames =
+            Character.Advantages.Select(x => x.Name)
+                .Concat(Character.Disadvantages.Select(x => x.Name))
+                .ToHashSet();
+        _selectedTitles = 
+            Character.Advantages.Select(x => x.Title)
+                .Concat(Character.Disadvantages.Select(x => x.Title))
+                .ToHashSet();
+    }
+
+    private void OnAdvantagesChange(IEnumerable<string> selectedItems)
+    {
+        Character.Advantages = selectedItems
+            .Select(CharacterVantage.FromTitle)
+            .OrderByDescending(x=>x.Rank) 
+            .DistinctBy(x=>x.Name)
+            .OrderBy(x=>x.Name)
+            .ToArray();
+        _advantages = Character.Advantages.Select(x => x.Title).ToArray();
+        Update();
+    }
+
+    private void OnDisadvantagesChange(IEnumerable<string> selectedItems)
+    {
+        Character.Disadvantages = selectedItems
+            .Select(CharacterVantage.FromTitle)
+            .OrderByDescending(x=>x.Rank) 
+            .DistinctBy(x=>x.Name)
+            .OrderBy(x=>x.Name)
+            .ToArray();
+        _disadvantages = Character.Disadvantages.Select(x => x.Title).ToArray();
+        Update();
+    }
+
+    private void CheckChanged(bool value)
+    {
+        Character.NoAdvantages = value;
+        Update();
+        StateHasChanged();
+    }
+
+}

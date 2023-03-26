@@ -1,0 +1,20 @@
+@using Larp.Landing.Client.Pages.MwFifth
+
+@page "/characters/{gameName}/{characterId}/edit"
+@inject LandingService LandingService
+
+<MudContainer MaxWidth="MaxWidth.Medium">
+    <MudPaper Elevation="2" Style="margin-top: 1em;">
+		@if (GameName == "mw5e") {
+			<MwFifthCharacterEdit CharacterId="@CharacterId" />	
+		}
+    </MudPaper>
+</MudContainer>
+
+@code {
+    [Parameter]
+    public string? GameName { get; set; }
+
+    [Parameter]
+    public string? CharacterId { get; set; }
+}

@@ -236,7 +236,7 @@
     "skills": [
       "Engineering",
       "Income 5",
-      "Occupational Spells (page 126)",
+      "Occupational Spells",
       "Production (1 Death Component)",
       "Slayer (Undead)",
       "Weapon Specialization (Tool)",
@@ -437,7 +437,7 @@
     "skills": [
       "Engineering",
       "Livery",
-      "Occupational Spells (page 126)",
+      "Occupational Spells",
       "Poisoner 2",
       "Set Trap",
       "Slayer (Vermin)"
@@ -835,7 +835,7 @@
       "Apothecary 2",
       "Income 10",
       "Livery",
-      "Occupational Spells (page 125)",
+      "Occupational Spells",
       "Production (4 Food)",
       "Production (4 Life)",
       "Serene Contemplation",
@@ -912,7 +912,7 @@
       "Execution",
       "Income 10",
       "Livery",
-      "Occupational Spells (page 125)",
+      "Occupational Spells",
       "Poisoner 4",
       "Weapon Specialization (One Handed Axe)",
       "Weapon Specialization (One Handed Sword)",
@@ -1000,7 +1000,7 @@
       "Duty 1",
       "Income 10",
       "Livery",
-      "Occupational Spells (page 125)",
+      "Occupational Spells",
       "Set Trap",
       "Weapon Specialization (One Handed Blunt)",
       "Weapon Specialization (Two Handed Blunt)",
@@ -1018,7 +1018,7 @@
       "Income 10",
       "Information Gathering",
       "Livery",
-      "Occupational Spells (page 126)",
+      "Occupational Spells",
       "Scribe 2"
     ]
   },
@@ -1168,7 +1168,7 @@
       "Cure Affliction",
       "Livery",
       "Medicine",
-      "Occupational Spells (page 126)",
+      "Occupational Spells",
       "Research",
       "Serene Contemplation"
     ]
@@ -1521,7 +1521,7 @@
       "Battlemage",
       "Leadership (anyone under your command in battle)",
       "Mage Lore",
-      "Occupational Spells (page 126)",
+      "Occupational Spells",
       "Set Trap",
       "Slayer (Daemons)",
       "Wear Armor 4"
@@ -1532,6 +1532,25 @@
         "choices": [
           "Information Gathering",
           "Research"
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Basic",
+    "name": "Drengr",
+    "chapters": ["burgundar"],
+    "skills": [
+      "Iron Will",
+      "Unarmed Combat",
+      "Wear Armor 2"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Weapon Specialization (One Handed Axe)",
+          "Weapon Specialization (One Handed Sword)"
         ]
       }
     ]

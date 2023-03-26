@@ -10,16 +10,17 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+        <PackageReference Include="Moq" Version="4.18.4" />
         <PackageReference Include="MSTest.TestAdapter" Version="2.2.8" />
         <PackageReference Include="MSTest.TestFramework" Version="2.2.8" />
         <PackageReference Include="coverlet.collector" Version="3.1.2" />
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Larp.Data.Mongo\Larp.Data.Mongo.csproj" />
       <ProjectReference Include="..\Larp.Data.TestFixture\Larp.Data.TestFixture.csproj" />
       <ProjectReference Include="..\Larp.Data\Larp.Data.csproj" />
       <ProjectReference Include="..\Larp.Test.Common\Larp.Test.Common.csproj" />
-      <ProjectReference Include="..\Larp.WebService.Tests\Larp.WebService.Tests.csproj" />
     </ItemGroup>
 
 </Project>

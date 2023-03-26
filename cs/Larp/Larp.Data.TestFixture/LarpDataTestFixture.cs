@@ -1,8 +1,8 @@
-﻿using Larp.Data.Seeder;
-using Larp.Data.Services;
+﻿using Larp.Data.Mongo;
+using Larp.Data.Mongo.Services;
+using Larp.Data.Seeder;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Internal;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Mongo2Go;
@@ -43,7 +43,7 @@ public class LarpDataTestFixture : IDisposable
 
         if (!seed) return result;
 
-        var seederLogger = LoggerFactory.Create(null).CreateLogger<LarpDataSeeder>();
+        var seederLogger = NullLogger<LarpDataSeeder>.Instance;
         var seeder = new LarpDataSeeder(result.Context, seederLogger, clock);
         await seeder.Seed();
 
