@@ -1,33 +1,115 @@
 @using Larp.Landing.Shared.MwFifth
 @using Larp.Landing.Client.Pages.MwFifth.Components
 
-<div class="mw5e-character-sheet">
-    <MudGrid>
-        <MudItem>
-            <MudGrid>
-                <MudItem><Gift GiftName="Courage" Level="@Character.Courage" /></MudItem>
-                <MudItem><Gift GiftName="Dexterity" Level="@Character.Dexterity" /></MudItem>
-                <MudItem><Gift GiftName="Empathy" Level="@Character.Empathy" /></MudItem>
-                <MudItem><Gift GiftName="Passion" Level="@Character.Passion" /></MudItem>
-                <MudItem><Gift GiftName="Prowess" Level="@Character.Prowess" /></MudItem>
-                <MudItem><Gift GiftName="Wisdom" Level="@Character.Wisdom" /></MudItem>
-            </MudGrid>
-        </MudItem>
-        <MudItem>
-            <PropertyList Properties="@Character.Properties" />
-        </MudItem>
-    </MudGrid>
-
-</div>
+<MudGrid>
+    <MudItem xs="2" Class="justify-center"><img src="/tree.webp" alt="Mystwood Logo" style="height: 4em; width: auto; padding-right: 1em"/></MudItem>
+    <MudItem xs="10">
+        <div style="font-size: 1.75em">
+            @Character.CharacterName
+        </div>
+        <div style="font-size: 1.2em">
+            @_homeChapter, @_specialty, @_religion
+        </div>
+    </MudItem>
+    <MudItem xs="12">
+        <MudGrid>
+            @foreach (var (name, rank) in _gifts)
+            {
+                <MudItem xs="6">
+                    <div style="border: 1pt solid #777777; background-color: #f4f5f7; position: relative">
+                        <div style="
+                             position: absolute; left: 0.5em; bottom: -0.5em; width: 2em; height: 2em;
+                             border-radius: 50%; border: 1pt solid #777777; background-color: #ffffff; font-size: 2em;
+                             text-align: center; font-weight: bold; padding-top: 0.2em; box-sizing: border-box">
+                            @rank
+                        </div>
+                        <div style="padding: 0.1em 0.5em; background-color: #ffffff; font-weight: bold">
+                            @name
+                        </div>
+                        <div style="padding-left: 40%; padding-top: 0.5em; height: 4em; line-height: 1.5em">
+                            <div>
+                                @for (var i = 0; i < Math.Min(5, rank); i++)
+                                {
+                                    <MudIcon Icon="@Icons.Material.Filled.Star" Size="Size.Small"/>
+                                }
+                            </div>
+                            <div>
+                                @for (var i = 5; i < Math.Min(10, rank); i++)
+                                {
+                                    <MudIcon Icon="@Icons.Material.Filled.Star" Size="Size.Small"/>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </MudItem>
+            }
+        </MudGrid>
+    </MudItem>
+    <MudItem xs="6">
+        <MudStack Spacing="4">
+            @foreach (var (name, value) in Character.Properties)
+            {
+                <div style="border: 1pt solid #777777; background-color: #ffffff; position: relative">
+                    <div style="
+                         position: absolute; right: 0.5em; bottom: -0.5em; width: 1.75em; height: 1.75em;
+                         border-radius: 50%; border: 1pt solid #777777; background-color: #ffffff; font-size: 1em;
+                         text-align: center; font-weight: bold; padding-top: 0.1em; box-sizing: border-box">
+                        @value
+                    </div>
+                    <div style="padding: 0.25em 0.5em; font-weight: bold">
+                        @name
+                    </div>
+                </div>
+            }
+        </MudStack>
+    </MudItem>
+    <MudItem xs="6">
+        <div style="
+            border: 1pt solid #777777;
+            background-color: #ffffff;
+            position: relative;
+            padding-top: 2em ">
+            <div style="
+                position: absolute; left: 0.5em; top: -0.5em;
+                border: 1pt solid #777777; background-color: #ffffff;
+                text-align: center; font-weight: bold; padding: 0.25em 0.5em; box-sizing: border-box
+            ">Attributes</div>
+            @foreach (var name in Character.Abilities)
+            {
+                <div style="padding: 0.25em 0.5em; font-weight: bold">
+                    @name
+                </div>
+            }
+        </div>
+    </MudItem>
+</MudGrid>
 
 
 @code {
+
     [Parameter]
     public CharacterBuilder Character { get; set; } = null!;
 
+    private (string Name, int Value)[] _gifts = Array.Empty<(string, int)>();
+    private string? _homeChapter;
+    private string? _specialty;
+    private string? _religion;
+
     protected override void OnInitialized()
     {
-        
+        _gifts = new[]
+        {
+            ("Courage", Character.Courage),
+            ("Dexterity", Character.Dexterity),
+            ("Empathy", Character.Empathy),
+            ("Passion", Character.Passion),
+            ("Prowess", Character.Prowess),
+            ("Wisdom", Character.Wisdom),
+        };
+
+        _homeChapter = Character.GetHomeChapter()?.Title ?? "Invalid Home Chapter";
+        _specialty = Character.Specialty ?? Character.GetOccupation()?.Name ?? "No Occupation";
+        _religion = Character.GetReligion()?.Title ?? "No Religion";
     }
 
 }

@@ -1,0 +1,53 @@
+@using Larp.Landing.Shared.MwFifth
+<MudText Typo="Typo.h6">Name your character</MudText>
+<MudText Typo="Typo.body2">
+    Provide a in-game name for your character.
+    Also, select the age group that applies to <strong>you, as a player</strong>.
+    Please note the restrictions for each age group as described in the Mystwood manual.
+</MudText>
+<StepDivider/>
+
+<MudTextField T="string" Variant="Variant.Outlined" Value="Character.CharacterName" Label="Character Name" ValueChanged="UpdateName"/>
+<StepDivider/>
+<MudText Typo="Typo.h6">Select your age group for this character</MudText>
+<MudListExtended T="AgeGroup?" Clickable="true" SelectedValue="Character.AgeGroup" SelectedValueChanged="UpdateAgeGroup">
+    <MudListItemExtended T="AgeGroup?" Value="@AgeGroup.PreTeen" Text="10-14" SecondaryText="Requires an adult guardian PCing or NPCing with you at all times. You cannot choose Gifts or an Occupation." Icon="@Icons.Material.Outlined.SignalCellularAlt1Bar"/>
+    <MudListItemExtended T="AgeGroup?" Value="@AgeGroup.Youth" Text="14-16" SecondaryText="Requires an adult guardian on site with you at all times. You can only choose from Youth Occupations." Icon="@Icons.Material.Outlined.SignalCellularAlt2Bar"/>
+    <MudListItemExtended T="AgeGroup?" Value="@AgeGroup.YoungAdult" Text="16-18" SecondaryText="Requires signed waiver from adult" Icon="@Icons.Material.Outlined.SignalCellularAlt"/>
+    <MudListItemExtended T="AgeGroup?" Value="@AgeGroup.Adult" Text="18+" Icon="@Icons.Material.Outlined.SignalCellular4Bar"/>
+</MudListExtended>
+<StepDivider/>
+
+@if (Character.AgeGroup != null && Character.AgeGroup != AgeGroup.Adult)
+{
+    <MudAlert Severity="Severity.Info">Please make sure that your Birth Date is provided in your account profile.</MudAlert>
+}
+
+@code {
+
+    [Parameter]
+    public CharacterBuilder Character { get; set; } = null!;
+
+    private void UpdateName(string value)
+    {
+        Character.CharacterName = value;
+    }
+
+    private void UpdateAgeGroup(AgeGroup? value)
+    {
+        // PreTeen cannot have occupation
+        if (value == AgeGroup.PreTeen)
+        {
+            Character.NoOccupation = false;
+            Character.Occupation = null;
+        }
+    // Youth occupations are specific, so just reset it
+        else if (value == AgeGroup.Youth || Character.AgeGroup == AgeGroup.Youth)
+        {
+            Character.NoOccupation = false;
+            Character.Occupation = null;
+        } 
+        
+        Character.AgeGroup = value;
+    }
+}

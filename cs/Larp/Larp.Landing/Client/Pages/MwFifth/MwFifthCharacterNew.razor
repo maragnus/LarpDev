@@ -22,6 +22,11 @@
         _steps = new Step[]
         {
             new(
+                "Name",
+                @<StepName Character="_character" />, 
+                @<MudIcon Icon="@Icons.Material.Outlined.PermIdentity" />,
+                () => _character.IsNameValid && _character.IsAgeGroupValid),
+            new(
                 "Home Chapter",
                 @<StepHomeChapter Character="_character" />, 
                 @<MudIcon Icon="@Icons.Material.Outlined.Flag" />,
@@ -37,13 +42,15 @@
                 "Occupation", 
                 @<StepOccupation Character="_character" />,
                 @<MudIcon Icon="@Icons.Material.Outlined.Work" />,         
-                () => _character.IsOccupationValid),
+                () => _character.IsOccupationValid,
+                () => _character.AgeGroup != AgeGroup.PreTeen),
             
             new(
                 "Gifts", 
                 @<StepGifts Character="_character" />,
                 @<MudIcon Icon="@Icons.Material.Outlined.FitnessCenter" />,         
-                () => _character.IsGiftsValid),
+                () => _character.IsGiftsValid,
+                () => _character.AgeGroup != AgeGroup.PreTeen),
             
             new(
                 "Religion", 

@@ -1,67 +1,89 @@
 @using Larp.Landing.Shared.MwFifth
 <MudText Typo="Typo.h6">Select your occupation</MudText>
-<MudText Typo="Typo.body2">Choose and customize a Basic Occupation or a Chapter-Specific Basic Occupation</MudText>
+<MudText Typo="Typo.body2">Choose and customize a Basic Occupation or a Chapter-Specific Basic Occupation.
+    You can opt not to choose an occupation until your third session. 
+    Also, Occupation can be changed once per year.</MudText>
 
 <StepDivider/>
 
-<MudSelectExtended
-    Label="Occupation"
-    T="string"
-    Value="Character.Occupation"
-    ValueChanged="OnSelectOccupation"
-    SearchFunc="SearchList"
-    SearchBox="true"
-    SearchBoxAutoFocus="true"
-    SearchBoxClearable="true"
-    Variant="Variant.Outlined"
-    ItemCollection="_occupations"/>
+<MudSwitch T="bool" Checked="Character.NoOccupation" CheckedChanged="NoOccupationChanged">No Occupation</MudSwitch>
 
-@if (Character.AllSpecialties.Length > 0)
+<StepDivider/>
+
+@if (!Character.IsAgeGroupValid)
+{
+    <MudAlert Severity="Severity.Info">
+        Select your <strong>Age Group</strong> before selecting your Occupation.
+    </MudAlert>
+}
+else if (!Character.IsHomeChapterValid)
+{
+    <MudAlert Severity="Severity.Info">
+        Select your <strong>Home Chapter</strong> before selecting your Occupation.
+    </MudAlert>
+}
+else if (!Character.NoOccupation)
 {
     <MudSelectExtended
-        Label="Specialty"
+        Label="Occupation"
         T="string"
-        Value="Character.Specialty"
-        ValueChanged="OnSelectSpecialty"
-        ItemCollection="Character.AllSpecialties"
+        Value="Character.Occupation"
+        ValueChanged="OnSelectOccupation"
+        SearchFunc="SearchList"
+        SearchBox="true"
+        SearchBoxAutoFocus="true"
+        SearchBoxClearable="true"
         Variant="Variant.Outlined"
-        Style="margin: 2em 0"/>
-}
+        ItemCollection="_occupations"/>
 
-@if (_occupation?.Skills.Length > 0)
-{
-    <StepDivider/>
+    @if (Character.AllSpecialties.Length > 0)
+    {
+        <MudSelectExtended
+            Label="Specialty"
+            T="string"
+            Value="Character.Specialty"
+            ValueChanged="OnSelectSpecialty"
+            ItemCollection="Character.AllSpecialties"
+            Variant="Variant.Outlined"
+            Style="margin: 2em 0"/>
+    }
 
-    <MudText Typo="Typo.caption">Occupational Skills</MudText>
-    <MudChipSet>
-        @foreach (var skill in _occupation.Skills)
-        {
-            <MudChip>@skill</MudChip>
-        }
-    </MudChipSet>
-}
-
-@if (_skillSelectors.Length > 0)
-{
-    foreach (var skillChoice in _skillSelectors)
+    @if (_occupation?.Skills.Length > 0)
     {
         <StepDivider/>
 
-        <MudText Typo="Typo.caption">Choose @skillChoice.Count</MudText>
-        <MudChipSet T="string" MultiSelection="true" Filter SelectedValues="@skillChoice.SelectedSkills" SelectedValuesChanged="(skills) => OnSkillsChange(skillChoice, skills)">
-            @foreach (var skill in skillChoice.Skills)
+        <MudText Typo="Typo.caption">Occupational Skills</MudText>
+        <MudChipSet>
+            @foreach (var skill in _occupation.Skills)
             {
-                <MudChip Color="Color.Primary" Value="@skill">@skill</MudChip>
+                <MudChip>@skill</MudChip>
             }
         </MudChipSet>
-        @if (skillChoice.IsError)
+    }
+
+    @if (_skillSelectors.Length > 0)
+    {
+        foreach (var skillChoice in _skillSelectors)
         {
-            <MudAlert Severity="Severity.Warning">You must select exactly @skillChoice.Count @(skillChoice.Count == 1 ? "skill" : "skills")</MudAlert>
+            <StepDivider/>
+
+            <MudText Typo="Typo.caption">Choose @skillChoice.Count</MudText>
+            <MudChipSet T="string" MultiSelection="true" Filter SelectedValues="@skillChoice.SelectedSkills" SelectedValuesChanged="(skills) => OnSkillsChange(skillChoice, skills)">
+                @foreach (var skill in skillChoice.Skills)
+                {
+                    <MudChip Color="Color.Primary" Value="@skill">@skill</MudChip>
+                }
+            </MudChipSet>
+            @if (skillChoice.IsError)
+            {
+                <MudAlert Severity="Severity.Warning">You must select exactly @skillChoice.Count @(skillChoice.Count == 1 ? "skill" : "skills")</MudAlert>
+            }
         }
     }
 }
 
 @code {
+
     [Parameter]
     public CharacterBuilder Character { get; set; } = null!;
 
@@ -80,7 +102,7 @@
         {
             Skills = skillChoice.Choices;
             Count = skillChoice.Count;
-            SelectSkills(character.Skills.Where(skill => skill.Type == SkillPurchase.OccupationChoice).Select(x=>x.Name));
+            SelectSkills(character.Skills.Where(skill => skill.Type == SkillPurchase.OccupationChoice).Select(x => x.Name));
         }
 
         public void SelectSkills(IEnumerable<string> skills)
@@ -129,4 +151,11 @@
         Character.OccupationalChosenSkills = _skillSelectors.SelectMany(x => x.SelectedSkills).ToArray();
     }
 
+    private void NoOccupationChanged(bool value)
+    {
+        Character.NoOccupation = value;
+        if (value)
+            Character.Occupation = null;
+    }
 }
+

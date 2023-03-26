@@ -124,6 +124,18 @@ public class Occupation
     
     // ReSharper disable once NonReadonlyMemberInGetHashCode
     public override int GetHashCode() => Name.GetHashCode();
+
+    public bool IsChapter(string? homeChapter)
+    {
+        // If this is not chapter-specific, match
+        if (Chapters.Length == 0)
+            return true;
+        // If it is chapter-specific and the player hasn't selected a chapter, no match
+        if (string.IsNullOrEmpty(homeChapter))
+            return false;
+        // If it is chapter-specific, and the character's chapter matches, match
+        return Chapters.Contains(homeChapter);
+    }
 }
 
 [PublicAPI]

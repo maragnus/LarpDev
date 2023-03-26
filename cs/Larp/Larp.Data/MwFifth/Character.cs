@@ -3,6 +3,21 @@ using MongoDB.Bson.Serialization.Serializers;
 
 namespace Larp.Data.MwFifth;
 
+public enum AgeGroup
+{
+    /// <summary>Ages 10-13</summary>
+    PreTeen,
+
+    /// <summary>Ages 14-16</summary>
+    Youth,
+
+    /// <summary>Ages 16-17</summary>
+    YoungAdult,
+
+    /// <summary>Ages 18+</summary>
+    Adult
+}
+
 [PublicAPI]
 public class CharacterProperty
 {
@@ -94,6 +109,7 @@ public class Character
     public string? PublicHistory { get; set; }
     public string? PrivateHistory { get; set; }
     public string? Homeland { get; set; }
+    public AgeGroup? AgeGroup { get; set; }
 
     public int StartingMoonstone { get; set; }
     public int SkillTokens { get; set; }
@@ -136,9 +152,9 @@ public class Character
     public string? Notes { get; set; }
 
     public bool UnlockedAllSpells { get; set; }
-    public bool IsYouth { get; set; }
     public bool NoHistory { get; set; }
     public bool NoAdvantages { get; set; }
+    public bool NoOccupation { get; set; }
 
     public CharacterSummary ToSummary() =>
         new CharacterSummary(

@@ -34,22 +34,22 @@ public class CharacterBuilder
     public Religion[] AllReligions { get; set; }
     public Dictionary<string, Gift> AllGifts { get; }
 
-    [DependsOn(nameof(PopulateOccupationalDependencies), nameof(Occupation))]
+    [DependsOn(nameof(PopulateOccupationalDependencies), nameof(Occupation), nameof(NoOccupation))]
     public string[] AllSpecialties { get; private set; } = Array.Empty<string>();
 
     [DependsOn(nameof(PopulateHomelands), nameof(HomeChapter))]
     public string[] AvailableHomelands { get; private set; } = Array.Empty<string>();
 
-    [DependsOn(nameof(PopulateOccupations), nameof(HomeChapter))]
+    [DependsOn(nameof(PopulateOccupations), nameof(HomeChapter), nameof(AgeGroup))]
     public Dictionary<string, Occupation> AvailableOccupations { get; private set; } = new();
 
-    [DependsOn(nameof(PopulateOccupationalDependencies), nameof(Occupation), nameof(Wisdom))]
+    [DependsOn(nameof(PopulateOccupationalDependencies), nameof(Occupation), nameof(NoOccupation), nameof(Wisdom))]
     public Spell[] OccupationalSpells { get; private set; } = Array.Empty<Spell>();
 
-    [DependsOn(nameof(PopulateOccupationalDependencies), nameof(Occupation))]
+    [DependsOn(nameof(PopulateOccupationalDependencies), nameof(Occupation), nameof(NoOccupation))]
     public CharacterSkill[] OccupationalSkills { get; private set; } = Array.Empty<CharacterSkill>();
 
-    [DependsOn(nameof(PopulateOccupationalDependencies), nameof(Occupation))]
+    [DependsOn(nameof(PopulateOccupationalDependencies), nameof(Occupation), nameof(NoOccupation))]
     public SkillChoice[] OccupationalSkillsChoices { get; private set; } = Array.Empty<SkillChoice>();
 
     #endregion
@@ -79,6 +79,18 @@ public class CharacterBuilder
 
     #region Character
 
+    public string? CharacterName
+    {
+        get => Character.CharacterName;
+        set => Set(c => c.CharacterName = value);
+    }
+
+    public AgeGroup? AgeGroup
+    {
+        get => Character.AgeGroup;
+        set => Set(c => c.AgeGroup = value);
+    }
+
     public string? HomeChapter
     {
         get => Character.HomeChapter;
@@ -107,6 +119,12 @@ public class CharacterBuilder
     {
         get => Character.Religion;
         set => Set(x => x.Religion = value);
+    }
+
+    public bool NoOccupation
+    {
+        get => Character.NoOccupation;
+        set => Set(x => x.NoOccupation = value);
     }
 
     public bool NoHistory
@@ -228,46 +246,57 @@ public class CharacterBuilder
         set => Set(x => x.Disadvantages = value);
     }
 
-    public HomeChapter? GetHomeChapter() => GameState.HomeChapters.FirstOrDefault(x => x.Name == Character.HomeChapter);
+    public HomeChapter? GetHomeChapter() =>
+        GameState.HomeChapters.FirstOrDefault(x => x.Name == Character.HomeChapter);
 
-    public Occupation? GetOccupation() => GameState.Occupations.FirstOrDefault(x => x.Name == Character.Occupation);
+    public Occupation? GetOccupation() =>
+        GameState.Occupations.FirstOrDefault(x => x.Name == Character.Occupation);
+
+    public Religion? GetReligion() =>
+        AllReligions.FirstOrDefault(x => x.Name == Character.Religion);
 
     #endregion
 
     #region Validation
 
-    [DependsOn(nameof(PopulateSkills), nameof(Occupation), nameof(OccupationalChosenSkills), nameof(PurchasedSkills))]
+    [DependsOn(nameof(PopulateSkills), nameof(Occupation), nameof(NoOccupation), nameof(OccupationalChosenSkills), nameof(PurchasedSkills))]
     public HashSet<string> Skills { get; private set; } = new();
 
     [DependsOn(nameof(PopulateSpells), nameof(Wisdom))]
     public bool HasWisdomSpells { get; private set; }
 
-    [DependsOn(nameof(PopulateSpells), nameof(Wisdom), nameof(Occupation))]
+    [DependsOn(nameof(PopulateSpells), nameof(Wisdom), nameof(Occupation), nameof(NoOccupation))]
     public bool HasBardicSpells { get; private set; }
 
-    [DependsOn(nameof(PopulateSpells), nameof(Wisdom), nameof(Occupation))]
+    [DependsOn(nameof(PopulateSpells), nameof(Wisdom), nameof(Occupation), nameof(NoOccupation))]
     public bool HasDivineSpells { get; private set; }
 
-    [DependsOn(nameof(PopulateSpells), nameof(Wisdom), nameof(Occupation))]
+    [DependsOn(nameof(PopulateSpells), nameof(Wisdom), nameof(Occupation), nameof(NoOccupation))]
     public bool HasOccupationalSpells { get; private set; }
 
+    public bool IsNameValid => !string.IsNullOrWhiteSpace(Character.CharacterName);
+    public bool IsAgeGroupValid => Character.AgeGroup != null;
     public bool IsHomeChapterValid => !string.IsNullOrEmpty(Character.HomeChapter);
     public bool IsHomelandValid => !string.IsNullOrWhiteSpace(Character.Homeland);
 
-    [DependsOn(nameof(PopulateIsOccupationValid), nameof(Occupation), nameof(OccupationalChosenSkills),
-        nameof(Specialty))]
+    [DependsOn(nameof(PopulateIsOccupationValid), nameof(Occupation), nameof(NoOccupation), nameof(OccupationalChosenSkills),
+        nameof(Specialty), nameof(AgeGroup))]
     public bool IsOccupationValid { get; private set; }
 
-    [DependsOn(nameof(PopulateIsOccupationValid), nameof(Occupation), nameof(OccupationalSkillsChoices))]
+    [DependsOn(nameof(PopulateIsOccupationValid), nameof(Occupation), nameof(NoOccupation), nameof(OccupationalSkillsChoices))]
     public bool IsChosenSkillsValid { get; private set; }
 
-    public bool IsGiftsValid => NoHistory && Level == 5 || !NoHistory && Level == 6;
+    public bool IsGiftsValid =>
+        AgeGroup == Data.MwFifth.AgeGroup.PreTeen
+        || (NoHistory && Level == 5) 
+        || (!NoHistory && Level == 6);
+
     public bool IsReligionValid => !string.IsNullOrEmpty(Character.Religion);
 
-    [DependsOn(nameof(PopulateSpells), nameof(Wisdom), nameof(Occupation), nameof(ChosenSpells))]
+    [DependsOn(nameof(PopulateSpells), nameof(Wisdom), nameof(Occupation), nameof(NoOccupation), nameof(ChosenSpells))]
     public bool IsSpellsValid { get; private set; }
 
-    [DependsOn(nameof(PopulateSpells), nameof(Wisdom), nameof(Occupation))]
+    [DependsOn(nameof(PopulateSpells), nameof(Wisdom), nameof(Occupation), nameof(NoOccupation))]
     public bool HasSpells { get; private set; }
 
     [DependsOn(nameof(PopulateVantages), nameof(NoAdvantages), nameof(Advantages), nameof(Disadvantages))]
@@ -343,23 +372,57 @@ public class CharacterBuilder
 
     private void PopulateOccupations()
     {
-        var type = Character.IsYouth ? OccupationType.Youth : OccupationType.Basic;
+        IEnumerable<Occupation> occupations; // = Array.Empty<Occupation>();
 
         if (_mode == CharacterBuilderMode.NewCharacter)
         {
-            AvailableOccupations =
-                GameState.Occupations
-                    .Where(o => o.Type == type
-                                && (o.Chapters.Length == 0 || o.Chapters.Contains(HomeChapter)))
-                    .ToDictionary(x => x.Name);
+            switch (Character.AgeGroup)
+            {
+                case null:
+                case Data.MwFifth.AgeGroup.PreTeen:
+                default:
+                    occupations = Array.Empty<Occupation>();
+                    break;
+                case Data.MwFifth.AgeGroup.Youth:
+                    occupations = GameState.Occupations
+                        .Where(o => o.Type is OccupationType.Youth
+                                    && o.IsChapter(HomeChapter));
+                    break;
+                case Data.MwFifth.AgeGroup.Adult:
+                case Data.MwFifth.AgeGroup.YoungAdult:
+                    occupations = GameState.Occupations
+                        .Where(o =>
+                            o.Type is OccupationType.Basic
+                            && o.IsChapter(HomeChapter));
+                    break;
+            }
         }
         else
         {
-            AvailableOccupations =
-                GameState.Occupations
-                    .Where(o => o.Chapters.Length == 0 || o.Chapters.Contains(HomeChapter))
-                    .ToDictionary(x => x.Name);
+            switch (Character.AgeGroup)
+            {
+                case null:
+                case Data.MwFifth.AgeGroup.PreTeen:
+                default:
+                    occupations = Array.Empty<Occupation>();
+                    break;
+                case Data.MwFifth.AgeGroup.Youth:
+                    occupations = GameState.Occupations
+                        .Where(o => o.Type is OccupationType.Youth
+                                    && o.IsChapter(HomeChapter));
+                    break;
+                case Data.MwFifth.AgeGroup.Adult:
+                case Data.MwFifth.AgeGroup.YoungAdult:
+                    occupations = GameState.Occupations
+                        .Where(o =>
+                            o.Type is OccupationType.Basic or OccupationType.Advanced or OccupationType.Plot
+                            && o.IsChapter(HomeChapter));
+                    break;
+            }
         }
+
+        AvailableOccupations = occupations
+            .ToDictionary(x => x.Name);
     }
 
     private void PopulateHomelands()
@@ -394,9 +457,30 @@ public class CharacterBuilder
 
     private void PopulateIsOccupationValid()
     {
-        if (GetOccupation() == null)
+        if (AgeGroup == Data.MwFifth.AgeGroup.PreTeen)
+        {
+            _logger.LogInformation("Occupation not available for preteen");
+            IsOccupationValid = true;
+            return;
+        }
+
+        if (NoOccupation)
+        {
+            IsOccupationValid = true;
+            IsChosenSkillsValid = true;
+            return;
+        }
+
+        if (Occupation == null)
         {
             _logger.LogInformation("Occupation not selected");
+            IsOccupationValid = false;
+            return;
+        }
+
+        if (Occupation != null && !AvailableOccupations.ContainsKey(Occupation))
+        {
+            _logger.LogInformation("Occupation selection is invalid");
             IsOccupationValid = false;
             return;
         }

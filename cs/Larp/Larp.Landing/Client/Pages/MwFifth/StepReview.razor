@@ -2,12 +2,20 @@
 <MudText Typo="Typo.h6">Review your character</MudText>
 <MudText Typo="Typo.body2">Choose and customize a Basic Occupation or a Chapter-Specific Basic Occupation</MudText>
 
-<StepDivider />
+<StepDivider/>
 
 <style>
     .mud-alert { margin-top: 2em }
 </style>
 
+@if (!Character.IsNameValid)
+{
+    <MudAlert Severity="Severity.Warning">You must choose a name for your character.</MudAlert>
+}
+@if (!Character.IsAgeGroupValid)
+{
+    <MudAlert Severity="Severity.Warning">You must select your age group.</MudAlert>
+}
 @if (!Character.IsHomeChapterValid)
 {
     <MudAlert Severity="Severity.Warning">You must choose a home chapter for this character. This can be changed once per year, but must have an initial chapter.</MudAlert>
@@ -17,17 +25,28 @@ else if (!Character.IsHomelandValid)
     <MudAlert Severity="Severity.Warning">You must choose a homeland.</MudAlert>
 }
 
-@if (Character.GetOccupation() == null)
+@if (Character.AgeGroup != AgeGroup.PreTeen)
 {
-    <MudAlert Severity="Severity.Info">You have chosen not to select an Occupation. This is optional, but must be chosen prior to the third event.</MudAlert>
-}
-else if (Character.Specialty == null && Character.AllSpecialties.Length > 0)
-{
-    <MudAlert Severity="Severity.Warning">You must choose the Specialty of your occupation.</MudAlert>
-}
-else if (!Character.IsChosenSkillsValid)
-{
-    <MudAlert Severity="Severity.Warning">You must make the Skill Choices for your occupation.</MudAlert>
+    @if (Character.NoOccupation)
+    {
+        <MudAlert Severity="Severity.Info">You have chosen not to select an Occupation. This is optional, but must be chosen prior to the third event.</MudAlert>
+    }
+    else if (Character.GetOccupation() == null)
+    {
+        <MudAlert Severity="Severity.Warning">You must choose an Occupation or choose the No Occupation option.</MudAlert>
+    }
+    else if (Character.Specialty == null && Character.AllSpecialties.Length > 0)
+    {
+        <MudAlert Severity="Severity.Warning">You must choose the Specialty of your occupation.</MudAlert>
+    }
+    else if (!Character.IsChosenSkillsValid)
+    {
+        <MudAlert Severity="Severity.Warning">You must make the Skill Choices for your occupation.</MudAlert>
+    }
+    else if (!Character.IsOccupationValid)
+    {
+        <MudAlert Severity="Severity.Warning">Your occupation selection is not valid.</MudAlert>
+    }
 }
 
 @if (!Character.IsGiftsValid)
@@ -55,15 +74,17 @@ else if (!Character.IsChosenSkillsValid)
     <MudAlert Severity="Severity.Warning">You must either provide a public history or choose No History.</MudAlert>
 }
 
-<StepDivider />
+<StepDivider/>
 
-<CharacterSheet Character="Character" />
+<CharacterSheet Character="Character"/>
 
-<StepDivider />
+<StepDivider/>
 
 <MudButton StartIcon="@Icons.Material.Outlined.Verified" Variant="Variant.Outlined">Submit this character</MudButton>
 
 @code {
+
     [Parameter]
     public CharacterBuilder Character { get; set; } = null!;
+
 }
