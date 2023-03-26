@@ -3,7 +3,7 @@
 
 <MudGrid>
     <MudItem xs="2" Class="justify-center"><img src="/tree.webp" alt="Mystwood Logo" style="height: 4em; width: auto; padding-right: 1em"/></MudItem>
-    <MudItem xs="10">
+    <MudItem xs="8">
         <div style="font-size: 1.75em">
             @Character.CharacterName
         </div>
@@ -11,6 +11,7 @@
             @_homeChapter, @_specialty, @_religion
         </div>
     </MudItem>
+    <MudItem xs="2" Class="justify-center"><!-- QR Code --></MudItem>
     <MudItem xs="12">
         <MudGrid>
             @foreach (var (name, rank) in _gifts)
@@ -94,9 +95,12 @@
     private string? _homeChapter;
     private string? _specialty;
     private string? _religion;
+    private string? _qrCode;
 
     protected override void OnInitialized()
     {
+        _qrCode = $"https://larp.maragnus.com/cs/{Character.Character.Id}";
+        
         _gifts = new[]
         {
             ("Courage", Character.Courage),

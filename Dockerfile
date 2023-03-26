@@ -15,13 +15,6 @@ RUN curl -sL https://deb.nodesource.com/setup_14.x | bash --debug
 RUN apt-get install nodejs -yq
 RUN npm install -g pnpm
 
-# Update npm packages first (changes rarely)
-WORKDIR /src
-COPY ["ts/landing/package.json", "ts/landing/package.json"]
-COPY ["ts/landing/pnpm-lock.yaml", "ts/landing/pnpm-lock.yaml"]
-WORKDIR /src/ts/landing
-RUN pnpm install
-
 # Update nuget packages first (changes rarely)
 WORKDIR /src
 RUN mkdir -p cs/Larp

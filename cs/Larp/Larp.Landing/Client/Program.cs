@@ -23,7 +23,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
     services.AddScoped<IMwFifthGameService, LandingInteropService>();
 
     services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-
+    
     services.AddMudServices();
     services.AddMudExtensions();
 }
