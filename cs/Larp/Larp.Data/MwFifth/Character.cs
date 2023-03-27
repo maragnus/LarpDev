@@ -18,6 +18,18 @@ public enum AgeGroup
     Adult
 }
 
+public enum CharacterState
+{
+    /// <summary>New Character, still in edit mode</summary>
+    NewDraft,
+    /// <summary>Existing Character, still in edit mode</summary>
+    UpdateDraft,
+    /// <summary>Revisions are waiting for Game Master approval</summary>
+    Review,
+    /// <summary>Current character ready for game</summary>
+    Live
+}
+
 [PublicAPI]
 public class CharacterProperty
 {
@@ -100,6 +112,8 @@ public class Character
 
     public string AccountId { get; set; } = null!;
 
+    public CharacterState State { get; set; } = CharacterState.NewDraft;
+    
     public string? CharacterName { get; set; }
     public string? Religion { get; set; }
     public string? Occupation { get; set; }
@@ -123,24 +137,6 @@ public class Character
     public int Wisdom { get; set; }
 
     public CharacterSkill[] Skills { get; set; } = Array.Empty<CharacterSkill>();
-
-    public void SetOccupationSkills(IEnumerable<CharacterSkill> skills)
-    {
-        Skills = Skills.Where(x => x.Type != SkillPurchase.Occupation).Concat(skills).ToArray();
-    }
-
-    public void SetOccupationChoicesSkills(IEnumerable<CharacterSkill> skills)
-    {
-    }
-
-    public void SetFreeSkills(IEnumerable<CharacterSkill> skills)
-    {
-    }
-
-    public void SetPurchasedSkills(IEnumerable<CharacterSkill> skills)
-    {
-    }
-
     public CharacterVantage[] Advantages { get; set; } = Array.Empty<CharacterVantage>();
     public CharacterVantage[] Disadvantages { get; set; } = Array.Empty<CharacterVantage>();
     public string[] Spells { get; set; } = Array.Empty<string>();

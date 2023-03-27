@@ -21,7 +21,8 @@ builder.Configuration
     
     services.AddControllersWithViews();
     services.AddRazorPages();
-
+    services.AddHttpContextAccessor();
+     
     // Larp.Notify
     services.AddScoped<INotifyService, NotifyService>();
     services.Configure<NotifyServiceOptions>(
@@ -41,8 +42,9 @@ builder.Configuration
     services.AddStartupTask<LarpDataSeederStartupTask>();
     
     // Larp.Landing.Server
-    services.AddScoped<ILandingService, LandingService>();
-    services.AddScoped<IMwFifthGameService, MwFifthGameService>();
+    services.AddScoped<ILandingService, LandingServiceServer>();
+    services.AddScoped<IMwFifthService, MwFifthServiceServer>();
+    services.AddScoped<IUserManager, UserManager>();
 }
 
 var app = builder.Build();
@@ -64,7 +66,10 @@ app.UseHttpsRedirection();
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
+app.UseMiddleware<UserSessionMiddleware>();
+
 app.UseRouting();
+
 app.MapControllers();
 app.MapRazorPages();
 app.MapFallbackToFile("index.html");

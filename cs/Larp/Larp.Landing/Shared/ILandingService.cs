@@ -1,25 +1,24 @@
 using JetBrains.Annotations;
 using Larp.Data;
-using Larp.Data.MwFifth;
+using Larp.Landing.Shared.Messages;
 
 namespace Larp.Landing.Shared;
 
 [PublicAPI]
 public interface ILandingService
 {
+    [ApiPath("auth/login")]
+    Task<Result> Login(string email, string origin);
+
+    [ApiPath("auth/confirm")]
+    Task<StringResult> Confirm(string email, string token);
+
+    [ApiPath("auto/validate")]
+    Task<Result> Validate(string token);
+    
     [ApiPath("games")]
     Task<Game[]> GetGames();
 
     [ApiPath("characters")]
     Task<CharacterSummary[]> GetCharacters();
-}
-
-[PublicAPI]
-public interface IMwFifthGameService
-{
-    [ApiPath("mw5e/gameState")]
-    Task<GameState?> GetGameState(string lastRevision);
-
-    [ApiPath("mw5e/character/:characterId")]
-    Task<Character?> GetCharacter(string characterId);
 }

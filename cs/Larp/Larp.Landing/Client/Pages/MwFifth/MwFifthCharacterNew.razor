@@ -3,6 +3,7 @@
 @using MongoDB.Bson.IO
 @inject LandingService LandingService
 @inject ILogger<MwFifthCharacterNew> Logger;
+@implements IAsyncDisposable
 
 @code {
     private LoadingState _loadingState = LoadingState.Loading;
@@ -14,11 +15,15 @@
     {
         _game = LandingService.MwFifth.Game;
         _gameState = LandingService.MwFifth.GameState;
-
-        var character = await LandingService.MwFifth.GetDraftCharacter();
-        _character = new CharacterBuilder(character, _gameState, CharacterBuilderMode.NewCharacter, Logger);
-        _character.StateChanged = StateHasChanged;
         
+        LandingService.MwFifth.AutoSaveStateChange+= AutoSaveStateChange;
+        
+        var character = await LandingService.MwFifth.GetDraftCharacter();
+        _character = new CharacterBuilder(character, _gameState, CharacterBuilderMode.NewCharacter, Logger)
+        {
+            StateChanged = StateHasChanged
+        };
+
         _steps = new Step[]
         {
             new(
@@ -94,17 +99,41 @@
     private Step[] _steps = Array.Empty<Step>();
 
     private Step? _currentStep = null;
-    
+    private AutoSaveState _saveState;
+
     private void OnStepChange()
     {
+        LandingService.MwFifth.UpdateAutoSave(_character.Character);
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await LandingService.MwFifth.FinishAutoSave(_character.Character);
+    }
+
+    private void AutoSaveStateChange(object? sender, EventArgs e)
+    {
+        _saveState = LandingService.MwFifth.AutoSaveState;
         StateHasChanged();
     }
 }
+
+
 
 @if (_loadingState != LoadingState.Loaded)
 {
     <MudProgressLinear Indeterminate />
     return;
+}
+
+@if (_saveState == AutoSaveState.Saving)
+{
+    <MudProgressLinear Indeterminate="true" />
+}
+else if (_saveState == AutoSaveState.Saved)
+{
+    <MudAlert Severity="Severity.Info">Autosaved</MudAlert>
 }
 
 <MudGrid Style="margin-top: 1em">

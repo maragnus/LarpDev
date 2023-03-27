@@ -7,6 +7,12 @@
 </MudText>
 <StepDivider/>
 
+@if (Character.AgeGroup != null && Character.AgeGroup != AgeGroup.Adult)
+{
+    <MudAlert Severity="Severity.Info">Please make sure that your Birth Date is provided in your account profile.</MudAlert>
+    <StepDivider/>
+}
+
 <MudTextField T="string" Variant="Variant.Outlined" Value="Character.CharacterName" Label="Character Name" ValueChanged="UpdateName"/>
 <StepDivider/>
 <MudText Typo="Typo.h6">Select your age group for this character</MudText>
@@ -17,11 +23,6 @@
     <MudListItemExtended T="AgeGroup?" Value="@AgeGroup.Adult" Text="18+" Icon="@Icons.Material.Outlined.SignalCellular4Bar"/>
 </MudListExtended>
 <StepDivider/>
-
-@if (Character.AgeGroup != null && Character.AgeGroup != AgeGroup.Adult)
-{
-    <MudAlert Severity="Severity.Info">Please make sure that your Birth Date is provided in your account profile.</MudAlert>
-}
 
 @code {
 

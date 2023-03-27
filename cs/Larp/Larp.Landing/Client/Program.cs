@@ -19,8 +19,8 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
     // Larp.Landing.Server
     services.AddScoped<DataCacheService>();
     services.AddScoped<LandingService>();
-    services.AddScoped<ILandingService, LandingInteropService>();
-    services.AddScoped<IMwFifthGameService, LandingInteropService>();
+    services.AddScoped<ILandingService, LandingServiceClient>();
+    services.AddScoped<IMwFifthService, LandingServiceClient>();
 
     services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
     

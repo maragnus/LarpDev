@@ -1,20 +1,34 @@
+using System.Collections.Concurrent;
 using Blazored.LocalStorage;
 using Larp.Data;
 using Larp.Data.MwFifth;
 using Larp.Landing.Shared;
+using MongoDB.Bson;
 
 namespace Larp.Landing.Client;
 
-public class MwFifthService
+public enum AutoSaveState
 {
-    private readonly IMwFifthGameService _mwFifth;
+    Inactive,
+    ChangeAvailable,
+    Saved,
+    Saving
+}
+
+public class MwFifthService : IAsyncDisposable
+{
+    private readonly IMwFifthService _mwFifth;
     private readonly ILocalStorageService _localStorage;
     private readonly DataCacheService _dataCache;
     private readonly LandingService _landingService;
 
     private const string DraftCharacterStorageKey = "MwFifth.NewCharacter";
+
+    public AutoSaveState AutoSaveState { get; private set; } = AutoSaveState.Inactive;
+    public EventHandler? AutoSaveStateChange;
     
-    public MwFifthService(LandingService landingService, IMwFifthGameService mwFifth, ILocalStorageService localStorage, DataCacheService dataCache)
+    public MwFifthService(LandingService landingService, IMwFifthService mwFifth, ILocalStorageService localStorage,
+        DataCacheService dataCache)
     {
         _mwFifth = mwFifth;
         _localStorage = localStorage;
@@ -37,31 +51,97 @@ public class MwFifthService
     {
         await GetMwFifthGameState();
     }
-    
+
     private async Task GetMwFifthGameState()
     {
         GameState = await _dataCache.CacheGameState<GameState>(GameState.GameName,
             async revision => await _mwFifth.GetGameState(revision));
     }
 
-    public async Task StoreDraftCharacter(Character character)
-    {
-        await _localStorage.SetItemAsync(DraftCharacterStorageKey, character);
-    }
-    
     public async Task<Character> GetDraftCharacter()
     {
-        try
-        {
-            if (!await _localStorage.ContainKeyAsync(DraftCharacterStorageKey))
-                return new Character();
+        return await _mwFifth.GetNewCharacter();
+    }
 
-            return await _localStorage.GetItemAsync<Character>(DraftCharacterStorageKey);
-        }
-        catch
+    public async Task Save(Character character)
+    {
+        await Task.Delay(TimeSpan.FromSeconds(5));
+    }
+
+    private ConcurrentDictionary<string, Character>? _autoSaves;
+    private Task? _autoSavingTask;
+    private CancellationTokenSource? _autoSaveFinished;
+    
+    public void StartAutoSaving()
+    {
+        if (_autoSavingTask != null) return;
+        _autoSaves ??= new();
+        _autoSaveFinished = new CancellationTokenSource();
+
+        var token = _autoSaveFinished.Token;
+        _autoSavingTask = Task.Run(async () =>
         {
-            return new Character();
+            while (!token.IsCancellationRequested)
+            {
+                try
+                {
+                    await SaveAutoSaves();
+                    await Task.Delay(TimeSpan.FromSeconds(15), token);
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
+        }, CancellationToken.None);
+    }
+
+    private async Task SaveAutoSaves()
+    {
+        if (_autoSaves == null) return;
+        
+        AutoSaveState = AutoSaveState.Saving;
+        AutoSaveStateChange?.Invoke(this, EventArgs.Empty);
+        
+        foreach (var key in _autoSaves.Keys.ToList())
+        {
+            if (_autoSaves.TryRemove(key, out var character))
+            {
+                await Save(character);
+            }
         }
+
+        AutoSaveState = AutoSaveState.Saved;
+        AutoSaveStateChange?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void UpdateAutoSave(Character character)
+    {
+        StartAutoSaving();
+        _autoSaves!.TryAdd(character.Id, character);
+        AutoSaveState = AutoSaveState.ChangeAvailable;
+        AutoSaveStateChange?.Invoke(this, EventArgs.Empty);
+    }
+
+    public async Task FinishAutoSave(Character character)
+    {
+        if (_autoSaves?.TryRemove(character.Id, out var c) == true)
+            await Save(c);
+    }
+    
+    public async Task FinishAutoSave(TimeSpan? timeOut)
+    {
+        if (_autoSavingTask != null)
+        {
+            _autoSaveFinished?.Cancel();
+            await _autoSavingTask.WaitAsync(timeOut ?? TimeSpan.FromSeconds(15));
+        }
+        await SaveAutoSaves();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await FinishAutoSave(TimeSpan.FromSeconds(5));
     }
 }
 
@@ -74,7 +154,7 @@ public class LandingService
     private const int GameStateUpdateFrequencyHours = 4;
 
     public LandingService(ILandingService landing,
-        IMwFifthGameService mwFifth,
+        IMwFifthService mwFifth,
         DataCacheService dataCache,
         ILogger<LandingService> logger, ILocalStorageService localStorage)
     {

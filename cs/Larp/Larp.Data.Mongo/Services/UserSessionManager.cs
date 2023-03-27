@@ -18,8 +18,9 @@ public record UserSessionValidationResult(UserSessionValidationResultStatusCode 
 
 public interface IUserSessionManager
 {
+    Task<string> GenerateToken(string email, string deviceId);
     Task<string> GenerateToken(string accountId, string email, string deviceId);
-    Task<string> CreateUserSession(string accountId, string token);
+    Task<string> CreateUserSession(string email, string token);
     Task DestroyUserSessions(string accountId);
     Task DestroyUserSession(string sessionId);
     Task<UserSessionValidationResult> ValidateUserSession(string sessionId);
@@ -40,7 +41,6 @@ public class UserSessionManager : IUserSessionManager
     private readonly ISystemClock _clock;
     private readonly LarpContext _larpContext;
     private readonly UserSessionManagerOptions _options;
-    private readonly SemaphoreSlim _semaphore = new(1);
 
     public UserSessionManager(LarpContext larpContext, LarpDataCache cache, ISystemClock clock,
         IOptions<UserSessionManagerOptions> options)
@@ -51,6 +51,42 @@ public class UserSessionManager : IUserSessionManager
         _options = options.Value;
     }
 
+    public async Task<string> GenerateToken(string email, string deviceId)
+    {
+        var normalizedEmail = email.ToLowerInvariant();
+
+        await TokenLock.WaitAsync();
+        try
+        {
+            var accountId = await GetAccountIdFromEmail(email);
+            if (accountId != null) 
+                return await GenerateToken(accountId, email, deviceId);
+            
+            var account = new Account
+            {
+                AccountId = ObjectId.GenerateNewId().ToString(),
+                Created = DateTimeOffset.Now,
+                Emails =
+                {
+                    new AccountEmail()
+                    {
+                        Email = email, 
+                        NormalizedEmail = normalizedEmail, 
+                        IsPreferred = true,
+                        IsVerified = false
+                    }
+                }
+            };
+            await _larpContext.Accounts.InsertOneAsync(account);
+
+            return await GenerateToken(account.AccountId, email, deviceId);
+        }
+        finally
+        {
+            TokenLock.Release();
+        }
+    }
+    
     public async Task<string> GenerateToken(string accountId, string email, string deviceId)
     {
         var normalizedEmail = email.ToLowerInvariant();
@@ -84,8 +120,10 @@ public class UserSessionManager : IUserSessionManager
         }
     }
 
-    public async Task<string> CreateUserSession(string accountId, string token)
+    public async Task<string> CreateUserSession(string email, string token)
     {
+        var accountId = await GetAccountIdFromEmail(email);
+
         var session =
             await _larpContext.Sessions.Find(x => x.Token == token && x.AccountId == accountId).FirstOrDefaultAsync()
             ?? throw new UserSessionException("Token was not found");
@@ -101,6 +139,20 @@ public class UserSessionManager : IUserSessionManager
         await _larpContext.Sessions.UpdateOneAsync(x => x.Token == token, update);
 
         return session.SessionId;
+    }
+
+    private async Task<string?> GetAccountIdFromEmail(string email)
+    {
+        var normalizedEmail = email.ToLowerInvariant();
+        var filter = Builders<Account>.Filter
+            .ElemMatch(x => x.Emails, x => x.NormalizedEmail == normalizedEmail);
+        var project = Builders<Account>.Projection
+            .Expression(a => a.AccountId);
+
+        return await _larpContext.Accounts
+            .Find(filter)
+            .Project(project)
+            .FirstOrDefaultAsync();
     }
 
     public async Task ConfirmEmailAddress(string accountId, string email)
