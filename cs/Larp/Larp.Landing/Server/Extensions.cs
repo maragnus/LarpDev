@@ -6,7 +6,6 @@ namespace Larp.Landing.Server;
 
 public static class Extensions
 {
-
     public static void MapApi<TInterface>(this WebApplication app)
     {
         var root = typeof(TInterface).GetCustomAttribute<ApiRootAttribute>();
@@ -53,7 +52,7 @@ public static class Extensions
                 if (body != null)
                     return body.RootElement.GetProperty(name).Deserialize(parameter.ParameterType);
                 if (httpContext.Request.Query.TryGetValue(name, out var value))
-                    return value;
+                    return value.FirstOrDefault();
                 
                 throw new Exception($"Parameter {name} was not found in route or body");
             })

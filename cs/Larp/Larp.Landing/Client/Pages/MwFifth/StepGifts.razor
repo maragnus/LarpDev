@@ -90,6 +90,8 @@
             new GiftInfo("Prowess", Character.Prowess, value => Character.Prowess = value, GiftChanged),
             new GiftInfo("Wisdom", Character.Wisdom, value => Character.Wisdom = value, GiftChanged)
         };
+        _abilities = Character.Abilities;
+        _properties = Character.Properties;
     }
 
     private void GiftChanged()
