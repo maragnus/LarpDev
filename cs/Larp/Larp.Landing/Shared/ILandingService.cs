@@ -5,20 +5,21 @@ using Larp.Landing.Shared.Messages;
 namespace Larp.Landing.Shared;
 
 [PublicAPI]
+[ApiRoot("/api")]
 public interface ILandingService
 {
-    [ApiPath("auth/login")]
+    [ApiGet("auth/login")]
     Task<Result> Login(string email, string origin);
 
-    [ApiPath("auth/confirm")]
+    [ApiGet("auth/confirm")]
     Task<StringResult> Confirm(string email, string token);
 
-    [ApiPath("auto/validate")]
+    [ApiGet("auto/validate")]
     Task<Result> Validate(string token);
     
-    [ApiPath("games")]
+    [ApiGet("games")]
     Task<Game[]> GetGames();
 
-    [ApiPath("characters")]
+    [ApiGet("characters")]
     Task<CharacterSummary[]> GetCharacters();
 }

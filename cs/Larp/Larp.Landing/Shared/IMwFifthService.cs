@@ -4,17 +4,18 @@ using Larp.Data.MwFifth;
 namespace Larp.Landing.Shared;
 
 [PublicAPI]
+[ApiRoot("api/mw5e")]
 public interface IMwFifthService
 {
-    [ApiPath("mw5e/gameState")]
+    [ApiGet("gameState")]
     Task<GameState?> GetGameState(string lastRevision);
 
-    [ApiPath("mw5e/character/:characterId")]
+    [ApiGet("character/:characterId")]
     Task<Character?> GetCharacter(string characterId);
 
-    [ApiPath("mw5e/character/new")]
+    [ApiGet("character/new")]
     Task<Character> GetNewCharacter();
     
-    [ApiPath("mw5e/character/:characterId")]
+    [ApiPost("character/:characterId")]
     Task<bool> SaveCharacter(Character character);
 }
