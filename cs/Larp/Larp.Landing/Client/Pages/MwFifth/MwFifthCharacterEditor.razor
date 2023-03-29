@@ -1,8 +1,10 @@
 @using MongoDB.Bson
 @using Larp.Landing.Shared.MwFifth
 @using MongoDB.Bson.IO
+@using System.Text.Json
+@using Larp.Landing.Shared
 @inject LandingService LandingService
-@inject ILogger<MwFifthCharacterNew> Logger;
+@inject ILogger<MwFifthCharacterEditor> Logger;
 @inject IDialogService DialogService
 @inject NavigationManager NavigationManager
 @implements IAsyncDisposable
@@ -10,7 +12,8 @@
 @code {
     [Parameter]
     public string? CharacterId { get; set; }
-    
+
+    private bool _isNewCharacter;
     private LoadingState _loadingState = LoadingState.Loading;
     private Game _game = new();
     private GameState _gameState = null!;
@@ -23,17 +26,12 @@
         
         LandingService.MwFifth.AutoSaveStateChange += AutoSaveStateChange;
         
-        var character = string.IsNullOrEmpty(CharacterId)
+        _isNewCharacter = string.IsNullOrEmpty(CharacterId);
+
+        var character = _isNewCharacter
             ? await LandingService.MwFifth.GetDraftCharacter()
             : await LandingService.MwFifth.GetCharacter(CharacterId);
 
-        if (character is not {State: CharacterState.NewDraft })
-        {
-            await DialogService.ShowMessageBox("Editing character", "This character cannot be edited. You must draft changes to it instead.", "Ok");
-            NavigationManager.NavigateTo("/characters");
-            return;
-        }
-        
         _character = new CharacterBuilder(character, _gameState, CharacterBuilderMode.NewCharacter, Logger)
         {
             StateChanged = StateHasChanged
@@ -118,8 +116,9 @@
 
     private void OnStepChange()
     {
-        LandingService.MwFifth.UpdateAutoSave(_character.Character);
-        StateHasChanged();
+        _saveState = AutoSaveState.ChangeAvailable;
+        //LandingService.MwFifth.UpdateAutoSave(_character.Character);
+        //StateHasChanged();
     }
 
     public async ValueTask DisposeAsync()
@@ -131,6 +130,19 @@
     {
         _saveState = LandingService.MwFifth.AutoSaveState;
         StateHasChanged();
+    }
+
+    private async Task Save()
+    {
+        await LandingService.MwFifth.Save(_character.Character);
+        CharacterId = _character.Character.Id;
+        _saveState = AutoSaveState.Saved;
+
+        if (new Uri(NavigationManager.Uri).AbsolutePath.EndsWith("/new"))
+        {
+            Logger.LogInformation("{Json}", JsonSerializer.Serialize(_character.Character, LarpJson.Options));
+            NavigationManager.NavigateTo($"/characters/mw5e/{CharacterId}/edit", new NavigationOptions() { ReplaceHistoryEntry = true });
+        }
     }
 }
 
@@ -154,7 +166,7 @@
                     <MudAlert Severity="@Severity.Info">Autosaved</MudAlert>
                     break;
                 case AutoSaveState.ChangeAvailable:
-                    <MudAlert Severity="@Severity.Warning">Autosave pending...</MudAlert>
+                    <MudButton OnClick="Save">Save Changes</MudButton>
                     break;
             }
         </MudStack>

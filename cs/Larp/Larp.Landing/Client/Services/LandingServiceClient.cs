@@ -14,10 +14,10 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     }
 
     public async Task<Result> Login(string email, string deviceName) =>
-        await Post<object, Result>("api/auth/login", new { Email = email, DeviceName = deviceName });
+        await Post<Result>("api/auth/login", new { Email = email, DeviceName = deviceName });
 
     public async Task<StringResult> Confirm(string email, string token, string deviceName) =>
-        await Post<object, StringResult>("api/auth/confirm",
+        await Post<StringResult>("api/auth/confirm",
             new { Email = email, Token = token, DeviceName = deviceName });
 
     public async Task<Result> Logout() =>
@@ -41,6 +41,6 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public Task<Character> GetNewCharacter() =>
         Get<Character>($"api/mw5e/character/new")!;
 
-    public Task<Result> SaveCharacter(Character character) =>
-        Post<object, Result>("api/mw5e/character", new { character });
+    public Task<StringResult> SaveCharacter(Character character) =>
+        Post<StringResult>("api/mw5e/character", new { character });
 }

@@ -30,9 +30,6 @@ public abstract class RestClient
     protected async Task<TResult> Get<TResult>(string uri) where TResult : new() =>
         (await _httpClient.GetFromJsonAsync<TResult>(uri, LarpJson.Options))!;
 
-    protected async Task Post<TBody>(string uri, TBody item) where TBody : class =>
-        await _httpClient.PostAsJsonAsync(uri, item, LarpJson.Options);
-
     protected async Task<TResult> Post<TResult>(string uri) where TResult : class
     {
         var response = await _httpClient.PostAsync(uri, content: new StringContent(""));
@@ -41,7 +38,7 @@ public abstract class RestClient
         return (await response.Content.ReadFromJsonAsync<TResult>(LarpJson.Options))!;
     }
 
-    protected async Task<TResult> Post<TBody, TResult>(string uri, TBody item) where TBody : class
+    protected async Task<TResult> Post<TResult>(string uri, object item) where TResult : class
     {
         var response = await _httpClient.PostAsJsonAsync(uri, item, LarpJson.Options);
         if (!response.IsSuccessStatusCode)

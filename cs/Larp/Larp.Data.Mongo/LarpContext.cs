@@ -2,12 +2,19 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 
 namespace Larp.Data.Mongo;
 
 public class LarpContext
 {
+    static LarpContext()
+    {
+        var enumConvention = new ConventionPack() { new EnumRepresentationConvention(BsonType.String) };
+        ConventionRegistry.Register(nameof(EnumRepresentationConvention), enumConvention, _ => true);
+    }
+
     public LarpContext(IOptions<LarpDataOptions> options, LarpDataCache cache, ILogger<LarpContext> logger)
     {
         var client = new MongoClient(options.Value.ConnectionString ??

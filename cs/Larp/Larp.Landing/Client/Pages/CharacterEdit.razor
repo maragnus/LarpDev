@@ -1,39 +1,20 @@
+@page "/characters/{gameName}/new"
+@page "/characters/{gameName}/{characterId}/edit"
 @using Larp.Landing.Client.Pages.MwFifth
 
-@page "/characters/{gameName}/{characterId}/edit"
-@inject LandingService LandingService
+<PageHeader>New Character</PageHeader>
 
 <MudContainer MaxWidth="MaxWidth.Medium">
-    <MudPaper Elevation="2" Style="margin-top: 1em;">
-		@if (GameName == "mw5e") {
-		    @if (isNew)
-		    {
-		        <MwFifthCharacterNew CharacterId="@CharacterId" />
-		    }
-		    else
-		    {
-			    <MwFifthCharacterEdit CharacterId="@CharacterId" />	
-		    }
-		}
-    </MudPaper>
+    @if (GameName == "mw5e")
+    {
+        <MwFifthCharacterEditor CharacterId="@CharacterId"/>
+    }
 </MudContainer>
 
 @code {
     [Parameter]
     public string? GameName { get; set; }
-
+    
     [Parameter]
     public string? CharacterId { get; set; }
-
-    private bool isNew;
-    
-    protected override async Task OnInitializedAsync()
-    {
-        if (GameName == "mw5e")
-        {
-            var character = await LandingService.MwFifth.GetCharacter(CharacterId);
-            isNew = character.State == CharacterState.NewDraft;
-        }
-    }
-
 }

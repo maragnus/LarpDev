@@ -1,4 +1,5 @@
-﻿using Larp.Data.Mongo;
+﻿using Larp.Data;
+using Larp.Data.Mongo;
 using Larp.Data.MwFifth;
 using Larp.Landing.Shared.Messages;
 using Larp.Landing.Shared.MwFifth;
@@ -44,7 +45,7 @@ public class MwFifthServiceServer : IMwFifthService
         });
     }
 
-    public async Task<Result> SaveCharacter(Character character)
+    public async Task<StringResult> SaveCharacter(Character character)
     {
         var oldCharacter = await _mwFifth.Characters
             .Find(x => x.Id == character.Id)
@@ -69,7 +70,7 @@ public class MwFifthServiceServer : IMwFifthService
                 throw new ResourceForbiddenException();
 
             await _mwFifth.Characters.ReplaceOneAsync(x => x.Id == character.Id, character);
-            return Result.Success;
+            return StringResult.Success(character.Id);
         }
 
         // Property is admin-only
@@ -83,6 +84,6 @@ public class MwFifthServiceServer : IMwFifthService
         character.AccountId = _userSession.AccountId!;
         
         await _mwFifth.Characters.InsertOneAsync(character);
-        return Result.Success;
+        return StringResult.Success(character.Id);
     }
 }

@@ -18,18 +18,6 @@ public enum AgeGroup
     Adult
 }
 
-public enum CharacterState
-{
-    /// <summary>New Character, still in edit mode</summary>
-    NewDraft,
-    /// <summary>Existing Character, still in edit mode</summary>
-    UpdateDraft,
-    /// <summary>Revisions are waiting for Game Master approval</summary>
-    Review,
-    /// <summary>Current character ready for game</summary>
-    Live
-}
-
 [PublicAPI]
 public class CharacterProperty
 {
@@ -160,7 +148,8 @@ public class Character
             AccountId,
             HomeChapter ?? "Undefined",
             $"{Occupation}",
-            Level);
+            Level,
+            State);
 
     public void ReplaceOccupationalSkills(string[]? occupationalSkills)
     {

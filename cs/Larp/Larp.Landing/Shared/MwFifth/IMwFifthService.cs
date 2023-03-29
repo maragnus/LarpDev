@@ -18,5 +18,5 @@ public interface IMwFifthService
     Task<Character> GetNewCharacter();
     
     [ApiPost("character"), ApiAuthenticated]
-    Task<Result> SaveCharacter(Character character);
+    Task<StringResult> SaveCharacter(Character character);
 }

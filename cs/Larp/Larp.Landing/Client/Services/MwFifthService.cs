@@ -54,7 +54,9 @@ public class MwFifthService : IAsyncDisposable
 
     public async Task Save(Character character)
     { 
-        await _mwFifth.SaveCharacter(character);
+        var id = await _mwFifth.SaveCharacter(character);
+        if (id.IsSuccess)
+            character.Id = id.Value!;
     }
 
     private ConcurrentDictionary<string, Character>? _autoSaves;

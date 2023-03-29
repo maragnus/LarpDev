@@ -40,11 +40,46 @@
 
                     @foreach (var character in characters)
                     {
+                        var uri = "/";
+                        var chip = "";
+                        var color = Color.Primary;
+                        
+                        switch (character.State)
+                        {
+                            case CharacterState.Live:
+                                uri = $"/characters/{game.Name}/{character.Id}/view";
+                                chip = "Live in game";
+                                color = Color.Success;
+                                break;
+                                
+                            case CharacterState.NewDraft:
+                                uri = $"/characters/{game.Name}/{character.Id}/edit";
+                                chip = "Drafting new character";
+                                break;
+                                
+                            case CharacterState.UpdateDraft:
+                                uri = $"/characters/{game.Name}/{character.Id}/edit";
+                                chip = "Drafting changes";
+                                break;
+                                
+                            case CharacterState.Review:
+                                uri = $"/characters/{game.Name}/{character.Id}/view";
+                                chip = "Submitted for review";
+                                color = Color.Info;
+                                break;
+                        }
+                        
                         <MudListItem
                             Icon="@Icons.Material.Filled.Person"
-                            Value="@($"/characters/{game.Name}/{character.Id}")">
-                            <MudText Typo="Typo.body1">@character.Name</MudText>
-                            <MudText Typo="Typo.body2">@character.Summary</MudText>
+                            AdornmentColor="Color.Primary"
+                            Value="@uri">
+                            <MudStack Row Justify="Justify.SpaceBetween">
+                                <div>
+                                    <MudText Typo="Typo.body1">@character.Name</MudText>
+                                    <MudText Typo="Typo.body2">@character.Summary</MudText>
+                                </div>
+                                <MudChip Text="@chip" Color="@color"/>
+                            </MudStack>
                         </MudListItem>
                     }
                     <MudListItem
@@ -63,7 +98,7 @@
     public string? GameName { get; set; }
 
     CharacterSummary[]? _characters;
-    Game[] _games = null!;
+    Game[]? _games;
 
     protected override async Task OnInitializedAsync()
     {

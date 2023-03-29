@@ -79,7 +79,7 @@ public static class MapApiExtensions
                     if (httpContext.Request.Query.TryGetValue(name, out var value))
                         return value.FirstOrDefault();
                     if (body?.RootElement.TryGetProperty(name, out var property) == true)
-                        return property.Deserialize(parameter.ParameterType);
+                        return property.Deserialize(parameter.ParameterType, LarpJson.Options);
 
                     throw new BadHttpRequestException($"Parameter {name} was not found in route or body");
                 })
