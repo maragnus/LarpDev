@@ -3,9 +3,14 @@
 @using MongoDB.Bson.IO
 @inject LandingService LandingService
 @inject ILogger<MwFifthCharacterNew> Logger;
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
 @implements IAsyncDisposable
 
 @code {
+    [Parameter]
+    public string? CharacterId { get; set; }
+    
     private LoadingState _loadingState = LoadingState.Loading;
     private Game _game = new();
     private GameState _gameState = null!;
@@ -16,9 +21,19 @@
         _game = LandingService.MwFifth.Game;
         _gameState = LandingService.MwFifth.GameState;
         
-        LandingService.MwFifth.AutoSaveStateChange+= AutoSaveStateChange;
+        LandingService.MwFifth.AutoSaveStateChange += AutoSaveStateChange;
         
-        var character = await LandingService.MwFifth.GetDraftCharacter();
+        var character = string.IsNullOrEmpty(CharacterId)
+            ? await LandingService.MwFifth.GetDraftCharacter()
+            : await LandingService.MwFifth.GetCharacter(CharacterId);
+
+        if (character is not {State: CharacterState.NewDraft })
+        {
+            await DialogService.ShowMessageBox("Editing character", "This character cannot be edited. You must draft changes to it instead.", "Ok");
+            NavigationManager.NavigateTo("/characters");
+            return;
+        }
+        
         _character = new CharacterBuilder(character, _gameState, CharacterBuilderMode.NewCharacter, Logger)
         {
             StateChanged = StateHasChanged
@@ -119,26 +134,30 @@
     }
 }
 
-
-
 @if (_loadingState != LoadingState.Loaded)
 {
     <MudProgressLinear Indeterminate />
     return;
 }
 
-@if (_saveState == AutoSaveState.Saving)
-{
-    <MudProgressLinear Indeterminate="true" />
-}
-else if (_saveState == AutoSaveState.Saved)
-{
-    <MudAlert Severity="Severity.Info">Autosaved</MudAlert>
-}
-
 <MudGrid Style="margin-top: 1em">
     <MudItem md="12" sm="12">
-        <MudText Typo="Typo.h6">New @_game.Title Character</MudText>
+        <MudStack Row Justify="Justify.SpaceBetween">
+            <MudText Typo="Typo.h6">New @_game.Title Character</MudText>
+
+            @switch (_saveState)
+            {
+                case AutoSaveState.Saving:
+                    <MudProgressCircular Indeterminate="@true" />
+                    break;
+                case AutoSaveState.Saved:
+                    <MudAlert Severity="@Severity.Info">Autosaved</MudAlert>
+                    break;
+                case AutoSaveState.ChangeAvailable:
+                    <MudAlert Severity="@Severity.Warning">Autosave pending...</MudAlert>
+                    break;
+            }
+        </MudStack>
     </MudItem>
     <MudItem md="3" sm="12">
         <MudTimeline TimelinePosition="TimelinePosition.Left" SelectedIndexChanged="OnStepChange">

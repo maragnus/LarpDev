@@ -2,18 +2,9 @@ using System.Collections.Concurrent;
 using Blazored.LocalStorage;
 using Larp.Data;
 using Larp.Data.MwFifth;
-using Larp.Landing.Shared;
-using MongoDB.Bson;
+using Larp.Landing.Shared.MwFifth;
 
-namespace Larp.Landing.Client;
-
-public enum AutoSaveState
-{
-    Inactive,
-    ChangeAvailable,
-    Saved,
-    Saving
-}
+namespace Larp.Landing.Client.Services;
 
 public class MwFifthService : IAsyncDisposable
 {
@@ -21,8 +12,6 @@ public class MwFifthService : IAsyncDisposable
     private readonly ILocalStorageService _localStorage;
     private readonly DataCacheService _dataCache;
     private readonly LandingService _landingService;
-
-    private const string DraftCharacterStorageKey = "MwFifth.NewCharacter";
 
     public AutoSaveState AutoSaveState { get; private set; } = AutoSaveState.Inactive;
     public EventHandler? AutoSaveStateChange;
@@ -64,8 +53,8 @@ public class MwFifthService : IAsyncDisposable
     }
 
     public async Task Save(Character character)
-    {
-        await Task.Delay(TimeSpan.FromSeconds(5));
+    { 
+        await _mwFifth.SaveCharacter(character);
     }
 
     private ConcurrentDictionary<string, Character>? _autoSaves;
@@ -142,54 +131,5 @@ public class MwFifthService : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         await FinishAutoSave(TimeSpan.FromSeconds(5));
-    }
-}
-
-public class LandingService
-{
-    private readonly ILandingService _landing;
-    private readonly DataCacheService _dataCache;
-    private readonly ILogger<LandingService> _logger;
-
-    private const int GameStateUpdateFrequencyHours = 4;
-
-    public LandingService(ILandingService landing,
-        IMwFifthService mwFifth,
-        DataCacheService dataCache,
-        ILogger<LandingService> logger, ILocalStorageService localStorage)
-    {
-        _landing = landing;
-        _dataCache = dataCache;
-        _logger = logger;
-        MwFifth = new MwFifthService(this, mwFifth, localStorage, dataCache);
-    }
-
-    public IReadOnlyDictionary<string, Game> Games { get; private set; } = null!;
-    public MwFifthService MwFifth { get; }
-    public bool IsLoggedIn => false;
-
-    public async Task<CharacterSummary[]> GetCharacters() => await _landing.GetCharacters();
-
-    public async Task Refresh()
-    {
-        _logger.LogInformation("Refresh starting...");
-        await GetGames();
-        await MwFifth.Refresh();
-        _logger.LogInformation("Refresh complete");
-    }
-
-    private async Task GetGames()
-    {
-        Games = await _dataCache
-            .CacheItem(nameof(Games), TimeSpan.FromHours(GameStateUpdateFrequencyHours), async () =>
-            {
-                var games = await _landing.GetGames();
-                return games.ToDictionary(x => x.Name);
-            });
-    }
-
-    public async Task Logout()
-    {
-        await Task.Delay(TimeSpan.FromSeconds(10));
     }
 }

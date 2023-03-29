@@ -5,6 +5,7 @@ using Larp.Data.Seeder;
 using Larp.Landing.Server;
 using Larp.Landing.Server.Services;
 using Larp.Landing.Shared;
+using Larp.Landing.Shared.MwFifth;
 using Larp.Notify;
 using Microsoft.Extensions.Internal;
 
@@ -45,7 +46,7 @@ builder.Configuration
     // Larp.Landing.Server
     services.AddScoped<ILandingService, LandingServiceServer>();
     services.AddScoped<IMwFifthService, MwFifthServiceServer>();
-    services.AddScoped<IUserManager, UserManager>();
+    services.AddScoped<IUserSession, UserSession>();
 }
 
 var app = builder.Build();
@@ -74,7 +75,6 @@ app.UseRouting();
 app.MapApi<ILandingService>();
 app.MapApi<IMwFifthService>();
 
-app.MapControllers();
 app.MapRazorPages();
 app.MapFallbackToFile("index.html");
 

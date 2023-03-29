@@ -6,7 +6,14 @@
 <MudContainer MaxWidth="MaxWidth.Medium">
     <MudPaper Elevation="2" Style="margin-top: 1em;">
 		@if (GameName == "mw5e") {
-			<MwFifthCharacterEdit CharacterId="@CharacterId" />	
+		    @if (isNew)
+		    {
+		        <MwFifthCharacterNew CharacterId="@CharacterId" />
+		    }
+		    else
+		    {
+			    <MwFifthCharacterEdit CharacterId="@CharacterId" />	
+		    }
 		}
     </MudPaper>
 </MudContainer>
@@ -17,4 +24,16 @@
 
     [Parameter]
     public string? CharacterId { get; set; }
+
+    private bool isNew;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        if (GameName == "mw5e")
+        {
+            var character = await LandingService.MwFifth.GetCharacter(CharacterId);
+            isNew = character.State == CharacterState.NewDraft;
+        }
+    }
+
 }

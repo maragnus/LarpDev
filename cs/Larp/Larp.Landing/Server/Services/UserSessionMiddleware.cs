@@ -9,9 +9,9 @@ public class UserSessionMiddleware
         _next = next;
     }
     
-    public async Task Invoke(HttpContext httpContext, IUserManager userManager)
+    public async Task InvokeAsync(HttpContext httpContext, IUserSession userSession)
     {
-        await ((UserManager)userManager).GetCurrentUser(httpContext);
+        await ((UserSession)userSession).GetCurrentUser(httpContext);
         await _next.Invoke(httpContext);
     }
 }

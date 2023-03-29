@@ -1,0 +1,23 @@
+<MudDialog>
+    <DialogContent>
+        <MudAlert Severity="Severity.Error">@ContentText</MudAlert>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="@Color" Variant="Variant.Filled" OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="@Color" Variant="Variant.Filled" OnClick="Close">Force</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter]
+    public string ContentText { get; set; } = null!;
+
+    [Parameter]
+    public Color Color { get; set; } = Color.Error;
+
+    void Cancel() => MudDialog.Cancel();
+    void Close() => MudDialog.Close(DialogResult.Ok(true));
+}

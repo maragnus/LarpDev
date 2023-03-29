@@ -1,6 +1,8 @@
 @page "/logout"
+@using Larp.Landing.Client.Pages.Dialogs
 @inject LandingService LandingService
 @inject NavigationManager NavigationManager
+@inject IDialogService Dialog
 
 <PageHeader>Logout</PageHeader>
 
@@ -25,12 +27,22 @@
     {
         try
         {
-            await LandingService.Logout();
+            _loadingState = LoadingState.Loaded;
+            await LandingService.Logout(false);
             NavigationManager.NavigateTo("/");
         }
-        catch
+        catch (Exception ex)
         {
             _loadingState = LoadingState.Failed;
+
+            var parameters = new DialogParameters { { "ContentText", ex.Message } };
+            var response = await Dialog.ShowAsync<LogoutFailedDialog>("Unable to contact the server to perform a log out. Would you like to abandon this session?", parameters);
+            var result = await response.Result;
+            if (result.Data as bool? == true)
+            {
+                await LandingService.Logout(true);
+                NavigationManager.NavigateTo("/");
+            }
         }
     }
 

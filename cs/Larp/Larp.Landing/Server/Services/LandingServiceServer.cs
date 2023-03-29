@@ -1,9 +1,9 @@
-using System.Threading.Channels;
 using Larp.Data;
 using Larp.Data.Mongo;
 using Larp.Data.Mongo.Services;
 using Larp.Landing.Shared;
 using Larp.Landing.Shared.Messages;
+using Larp.Notify;
 using MongoDB.Driver;
 
 namespace Larp.Landing.Server.Services;
@@ -12,28 +12,43 @@ public class LandingServiceServer : ILandingService
 {
     private readonly LarpContext _db;
     private readonly IUserSessionManager _userSessionManager;
+    private readonly IUserSession _userSession;
+    private readonly INotifyService _notifyService;
 
-    public LandingServiceServer(LarpContext db, IUserSessionManager userSessionManager)
+    public LandingServiceServer(LarpContext db, IUserSessionManager userSessionManager, IUserSession userSession, INotifyService notifyService)
     {
         _db = db;
         _userSessionManager = userSessionManager;
+        _userSession = userSession;
+        _notifyService = notifyService;
     }
 
-    public async Task<Result> Login(string email, string origin)
+    public async Task<Result> Login(string email, string deviceName)
     {
-        await _userSessionManager.GenerateToken(email, origin);
+        var token = await _userSessionManager.GenerateToken(email, deviceName);
+
+        await _notifyService.SendEmailAsync(email, "LARP Landing", @$"Your sign in code for LARP Landing is {token}");
+    
+        return Result.Success;
+    }
+    
+    public async Task<Result> Logout()
+    {
+        if (_userSession.SessionId == null)
+            return Result.Failed("You are not logged in");
+        await _userSessionManager.DestroyUserSession(_userSession.SessionId);
         return Result.Success;
     }
 
-    public async Task<StringResult> Confirm(string email, string token)
+    public async Task<StringResult> Confirm(string email, string token, string deviceName)
     {
-        var sessionId = await _userSessionManager.CreateUserSession(email, token);
+        var sessionId = await _userSessionManager.CreateUserSession(email, token, deviceName);
         return StringResult.Success(sessionId);
     }
 
-    public async Task<Result> Validate(string token)
+    public async Task<Result> Validate()
     {
-        var result = await _userSessionManager.ValidateUserSession(token);
+        var result = await _userSessionManager.ValidateUserSession(_userSession.SessionId);
         switch (result.StatusCode)
         {
             case UserSessionValidationResultStatusCode.Authenticated: 

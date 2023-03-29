@@ -8,18 +8,21 @@ namespace Larp.Landing.Shared;
 [ApiRoot("/api")]
 public interface ILandingService
 {
-    [ApiGet("auth/login")]
-    Task<Result> Login(string email, string origin);
+    [ApiPost("auth/login")]
+    Task<Result> Login(string email, string deviceName);
 
-    [ApiGet("auth/confirm")]
-    Task<StringResult> Confirm(string email, string token);
+    [ApiPost("auth/confirm")]
+    Task<StringResult> Confirm(string email, string token, string deviceName);
 
-    [ApiGet("auto/validate")]
-    Task<Result> Validate(string token);
+    [ApiPost("auth/logout")]
+    Task<Result> Logout();
     
-    [ApiGet("games")]
+    [ApiPost("auth/validate"), ApiAuthenticated]
+    Task<Result> Validate();
+
+    [ApiGet("larp/games")]
     Task<Game[]> GetGames();
 
-    [ApiGet("characters")]
+    [ApiGet("larp/characters"), ApiAuthenticated]
     Task<CharacterSummary[]> GetCharacters();
 }

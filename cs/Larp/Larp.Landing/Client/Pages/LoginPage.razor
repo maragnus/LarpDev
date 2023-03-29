@@ -1,13 +1,190 @@
 @page "/login"
+@page "/confirm"
+
+@inject NavigationManager NavigationManager
+@inject LandingService LandingService
+@inject ILogger<LoginPage> Logger;
+@inject IDialogService Dialog
+@implements IDisposable
 
 <PageHeader>Sign in</PageHeader>
 
-<MudContainer MaxWidth="MaxWidth.Large">
-    <MudPaper Style="margin-top: 2em; padding: 2em">
-        Not implemented
+<div class="background"></div>
+<div class="buffer"></div>
+
+@using PSC.Blazor.Components.BrowserDetect
+@using System.ComponentModel.DataAnnotations
+@using System.ComponentModel
+@using Larp.Landing.Client.Pages.Dialogs
+
+<BrowserDetect BrowserInfoChanged="info => LandingService.UpdateBrowserInfo(info)"/>
+
+<MudContainer MaxWidth="MaxWidth.Small">
+    <MudPaper Style="margin-top: 2em; padding: 2em; position: relative;">
+        <MudOverlay Absolute="true" Visible="_isBusy" DarkBackground AutoClose="false">
+            <MudProgressCircular Size="Size.Large" Color="Color.Primary" Indeterminate="true"/>
+        </MudOverlay>
+        @if (LandingService.IsAuthenticated)
+        {
+            @* User is already logged in *@
+            <MudStack Spacing="4">
+                <MudStack Row="true">
+                    <img src="/tree.webp" style="width: 8em; height: 8em" alt="Mystwood Tree Logo"/>
+                    <div>
+                        <MudText Typo="Typo.h6">Log into LARP Landing</MudText>
+                        <MudText Typo="Typo.body2" Align="Align.Justify">You're already logged in. If you want to change users, you'll need to log out first.</MudText>
+                    </div>
+                </MudStack>
+
+                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="SignOutClicked">Sign Out</MudButton>
+            </MudStack>
+        }
+        else if (NavigationManager.Uri.Contains("login"))
+        {
+            @* User needs a code *@
+            <MudStack Spacing="4">
+                <MudStack Row="true">
+                    <img src="/tree.webp" style="width: 8em; height: 8em" alt="Mystwood Tree Logo"/>
+                    <MudStack Spacing="4">
+                        <MudText Typo="Typo.h6">Log into LARP Landing</MudText>
+                        <MudText Typo="Typo.body2" Align="Align.Justify">We don't use passwords here. Provide your email address and we'll send you a code.</MudText>
+                        <MudText Typo="Typo.body2" Align="Align.Justify">If you <strong>don't have an account, we'll create one</strong> and then email you a code to sign in.</MudText>
+                    </MudStack>
+                </MudStack>
+
+                <EditForm Model="_loginModel" OnValidSubmit="@SubmitLogin">
+                    <DataAnnotationsValidator/>
+                    <MudStack Spacing="4">
+                        <MudTextField AutoFocus="true" InputType="InputType.Email" Label="Email Address" Variant="Variant.Outlined" @bind-Value="@_loginModel.EmailAddress" For="@(() => _loginModel.EmailAddress)" Disabled="_isBusy"/>
+                        <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Filled" Disabled="_isBusy">Log In</MudButton>
+                        <MudLink Typo="Typo.body2" Href="/confirm" OnClick="() => _confirmModel.EmailAddress = _loginModel.EmailAddress">I already have a code</MudLink>
+                    </MudStack>
+                </EditForm>
+            </MudStack>
+        }
+        else if (NavigationManager.Uri.Contains("confirm"))
+        {
+            @* User has a code *@
+            <MudStack Spacing="4">
+                <MudStack Row="true">
+                    <img src="/tree.webp" style="width: 8em; height: 8em" alt="Mystwood Tree Logo"/>
+                    <MudStack Spacing="4">
+                        <MudText Typo="Typo.h6">Log into LARP Landing</MudText>
+                        <MudText Typo="Typo.body2" Align="Align.Justify">Check your email for the code to log in.</MudText>
+                    </MudStack>
+                </MudStack>
+                <EditForm Model="@_confirmModel" OnValidSubmit="SubmitConfirm">
+                    <DataAnnotationsValidator/>
+                    <MudStack Spacing="4">
+                        <MudTextField T="string?" InputType="InputType.Email" Label="Email Address" Variant="Variant.Outlined" @bind-Value="_confirmModel.EmailAddress" For="@(() => _confirmModel.EmailAddress)" Disabled="_isBusy"/>
+                        <MudTextField T="string?" InputType="InputType.Text" Label="Code" Variant="Variant.Outlined" AutoFocus="true" @bind-Value="_confirmModel.Token" For="@(() => _confirmModel.Token)" Disabled="_isBusy"/>
+                        <MudTextField T="string?" InputType="InputType.Text" Label="Device Name" Variant="Variant.Outlined" @bind-Value="_confirmModel.DeviceName" For="@(() => _confirmModel.DeviceName)" Disabled="_isBusy"/>
+                        <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Filled" Disabled="_isBusy">Log In</MudButton>
+                        <MudLink Typo="Typo.body2" Href="/login" OnClick="() => _loginModel.EmailAddress = _confirmModel.EmailAddress">I didn't get a code</MudLink>
+                    </MudStack>
+                </EditForm>
+            </MudStack>
+        }
     </MudPaper>
 </MudContainer>
 
 @code {
+    bool _isBusy;
+    readonly LoginModel _loginModel = new();
+    readonly ConfirmModel _confirmModel = new();
+
+    [Serializable]
+    public class LoginModel
+    {
+        [Required, Display(Name = "Email Address"), EmailAddress]
+        public string? EmailAddress { get; set; }
+    }
+
+    [Serializable]
+    public class ConfirmModel
+    {
+        [Required, Display(Name = "Email Address"), EmailAddress]
+        public string? EmailAddress { get; set; }
+        [Required, Display(Name = "Code")]
+        [RegularExpression(@"[A-Za-z0-9]{6}", ErrorMessage = "Please enter the code carefully from your email")]
+        public string? Token { get; set; }
+        [Required, Display(Name = "Device Name")]
+        public string? DeviceName { get; set; }
+    }
     
+    protected override void OnInitialized()
+    {
+        NavigationManager.LocationChanged += NavigationManagerOnLocationChanged;
+        LandingService.AuthenticatedChanged += LandingServiceOnAuthenticatedChanged;
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= NavigationManagerOnLocationChanged;
+        LandingService.AuthenticatedChanged -= LandingServiceOnAuthenticatedChanged;
+    }
+
+    private void LandingServiceOnAuthenticatedChanged(object? sender, EventArgs e)
+    {
+        StateHasChanged();
+    }
+
+    private void NavigationManagerOnLocationChanged(object? _, LocationChangedEventArgs __)
+    {
+        StateHasChanged();
+    }
+
+    private void SignOutClicked()
+    {
+        NavigationManager.NavigateTo("/logout");
+    }
+    
+    private async Task SubmitConfirm(EditContext context)
+    {
+        var model = (ConfirmModel)context.Model;
+
+        _isBusy = true;
+        await Task.Yield();
+        try
+        {
+            await LandingService.LoginConfirm(model.EmailAddress!, model.Token!, model.DeviceName!);
+            NavigationManager.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "SubmitLogin failed");
+            var parameters = new DialogParameters { { "ContentText", ex.Message } };
+            await Dialog.ShowAsync<ErrorDialog>("Unable to log in", parameters);
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
+
+    private async Task SubmitLogin(EditContext context)
+    {
+        var model = _loginModel;
+        if (string.IsNullOrWhiteSpace(model.EmailAddress))
+            return;
+        _isBusy = true;
+        await Task.Yield();
+        try
+        {
+            await LandingService.Login(model.EmailAddress);
+            _confirmModel.EmailAddress = model.EmailAddress;
+            _confirmModel.DeviceName = LandingService.LocationName;
+            NavigationManager.NavigateTo("/confirm");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "ConfirmLogin failed");
+            var parameters = new DialogParameters { { "ContentText", ex.Message } };
+            await Dialog.ShowAsync<ErrorDialog>("Unable to log in", parameters);
+        }
+        finally
+        {
+            _isBusy = false;
+        }
+    }
 }
