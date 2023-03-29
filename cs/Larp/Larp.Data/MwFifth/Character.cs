@@ -1,4 +1,6 @@
+using System.Text.Json;
 using Larp.Common;
+using Larp.Landing.Shared;
 using MongoDB.Bson.Serialization.Serializers;
 
 namespace Larp.Data.MwFifth;
@@ -16,29 +18,6 @@ public enum AgeGroup
 
     /// <summary>Ages 18+</summary>
     Adult
-}
-
-[PublicAPI]
-public class CharacterProperty
-{
-    public string Name { get; set; }
-    public string Value { get; set; }
-
-    public CharacterProperty(string name, string value)
-    {
-        Name = name;
-        Value = value;
-    }
-
-    public CharacterProperty(KeyValuePair<string, string> keyValuePair) : this(keyValuePair.Key, keyValuePair.Value)
-    {
-    }
-
-    public void Deconstruct(out string name, out string value)
-    {
-        name = Name;
-        value = Value;
-    }
 }
 
 [PublicAPI]
@@ -97,11 +76,16 @@ public class Character
 {
     [BsonId, BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; } = null!;
-
+    
     public string AccountId { get; set; } = null!;
 
     public CharacterState State { get; set; } = CharacterState.NewDraft;
     
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string? PreviousId { get; set; }
+
+    public Dictionary<string, string>? ChangeSummary { get; set; }
+
     public string? CharacterName { get; set; }
     public string? Religion { get; set; }
     public string? Occupation { get; set; }
@@ -140,14 +124,14 @@ public class Character
     public bool NoAdvantages { get; set; }
     public bool NoOccupation { get; set; }
 
-    public CharacterSummary ToSummary() =>
+    public CharacterSummary ToSummary(GameState gameState) =>
         new CharacterSummary(
             Id,
             CharacterName ?? "Unnamed",
             GameState.GameName,
             AccountId,
             HomeChapter ?? "Undefined",
-            $"{Occupation}",
+            $"{gameState.HomeChapters.FirstOrDefault(x=>x.Name == HomeChapter)?.Title ?? "No Home Chapter"}, {Occupation ?? "No Occupation"}, {gameState.Religions.FirstOrDefault(x=>x.Name == Religion)?.Title ?? "Not Religious"}",
             Level,
             State);
 
@@ -160,5 +144,24 @@ public class Character
             .Where(x => x.Type != SkillPurchase.Occupation)
             .Concat(occupationalSkills.Select(x => CharacterSkill.FromTitle(x, SkillPurchase.Occupation)))
             .ToArray();
+    }
+
+    private static HashSet<string> _skipProperties = new() { nameof(ChangeSummary), nameof(State), nameof(Id),nameof(PreviousId),nameof(AccountId) };
+    
+    public static Dictionary<string, string> BuildChangeSummary(Character oldCharacter, Character newCharacter)
+    {
+        var result = new Dictionary<string, string>();
+        foreach (var property in typeof(Character).GetProperties())
+        {
+            if (_skipProperties.Contains(property.Name)) continue;
+            var oldValue = property.GetValue(oldCharacter);
+            var newValue = property.GetValue(newCharacter);
+            if (oldValue?.Equals(newValue) == false)
+            {
+                result.Add(property.Name, JsonSerializer.Serialize(oldValue, LarpJson.Options));
+            }
+        }
+
+        return result;
     }
 }

@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using Larp.Common;
+using Larp.Data;
 using Larp.Data.MwFifth;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
@@ -34,15 +35,15 @@ public class CharacterBuilder
     public Religion[] AllReligions { get; set; }
     public Dictionary<string, Gift> AllGifts { get; }
 
+    [DependsOn(nameof(PopulateOccupations), nameof(HomeChapter), nameof(AgeGroup))]
+    public Dictionary<string, Occupation> AvailableOccupations { get; private set; } = new();
+
     [DependsOn(nameof(PopulateOccupationalDependencies), nameof(Occupation), nameof(NoOccupation))]
     public string[] AllSpecialties { get; private set; } = Array.Empty<string>();
 
     [DependsOn(nameof(PopulateHomelands), nameof(HomeChapter))]
     public string[] AvailableHomelands { get; private set; } = Array.Empty<string>();
-
-    [DependsOn(nameof(PopulateOccupations), nameof(HomeChapter), nameof(AgeGroup))]
-    public Dictionary<string, Occupation> AvailableOccupations { get; private set; } = new();
-
+    
     [DependsOn(nameof(PopulateOccupationalDependencies), nameof(Occupation), nameof(NoOccupation), nameof(Wisdom))]
     public Spell[] OccupationalSpells { get; private set; } = Array.Empty<Spell>();
 
@@ -279,11 +280,11 @@ public class CharacterBuilder
     public bool IsHomeChapterValid => !string.IsNullOrEmpty(Character.HomeChapter);
     public bool IsHomelandValid => !string.IsNullOrWhiteSpace(Character.Homeland);
 
-    [DependsOn(nameof(PopulateIsOccupationValid), nameof(Occupation), nameof(NoOccupation), nameof(OccupationalChosenSkills),
+    [DependsOn(nameof(PopulateIsOccupationValid), nameof(AgeGroup), nameof(Occupation), nameof(NoOccupation), nameof(OccupationalChosenSkills),
         nameof(Specialty), nameof(AgeGroup))]
     public bool IsOccupationValid { get; private set; }
 
-    [DependsOn(nameof(PopulateIsOccupationValid), nameof(Occupation), nameof(NoOccupation), nameof(OccupationalSkillsChoices))]
+    [DependsOn(nameof(PopulateIsOccupationValid), nameof(AgeGroup), nameof(Occupation), nameof(NoOccupation), nameof(OccupationalSkillsChoices))]
     public bool IsChosenSkillsValid { get; private set; }
 
     public bool IsGiftsValid =>
@@ -311,7 +312,7 @@ public class CharacterBuilder
 
     [DependsOn(nameof(PopulateAbilities), nameof(Courage), nameof(Dexterity), nameof(Empathy), nameof(Passion),
         nameof(Prowess), nameof(Wisdom))]
-    public CharacterProperty[] Properties { get; private set; } = Array.Empty<CharacterProperty>();
+    public GiftPropertyValue[] Properties { get; private set; } = Array.Empty<GiftPropertyValue>();
 
     #endregion
 
@@ -327,7 +328,7 @@ public class CharacterBuilder
     private void PopulateAbilities()
     {
         var abilities = new List<Ability>();
-        var properties = new Dictionary<string, string>();
+        var properties = new List<GiftPropertyValue>();
 
         if (Level == 0)
         {
@@ -348,7 +349,7 @@ public class CharacterBuilder
             var gift = AllGifts[giftName];
             var rank = gift.Ranks[giftLevel - 1];
             var p = gift.Properties.Select((name, index) =>
-                new KeyValuePair<string, string>(name, rank.Properties[index]));
+                new GiftPropertyValue(name, rank.Properties[index]));
             properties.AddRange(p);
         }
 
@@ -367,14 +368,14 @@ public class CharacterBuilder
             .ToArray();
 
 
-        Properties = properties.Select(x => new CharacterProperty(x)).ToArray();
+        Properties = properties.ToArray();
     }
 
     private void PopulateOccupations()
     {
-        IEnumerable<Occupation> occupations; // = Array.Empty<Occupation>();
+        IEnumerable<Occupation> occupations;
 
-        if (_mode == CharacterBuilderMode.NewCharacter)
+        if (Character.State == CharacterState.NewDraft)
         {
             switch (Character.AgeGroup)
             {
@@ -423,6 +424,8 @@ public class CharacterBuilder
 
         AvailableOccupations = occupations
             .ToDictionary(x => x.Name);
+        
+        _logger.LogInformation("{asdf}", AvailableOccupations);
     }
 
     private void PopulateHomelands()
@@ -457,6 +460,8 @@ public class CharacterBuilder
 
     private void PopulateIsOccupationValid()
     {
+        PopulateOccupations();
+        
         if (AgeGroup == Data.MwFifth.AgeGroup.PreTeen)
         {
             _logger.LogInformation("Occupation not available for preteen");
@@ -475,13 +480,15 @@ public class CharacterBuilder
         {
             _logger.LogInformation("Occupation not selected");
             IsOccupationValid = false;
+            IsChosenSkillsValid = true;
             return;
         }
 
         if (Occupation != null && !AvailableOccupations.ContainsKey(Occupation))
         {
-            _logger.LogInformation("Occupation selection is invalid");
+            _logger.LogInformation("Occupation selection is invalid. {Occupation} should be in {AvailableOccupations}", Occupation, AvailableOccupations.Keys);
             IsOccupationValid = false;
+            IsChosenSkillsValid = true;
             return;
         }
 

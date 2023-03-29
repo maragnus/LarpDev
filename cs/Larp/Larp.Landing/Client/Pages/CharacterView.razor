@@ -1,6 +1,19 @@
-@page "/characters/:characterId"
-<h3>CharacterView</h3>
+@page "/characters/{gameName}/{characterId}"
+@using Larp.Landing.Client.Pages.MwFifth
+
+<PageHeader>Character Sheet</PageHeader>
+
+<MudContainer MaxWidth="MaxWidth.Medium">
+    @if (GameName == "mw5e")
+    {
+        <MwFifthCharacter CharacterId="@CharacterId"/>
+    }
+</MudContainer>
 
 @code {
+    [Parameter]
+    public string? GameName { get; set; }
     
+    [Parameter]
+    public string? CharacterId { get; set; }
 }

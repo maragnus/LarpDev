@@ -7,6 +7,7 @@ using Larp.Landing.Server.Services;
 using Larp.Landing.Shared;
 using Larp.Landing.Shared.MwFifth;
 using Larp.Notify;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Internal;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,7 +25,8 @@ builder.Configuration
     services.AddControllersWithViews();
     services.AddRazorPages();
     services.AddHttpContextAccessor();
-
+    services.AddSingleton<IFileProvider>(_ => new PhysicalFileProvider(Path.GetTempPath()));
+    
     // Larp.Notify
     services.AddScoped<INotifyService, NotifyService>();
     services.Configure<NotifyServiceOptions>(

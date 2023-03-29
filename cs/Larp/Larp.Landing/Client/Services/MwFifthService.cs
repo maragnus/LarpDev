@@ -25,13 +25,8 @@ public class MwFifthService : IAsyncDisposable
         _landingService = landingService;
     }
 
-    public async Task<Character?> GetCharacter(string? characterId)
-    {
-        if (string.IsNullOrWhiteSpace(characterId))
-            return null;
-
-        return await _mwFifth.GetCharacter(characterId);
-    }
+    public async Task<Character> GetCharacter(string characterId) =>
+        await _mwFifth.GetCharacter(characterId);
 
     public Game Game => _landingService.Games[GameState.GameName];
     public GameState GameState { get; private set; } = null!;
@@ -134,4 +129,7 @@ public class MwFifthService : IAsyncDisposable
     {
         await FinishAutoSave(TimeSpan.FromSeconds(5));
     }
+
+    public async Task DeleteCharacter(string characterId) =>
+        await _mwFifth.DeleteCharacter(characterId);
 }

@@ -7,6 +7,17 @@ public class ApiAuthenticatedAttribute : Attribute
 {
 }
 
+[AttributeUsage(AttributeTargets.Method)]
+public class ApiContentTypeAttribute : Attribute
+{
+    public string ContentType { get; }
+
+    public ApiContentTypeAttribute(string contentType)
+    {
+        ContentType = contentType;
+    }
+}
+
 public abstract class ApiRouteAttribute : Attribute
 {
     protected ApiRouteAttribute(HttpMethod httpMethod, string apiPath)
@@ -33,6 +44,12 @@ public class ApiPost : ApiRouteAttribute
     { }
 }
 
+[AttributeUsage(AttributeTargets.Method)]
+public class ApiDelete : ApiRouteAttribute
+{
+    public ApiDelete([RouteTemplate]string apiPath) : base(HttpMethod.Delete, apiPath)
+    { }
+}
 
 [AttributeUsage(AttributeTargets.Interface | AttributeTargets.Class)]
 public class ApiRootAttribute : Attribute

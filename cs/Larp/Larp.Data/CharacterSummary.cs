@@ -12,7 +12,10 @@ public enum CharacterState
     Review,
     
     /// <summary>Current character ready for game</summary>
-    Live
+    Live,
+    
+    /// <summary>Previously Live but replaced with a new revision</summary>
+    Archived
 }
 
 // Game agnostic character summary

@@ -3,6 +3,7 @@
         "name": "burgundar",
         "title": "Burgundar",
         "location": "45 Upton Rd, Harrison, ME 04040",
+        "email": "burgundar@mystwood.org",
         "homelands": [
             "Barony of Pelancia, Navarre",
             "County of Burgundar, Navarre",
@@ -14,6 +15,7 @@
         "name": "keep",
         "title": "The Keep",
         "location": "42 Stalkers Way, Jefferson, ME, United States, Maine",
+        "email": "thekeep@mystwood.org",
         "homelands": [
             "Barony of Dragonshire",
             "Barony of Fenwyck",
@@ -26,6 +28,7 @@
         "name": "novgorond",
         "title": "Novgorond",
         "location": "45 Upton Rd, Harrison, ME 04040",
+        "email": "novgorond@mystwood.org",
         "homelands": [
             "Free City of Novgorond",
             "Black Rus",

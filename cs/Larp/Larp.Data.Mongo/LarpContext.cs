@@ -11,8 +11,8 @@ public class LarpContext
 {
     static LarpContext()
     {
-        var enumConvention = new ConventionPack() { new EnumRepresentationConvention(BsonType.String) };
-        ConventionRegistry.Register(nameof(EnumRepresentationConvention), enumConvention, _ => true);
+        // var enumConvention = new ConventionPack() { new EnumRepresentationConvention(BsonType.String) };
+        // ConventionRegistry.Register(nameof(EnumRepresentationConvention), enumConvention, _ => true);
     }
 
     public LarpContext(IOptions<LarpDataOptions> options, LarpDataCache cache, ILogger<LarpContext> logger)

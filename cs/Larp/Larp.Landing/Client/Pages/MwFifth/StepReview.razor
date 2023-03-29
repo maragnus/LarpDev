@@ -80,11 +80,13 @@ else if (!Character.IsHomelandValid)
 
 <StepDivider/>
 
-<MudButton StartIcon="@Icons.Material.Outlined.Verified" Variant="Variant.Outlined">Submit this character</MudButton>
+<MudButton StartIcon="@Icons.Material.Outlined.Verified" Variant="Variant.Outlined" Color="Color.Success" OnClick="Submit">Submit this character</MudButton>
 
 @code {
 
     [Parameter]
     public CharacterBuilder Character { get; set; } = null!;
-
+    
+    [Parameter]
+    public EventCallback Submit { get; set; }
 }

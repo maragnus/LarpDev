@@ -1,15 +1,15 @@
-@using MongoDB.Bson
 @using Larp.Landing.Shared.MwFifth
-@using MongoDB.Bson.IO
 @using System.Text.Json
 @using Larp.Landing.Shared
 @inject LandingService LandingService
 @inject ILogger<MwFifthCharacterEditor> Logger;
 @inject IDialogService DialogService
 @inject NavigationManager NavigationManager
+
 @implements IAsyncDisposable
 
 @code {
+
     [Parameter]
     public string? CharacterId { get; set; }
 
@@ -18,107 +18,97 @@
     private Game _game = new();
     private GameState _gameState = null!;
     private CharacterBuilder _character = null!;
+    private Step[] _steps = Array.Empty<Step>();
+    private Step? _currentStep = null;
+    private AutoSaveState _saveState;
 
     protected override async Task OnInitializedAsync()
     {
         _game = LandingService.MwFifth.Game;
         _gameState = LandingService.MwFifth.GameState;
-        
-        LandingService.MwFifth.AutoSaveStateChange += AutoSaveStateChange;
-        
+
         _isNewCharacter = string.IsNullOrEmpty(CharacterId);
 
         var character = _isNewCharacter
             ? await LandingService.MwFifth.GetDraftCharacter()
-            : await LandingService.MwFifth.GetCharacter(CharacterId);
+            : await LandingService.MwFifth.GetCharacter(CharacterId!);
 
         _character = new CharacterBuilder(character, _gameState, CharacterBuilderMode.NewCharacter, Logger)
         {
-            StateChanged = StateHasChanged
+            StateChanged = () =>
+            {
+                _saveState = AutoSaveState.ChangeAvailable;
+                StateHasChanged();
+            }
         };
 
         _steps = new Step[]
         {
             new(
                 "Name",
-                @<StepName Character="_character" />, 
-                @<MudIcon Icon="@Icons.Material.Outlined.PermIdentity" />,
+                @<StepName Character="_character"/>,
+                @<MudIcon Icon="@Icons.Material.Outlined.PermIdentity"/>,
                 () => _character.IsNameValid && _character.IsAgeGroupValid),
             new(
                 "Home Chapter",
-                @<StepHomeChapter Character="_character" />, 
-                @<MudIcon Icon="@Icons.Material.Outlined.Flag" />,
+                @<StepHomeChapter Character="_character"/>,
+                @<MudIcon Icon="@Icons.Material.Outlined.Flag"/>,
                 () => _character.IsHomeChapterValid),
-            
             new(
-                "Homeland", 
-                @<StepHomeland Character="_character" />,
-                @<MudIcon Icon="@Icons.Material.Outlined.Home" />,            
+                "Homeland",
+                @<StepHomeland Character="_character"/>,
+                @<MudIcon Icon="@Icons.Material.Outlined.Home"/>,
                 () => _character.IsHomelandValid),
-
             new(
-                "Occupation", 
-                @<StepOccupation Character="_character" />,
-                @<MudIcon Icon="@Icons.Material.Outlined.Work" />,         
+                "Occupation",
+                @<StepOccupation Character="_character"/>,
+                @<MudIcon Icon="@Icons.Material.Outlined.Work"/>,
                 () => _character.IsOccupationValid,
                 () => _character.AgeGroup != AgeGroup.PreTeen),
-            
             new(
-                "Gifts", 
-                @<StepGifts Character="_character" />,
-                @<MudIcon Icon="@Icons.Material.Outlined.FitnessCenter" />,         
+                "Gifts",
+                @<StepGifts Character="_character"/>,
+                @<MudIcon Icon="@Icons.Material.Outlined.FitnessCenter"/>,
                 () => _character.IsGiftsValid,
                 () => _character.AgeGroup != AgeGroup.PreTeen),
-            
             new(
-                "Religion", 
-                @<StepReligion Character="_character" />,
-                @<MudIcon Icon="@Icons.Material.Outlined.GroupWork" />,         
+                "Religion",
+                @<StepReligion Character="_character"/>,
+                @<MudIcon Icon="@Icons.Material.Outlined.GroupWork"/>,
                 () => _character.IsReligionValid),
-            
             new(
-                "Spells", 
-                @<StepSpells Character="_character" />,
-                @<MudIcon Icon="@Icons.Material.Outlined.Book" />,         
+                "Spells",
+                @<StepSpells Character="_character"/>,
+                @<MudIcon Icon="@Icons.Material.Outlined.Book"/>,
                 () => _character.IsSpellsValid,
                 () => _character.HasWisdomSpells),
-            
             new(
-                "Advantages", 
-                @<StepVantages Character="_character" />,
-                @<MudIcon Icon="@Icons.Material.Outlined.Blind" />,         
+                "Advantages",
+                @<StepVantages Character="_character"/>,
+                @<MudIcon Icon="@Icons.Material.Outlined.Blind"/>,
                 () => _character.IsVantagesValid),
-            
             new(
-                "History", 
-                @<StepHistory Character="_character" />,
-                @<MudIcon Icon="@Icons.Material.Outlined.History" />,         
+                "History",
+                @<StepHistory Character="_character"/>,
+                @<MudIcon Icon="@Icons.Material.Outlined.History"/>,
                 () => _character.IsHistoryValid),
-            
             new(
-                "Review", 
+                "Review",
                 //@<pre>@_character.Character.ToJson(new JsonWriterSettings() {Indent = true})</pre>,
-                @<StepReview Character="_character" />,
-                @<MudIcon Icon="@Icons.Material.Outlined.Verified" />,
+                @<StepReview Character="_character" Submit="Submit"/>,
+                @<MudIcon Icon="@Icons.Material.Outlined.Verified"/>,
                 () => false)
         };
-        
+
         _currentStep = _steps[0];
         _loadingState = LoadingState.Loaded;
     }
 
     record Step(string Title, RenderFragment Content, RenderFragment Icon, Func<bool> IsComplete, Func<bool>? IsAvailable = null);
 
-    private Step[] _steps = Array.Empty<Step>();
-
-    private Step? _currentStep = null;
-    private AutoSaveState _saveState;
-
     private void OnStepChange()
     {
-        _saveState = AutoSaveState.ChangeAvailable;
-        //LandingService.MwFifth.UpdateAutoSave(_character.Character);
-        //StateHasChanged();
+        StateHasChanged();
     }
 
     public async ValueTask DisposeAsync()
@@ -126,17 +116,16 @@
         await LandingService.MwFifth.FinishAutoSave(_character.Character);
     }
 
-    private void AutoSaveStateChange(object? sender, EventArgs e)
-    {
-        _saveState = LandingService.MwFifth.AutoSaveState;
-        StateHasChanged();
-    }
-
     private async Task Save()
     {
+        _saveState = AutoSaveState.Saving;
+        await Task.Yield();
+
         await LandingService.MwFifth.Save(_character.Character);
         CharacterId = _character.Character.Id;
+
         _saveState = AutoSaveState.Saved;
+        await Task.Yield();
 
         if (new Uri(NavigationManager.Uri).AbsolutePath.EndsWith("/new"))
         {
@@ -144,11 +133,34 @@
             NavigationManager.NavigateTo($"/characters/mw5e/{CharacterId}/edit", new NavigationOptions() { ReplaceHistoryEntry = true });
         }
     }
+
+    private async Task DeleteDraft()
+    {
+        var result = await DialogService.ShowMessageBox("Delete Character Draft", "Are you sure you want to delete this draft? It cannot be recovered.", "Yes, Delete It", "No, Keep It");
+        if (result == true)
+        {
+            await LandingService.MwFifth.DeleteCharacter(_character.Character.Id);
+            NavigationManager.NavigateTo("/characters");
+        }
+    }
+
+    private async Task Submit()
+    {
+        var result = await DialogService.ShowMessageBox("Submit Character for Review", "Are you sure you want to submit this draft for review? You cannot edit it again until it is approved.", "Yes, I'm Done", "No, Keep Editing");
+        if (result == true)
+        {
+            _character.Character.State = CharacterState.Review;
+            await LandingService.MwFifth.Save(_character.Character);
+            NavigationManager.NavigateTo($"/characters/mw5e/{CharacterId}", new NavigationOptions() { ReplaceHistoryEntry = true });
+        }
+    }
+
 }
+
 
 @if (_loadingState != LoadingState.Loaded)
 {
-    <MudProgressLinear Indeterminate />
+    <MudProgressLinear Indeterminate/>
     return;
 }
 
@@ -157,18 +169,24 @@
         <MudStack Row Justify="Justify.SpaceBetween">
             <MudText Typo="Typo.h6">New @_game.Title Character</MudText>
 
-            @switch (_saveState)
-            {
-                case AutoSaveState.Saving:
-                    <MudProgressCircular Indeterminate="@true" />
-                    break;
-                case AutoSaveState.Saved:
-                    <MudAlert Severity="@Severity.Info">Autosaved</MudAlert>
-                    break;
-                case AutoSaveState.ChangeAvailable:
-                    <MudButton OnClick="Save">Save Changes</MudButton>
-                    break;
-            }
+            <MudStack Row>
+                @if (CharacterId != null)
+                {
+                    <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="DeleteDraft">Delete draft</MudButton>
+                }
+                @switch (_saveState)
+                {
+                    case AutoSaveState.Saving:
+                        <MudProgressCircular Indeterminate="@true"/>
+                        break;
+                    case AutoSaveState.Saved:
+                        <MudAlert Severity="@Severity.Info">Saved</MudAlert>
+                        break;
+                    case AutoSaveState.ChangeAvailable:
+                        <MudButton Variant="Variant.Filled" OnClick="Save">Save Changes</MudButton>
+                        break;
+                }
+            </MudStack>
         </MudStack>
     </MudItem>
     <MudItem md="3" sm="12">
@@ -177,7 +195,7 @@
             {
                 if (step.IsAvailable != null && !step.IsAvailable())
                     continue;
-                
+
                 var isCurrentStep = _currentStep == step;
                 var isComplete = step.IsComplete();
                 <MudTimelineItem Color="isCurrentStep ? Color.Primary : (isComplete ? Color.Success : Color.Default)">
@@ -195,4 +213,3 @@
         </MudPaper>
     </MudItem>
 </MudGrid>
-

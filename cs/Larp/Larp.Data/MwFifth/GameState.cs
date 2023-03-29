@@ -42,8 +42,24 @@ public class GiftProperty
 [PublicAPI]
 public class GiftPropertyValue
 {
+    public GiftPropertyValue()
+    {
+    }
+
+    public GiftPropertyValue(string name, string value)
+    {
+        Name = name;
+        Value = value;
+    }
+
     public string Name { get; set; } = null!;
     public string Value { get; set; } = null!;
+    
+    public void Deconstruct(out string name, out string value)
+    {
+        name = Name;
+        value = Value;
+    }
 }
 
 [PublicAPI]
@@ -78,7 +94,7 @@ public class SkillDefinition
     public string Name { get; set; } = null!;
     public string Title { get; set; } = null!;
     public SkillClass Class { get; set; }
-    public SkillPurchasable Purchasable { get; set; } 
+    public SkillPurchasable Purchasable { get; set; }
     public int? RanksPerPurchase { get; set; }
     public int? CostPerPurchase { get; set; }
     public string[] Iterations { get; set; } = Array.Empty<string>();
@@ -87,7 +103,7 @@ public class SkillDefinition
 [PublicAPI]
 public class Ability
 {
-    public string Name { get; set; }  = null!; // Name without rank
+    public string Name { get; set; } = null!; // Name without rank
     public int Rank { get; set; } // 0 if there's only one rank, otherwise represents I, II, IV, 1, 2 ,3
     public string Title { get; set; } = null!; // Name and Rank verbatim
 }
@@ -121,7 +137,7 @@ public class Occupation
     public string? Duty { get; set; }
     public string? Livery { get; set; }
     public string[] Chapters { get; set; } = Array.Empty<string>();
-    
+
     // ReSharper disable once NonReadonlyMemberInGetHashCode
     public override int GetHashCode() => Name.GetHashCode();
 
@@ -146,7 +162,7 @@ public class Vantage
     public int Rank { get; set; }
     public bool Physical { get; set; }
     public string? Description { get; set; }
-    
+
     // ReSharper disable once NonReadonlyMemberInGetHashCode
     public override int GetHashCode() => Title.GetHashCode();
 }
@@ -157,7 +173,7 @@ public class Religion
     public string Name { get; set; } = null!;
     public string Title { get; set; } = null!;
     public string? Description { get; set; }
-    
+
     // ReSharper disable once NonReadonlyMemberInGetHashCode
     public override int GetHashCode() => Name.GetHashCode();
 }
@@ -169,6 +185,7 @@ public class HomeChapter
     public string Title { get; set; } = null!;
     public string Location { get; set; } = null!;
     public string[] Homelands { get; set; } = Array.Empty<string>();
+    public string Email { get; set; } = null!;
 
     // ReSharper disable once NonReadonlyMemberInGetHashCode
     public override int GetHashCode() => Name.GetHashCode();
@@ -199,7 +216,7 @@ public class Spell
     public bool IsDivine => Category.StartsWith("Divine");
     public bool IsGiftOfWisdom => Category is "Gift of Wisdom";
     public bool IsOccupational => !IsBardic && !IsDivine && !IsGiftOfWisdom;
-    
+
     // ReSharper disable once NonReadonlyMemberInGetHashCode
     public override int GetHashCode() => Name.GetHashCode();
 }

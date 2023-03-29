@@ -1,0 +1,78 @@
+@using Larp.Landing.Shared.MwFifth
+@inject LandingService LandingService
+@inject ILogger<MwFifthCharacterEditor> Logger;
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
+
+@code {
+
+    [Parameter]
+    public string? CharacterId { get; set; }
+
+    private LoadingState _loadingState = LoadingState.Loading;
+    private Game _game = new();
+    private GameState _gameState = null!;
+    private CharacterBuilder _character = null!;
+    private string? _chapterEmail;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _game = LandingService.MwFifth.Game;
+        _gameState = LandingService.MwFifth.GameState;
+
+        var character = await LandingService.MwFifth.GetCharacter(CharacterId!);
+
+        _character = new CharacterBuilder(character, _gameState, CharacterBuilderMode.NewCharacter, Logger);
+        _chapterEmail = _character.GetHomeChapter()?.Email ?? _game.Email;
+        _loadingState = LoadingState.Loaded;
+    }
+
+    private async Task DeleteDraft()
+    {
+        var result = await DialogService.ShowMessageBox("Delete Character Draft", "Are you sure you want to delete this draft? It cannot be recovered.", "Yes, Delete It", "No, Keep It");
+        if (result == true)
+        {
+            await LandingService.MwFifth.DeleteCharacter(_character.Character.Id);
+            NavigationManager.NavigateTo("/characters");
+        }
+    }
+}
+
+<StepDivider/>
+
+@if (_loadingState == LoadingState.Loading)
+{
+    <MudProgressLinear Indeterminate/>
+    return;
+}
+
+@if (_loadingState != LoadingState.Loaded)
+{
+    <MudAlert Severity="Severity.Error">Character could not be loaded</MudAlert>
+    return;
+}
+
+@if (_character.Character.State is CharacterState.NewDraft or CharacterState.UpdateDraft)
+{
+    <MudButton Color="Color.Error" OnClick="DeleteDraft">Delete Draft</MudButton>
+    <StepDivider/>
+}
+
+@if (_character.Character.State is CharacterState.Review)
+{
+    <MudAlert Severity="Severity.Info">
+        <MudStack Spacing="4">
+            <div>
+                This draft is currently <strong>waiting for the Game Masters to review</strong>.
+            </div>
+            <div>
+                Once your draft is approved, it will be Live and can be printed. If the Game Master has any questions, they'll reach out to you.
+            </div>
+            <div>
+                If you have questions, please contact the chapter via email at <a href="mailto:@_chapterEmail?subject=Question+about+@_character.CharacterName">@_chapterEmail</a>.
+            </div>
+        </MudStack>
+    </MudAlert>
+    <StepDivider/>
+}
+<CharacterSheet Character="_character"/>

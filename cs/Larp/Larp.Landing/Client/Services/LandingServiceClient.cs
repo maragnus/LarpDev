@@ -3,6 +3,7 @@ using Larp.Data.MwFifth;
 using Larp.Landing.Shared;
 using Larp.Landing.Shared.Messages;
 using Larp.Landing.Shared.MwFifth;
+using Microsoft.Extensions.FileProviders;
 
 namespace Larp.Landing.Client.Services;
 
@@ -32,15 +33,27 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public async Task<CharacterSummary[]> GetCharacters() =>
         await GetArray<CharacterSummary>("api/larp/characters");
 
+    public Task<IFileInfo> Export()
+    {
+        // This is server-side only
+        return Task.FromResult((IFileInfo)null!);
+    }
+
     public Task<GameState> GetGameState(string lastRevision) =>
         Get<GameState>($"api/mw5e/gameState?lastRevision={lastRevision}");
 
     public Task<Character> GetCharacter(string characterId) =>
         Get<Character>($"api/mw5e/character?characterId={characterId}");
 
+    public Task<Character> ReviseCharacter(string characterId) =>
+        Get<Character>($"api/mw5e/character/revise?characterId={characterId}");
+
     public Task<Character> GetNewCharacter() =>
         Get<Character>($"api/mw5e/character/new")!;
 
     public Task<StringResult> SaveCharacter(Character character) =>
         Post<StringResult>("api/mw5e/character", new { character });
+
+    public async Task DeleteCharacter(string characterId) =>
+        await Delete($"api/mw5e/character?characterId={characterId}");
 }

@@ -3,7 +3,8 @@
     {
       "name": "mw5e",
       "title": "Mystwood 5e",
-      "description": "Mystwood 5th Edition"
+      "description": "Mystwood 5th Edition",
+      "email": "mystwood@mystwood.org"
     }
   ],
   "events": [

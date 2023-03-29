@@ -47,7 +47,7 @@
                         switch (character.State)
                         {
                             case CharacterState.Live:
-                                uri = $"/characters/{game.Name}/{character.Id}/view";
+                                uri = $"/characters/{game.Name}/{character.Id}";
                                 chip = "Live in game";
                                 color = Color.Success;
                                 break;
@@ -63,7 +63,7 @@
                                 break;
                                 
                             case CharacterState.Review:
-                                uri = $"/characters/{game.Name}/{character.Id}/view";
+                                uri = $"/characters/{game.Name}/{character.Id}";
                                 chip = "Submitted for review";
                                 color = Color.Info;
                                 break;

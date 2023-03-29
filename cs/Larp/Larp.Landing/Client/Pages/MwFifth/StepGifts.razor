@@ -35,7 +35,7 @@
 {
     <StepDivider/>
     <MudText Typo="Typo.h6">Your properties</MudText>
-    <MudTable T="CharacterProperty" Items="_properties">
+    <MudTable T="GiftPropertyValue" Items="_properties">
         <HeaderContent>
             <MudTh>Property</MudTh>
             <MudTh>Value</MudTh>
@@ -77,7 +77,7 @@
 
     private GiftInfo[] _gifts = Array.Empty<GiftInfo>();
     private string[] _abilities = Array.Empty<string>();
-    private CharacterProperty[] _properties = Array.Empty<CharacterProperty>();
+    private GiftPropertyValue[] _properties = Array.Empty<GiftPropertyValue>();
 
     protected override void OnInitialized()
     {

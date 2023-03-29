@@ -27,6 +27,9 @@ public abstract class RestClient
                 : new AuthenticationHeaderValue("Basic", sessionId);
     }
 
+    protected async Task Delete(string uri) =>
+        await _httpClient.DeleteAsync(uri);
+    
     protected async Task<TResult> Get<TResult>(string uri) where TResult : new() =>
         (await _httpClient.GetFromJsonAsync<TResult>(uri, LarpJson.Options))!;
 

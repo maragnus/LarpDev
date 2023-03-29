@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using Larp.Data;
 using Larp.Landing.Shared.Messages;
+using Microsoft.Extensions.FileProviders;
 
 namespace Larp.Landing.Shared;
 
@@ -25,4 +26,7 @@ public interface ILandingService
 
     [ApiGet("larp/characters"), ApiAuthenticated]
     Task<CharacterSummary[]> GetCharacters();
+    
+    [ApiGet("export"), ApiContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")]
+    Task<IFileInfo> Export();
 }

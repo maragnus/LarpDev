@@ -3,6 +3,7 @@ using System.Text.Json;
 using Larp.Landing.Server.Services;
 using Larp.Landing.Shared;
 using Larp.Landing.Shared.Messages;
+using Microsoft.Extensions.FileProviders;
 
 namespace Larp.Landing.Server;
 public class ResourceForbiddenException : Exception
@@ -10,7 +11,23 @@ public class ResourceForbiddenException : Exception
     public ResourceForbiddenException() : base("User is authenticated but not privileged to access this resource")
     {
     }
+    
+    public ResourceForbiddenException(string message) : base(message)
+    {
+    }
 }
+
+public class BadRequestException : Exception
+{
+    public BadRequestException() : base("Unexpected parameters in request")
+    {
+    }
+    
+    public BadRequestException(string message) : base(message)
+    {
+    }
+}
+
 
 public class ResourceNotFoundException : Exception
 {
@@ -36,10 +53,11 @@ public static class MapApiExtensions
             .Select(x => (
                 MethodInfo: x,
                 Api: x.GetCustomAttribute<ApiRouteAttribute>(),
-                AuthRequired: x.GetCustomAttribute<ApiAuthenticatedAttribute>() != null))
+                AuthRequired: x.GetCustomAttribute<ApiAuthenticatedAttribute>() != null,
+                ContentType: x.GetCustomAttribute<ApiContentTypeAttribute>()))
             .Where(x => x.Api != null);
 
-        foreach (var (methodInfo, api, authRequired) in methods)
+        foreach (var (methodInfo, api, authRequired, contentType) in methods)
         {
             var uri = rootUri + api!.ApiPath.Trim('/');
 
@@ -47,13 +65,12 @@ public static class MapApiExtensions
 
             app.MapMethods(uri, new [] { api.HttpMethod.Method },
                 async (HttpContext httpContext, TInterface obj, IUserSession session) =>
-                    await HandleRequest(httpContext, methodInfo, obj, logger, session, authRequired));
+                    await HandleRequest(httpContext, methodInfo, obj, logger, session, authRequired, contentType));
         }
     }
 
-    static async Task HandleRequest<TInterface>(HttpContext httpContext, MethodBase methodInfo, TInterface obj,
-        ILogger logger,
-        IUserSession userSession, bool authRequired)
+    static async Task HandleRequest<TInterface>(HttpContext httpContext, MethodInfo methodInfo, TInterface obj,
+        ILogger logger, IUserSession userSession, bool authRequired, ApiContentTypeAttribute? contentType)
     {
         if (authRequired && !userSession.IsAuthenticated)
         {
@@ -81,15 +98,32 @@ public static class MapApiExtensions
                     if (body?.RootElement.TryGetProperty(name, out var property) == true)
                         return property.Deserialize(parameter.ParameterType, LarpJson.Options);
 
-                    throw new BadHttpRequestException($"Parameter {name} was not found in route or body");
+                    throw new BadRequestException($"Parameter {name} was not found in route or body");
                 })
                 .ToArray();
 
             var result = (dynamic)methodInfo.Invoke(obj, parameters)!;
+            
+            if (methodInfo.ReturnType == typeof(Task<IFileInfo>))
+            {
+                if (contentType != null)
+                    httpContext.Response.ContentType = contentType.ContentType;
+                var fileInfo = await (Task<IFileInfo>)result;
+                await httpContext.Response.SendFileAsync(fileInfo);
+                File.Delete(fileInfo.PhysicalPath!);
+                return;
+            }
+            
+            if (methodInfo.ReturnType == typeof(Task))
+            {
+                await (Task)result;
+                return;
+            }
+
             var response = await result;
             await httpContext.Response.WriteAsJsonAsync((object)response, LarpJson.Options);
         }
-        catch (BadHttpRequestException ex)
+        catch (BadRequestException ex)
         {
             // 400 Bad Request is the status code to return when the form of the client request is not as the API expects.
             logger.LogWarning(ex, "Request is not expected: {Uri}", httpContext.Request.Path);
