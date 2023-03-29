@@ -9,7 +9,6 @@
 @implements IAsyncDisposable
 
 @code {
-
     [Parameter]
     public string? CharacterId { get; set; }
 
@@ -21,32 +20,47 @@
     private Step[] _steps = Array.Empty<Step>();
     private Step? _currentStep = null;
     private AutoSaveState _saveState;
+    private int _lastMoonstoneCost = 0;
+    private int _newMoonstoneCost = 0;
 
     protected override async Task OnInitializedAsync()
     {
         _game = LandingService.MwFifth.Game;
         _gameState = LandingService.MwFifth.GameState;
 
-        _isNewCharacter = string.IsNullOrEmpty(CharacterId);
-
-        var character = _isNewCharacter
+        var character = string.IsNullOrEmpty(CharacterId)
             ? await LandingService.MwFifth.GetDraftCharacter()
-            : await LandingService.MwFifth.GetCharacter(CharacterId!);
+            : await LandingService.MwFifth.GetCharacter(CharacterId);
 
-        _character = new CharacterBuilder(character, _gameState, CharacterBuilderMode.NewCharacter, Logger)
+        void UpdateCharacter()
+        {
+            character.UpdateMoonstone(_gameState);
+            _newMoonstoneCost = character.GiftMoonstone + character.SkillMoonstone;
+        }
+        
+        _character = new CharacterBuilder(character, _gameState, Logger)
         {
             StateChanged = () =>
             {
+                UpdateCharacter();
                 _saveState = AutoSaveState.ChangeAvailable;
                 StateHasChanged();
             }
         };
+        UpdateCharacter();
+        
+        _isNewCharacter = character.PreviousId == null;
+        if (character.PreviousId != null)
+        {
+            var previousCharacter = await LandingService.MwFifth.GetCharacter(character.PreviousId);
+            _lastMoonstoneCost = previousCharacter.GiftMoonstone + previousCharacter.SkillMoonstone;
+        }
 
         _steps = new Step[]
         {
             new(
                 "Name",
-                @<StepName Character="_character"/>,
+                @<StepSkills Character="_character"/>,
                 @<MudIcon Icon="@Icons.Material.Outlined.PermIdentity"/>,
                 () => _character.IsNameValid && _character.IsAgeGroupValid),
             new(
@@ -76,6 +90,12 @@
                 @<StepReligion Character="_character"/>,
                 @<MudIcon Icon="@Icons.Material.Outlined.GroupWork"/>,
                 () => _character.IsReligionValid),
+            new(
+                "Skills",
+                @<StepSkills Character="_character"/>,
+                @<MudIcon Icon="@Icons.Material.Outlined.Handyman"/>,
+                () => _character.IsSkillsValid,
+                () => _character.HasSkills),
             new(
                 "Spells",
                 @<StepSpells Character="_character"/>,
@@ -129,7 +149,6 @@
 
         if (new Uri(NavigationManager.Uri).AbsolutePath.EndsWith("/new"))
         {
-            Logger.LogInformation("{Json}", JsonSerializer.Serialize(_character.Character, LarpJson.Options));
             NavigationManager.NavigateTo($"/characters/mw5e/{CharacterId}/edit", new NavigationOptions() { ReplaceHistoryEntry = true });
         }
     }
@@ -167,9 +186,24 @@
 <MudGrid Style="margin-top: 1em">
     <MudItem md="12" sm="12">
         <MudStack Row Justify="Justify.SpaceBetween">
-            <MudText Typo="Typo.h6">New @_game.Title Character</MudText>
-
+            @if (_isNewCharacter)
+            {
+                <MudText Typo="Typo.h6">New @_game.Title Character</MudText>
+            }
+            else
+            {
+                <MudText Typo="Typo.h6">Updating @_game.Title Character</MudText>
+            }
+            
             <MudStack Row>
+                  @if (!_isNewCharacter)
+                  {
+                      <MudStack AlignItems="AlignItems.Center" Row>
+                          <MudAvatar Color="Color.Success">@(_newMoonstoneCost > 0 ? "+" : "")@(_newMoonstoneCost)</MudAvatar>
+                          <MudText>Moonstone</MudText>
+                      </MudStack>
+                  }
+                
                 @if (CharacterId != null)
                 {
                     <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="DeleteDraft">Delete draft</MudButton>

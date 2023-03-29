@@ -78,9 +78,12 @@
     private GiftInfo[] _gifts = Array.Empty<GiftInfo>();
     private string[] _abilities = Array.Empty<string>();
     private GiftPropertyValue[] _properties = Array.Empty<GiftPropertyValue>();
+    private bool _isNewCharacter;
 
     protected override void OnInitialized()
     {
+        _isNewCharacter = Character.Character.State == CharacterState.NewDraft;
+        
         _gifts = new[]
         {
             new GiftInfo("Courage", Character.Courage, value => Character.Courage = value, GiftChanged),

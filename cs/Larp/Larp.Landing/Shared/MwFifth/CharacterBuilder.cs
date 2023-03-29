@@ -7,17 +7,10 @@ using MongoDB.Bson;
 
 namespace Larp.Landing.Shared.MwFifth;
 
-public enum CharacterBuilderMode
-{
-    NewCharacter,
-    EditCharacter
-}
-
 public class CharacterBuilder
 {
     private DependencyManager<CharacterBuilder> DependencyManager { get; }
 
-    private readonly CharacterBuilderMode _mode;
     private readonly ILogger _logger;
 
     public Action? StateChanged { get; set; }
@@ -34,9 +27,13 @@ public class CharacterBuilder
     public Dictionary<string, HomeChapter> AllHomeChapters { get; }
     public Religion[] AllReligions { get; set; }
     public Dictionary<string, Gift> AllGifts { get; }
+    public Dictionary<string, Spell> AllSpells { get; }
 
     [DependsOn(nameof(PopulateOccupations), nameof(HomeChapter), nameof(AgeGroup))]
     public Dictionary<string, Occupation> AvailableOccupations { get; private set; } = new();
+
+    [DependsOn(nameof(PopulateOccupations), nameof(HomeChapter), nameof(AgeGroup))]
+    public Dictionary<string, Occupation> AllEnhancements { get; private set; } = new();
 
     [DependsOn(nameof(PopulateOccupationalDependencies), nameof(Occupation), nameof(NoOccupation))]
     public string[] AllSpecialties { get; private set; } = Array.Empty<string>();
@@ -44,20 +41,21 @@ public class CharacterBuilder
     [DependsOn(nameof(PopulateHomelands), nameof(HomeChapter))]
     public string[] AvailableHomelands { get; private set; } = Array.Empty<string>();
     
-    [DependsOn(nameof(PopulateOccupationalDependencies), nameof(Occupation), nameof(NoOccupation), nameof(Wisdom))]
+    [DependsOn(nameof(PopulateOccupationalDependencies), nameof(Occupation), nameof(NoOccupation), nameof(Wisdom), nameof(Enhancement))]
     public Spell[] OccupationalSpells { get; private set; } = Array.Empty<Spell>();
 
-    [DependsOn(nameof(PopulateOccupationalDependencies), nameof(Occupation), nameof(NoOccupation))]
+    [DependsOn(nameof(PopulateOccupationalDependencies), nameof(Occupation), nameof(NoOccupation), nameof(Enhancement))]
     public CharacterSkill[] OccupationalSkills { get; private set; } = Array.Empty<CharacterSkill>();
 
-    [DependsOn(nameof(PopulateOccupationalDependencies), nameof(Occupation), nameof(NoOccupation))]
+    [DependsOn(nameof(PopulateOccupationalDependencies), nameof(Occupation), nameof(NoOccupation), nameof(Enhancement))]
     public SkillChoice[] OccupationalSkillsChoices { get; private set; } = Array.Empty<SkillChoice>();
-
+    
+    public SkillDefinition[] AllPurchasableSkills { get; }
+    
     #endregion
 
-    public CharacterBuilder(Character character, GameState gameState, CharacterBuilderMode mode, ILogger logger)
+    public CharacterBuilder(Character character, GameState gameState, ILogger logger)
     {
-        _mode = mode;
         _logger = logger;
         Character = character;
         GameState = gameState;
@@ -67,11 +65,15 @@ public class CharacterBuilder
         AllBardicSpells = GameState.Spells.Where(x => x.IsBardic).ToArray();
         AllDivineSpells = GameState.Spells.Where(x => x.IsDivine).ToArray();
         AllOccupationalSpells = GameState.Spells.Where(x => x.IsOccupational).ToArray();
-
+        AllPurchasableSkills = GameState.Skills.Where(x => x.Purchasable != SkillPurchasable.Unavailable).ToArray();
         AllHomeChapters = GameState.HomeChapters.ToDictionary(x => x.Name);
         AllGifts = GameState.Gifts.ToDictionary(x => x.Name);
 
         AllReligions = GameState.Religions;
+
+        AllSpells = GameState.Spells
+            .GroupBy(x => x.Name) // Some Occupations share skills
+            .ToDictionary(x => x.Key, x => x.First());
 
         DependencyManager.UpdateAll(this);
     }
@@ -108,6 +110,12 @@ public class CharacterBuilder
     {
         get => Character.Occupation;
         set => Set(x => x.Occupation = value);
+    }
+    
+    public string? Enhancement
+    {
+        get => Character.Enhancement;
+        set => Set(x => x.Enhancement = value);
     }
 
     public string? Specialty
@@ -253,6 +261,9 @@ public class CharacterBuilder
     public Occupation? GetOccupation() =>
         GameState.Occupations.FirstOrDefault(x => x.Name == Character.Occupation);
 
+    public Occupation? GetEnhancement() =>
+        GameState.Occupations.FirstOrDefault(x => x.Name == Character.Enhancement);
+    
     public Religion? GetReligion() =>
         AllReligions.FirstOrDefault(x => x.Name == Character.Religion);
 
@@ -262,6 +273,8 @@ public class CharacterBuilder
 
     [DependsOn(nameof(PopulateSkills), nameof(Occupation), nameof(NoOccupation), nameof(OccupationalChosenSkills), nameof(PurchasedSkills))]
     public HashSet<string> Skills { get; private set; } = new();
+
+    public bool HasEnhancements => AvailableOccupations.Count > 0 && Character.PreviousId != null;
 
     [DependsOn(nameof(PopulateSpells), nameof(Wisdom))]
     public bool HasWisdomSpells { get; private set; }
@@ -287,11 +300,17 @@ public class CharacterBuilder
     [DependsOn(nameof(PopulateIsOccupationValid), nameof(AgeGroup), nameof(Occupation), nameof(NoOccupation), nameof(OccupationalSkillsChoices))]
     public bool IsChosenSkillsValid { get; private set; }
 
-    public bool IsGiftsValid =>
-        AgeGroup == Data.MwFifth.AgeGroup.PreTeen
-        || (NoHistory && Level == 5) 
-        || (!NoHistory && Level == 6);
-
+    public bool IsGiftsValid {
+        get
+        {
+            if (AgeGroup == Data.MwFifth.AgeGroup.PreTeen)
+                return Level == 0;
+            if (Character.State == CharacterState.NewDraft)
+                return (NoHistory && Level == 5) || (!NoHistory && Level == 6);
+            return (NoHistory && Level >= 5) || (!NoHistory && Level >= 6);
+        }
+    }
+    
     public bool IsReligionValid => !string.IsNullOrEmpty(Character.Religion);
 
     [DependsOn(nameof(PopulateSpells), nameof(Wisdom), nameof(Occupation), nameof(NoOccupation), nameof(ChosenSpells))]
@@ -306,6 +325,10 @@ public class CharacterBuilder
     [DependsOn(nameof(PopulateHistory), nameof(NoHistory), nameof(PublicHistory), nameof(PrivateHistory))]
     public bool IsHistoryValid { get; private set; }
 
+    public bool IsSkillsValid => true;
+    
+    public bool HasSkills => Character.State != CharacterState.NewDraft;
+
     [DependsOn(nameof(PopulateAbilities), nameof(Courage), nameof(Dexterity), nameof(Empathy), nameof(Passion),
         nameof(Prowess), nameof(Wisdom))]
     public string[] Abilities { get; private set; } = Array.Empty<string>();
@@ -313,7 +336,7 @@ public class CharacterBuilder
     [DependsOn(nameof(PopulateAbilities), nameof(Courage), nameof(Dexterity), nameof(Empathy), nameof(Passion),
         nameof(Prowess), nameof(Wisdom))]
     public GiftPropertyValue[] Properties { get; private set; } = Array.Empty<GiftPropertyValue>();
-
+    
     #endregion
 
     #region Populate
@@ -375,6 +398,10 @@ public class CharacterBuilder
     {
         IEnumerable<Occupation> occupations;
 
+        AllEnhancements = GameState.Occupations
+            .Where(x => x.Type == OccupationType.Enhancement && x.IsChapter(HomeChapter))
+            .ToDictionary(x=>x.Name);
+        
         if (Character.State == CharacterState.NewDraft)
         {
             switch (Character.AgeGroup)
@@ -386,15 +413,12 @@ public class CharacterBuilder
                     break;
                 case Data.MwFifth.AgeGroup.Youth:
                     occupations = GameState.Occupations
-                        .Where(o => o.Type is OccupationType.Youth
-                                    && o.IsChapter(HomeChapter));
+                        .Where(o => o.Type is OccupationType.Youth && o.IsChapter(HomeChapter));
                     break;
                 case Data.MwFifth.AgeGroup.Adult:
                 case Data.MwFifth.AgeGroup.YoungAdult:
                     occupations = GameState.Occupations
-                        .Where(o =>
-                            o.Type is OccupationType.Basic
-                            && o.IsChapter(HomeChapter));
+                        .Where(o => o.Type is OccupationType.Basic && o.IsChapter(HomeChapter));
                     break;
             }
         }
@@ -409,8 +433,7 @@ public class CharacterBuilder
                     break;
                 case Data.MwFifth.AgeGroup.Youth:
                     occupations = GameState.Occupations
-                        .Where(o => o.Type is OccupationType.Youth
-                                    && o.IsChapter(HomeChapter));
+                        .Where(o => o.Type is OccupationType.Youth && o.IsChapter(HomeChapter));
                     break;
                 case Data.MwFifth.AgeGroup.Adult:
                 case Data.MwFifth.AgeGroup.YoungAdult:
@@ -424,8 +447,6 @@ public class CharacterBuilder
 
         AvailableOccupations = occupations
             .ToDictionary(x => x.Name);
-        
-        _logger.LogInformation("{asdf}", AvailableOccupations);
     }
 
     private void PopulateHomelands()
@@ -436,14 +457,22 @@ public class CharacterBuilder
     private void PopulateOccupationalDependencies()
     {
         var occupation = GetOccupation();
+        var enhancement = GetEnhancement();
 
-        OccupationalSkills = occupation?.Skills
-                                 .Select(skillTitle => CharacterSkill.FromTitle(skillTitle, SkillPurchase.Occupation))
-                                 ?.ToArray()
-                             ?? Array.Empty<CharacterSkill>();
+        var occupationSkills = 
+            occupation?.Skills
+            .Select(skillTitle => CharacterSkill.FromTitle(skillTitle, SkillPurchase.Occupation)) ?? Array.Empty<CharacterSkill>();
+        
+        var enhancementSkills = 
+            enhancement?.Skills
+                .Select(skillTitle => CharacterSkill.FromTitle(skillTitle, SkillPurchase.Occupation)) ?? Array.Empty<CharacterSkill>();
 
-        OccupationalSkillsChoices = occupation?.Choices
-                                    ?? Array.Empty<SkillChoice>();
+        OccupationalSkills = occupationSkills.Concat(enhancementSkills).ToArray();
+        
+        OccupationalSkillsChoices = 
+            (occupation?.Choices ?? Array.Empty<SkillChoice>())
+            .Concat(enhancement?.Choices ?? Array.Empty<SkillChoice>())
+            .ToArray();
 
         AllSpecialties = occupation?.Specialties ?? Array.Empty<string>();
         if (!AllSpecialties.Contains(Character.Specialty))
@@ -464,7 +493,6 @@ public class CharacterBuilder
         
         if (AgeGroup == Data.MwFifth.AgeGroup.PreTeen)
         {
-            _logger.LogInformation("Occupation not available for preteen");
             IsOccupationValid = true;
             return;
         }
@@ -478,7 +506,7 @@ public class CharacterBuilder
 
         if (Occupation == null)
         {
-            _logger.LogInformation("Occupation not selected");
+            _logger.LogDebug("Occupation not selected");
             IsOccupationValid = false;
             IsChosenSkillsValid = true;
             return;
@@ -486,7 +514,7 @@ public class CharacterBuilder
 
         if (Occupation != null && !AvailableOccupations.ContainsKey(Occupation))
         {
-            _logger.LogInformation("Occupation selection is invalid. {Occupation} should be in {AvailableOccupations}", Occupation, AvailableOccupations.Keys);
+            _logger.LogDebug("Occupation selection is invalid. {Occupation} should be in {AvailableOccupations}", Occupation, AvailableOccupations.Keys);
             IsOccupationValid = false;
             IsChosenSkillsValid = true;
             return;
@@ -507,7 +535,7 @@ public class CharacterBuilder
                     choice.Count == choice.Choices.Count(skillName => chosenSkills.Contains(skillName)));
             if (!chosenSkillsAreValue)
             {
-                _logger.LogInformation("Occupational skills choices not selected {Json}, {Choices}",
+                _logger.LogDebug("Occupational skills choices not selected {Json}, {Choices}",
                     chosenSkills.ToJson(), OccupationalSkillsChoices.ToJson());
                 IsOccupationValid = false;
                 IsChosenSkillsValid = false;
@@ -521,7 +549,7 @@ public class CharacterBuilder
         {
             if (string.IsNullOrEmpty(Specialty))
             {
-                _logger.LogInformation("Occupational specialty not selected");
+                _logger.LogDebug("Occupational specialty not selected");
                 IsOccupationValid = false;
                 return;
             }

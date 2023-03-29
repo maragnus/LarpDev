@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Larp.Common;
 using Larp.Landing.Shared;
-using MongoDB.Bson.Serialization.Serializers;
 
 namespace Larp.Data.MwFifth;
 
@@ -69,6 +68,12 @@ public class CharacterVantage
     public string Name { get; set; } = null!;
     public int Rank { get; set; }  
     public string Title => Rank == 0 ? Name : $"{Name} {Rank}";
+
+    public void Deconstruct(out string name, out int rank)
+    {
+        name = Name;
+        rank = Rank;
+    }
 }
 
 [PublicAPI]
@@ -107,13 +112,11 @@ public class Character
     public int Passion { get; set; }
     public int Prowess { get; set; }
     public int Wisdom { get; set; }
-
     public CharacterSkill[] Skills { get; set; } = Array.Empty<CharacterSkill>();
     public CharacterVantage[] Advantages { get; set; } = Array.Empty<CharacterVantage>();
     public CharacterVantage[] Disadvantages { get; set; } = Array.Empty<CharacterVantage>();
     public string[] Spells { get; set; } = Array.Empty<string>();
     public string[] FlavorTraits { get; set; } = Array.Empty<string>();
-
     public string? UnusualFeatures { get; set; }
     public string? Cures { get; set; }
     public string? Documents { get; set; }
@@ -123,6 +126,14 @@ public class Character
     public bool NoHistory { get; set; }
     public bool NoAdvantages { get; set; }
     public bool NoOccupation { get; set; }
+    
+    public int StartingLevel => NoHistory ? 5 : 6;
+    public int GiftMoonstone { get; set; }
+    public int SkillMoonstone { get; set; }
+    
+    public static int Triangle(int level) {
+        return Math.Max(0, level * (level + 1) / 2);
+    }
 
     public CharacterSummary ToSummary(GameState gameState) =>
         new CharacterSummary(
@@ -134,17 +145,6 @@ public class Character
             $"{gameState.HomeChapters.FirstOrDefault(x=>x.Name == HomeChapter)?.Title ?? "No Home Chapter"}, {Occupation ?? "No Occupation"}, {gameState.Religions.FirstOrDefault(x=>x.Name == Religion)?.Title ?? "Not Religious"}",
             Level,
             State);
-
-    public void ReplaceOccupationalSkills(string[]? occupationalSkills)
-    {
-        if (occupationalSkills == null)
-            return;
-
-        Skills = Skills
-            .Where(x => x.Type != SkillPurchase.Occupation)
-            .Concat(occupationalSkills.Select(x => CharacterSkill.FromTitle(x, SkillPurchase.Occupation)))
-            .ToArray();
-    }
 
     private static HashSet<string> _skipProperties = new() { nameof(ChangeSummary), nameof(State), nameof(Id),nameof(PreviousId),nameof(AccountId) };
     
@@ -163,5 +163,27 @@ public class Character
         }
 
         return result;
+    }
+
+    public void UpdateMoonstone(GameState gameState)
+    {
+        GiftMoonstone = Triangle(Level) - Triangle(StartingLevel);
+        
+        var purchasedSkills = Skills.Where(x => x.Type == SkillPurchase.Purchased).ToList();
+
+        if (purchasedSkills.Count == 0)
+        {
+            SkillMoonstone = 0;
+            return;
+        }
+        
+        var purchaseCount = Triangle(purchasedSkills.Sum(x=>x.Purchases ?? 0));
+        var purchaseCostSum = purchasedSkills.Join(
+            gameState.Skills, 
+            x => x.Name, x => x.Name, 
+            (x,y)=>(x.Purchases ?? 0) * (y.CostPerPurchase ?? 0))
+            .Sum();
+
+        SkillMoonstone = purchaseCount + purchaseCostSum;
     }
 }

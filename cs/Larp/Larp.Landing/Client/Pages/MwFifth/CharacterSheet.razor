@@ -1,106 +1,26 @@
 @using Larp.Landing.Shared.MwFifth
 @using Larp.Landing.Client.Pages.MwFifth.Components
-
-<MudGrid>
-    <MudItem xs="2" Class="justify-center"><img src="/tree.webp" alt="Mystwood Logo" style="height: 4em; width: auto; padding-right: 1em"/></MudItem>
-    <MudItem xs="8">
-        <div style="font-size: 1.75em">
-            @Character.CharacterName
-        </div>
-        <div style="font-size: 1.2em">
-            @_homeChapter, @_specialty, @_religion
-        </div>
-    </MudItem>
-    <MudItem xs="2" Class="justify-center"><!-- QR Code --></MudItem>
-    <MudItem xs="12">
-        <MudGrid>
-            @foreach (var (name, rank) in _gifts)
-            {
-                <MudItem xs="6">
-                    <div style="border: 1pt solid #777777; background-color: #f4f5f7; position: relative">
-                        <div style="
-                             position: absolute; left: 0.5em; bottom: -0.5em; width: 2em; height: 2em;
-                             border-radius: 50%; border: 1pt solid #777777; background-color: #ffffff; font-size: 2em;
-                             text-align: center; font-weight: bold; padding-top: 0.2em; box-sizing: border-box">
-                            @rank
-                        </div>
-                        <div style="padding: 0.1em 0.5em; background-color: #ffffff; font-weight: bold">
-                            @name
-                        </div>
-                        <div style="padding-left: 40%; padding-top: 0.5em; height: 4em; line-height: 1.5em">
-                            <div>
-                                @for (var i = 0; i < Math.Min(5, rank); i++)
-                                {
-                                    <MudIcon Icon="@Icons.Material.Filled.Star" Size="Size.Small"/>
-                                }
-                            </div>
-                            <div>
-                                @for (var i = 5; i < Math.Min(10, rank); i++)
-                                {
-                                    <MudIcon Icon="@Icons.Material.Filled.Star" Size="Size.Small"/>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </MudItem>
-            }
-        </MudGrid>
-    </MudItem>
-    <MudItem xs="6">
-        <MudStack Spacing="4">
-            @foreach (var (name, value) in Character.Properties)
-            {
-                <div style="border: 1pt solid #777777; background-color: #ffffff; position: relative">
-                    <div style="
-                         position: absolute; right: 0.5em; bottom: -0.5em; width: 1.75em; height: 1.75em;
-                         border-radius: 50%; border: 1pt solid #777777; background-color: #ffffff; font-size: 1em;
-                         text-align: center; font-weight: bold; padding-top: 0.1em; box-sizing: border-box">
-                        @value
-                    </div>
-                    <div style="padding: 0.25em 0.5em; font-weight: bold">
-                        @name
-                    </div>
-                </div>
-            }
-        </MudStack>
-    </MudItem>
-    <MudItem xs="6">
-        <div style="
-            border: 1pt solid #777777;
-            background-color: #ffffff;
-            position: relative;
-            padding-top: 2em ">
-            <div style="
-                position: absolute; left: 0.5em; top: -0.5em;
-                border: 1pt solid #777777; background-color: #ffffff;
-                text-align: center; font-weight: bold; padding: 0.25em 0.5em; box-sizing: border-box
-            ">Attributes</div>
-            @foreach (var name in Character.Abilities)
-            {
-                <div style="padding: 0.25em 0.5em; font-weight: bold">
-                    @name
-                </div>
-            }
-        </div>
-    </MudItem>
-</MudGrid>
-
+@using Larp.Common
 
 @code {
-
     [Parameter]
     public CharacterBuilder Character { get; set; } = null!;
+
+    [Parameter]
+    public bool FullLayout { get; set; }
 
     private (string Name, int Value)[] _gifts = Array.Empty<(string, int)>();
     private string? _homeChapter;
     private string? _specialty;
     private string? _religion;
     private string? _qrCode;
+    private Spell[] _spells = Array.Empty<Spell>();
+    private string[] _aggregateSkills = Array.Empty<string>();
 
     protected override void OnInitialized()
     {
         _qrCode = $"https://larp.maragnus.com/cs/{Character.Character.Id}";
-        
+
         _gifts = new[]
         {
             ("Courage", Character.Courage),
@@ -114,6 +34,156 @@
         _homeChapter = Character.GetHomeChapter()?.Title ?? "Invalid Home Chapter";
         _specialty = Character.Specialty ?? Character.GetOccupation()?.Name ?? "No Occupation";
         _religion = Character.GetReligion()?.Title ?? "No Religion";
+
+        string SkillAggregate(IGrouping<string, CharacterSkill> item)
+        {
+            var rank = item.Sum(x => x.Rank);
+            return rank == 0 ? item.Key : $"{item.Key} {rank}";
+        }
+
+        _aggregateSkills =
+            Character.OccupationalChosenSkills.Select(x => CharacterSkill.FromTitle(x, SkillPurchase.Occupation))
+                .Concat(Character.OccupationalSkills)
+                .Concat(Character.PurchasedSkills)
+                .GroupBy(x => x.Name)
+                .Select(SkillAggregate)
+                .ToArray();
+
+        _spells = Character.AllSpells.TryFromKeys(Character.Character.Spells).ToArray();
     }
 
 }
+
+<MudGrid>
+    <MudItem xs="2" Class="justify-center">
+        <img src="/tree.webp" alt="Mystwood Logo" class="game-logo"/>
+    </MudItem>
+    <MudItem xs="8">
+        <div class="character-title">
+            @Character.CharacterName
+        </div>
+        <div class="character-subtitle">
+            @_homeChapter, @_specialty, @_religion
+        </div>
+    </MudItem>
+    <MudItem xs="2" Class="justify-center"><!-- QR Code --></MudItem>
+    <MudItem xs="@(FullLayout ? 8 : 12)">
+        <MudGrid>
+            @foreach (var (name, rank) in _gifts)
+            {
+                <MudItem xs="@(FullLayout ? 6 : 2)">
+                    <div class="gift-container">
+                        <div class="gift-rank">
+                            @rank
+                        </div>
+                        <div class="gift-name">
+                            @name
+                        </div>
+                        @if (FullLayout) {
+                            <div class="gift-stars">
+                                <div>
+                                    @for (var i = 0; i < Math.Min(5, rank); i++)
+                                    {
+                                        <MudIcon Icon="@Icons.Material.Filled.Star" Size="Size.Small"/>
+                                    }
+                                </div>
+                                <div>
+                                    @for (var i = 5; i < Math.Min(10, rank); i++)
+                                    {
+                                        <MudIcon Icon="@Icons.Material.Filled.Star" Size="Size.Small"/>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </MudItem>
+            }
+        </MudGrid>
+    </MudItem>
+    <MudItem xs="@(FullLayout ? 4 : 6)">
+        <MudStack Spacing="4">
+            @foreach (var (name, value) in Character.Properties)
+            {
+                <div class="property-container">
+                    <div class="property-value">@value</div>
+                    <div class="property-name">@name</div>
+                </div>
+            }
+        </MudStack>
+    </MudItem>
+    <MudItem xs="@(FullLayout ? 4 : 6)">
+        <div class="list-container">
+            <div class="list-header">Attributes</div>
+            @foreach (var name in Character.Abilities)
+            {
+                <div class="list-item">@name</div>
+            }
+        </div>
+    </MudItem>
+    <MudItem xs="@(FullLayout ? 4 : 6)">
+        <div class="list-container">
+            <div class="list-header">Skills</div>
+            @foreach (var name in _aggregateSkills)
+            {
+                <div class="list-item">@name</div>
+            }
+        </div>
+    </MudItem>
+    @if (Character.Advantages.Length > 0 || Character.Disadvantages.Length > 0)
+    {
+        <MudItem xs="@(FullLayout ? 4 : 6)">
+            <div style="display: flex; flex-direction: column; gap: 2em; height: 100%">
+                <div class="list-container" style="height: auto; flex-grow: 1">
+                    <div class="list-header">Advantages</div>
+                    @foreach (var (name, rank) in Character.Advantages)
+                    {
+                        <div class="list-item">@rank @name</div>
+                    }
+                </div>
+                <div class="list-container" style="height: auto; flex-grow: 1">
+                    <div class="list-header">Disadvantages</div>
+
+                    @foreach (var (name, rank) in Character.Disadvantages)
+                    {
+                        <div class="list-item">@rank @name</div>
+                    }
+                </div>
+            </div>
+        </MudItem>
+    }
+    <MudItem xs="6">
+        <div class="list-container">
+            <div class="list-header">Unusual Features</div>
+            <div class="list-text">
+                @(Character.Character.UnusualFeatures ?? "No Unusual Features")
+            </div>
+        </div>
+    </MudItem>
+    <MudItem xs="6">
+        <div class="list-container">
+            <div class="list-header">Cures</div>
+            <div class="list-text">
+                @(Character.Character.Cures ?? "No Cures")
+            </div>
+        </div>
+    </MudItem>
+    <MudItem xs="6">
+        <div class="list-container">
+            <div class="list-header">Documents</div>
+            <div class="list-text">
+                @(Character.Character.Documents ?? "No Documents")
+            </div>
+        </div>
+    </MudItem>
+    @foreach (var spell in _spells)
+    {
+        <MudItem xs="@(FullLayout ? 3 : 4)">
+            <div class="spell-container">
+                <div class="spell-name">@spell.Name</div>
+                <div>@spell.Effect</div>
+                <div>@spell.Type</div>
+                <div>@spell.Mana Mana</div>
+            </div>
+        </MudItem>
+    }
+</MudGrid>

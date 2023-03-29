@@ -1,0 +1,14 @@
+@page "/reset"
+@inject NavigationManager NavigationManager
+@inject LandingService LandingService
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await LandingService.Reset();
+        NavigationManager.NavigateTo("/");
+    }
+
+}
+
+Resetting...
+<MudProgressCircular Size="Size.Large" Indeterminate />

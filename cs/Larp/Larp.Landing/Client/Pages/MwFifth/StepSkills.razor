@@ -1,0 +1,180 @@
+@using Larp.Landing.Shared.MwFifth
+@using System.Text.Json
+@inject ILogger<StepSkills> Logger
+
+<MudText Typo="Typo.h6">Purchase skills</MudText>
+<MudText Typo="Typo.body2">
+    Each skill has a purchase price. In addition, each skill you purchase cost incrementally more by one moonstone.
+</MudText>
+
+<StepDivider/>
+
+<MudText Typo="Typo.body2">
+    Select skills from this list to add them to the grid where you can purchase ranks.
+</MudText>
+<MudSelectExtended @ref="_selectComponent"
+    T="SkillItem?"
+    ItemCollection="_availableSkills"
+    ToStringFunc="x => x!.Definition.Title"
+    ValueChanged="AddSkill"
+    Label="Select to purchase a skill"
+    Variant="Variant.Outlined"
+    SearchBox="true"
+    SearchFunc="(item, query) => item!.Definition.Name.Contains(query, StringComparison.InvariantCultureIgnoreCase)"
+    SearchBoxClearable="true"
+    SearchBoxAutoFocus="true"/>
+
+<StepDivider/>
+
+<MudGrid>
+    @foreach (var skill in _skills.Where(x => x.IsPurchased))
+    {
+        <MudItem xs="6">
+            <MudPaper Style="padding: 0.5em">
+                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+                        <MudAvatar Size="Size.Medium">0</MudAvatar>
+                        <div>
+                            <MudText Typo="Typo.body1">@skill.Title</MudText>
+                            <MudText Typo="Typo.body2">@skill.Subtitle</MudText>
+                        </div>
+                    </MudStack>
+
+                    <MudStack Row Justify="Justify.FlexEnd" AlignItems="AlignItems.Center">
+                        @if (skill.Definition.Purchasable == SkillPurchasable.Multiple)
+                        {
+                            <MudFab StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="() => Add(skill)"/>
+                            <MudFab StartIcon="@(skill.IsLastRank ? Icons.Material.Filled.Delete : Icons.Material.Filled.Remove)" Size="Size.Small" OnClick="() => Remove(skill)"/>
+                        }
+                        else
+                        {
+                            <MudFab StartIcon="@Icons.Material.Filled.Delete" Size="Size.Small" OnClick="() => Remove(skill)"/>
+                        }
+                    </MudStack>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+    }
+</MudGrid>
+<StepDivider/>
+
+@code {
+
+    [Parameter]
+    public CharacterBuilder Character { get; set; } = null!;
+
+    private MudSelectExtended<SkillItem?>? _selectComponent;
+    
+    private SkillItem[] _skills = Array.Empty<SkillItem>();
+    private SkillItem[] _availableSkills = Array.Empty<SkillItem>();
+
+    record SkillItem(SkillDefinition Definition, CharacterSkill Purchase)
+    {
+        public string Title { get; set; } = "Bacon";
+        public string Subtitle { get; set; } = "";
+
+        public bool IsPurchased => Purchase.Purchases > 0;
+        public bool IsLastRank => Purchase.Purchases == 1;
+
+        public void Update()
+        {
+            var ranksPerPurchase = Definition.RanksPerPurchase ?? 1;
+            Purchase.Rank = (Purchase.Purchases ?? 0) * ranksPerPurchase;
+
+            if (Purchase.Purchases is null or 0)
+                Title = "Cheese";
+            else if (Definition.Purchasable == SkillPurchasable.Once)
+                Title = ranksPerPurchase == 1 ? Definition.Title : $"{Definition.Name} {Purchase.Rank}";
+            else
+                Title = $"{Definition.Name} {Purchase.Rank}";
+
+            if (Definition.Purchasable == SkillPurchasable.Once)
+                Subtitle = ranksPerPurchase == 1 ? $"{Definition.CostPerPurchase} MS" : $"{Definition.CostPerPurchase} MS for {Definition.RanksPerPurchase} ranks";
+            else
+                Subtitle = ranksPerPurchase == 1 ? $"{Definition.CostPerPurchase} MS per rank" : $"{Definition.CostPerPurchase} MS for {ranksPerPurchase} ranks";
+        }
+
+        public void Add()
+        {
+            switch (Definition.Purchasable)
+            {
+                case SkillPurchasable.Unavailable:
+                    return;
+                case SkillPurchasable.Once:
+                    Purchase.Purchases = 1;
+                    return;
+                case SkillPurchasable.Multiple:
+                default:
+                    Purchase.Purchases += 1;
+                    break;
+            }
+            Update();
+        }
+
+        public void Remove()
+        {
+            switch (Definition.Purchasable)
+            {
+                case SkillPurchasable.Unavailable:
+                    return;
+                case SkillPurchasable.Once:
+                    Purchase.Purchases = 0;
+                    return;
+                case SkillPurchasable.Multiple:
+                default:
+                    Purchase.Purchases = Math.Max(0, (Purchase.Purchases ?? 0) - 1);
+                    break;
+            }
+            Update();
+        }
+    }
+
+
+    protected override void OnInitialized()
+    {
+        _skills = Character.AllPurchasableSkills.Select(
+            definition => new SkillItem(definition,
+                Character.PurchasedSkills.FirstOrDefault(x => x.Name == definition.Name)
+                ?? new CharacterSkill() { Name = definition.Name, Purchases = 0, Rank = 0, Type = SkillPurchase.Purchased }))
+            .ToArray();
+
+        UpdateSkills();
+    }
+
+    private void UpdateSkills()
+    {
+        // _skill = null;
+        // if (_selectComponent != null)
+        //     _selectComponent.Value = null;
+        _selectComponent?.Clear();
+
+        foreach (var skill in _skills) skill.Update();
+
+        _availableSkills = _skills.Where(x => !x.IsPurchased).ToArray();
+
+        Character.PurchasedSkills = _skills
+            .Where(x => x.IsPurchased)
+            .Select(x => x.Purchase)
+            .ToArray();
+        
+        StateHasChanged();
+    }
+
+    private void AddSkill(SkillItem? skill)
+    {
+        skill?.Add();
+        UpdateSkills();
+    }
+
+    private void Add(SkillItem? skill)
+    {
+        skill?.Add();
+        UpdateSkills();
+    }
+
+    private void Remove(SkillItem? skill)
+    {
+        skill?.Remove();
+        UpdateSkills();
+    }
+}

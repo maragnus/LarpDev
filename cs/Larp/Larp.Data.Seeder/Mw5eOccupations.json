@@ -849,11 +849,12 @@
     "name": "Corporal of the Guard",
     "duty": "inspecting the Guard",
     "livery": "based on local Chapter",
+    "leadership": "Town Guard",
     "skills": [
       "Armstraining 2",
       "Duty 2",
       "Income 10",
-      "Leadership (Town Guard)",
+      "Leadership",
       "Livery",
       "Warcaster",
       "Weapon Specialization (any one Weapon Type)",
@@ -877,12 +878,13 @@
   {
     "type": "Advanced",
     "name": "Demagogue",
+    "leadership": "those who have joined your cause",
     "skills": [
       "Armstraining 4",
       "Bardic Voice 4",
       "Income 10",
       "Information Gathering",
-      "Leadership (those who have joined your cause)",
+      "Leadership",
       "News & Rumors",
       "Unarmed Combat"
     ]
@@ -1051,10 +1053,11 @@
     "type": "Advanced",
     "name": "Knight Errant",
     "livery": "Your heraldry",
+    "leadership": "any non-Knight sworn to aid you",
     "skills": [
       "Armstraining 4",
       "Income 10",
-      "Leadership (any non-Knight sworn to aid you)",
+      "Leadership",
       "Livery",
       "Retainers 1",
       "Wear Armor 6"
@@ -1264,10 +1267,11 @@
       "Bodyguard"
     ],
     "livery": "patron’s colors",
+    "leadership": "retainers and followers of your patron",
     "skills": [
       "Armstraining 6",
       "Income 10",
-      "Leadership (retainers and followers of your patron)",
+      "Leadership",
       "Livery",
       "Wear Armor 4"
     ]
@@ -1290,11 +1294,12 @@
   {
     "type": "Advanced",
     "name": "Steward",
+    "leadership": "retainers and followers of your patron",
     "skills": [
       "Buy/Sell (50)",
       "Cooking 6",
       "Commerce",
-      "Leadership (retainers and followers of your patron)",
+      "Leadership",
       "Scribe 2"
     ]
   },
@@ -1314,11 +1319,12 @@
     "type": "Advanced",
     "name": "Varlet",
     "duty": "fulfilling the requests of your master",
+    "leadership": "your master",
     "skills": [
       "Duty 2",
       "Income 5",
       "Information Gathering",
-      "Leadership (your master)",
+      "Leadership",
       "Unarmed Combat",
       "Craft skill 2"
     ]
@@ -1343,10 +1349,11 @@
     "name": "Captain of the Guard",
     "duty": "reviewing the guard",
     "livery": "based on local Chapter",
+    "leadership": "Town Guard",
     "skills": [
       "Duty 1",
       "Income 15",
-      "Improved Leadership (Town Guard)",
+      "Improved Leadership",
       "Livery",
       "Patronage 1",
       "Scribe 2",
@@ -1373,11 +1380,12 @@
     "type": "Plot",
     "name": "Inquisitor",
     "livery": "icons of faith",
+    "leadership": "anyone under your command in battle",
     "skills": [
       "Battlemage",
       "Divine Lore",
       "Divine Spells",
-      "Leadership (anyone under your command in battle)",
+      "Leadership",
       "Livery",
       "Mage Lore",
       "Slayer (Undead)",
@@ -1429,10 +1437,11 @@
     "type": "Plot",
     "name": "Knight of the Realm",
     "livery": "Your heraldry",
+    "leadership": "anyone wearing your colors",
     "skills": [
       "Armstraining 4",
       "Income (50)",
-      "Improved Leadership (anyone wearing your colors)",
+      "Improved Leadership",
       "Livery",
       "Patronage 3",
       "Retainers 6",
@@ -1443,9 +1452,10 @@
     "type": "Plot",
     "name": "Knight Templar",
     "livery": "your heraldry",
+    "leadership": "any non-Knight sworn to aid you",
     "skills": [
       "Battlemage",
-      "Leadership (any non-Knight sworn to aid you)",
+      "Leadership",
       "Income 10",
       "Livery",
       "Mage Lore",
@@ -1516,10 +1526,11 @@
   {
     "type": "Plot",
     "name": "Witch Hunter",
+    "leadership": "anyone under your command in battle",
     "skills": [
       "Armstraining 2",
       "Battlemage",
-      "Leadership (anyone under your command in battle)",
+      "Leadership",
       "Mage Lore",
       "Occupational Spells",
       "Set Trap",
@@ -1539,7 +1550,9 @@
   {
     "type": "Basic",
     "name": "Drengr",
-    "chapters": ["burgundar"],
+    "chapters": [
+      "burgundar"
+    ],
     "skills": [
       "Iron Will",
       "Unarmed Combat",
@@ -1554,5 +1567,57 @@
         ]
       }
     ]
+  },
+  {
+    "type": "Enhancement",
+    "name": "Alchemist",
+    "skills": [
+      "Production (Chaos or Time)"
+    ]
+  },
+  {
+    "type": "Enhancement",
+    "name": "Barback",
+    "skills": [
+      "Income 5",
+      "Sell Drinks"
+    ]
+  },
+  {
+    "type": "Enhancement",
+    "name": "Guild Crafter",
+    "skills": [
+      "Guild Wages",
+      "Livery"
+    ],
+    "livery": "guild patch and visible tools of the trade"
+  },
+  {
+    "type": "Enhancement",
+    "name": "Master Crafter",
+    "skills": [
+      "Guild Wages",
+      "Instruction",
+      "Livery",
+      "Masterwork",
+      "Retainer 1"
+    ],
+    "livery": "guild patch and visible tools of the trade"
+  },
+  {
+    "type": "Enhancement",
+    "name": "Master Healer",
+    "skills": [
+      "Medicine"
+    ]
+  },
+  {
+    "type": "Enhancement",
+    "name": "Town Guard Auxiliary",
+    "skills": [
+      "Income 5",
+      "Livery"
+    ],
+    "livery": "based on local Chapter"
   }
 ]

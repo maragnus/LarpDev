@@ -1,8 +1,10 @@
 @using Larp.Landing.Shared.MwFifth
 <MudText Typo="Typo.h6">Select your occupation</MudText>
-<MudText Typo="Typo.body2">Choose and customize a Basic Occupation or a Chapter-Specific Basic Occupation.
-    You can opt not to choose an occupation until your third session. 
-    Also, Occupation can be changed once per year.</MudText>
+<MudText Typo="Typo.body2">
+    Choose and customize a Basic Occupation or a Chapter-Specific Basic Occupation.
+    You can opt not to choose an occupation until your third session.
+    Also, Occupation can be changed once per year.
+</MudText>
 
 <StepDivider/>
 
@@ -24,6 +26,42 @@ else if (!Character.IsHomeChapterValid)
 }
 else if (!Character.NoOccupation)
 {
+    <MudExpansionPanels>
+        @if (Character.AgeGroup == AgeGroup.Youth)
+        {
+            <MudExpansionPanel Text="Youth Occupations" Icon="@Icons.Material.Outlined.Help">
+                <MudText Typo="Typo.body1">
+                    <strong>Youth Occupations</strong> provide in game roles for player characters who are between 14 and 18. They are simple and most are geared towards adventure, or helping other (adult) players. The prime example is “Adventurer”.
+                </MudText>
+            </MudExpansionPanel>
+        }
+        else
+        {
+            <MudExpansionPanel Text="Basic Occupations" Icon="@Icons.Material.Outlined.Help">
+                <MudText Typo="Typo.body1">
+                    <strong>Basic Occupations</strong> are those jobs and roles that are the common in the world of Mystwood, and do not require any special knowledge of our setting or in game society. They tend to be simpler to play than Advanced Occupations, and have fewer requirements. While they are listed as “basic”, most people in the setting of Mystwood are employed in one of these occupations, and player characters should not feel forced to move on to an Advanced Occupation if they are happy with their current one.
+                </MudText>
+            </MudExpansionPanel>
+
+            if (Character.Character.PreviousId != null)
+            {
+                <MudExpansionPanel Text="Advanced Occupations" Icon="@Icons.Material.Outlined.Help">
+                    <MudText Typo="Typo.body1">
+                        <strong>Advanced Occupations</strong> are rarer, more powerful, or both than Basic Occupations. You must meet certain expectations- normally prerequisites involving money, property, or the like- before you may choose an Advanced Occupation. Further, your change to the Advanced Occupation must be approved by a Game Master.
+                    </MudText>
+                </MudExpansionPanel>
+
+                <MudExpansionPanel Text="Plot Occupations" Icon="@Icons.Material.Outlined.Help">
+                    <MudText Typo="Typo.body1">
+                        <strong>Plot Occupations</strong> require some understanding of the game world, mechanics and lore in order to function. You must exhibit a good understanding of the game setting and it’s expectations, as well as the game mechanics involved in the Occupation, before you will be allowed by a Game Master to change to this Occupation.
+                    </MudText>
+                </MudExpansionPanel>
+            }
+        }
+    </MudExpansionPanels>
+
+    <StepDivider/>
+
     <MudSelectExtended
         Label="Occupation"
         T="string"
@@ -48,6 +86,25 @@ else if (!Character.NoOccupation)
             Style="margin: 2em 0"/>
     }
 
+    @if (Character.HasEnhancements)
+    {
+        <MudText Typo="Typo.body1" Style="margin-top: 2em; margin-bottom: 0.5em">
+            Some paths represent continued education or experience in a given area, but are not truly their own Occupation.
+        </MudText>
+
+        <MudSelectExtended
+            Label="Occupational Enhancement"
+            T="string"
+            Value="Character.Enhancement"
+            ValueChanged="OnSelectEnhancement"
+            SearchFunc="SearchList"
+            SearchBox="true"
+            SearchBoxAutoFocus="true"
+            SearchBoxClearable="true"
+            Variant="Variant.Outlined"
+            ItemCollection="_enhancements"/>
+    }
+
     @if (_occupation?.Skills.Length > 0)
     {
         <StepDivider/>
@@ -55,6 +112,19 @@ else if (!Character.NoOccupation)
         <MudText Typo="Typo.caption">Occupational Skills</MudText>
         <MudChipSet>
             @foreach (var skill in _occupation.Skills)
+            {
+                <MudChip>@skill</MudChip>
+            }
+        </MudChipSet>
+    }
+    
+    @if (_enhancement?.Skills.Length > 0)
+    {
+        <StepDivider/>
+
+        <MudText Typo="Typo.caption">Occupational Enhancement Skills</MudText>
+        <MudChipSet>
+            @foreach (var skill in _enhancement.Skills)
             {
                 <MudChip>@skill</MudChip>
             }
@@ -83,12 +153,13 @@ else if (!Character.NoOccupation)
 }
 
 @code {
-
     [Parameter]
     public CharacterBuilder Character { get; set; } = null!;
 
     private Occupation? _occupation;
+    private Occupation? _enhancement;
     private string[] _occupations = Array.Empty<string>();
+    private string[] _enhancements = Array.Empty<string>();
     private SkillSelector[] _skillSelectors = Array.Empty<SkillSelector>();
 
     class SkillSelector
@@ -115,6 +186,7 @@ else if (!Character.NoOccupation)
     private void Update()
     {
         _occupation = Character.GetOccupation();
+        _enhancement = Character.GetEnhancement();
         _skillSelectors = Character.OccupationalSkillsChoices
             .Select(x => new SkillSelector(x, Character.Character))
             .ToArray();
@@ -124,6 +196,7 @@ else if (!Character.NoOccupation)
     protected override void OnInitialized()
     {
         _occupations = Character.AvailableOccupations.Select(x => x.Value.Name).ToArray();
+        _enhancements = Character.AllEnhancements.Select(x => x.Value.Name).ToArray();
         Update();
     }
 
@@ -137,6 +210,12 @@ else if (!Character.NoOccupation)
         Character.Occupation = newOccupation;
         Character.OccupationalChosenSkills = Array.Empty<string>();
         Character.Specialty = null;
+        Update();
+    }
+
+    private void OnSelectEnhancement(string newEnhancement)
+    {
+        Character.Enhancement = newEnhancement;
         Update();
     }
 
@@ -157,5 +236,5 @@ else if (!Character.NoOccupation)
         if (value)
             Character.Occupation = null;
     }
-}
 
+}

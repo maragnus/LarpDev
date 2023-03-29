@@ -105,6 +105,7 @@ public class LandingService
         {
             await _landing.Logout();
             await _localStorage.RemoveItemAsync(SessionIdKey);
+            SetSessionId(null);
             return true;
         }
         catch (Exception ex)
@@ -141,5 +142,11 @@ public class LandingService
         {
             _logger.LogWarning(ex, "Failed to validate session");
         }
+    }
+
+    public async Task Reset()
+    {
+        await Logout(true);
+        await _localStorage.ClearAsync();
     }
 }

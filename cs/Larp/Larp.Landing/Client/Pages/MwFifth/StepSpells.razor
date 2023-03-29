@@ -7,29 +7,35 @@
 @if (Character.HasBardicSpells)
 {
     <MudAlert Severity="Severity.Info">Your Bardic Voice spells will be added automatically.</MudAlert>
+    <StepDivider/>
 }
 
 @if (Character.HasDivineSpells)
 {
     <MudAlert Severity="Severity.Info">Your Divine spells will be added automatically.</MudAlert>
+    <StepDivider/>
 }
 
 @if (Character.HasOccupationalSpells)
 {
     <MudAlert Severity="Severity.Info">Your @Character.Occupation Occupational spells will be added automatically.</MudAlert>
+    <StepDivider/>
 }
 
 @if (Character.ChosenSpells.Length != Character.Wisdom)
 {
     <MudAlert Severity="Severity.Warning">You need to select a number of spells equal to your Wisdom. You have selected @Character.ChosenSpells.Length spells and need to have @Character.Wisdom spells.</MudAlert>
+    <StepDivider/>
 }
 
-<MudListExtended MultiSelection T="string?" SelectedValues="Character.ChosenSpells" SelectedValuesChanged="SelectionChanged">
-    @foreach (var spell in Character.AllWisdomSpells)
-    {
-        <MudListItemExtended T="string?" Value="@spell.Name" Text="@spell.Name" SecondaryText="@spell.Effect"/>
-    }
-</MudListExtended>
+<MudPaper>
+    <MudListExtended MultiSelection T="string?" Clickable SelectedValues="Character.ChosenSpells" SelectedValuesChanged="SelectionChanged">
+        @foreach (var spell in Character.AllWisdomSpells)
+        {
+            <MudListItemExtended T="string?" Value="@spell.Name" Text="@spell.Name" SecondaryText="@spell.Effect"/>
+        }
+    </MudListExtended>
+</MudPaper>
 
 @code {
 

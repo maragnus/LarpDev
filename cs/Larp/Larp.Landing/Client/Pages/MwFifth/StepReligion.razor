@@ -4,26 +4,30 @@
 
 <StepDivider/>
 
-<MudListExtended 
-    Clickable="true" T="string" 
-    SelectedValue="Character.Religion" 
-    SelectedValueChanged="value => Character.Religion = value">
-    <ChildContent>
-        @foreach (var religion in _religions)
-        {
-            <MudListItemExtended T="string" Icon="@Icons.Material.Outlined.GroupWork" Text="@religion.Title" SecondaryText="@religion.Description" Value="@religion.Name"/>
-        }
-    </ChildContent>
-</MudListExtended>
+<MudPaper>
+    <MudListExtended
+        Clickable="true" T="string"
+        SelectedValue="Character.Religion"
+        SelectedValueChanged="value => Character.Religion = value">
+        <ChildContent>
+            @foreach (var religion in _religions)
+            {
+                <MudListItemExtended T="string" Icon="@Icons.Material.Outlined.GroupWork" Text="@religion.Title" SecondaryText="@religion.Description" Value="@religion.Name"/>
+            }
+        </ChildContent>
+    </MudListExtended>
+</MudPaper>
 
 @code {
+
     [Parameter]
     public CharacterBuilder Character { get; set; } = null!;
 
     private Religion[] _religions = Array.Empty<Religion>();
-    
+
     protected override void OnInitialized()
     {
         _religions = Character.AllReligions;
     }
+
 }

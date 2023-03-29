@@ -1,4 +1,5 @@
 using System.Collections;
+using Microsoft.AspNetCore.Components;
 
 namespace Larp.Landing.Client;
 
@@ -41,6 +42,12 @@ public class IndexedCollection<TItem> : IEnumerable<TItem>
 
 public static class Extensions
 {
+    public static bool IsPrintPage(this NavigationManager navigationManager)
+    {
+        var uri = new Uri(navigationManager.Uri.TrimEnd('/'));
+        return uri.AbsolutePath.EndsWith("/print");
+    }
+    
     public static IndexedCollection<TItem> ToIndexedCollection<TItem>(this IEnumerable<TItem> items,
         Func<TItem, string> getKey) =>
         new IndexedCollection<TItem>(items, getKey);

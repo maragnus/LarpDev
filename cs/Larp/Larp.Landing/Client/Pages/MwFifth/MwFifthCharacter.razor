@@ -9,6 +9,12 @@
     [Parameter]
     public string? CharacterId { get; set; }
 
+    [Parameter]
+    public bool Print { get; set; }
+    
+    [Parameter]
+    public bool FullLayout { get; set; }
+
     private LoadingState _loadingState = LoadingState.Loading;
     private Game _game = new();
     private GameState _gameState = null!;
@@ -22,7 +28,7 @@
 
         var character = await LandingService.MwFifth.GetCharacter(CharacterId!);
 
-        _character = new CharacterBuilder(character, _gameState, CharacterBuilderMode.NewCharacter, Logger);
+        _character = new CharacterBuilder(character, _gameState, Logger);
         _chapterEmail = _character.GetHomeChapter()?.Email ?? _game.Email;
         _loadingState = LoadingState.Loaded;
     }
@@ -36,6 +42,18 @@
             NavigationManager.NavigateTo("/characters");
         }
     }
+
+    private async Task CreateDraft()
+    {
+        var newCharacter = await LandingService.MwFifth.StartDraft(CharacterId!);
+        NavigationManager.NavigateTo($"/characters/mw5e/{newCharacter.Id}/edit");
+    }
+
+    private void PrintSheet()
+    {
+        NavigationManager.NavigateTo($"/characters/mw5e/{CharacterId}/print");
+    }
+
 }
 
 <StepDivider/>
@@ -45,34 +63,43 @@
     <MudProgressLinear Indeterminate/>
     return;
 }
-
-@if (_loadingState != LoadingState.Loaded)
+else if (_loadingState != LoadingState.Loaded)
 {
     <MudAlert Severity="Severity.Error">Character could not be loaded</MudAlert>
     return;
 }
 
-@if (_character.Character.State is CharacterState.NewDraft or CharacterState.UpdateDraft)
+@if (!Print)
 {
-    <MudButton Color="Color.Error" OnClick="DeleteDraft">Delete Draft</MudButton>
-    <StepDivider/>
-}
+    switch (_character.Character.State)
+    {
+        case CharacterState.NewDraft or CharacterState.UpdateDraft:
+            <MudButton Color="@Color.Error" OnClick="@DeleteDraft">Delete Draft</MudButton>
+            <StepDivider/>
+            break;
 
-@if (_character.Character.State is CharacterState.Review)
-{
-    <MudAlert Severity="Severity.Info">
-        <MudStack Spacing="4">
-            <div>
-                This draft is currently <strong>waiting for the Game Masters to review</strong>.
-            </div>
-            <div>
-                Once your draft is approved, it will be Live and can be printed. If the Game Master has any questions, they'll reach out to you.
-            </div>
-            <div>
-                If you have questions, please contact the chapter via email at <a href="mailto:@_chapterEmail?subject=Question+about+@_character.CharacterName">@_chapterEmail</a>.
-            </div>
-        </MudStack>
-    </MudAlert>
-    <StepDivider/>
+        case CharacterState.Live:
+            <MudButton Color="@Color.Secondary" OnClick="@PrintSheet">Print</MudButton>
+            <MudButton Color="@Color.Primary" OnClick="@CreateDraft">Draft Changes</MudButton>
+            <StepDivider/>
+            break;
+
+        case CharacterState.Review:
+            <MudAlert Severity="Severity.Info">
+                <MudStack Spacing="4">
+                    <div>
+                        This draft is currently <strong>waiting for the Game Masters to review</strong>.
+                    </div>
+                    <div>
+                        Once your draft is approved, it will be Live and can be printed. If the Game Master has any questions, they'll reach out to you.
+                    </div>
+                    <div>
+                        If you have questions, please contact the chapter via email at <a href="mailto:@_chapterEmail?subject=Question+about+@_character.CharacterName">@_chapterEmail</a>.
+                    </div>
+                </MudStack>
+            </MudAlert>
+            <StepDivider/>
+            break;
+    }
 }
-<CharacterSheet Character="_character"/>
+<CharacterSheet Character="_character" FullLayout="FullLayout"/>

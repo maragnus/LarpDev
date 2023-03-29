@@ -5,7 +5,6 @@ using Larp.Landing.Shared.Messages;
 using Larp.Landing.Shared.MwFifth;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using OfficeOpenXml;
 
 namespace Larp.Landing.Server.Services;
 
@@ -38,14 +37,24 @@ public class MwFifthServiceServer : IMwFifthService
 
     public async Task<Character> ReviseCharacter(string characterId)
     {
-        var character = await _mwFifth.Characters
-                   .Find(x => x.Id == characterId && x.AccountId == _userSession.AccountId)
-                   .FirstOrDefaultAsync()
-               ?? throw new ResourceNotFoundException();
+        var revision = await _mwFifth.Characters
+            .Find(x =>
+                x.State != CharacterState.Live
+                && x.PreviousId == characterId
+                && x.AccountId == _userSession.AccountId)
+            .FirstOrDefaultAsync();
+        if (revision != null)
+            return revision;
+
+        var character =
+            await _mwFifth.Characters
+                .Find(x => x.Id == characterId && x.AccountId == _userSession.AccountId)
+                .FirstOrDefaultAsync()
+            ?? throw new ResourceNotFoundException();
 
         if (character.State != CharacterState.Live)
             throw new BadRequestException("Character must be Live to revise");
-        
+
         character.PreviousId = character.Id;
         character.Id = ObjectId.GenerateNewId().ToString();
         character.State = CharacterState.UpdateDraft;
@@ -73,17 +82,19 @@ public class MwFifthServiceServer : IMwFifthService
         if (oldCharacter != null)
         {
             // User cannot change the state inappropriately
-            if (character.PreviousId == null && character.State is not (CharacterState.NewDraft or CharacterState.Review))
+            if (character.PreviousId == null &&
+                character.State is not (CharacterState.NewDraft or CharacterState.Review))
                 throw new BadRequestException("State may only be NewDraft or Review");
 
-            if (character.PreviousId != null && character.State is not (CharacterState.UpdateDraft or CharacterState.Review))
+            if (character.PreviousId != null &&
+                character.State is not (CharacterState.UpdateDraft or CharacterState.Review))
                 throw new BadRequestException("State may only be UpdateDraft or Review");
 
             // Properties are admin-only
             if (character.UnlockedAllSpells != oldCharacter.UnlockedAllSpells
                 || character.PreviousId != oldCharacter.PreviousId)
                 throw new BadRequestException("Cannot update restricted fields");
-            
+
             // User can only edit their own characters
             if (oldCharacter.AccountId != _userSession.AccountId)
                 throw new BadRequestException("Cannot change owner");
@@ -92,8 +103,12 @@ public class MwFifthServiceServer : IMwFifthService
             if (oldCharacter.State is not (CharacterState.NewDraft or CharacterState.UpdateDraft))
                 throw new BadRequestException("Character must be in draft to edit");
 
-            character.ChangeSummary = Character.BuildChangeSummary(oldCharacter, character);
-            
+            var previousCharacter = await _mwFifth.Characters
+                .Find(x => x.Id == character.PreviousId)
+                .FirstOrDefaultAsync();
+
+            character.ChangeSummary = Character.BuildChangeSummary(previousCharacter, character);
+
             await _mwFifth.Characters.ReplaceOneAsync(x => x.Id == character.Id, character);
             return StringResult.Success(character.Id);
         }
@@ -101,13 +116,13 @@ public class MwFifthServiceServer : IMwFifthService
         // Property is admin-only
         if (character.UnlockedAllSpells || character.PreviousId != null || character.ChangeSummary != null)
             throw new BadRequestException();
-        
+
         // User cannot change the state inappropriately
         if (character.State is not (CharacterState.NewDraft or CharacterState.Review))
             throw new ResourceForbiddenException();
-        
+
         character.AccountId = _userSession.AccountId!;
-        
+
         await _mwFifth.Characters.InsertOneAsync(character);
         return StringResult.Success(character.Id);
     }

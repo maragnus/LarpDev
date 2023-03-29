@@ -136,6 +136,7 @@ public class Occupation
     public SkillChoice[] Choices { get; set; } = Array.Empty<SkillChoice>();
     public string? Duty { get; set; }
     public string? Livery { get; set; }
+    public string? Leadership { get; set; }
     public string[] Chapters { get; set; } = Array.Empty<string>();
 
     // ReSharper disable once NonReadonlyMemberInGetHashCode

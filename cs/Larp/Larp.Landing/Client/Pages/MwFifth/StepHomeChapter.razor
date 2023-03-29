@@ -5,19 +5,23 @@
 </MudText>
 <StepDivider/>
 
-<MudListExtended 
-    Clickable="true" T="string" 
-    SelectedValue="Character.HomeChapter" 
-    SelectedValueChanged="(selected) => Character.HomeChapter = selected">
-    <ChildContent>
-        @foreach (var chapter in Character.AllHomeChapters.Values)
-        {
-            <MudListItemExtended T="string" Icon="@Icons.Material.Outlined.Flag" Text="@chapter.Title" SecondaryText="@chapter.Location" Value="@chapter.Name"/>
-        }
-    </ChildContent>
-</MudListExtended>
+<MudPaper>
+    <MudListExtended
+        Clickable="true" T="string"
+        SelectedValue="Character.HomeChapter"
+        SelectedValueChanged="(selected) => Character.HomeChapter = selected">
+        <ChildContent>
+            @foreach (var chapter in Character.AllHomeChapters.Values)
+            {
+                <MudListItemExtended T="string" Icon="@Icons.Material.Outlined.Flag" Text="@chapter.Title" SecondaryText="@chapter.Location" Value="@chapter.Name"/>
+            }
+        </ChildContent>
+    </MudListExtended>
+</MudPaper>
 
 @code {
+
     [Parameter]
     public CharacterBuilder Character { get; set; } = null!;
+
 }

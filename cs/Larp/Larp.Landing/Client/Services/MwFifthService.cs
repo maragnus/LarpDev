@@ -132,4 +132,7 @@ public class MwFifthService : IAsyncDisposable
 
     public async Task DeleteCharacter(string characterId) =>
         await _mwFifth.DeleteCharacter(characterId);
+
+    public async Task<Character> StartDraft(string characterId) =>
+        await _mwFifth.ReviseCharacter(characterId);
 }

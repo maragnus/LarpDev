@@ -1,15 +1,13 @@
-@page "/characters/{gameName}/{characterId}"
+@page "/characters/{gameName}/{characterId}/print"
 
 @using Larp.Landing.Client.Pages.MwFifth
 
 <PageHeader>Character Sheet</PageHeader>
 
-<MudContainer MaxWidth="MaxWidth.Medium">
-    @if (GameName == "mw5e")
-    {
-        <MwFifthCharacter CharacterId="@CharacterId" FullLayout/>
-    }
-</MudContainer>
+@if (GameName == "mw5e")
+{
+    <MwFifthCharacter CharacterId="@CharacterId" Print FullLayout />
+}
 
 @code {
     [Parameter]

@@ -4,18 +4,21 @@
 @inject LandingServiceUpkeep LandingServiceUpkeep
 
 @code {
-
     [CascadingParameter]
     protected PageInfo? PageInfo { get; set; }
 
     private IDisposable? _navChange;
     private bool _isDrawerOpen;
+    private bool _isPrint;
 
     protected override void OnInitialized()
     {
-        _navChange = NavigationManager.RegisterLocationChangingHandler(_ =>
+        _isPrint = NavigationManager.IsPrintPage();
+        _navChange = NavigationManager.RegisterLocationChangingHandler(context =>
         {
+            _isPrint = context.TargetLocation.EndsWith("/print");
             _isDrawerOpen = false;
+            StateHasChanged();
             return ValueTask.CompletedTask;
         });
 
@@ -50,41 +53,44 @@
     }
 }
 
-<MudAppBar Color="Color.Primary" Fixed="false" Dense="true">
-    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle"/>
-    <MudText>@PageInfo?.HeaderText</MudText>
-    <MudSpacer/>
-    <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" OnClick="AccountClick"/>
-</MudAppBar>
-<MudDrawer @bind-Open="@_isDrawerOpen">
-    <MudNavMenu>
-        @if (LandingService.IsAuthenticated)
-        {
-            <MudNavLink Href="/profile" Match="@NavLinkMatch.All" IconColor="@Color.Primary" Icon="@Icons.Material.Filled.AccountCircle">
-                <MudText Typo="@Typo.body1">@(LandingService.Account?.Name ?? "Name Not Set")</MudText>
-                <MudText Typo="@Typo.body2">Click to update your profile</MudText>
-            </MudNavLink>
-        }
-        else
-        {
-            <MudNavLink Href="/login" Match="@NavLinkMatch.All" Icon="@Icons.Material.Filled.AccountCircle">
-                <MudText Typo="@Typo.body1">Guest</MudText>
-                <MudText Typo="@Typo.body2">Click to log in</MudText>
-            </MudNavLink>
-        }
-        <MudDivider/>
-        <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
-        @if (LandingService.IsAuthenticated)
-        {
-            <MudNavLink Href="/characters" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.People">Characters</MudNavLink>
-        }
-        <MudNavLink Href="/events" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Event">Events</MudNavLink>
-        <MudNavLink Href="/clarify" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Book">Clarify</MudNavLink>
-        @if (LandingService.IsAuthenticated)
-        {
+@if (!_isPrint)
+{
+    <MudAppBar Color="Color.Primary" Fixed="false" Dense="true">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle"/>
+        <MudText>@PageInfo?.HeaderText</MudText>
+        <MudSpacer/>
+        <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" OnClick="AccountClick"/>
+    </MudAppBar>
+    <MudDrawer @bind-Open="@_isDrawerOpen">
+        <MudNavMenu>
+            @if (LandingService.IsAuthenticated)
+            {
+                <MudNavLink Href="/profile" Match="@NavLinkMatch.All" IconColor="@Color.Primary" Icon="@Icons.Material.Filled.AccountCircle">
+                    <MudText Typo="@Typo.body1">@(LandingService.Account?.Name ?? "Name Not Set")</MudText>
+                    <MudText Typo="@Typo.body2">Click to update your profile</MudText>
+                </MudNavLink>
+            }
+            else
+            {
+                <MudNavLink Href="/login" Match="@NavLinkMatch.All" Icon="@Icons.Material.Filled.AccountCircle">
+                    <MudText Typo="@Typo.body1">Guest</MudText>
+                    <MudText Typo="@Typo.body2">Click to log in</MudText>
+                </MudNavLink>
+            }
             <MudDivider/>
-            <MudNavLink Href="/profile" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person">Profile</MudNavLink>
-            <MudNavLink Href="/admin" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Shield">Administration</MudNavLink>
-        }
-    </MudNavMenu>
-</MudDrawer>
+            <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+            @if (LandingService.IsAuthenticated)
+            {
+                <MudNavLink Href="/characters" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.People">Characters</MudNavLink>
+            }
+            <MudNavLink Href="/events" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Event">Events</MudNavLink>
+            <MudNavLink Href="/clarify" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Book">Clarify</MudNavLink>
+            @if (LandingService.IsAuthenticated)
+            {
+                <MudDivider/>
+                <MudNavLink Href="/profile" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person">Profile</MudNavLink>
+                <MudNavLink Href="/admin" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Shield">Administration</MudNavLink>
+            }
+        </MudNavMenu>
+    </MudDrawer>
+}
