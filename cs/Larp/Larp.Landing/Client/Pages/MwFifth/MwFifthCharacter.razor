@@ -74,13 +74,13 @@ else if (_loadingState != LoadingState.Loaded)
     switch (_character.Character.State)
     {
         case CharacterState.NewDraft or CharacterState.UpdateDraft:
-            <MudButton Color="@Color.Error" OnClick="@DeleteDraft">Delete Draft</MudButton>
+            <MudButton Color="@Color.Error" OnClick="@DeleteDraft" Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.DeleteForever">Delete Draft</MudButton>
             <StepDivider/>
             break;
 
         case CharacterState.Live:
-            <MudButton Color="@Color.Secondary" OnClick="@PrintSheet">Print</MudButton>
-            <MudButton Color="@Color.Primary" OnClick="@CreateDraft">Draft Changes</MudButton>
+            <MudButton Color="@Color.Secondary" OnClick="@PrintSheet" Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Print">Print</MudButton>
+            <MudButton Color="@Color.Primary" OnClick="@CreateDraft" Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Edit">Draft Changes</MudButton>
             <StepDivider/>
             break;
 

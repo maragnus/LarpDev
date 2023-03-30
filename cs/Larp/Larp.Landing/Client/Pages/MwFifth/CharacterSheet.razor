@@ -20,12 +20,6 @@
     private string? _qrCode;
     private Spell[] _spells = Array.Empty<Spell>();
     private string[] _aggregateSkills = Array.Empty<string>();
-    private bool isMdAndUp;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        isMdAndUp = await BreakpointService.IsMediaSize(Breakpoint.MdAndUp);
-    }
 
     protected override void OnInitialized()
     {

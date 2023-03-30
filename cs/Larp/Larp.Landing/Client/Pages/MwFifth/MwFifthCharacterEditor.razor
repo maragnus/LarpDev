@@ -9,6 +9,7 @@
 @implements IAsyncDisposable
 
 @code {
+
     [Parameter]
     public string? CharacterId { get; set; }
 
@@ -31,7 +32,7 @@
         var character = string.IsNullOrEmpty(CharacterId)
             ? await LandingService.MwFifth.GetDraftCharacter()
             : await LandingService.MwFifth.GetCharacter(CharacterId);
-        
+
         _character = new CharacterBuilder(character, _gameState, Logger)
         {
             StateChanged = () =>
@@ -42,13 +43,13 @@
             }
         };
         UpdateCharacter();
-        
+
         void UpdateCharacter()
         {
             _character.UpdateMoonstone();
             _newMoonstoneCost = _character.GiftMoonstone + _character.SkillMoonstone;
         }
-        
+
         _isNewCharacter = character.PreviousId == null;
         if (character.PreviousId != null)
         {
@@ -114,7 +115,6 @@
                 () => _character.IsHistoryValid),
             new(
                 "Review",
-                //@<pre>@_character.Character.ToJson(new JsonWriterSettings() {Indent = true})</pre>,
                 @<StepReview Character="_character" Submit="Submit"/>,
                 @<MudIcon Icon="@Icons.Material.Outlined.Verified"/>,
                 () => false)
@@ -176,7 +176,6 @@
 
 }
 
-
 @if (_loadingState != LoadingState.Loaded)
 {
     <MudProgressLinear Indeterminate/>
@@ -194,32 +193,40 @@
             {
                 <MudText Typo="Typo.h6">Updating @_game.Title Character</MudText>
             }
-            
+
             <MudStack Row>
-                  @if (!_isNewCharacter)
-                  {
-                      <MudStack AlignItems="AlignItems.Center" Row>
-                          <MudAvatar Color="Color.Success">@(_newMoonstoneCost > 0 ? "+" : "")@(_newMoonstoneCost)</MudAvatar>
-                          <MudText>Moonstone</MudText>
-                      </MudStack>
-                  }
-                
+                @if (!_isNewCharacter)
+                {
+                    <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                        <MudAvatar Color="Color.Success">@(_newMoonstoneCost > 0 ? "+" : "")@(_newMoonstoneCost)</MudAvatar>
+                        <MudText Typo="Typo.caption">Moonstone</MudText>
+                    </MudStack>
+                }
+
                 @if (CharacterId != null)
                 {
-                    <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="DeleteDraft">Delete draft</MudButton>
+                    <div>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="DeleteDraft" StartIcon="@Icons.Material.Outlined.DeleteForever">Delete draft</MudButton>
+                    </div>
                 }
-                @switch (_saveState)
-                {
-                    case AutoSaveState.Saving:
-                        <MudProgressCircular Indeterminate="@true"/>
-                        break;
-                    case AutoSaveState.Saved:
-                        <MudAlert Severity="@Severity.Info">Saved</MudAlert>
-                        break;
-                    case AutoSaveState.ChangeAvailable:
-                        <MudButton Variant="Variant.Filled" OnClick="Save">Save Changes</MudButton>
-                        break;
-                }
+                <div>
+                    @switch (_saveState)
+                    {
+                        case AutoSaveState.Saving:
+                            <MudProgressCircular Indeterminate="@true"/>
+                            break;
+                        case AutoSaveState.Saved:
+                            <MudAlert Severity="@Severity.Info">Saved</MudAlert>
+                            break;
+                        case AutoSaveState.ChangeAvailable:
+                            <MudButton Variant="Variant.Filled" OnClick="Save">Save Changes</MudButton>
+                            break;
+                        case AutoSaveState.Inactive:
+                        default:
+                            <MudAlert Severity="@Severity.Info">No Changes</MudAlert>
+                            break;
+                    }
+                </div>
             </MudStack>
         </MudStack>
     </MudItem>
