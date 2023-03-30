@@ -164,26 +164,4 @@ public class Character
 
         return result;
     }
-
-    public void UpdateMoonstone(GameState gameState)
-    {
-        GiftMoonstone = Triangle(Level) - Triangle(StartingLevel);
-        
-        var purchasedSkills = Skills.Where(x => x.Type == SkillPurchase.Purchased).ToList();
-
-        if (purchasedSkills.Count == 0)
-        {
-            SkillMoonstone = 0;
-            return;
-        }
-        
-        var purchaseCount = Triangle(purchasedSkills.Sum(x=>x.Purchases ?? 0));
-        var purchaseCostSum = purchasedSkills.Join(
-            gameState.Skills, 
-            x => x.Name, x => x.Name, 
-            (x,y)=>(x.Purchases ?? 0) * (y.CostPerPurchase ?? 0))
-            .Sum();
-
-        SkillMoonstone = purchaseCount + purchaseCostSum;
-    }
 }

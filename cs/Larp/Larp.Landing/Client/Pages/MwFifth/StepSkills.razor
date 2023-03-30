@@ -8,14 +8,31 @@
 </MudText>
 
 <StepDivider/>
+<MudStack Row Justify="Justify.Center" AlignItems="AlignItems.Center" Spacing="8">
+    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+        <MudAvatar>@Character.SkillMoonstone</MudAvatar>
+        <MudText Typo="Typo.caption" Align="Align.Center">Skill Moonstone</MudText>
+    </MudStack>
+    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+        <MudAvatar Color="Color.Success">@(_skills.Sum(x => x.Purchase.Purchases))</MudAvatar>
+        <MudText Typo="Typo.caption" Align="Align.Center">Skill Count</MudText>
+    </MudStack>
+    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center">
+        <MudAvatar>@Character.Character.SkillTokens</MudAvatar>
+        <MudText Typo="Typo.caption" Align="Align.Center">Skill Tokens</MudText>
+    </MudStack>
+</MudStack>
+
+<StepDivider/>
 
 <MudText Typo="Typo.body2">
     Select skills from this list to add them to the grid where you can purchase ranks.
 </MudText>
-<MudSelectExtended @ref="_selectComponent"
+<MudSelectExtended
+    @ref="_selectComponent"
     T="SkillItem?"
     ItemCollection="_availableSkills"
-    ToStringFunc="x => x!.Definition.Title"
+    ToStringFunc="x => x!.Title"
     ValueChanged="AddSkill"
     Label="Select to purchase a skill"
     Variant="Variant.Outlined"
@@ -33,7 +50,7 @@
             <MudPaper Style="padding: 0.5em">
                 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                     <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
-                        <MudAvatar Size="Size.Medium">0</MudAvatar>
+                        <MudAvatar Size="Size.Medium">@skill.Purchase.Purchases</MudAvatar>
                         <div>
                             <MudText Typo="Typo.body1">@skill.Title</MudText>
                             <MudText Typo="Typo.body2">@skill.Subtitle</MudText>
@@ -64,7 +81,7 @@
     public CharacterBuilder Character { get; set; } = null!;
 
     private MudSelectExtended<SkillItem?>? _selectComponent;
-    
+
     private SkillItem[] _skills = Array.Empty<SkillItem>();
     private SkillItem[] _availableSkills = Array.Empty<SkillItem>();
 
@@ -82,7 +99,7 @@
             Purchase.Rank = (Purchase.Purchases ?? 0) * ranksPerPurchase;
 
             if (Purchase.Purchases is null or 0)
-                Title = "Cheese";
+                Title = ranksPerPurchase > 1 ? $"{Definition.Name} {Definition.RanksPerPurchase}" : Definition.Title;
             else if (Definition.Purchasable == SkillPurchasable.Once)
                 Title = ranksPerPurchase == 1 ? Definition.Title : $"{Definition.Name} {Purchase.Rank}";
             else
@@ -143,38 +160,41 @@
 
     private void UpdateSkills()
     {
-        // _skill = null;
-        // if (_selectComponent != null)
-        //     _selectComponent.Value = null;
         _selectComponent?.Clear();
 
         foreach (var skill in _skills) skill.Update();
 
         _availableSkills = _skills.Where(x => !x.IsPurchased).ToArray();
 
+        StateHasChanged();
+    }
+
+    private void ApplyChanges()
+    {
         Character.PurchasedSkills = _skills
             .Where(x => x.IsPurchased)
             .Select(x => x.Purchase)
             .ToArray();
-        
-        StateHasChanged();
+
+        UpdateSkills();
     }
 
     private void AddSkill(SkillItem? skill)
     {
         skill?.Add();
-        UpdateSkills();
+        ApplyChanges();
     }
 
     private void Add(SkillItem? skill)
     {
         skill?.Add();
-        UpdateSkills();
+        ApplyChanges();
     }
 
     private void Remove(SkillItem? skill)
     {
         skill?.Remove();
-        UpdateSkills();
+        ApplyChanges();
     }
+
 }

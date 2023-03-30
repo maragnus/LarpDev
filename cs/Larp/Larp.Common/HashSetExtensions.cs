@@ -23,7 +23,7 @@ public static class HashSetExtensions
     }
 }
 
-public static class IDictionaryExtensions
+public static class DictionaryExtensions
 {
     public static IEnumerable<TValue> TryFromKeys<TKey, TValue>(this IDictionary<TKey, TValue> dictionary,
         IEnumerable<TKey> keys)

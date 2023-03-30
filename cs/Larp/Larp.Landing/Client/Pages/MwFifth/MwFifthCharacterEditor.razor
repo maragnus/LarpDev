@@ -31,12 +31,6 @@
         var character = string.IsNullOrEmpty(CharacterId)
             ? await LandingService.MwFifth.GetDraftCharacter()
             : await LandingService.MwFifth.GetCharacter(CharacterId);
-
-        void UpdateCharacter()
-        {
-            character.UpdateMoonstone(_gameState);
-            _newMoonstoneCost = character.GiftMoonstone + character.SkillMoonstone;
-        }
         
         _character = new CharacterBuilder(character, _gameState, Logger)
         {
@@ -48,6 +42,12 @@
             }
         };
         UpdateCharacter();
+        
+        void UpdateCharacter()
+        {
+            _character.UpdateMoonstone();
+            _newMoonstoneCost = _character.GiftMoonstone + _character.SkillMoonstone;
+        }
         
         _isNewCharacter = character.PreviousId == null;
         if (character.PreviousId != null)
