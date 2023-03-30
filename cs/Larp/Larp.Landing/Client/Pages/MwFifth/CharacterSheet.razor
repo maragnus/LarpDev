@@ -1,8 +1,12 @@
 @using Larp.Landing.Shared.MwFifth
 @using Larp.Landing.Client.Pages.MwFifth.Components
 @using Larp.Common
+@using MudBlazor.Services
+@implements IAsyncDisposable
+@inject IBreakpointService BreakpointService
 
 @code {
+
     [Parameter]
     public CharacterBuilder Character { get; set; } = null!;
 
@@ -16,6 +20,12 @@
     private string? _qrCode;
     private Spell[] _spells = Array.Empty<Spell>();
     private string[] _aggregateSkills = Array.Empty<string>();
+    private bool isMdAndUp;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        isMdAndUp = await BreakpointService.IsMediaSize(Breakpoint.MdAndUp);
+    }
 
     protected override void OnInitialized()
     {
@@ -52,26 +62,34 @@
         _spells = Character.AllSpells.TryFromKeys(Character.Character.Spells).ToArray();
     }
 
+    public async ValueTask DisposeAsync()
+    {
+        await BreakpointService.DisposeAsync();
+    }
+
 }
 
 <MudGrid>
-    <MudItem xs="2" Class="justify-center">
-        <img src="/tree.webp" alt="Mystwood Logo" class="game-logo"/>
+    <MudItem xs="12" Class="justify-center">
+        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+            <div>
+                <img src="/tree.webp" alt="Mystwood Logo" class="game-logo"/>
+            </div>
+            <div>
+                <div class="character-title">
+                    @Character.CharacterName
+                </div>
+                <div class="character-subtitle">
+                    @_homeChapter, @_specialty, @_religion
+                </div>
+            </div>
+        </MudStack>
     </MudItem>
-    <MudItem xs="8">
-        <div class="character-title">
-            @Character.CharacterName
-        </div>
-        <div class="character-subtitle">
-            @_homeChapter, @_specialty, @_religion
-        </div>
-    </MudItem>
-    <MudItem xs="2" Class="justify-center"><!-- QR Code --></MudItem>
-    <MudItem xs="@(FullLayout ? 8 : 12)">
+    <MudItem xs="12">
         <MudGrid>
             @foreach (var (name, rank) in _gifts)
             {
-                <MudItem xs="@(FullLayout ? 6 : 2)">
+                <MudItem xs="@(FullLayout ? 4 : 6)" sm="@(FullLayout ? 2 : 3)" md="@(FullLayout ? 4 : 2)">
                     <div class="gift-container">
                         <div class="gift-rank">
                             @rank
@@ -79,39 +97,42 @@
                         <div class="gift-name">
                             @name
                         </div>
-                        @if (FullLayout) {
-                            <div class="gift-stars">
-                                <div>
-                                    @for (var i = 0; i < Math.Min(5, rank); i++)
-                                    {
-                                        <MudIcon Icon="@Icons.Material.Filled.Star" Size="Size.Small"/>
-                                    }
+                        @if (FullLayout)
+                        {
+                            <MudHidden Breakpoint="Breakpoint.SmAndDown">
+                                <div class="gift-stars">
+                                    <div>
+                                        @for (var i = 0; i < Math.Min(5, rank); i++)
+                                        {
+                                            <MudIcon Icon="@Icons.Material.Filled.Star" Size="Size.Small"/>
+                                        }
+                                    </div>
+                                    <div>
+                                        @for (var i = 5; i < Math.Min(10, rank); i++)
+                                        {
+                                            <MudIcon Icon="@Icons.Material.Filled.Star" Size="Size.Small"/>
+                                        }
+                                    </div>
                                 </div>
-                                <div>
-                                    @for (var i = 5; i < Math.Min(10, rank); i++)
-                                    {
-                                        <MudIcon Icon="@Icons.Material.Filled.Star" Size="Size.Small"/>
-                                    }
-                                </div>
-                            </div>
+                            </MudHidden>
                         }
                     </div>
                 </MudItem>
             }
         </MudGrid>
     </MudItem>
-    <MudItem xs="@(FullLayout ? 4 : 6)">
-        <MudStack Spacing="4">
-            @foreach (var (name, value) in Character.Properties)
-            {
-                <div class="property-container">
-                    <div class="property-value">@value</div>
-                    <div class="property-name">@name</div>
-                </div>
-            }
-        </MudStack>
-    </MudItem>
-    <MudItem xs="@(FullLayout ? 4 : 6)">
+    @foreach (var (name, value) in Character.Properties)
+    {
+        if (value == "-") continue;
+        <MudItem xs="6" sm="4" Style="page-break-inside: avoid">
+            <div class="property-container">
+                <div class="property-value">@value</div>
+                <div class="property-name">@name</div>
+            </div>
+        </MudItem>
+    }
+    <MudItem xs="12" Style="height: 0"></MudItem>
+    <MudItem xs="@(FullLayout ? 6 : 12)" sm="@(FullLayout ? 4 : 6)" Style="page-break-inside: avoid">
         <div class="list-container">
             <div class="list-header">Attributes</div>
             @foreach (var name in Character.Abilities)
@@ -120,7 +141,7 @@
             }
         </div>
     </MudItem>
-    <MudItem xs="@(FullLayout ? 4 : 6)">
+    <MudItem xs="@(FullLayout ? 6 : 12)" sm="@(FullLayout ? 4 : 6)" Style="page-break-inside: avoid">
         <div class="list-container">
             <div class="list-header">Skills</div>
             @foreach (var name in _aggregateSkills)
@@ -131,7 +152,7 @@
     </MudItem>
     @if (Character.Advantages.Length > 0 || Character.Disadvantages.Length > 0)
     {
-        <MudItem xs="@(FullLayout ? 4 : 6)">
+        <MudItem xs="@(FullLayout ? 6 : 12)" sm="@(FullLayout ? 4 : 6)" Style="page-break-inside: avoid">
             <div style="display: flex; flex-direction: column; gap: 2em; height: 100%">
                 <div class="list-container" style="height: auto; flex-grow: 1">
                     <div class="list-header">Advantages</div>
@@ -151,7 +172,7 @@
             </div>
         </MudItem>
     }
-    <MudItem xs="6">
+    <MudItem xs="@(FullLayout ? 6 : 12)" sm="6" Style="page-break-inside: avoid">
         <div class="list-container">
             <div class="list-header">Unusual Features</div>
             <div class="list-text">
@@ -159,7 +180,7 @@
             </div>
         </div>
     </MudItem>
-    <MudItem xs="6">
+    <MudItem xs="@(FullLayout ? 6 : 12)" sm="6" Style="page-break-inside: avoid">
         <div class="list-container">
             <div class="list-header">Cures</div>
             <div class="list-text">
@@ -167,7 +188,7 @@
             </div>
         </div>
     </MudItem>
-    <MudItem xs="6">
+    <MudItem xs="12" sm="@(FullLayout ? 6 : 12)" Style="page-break-inside: avoid">
         <div class="list-container">
             <div class="list-header">Documents</div>
             <div class="list-text">
@@ -177,7 +198,7 @@
     </MudItem>
     @foreach (var spell in _spells)
     {
-        <MudItem xs="@(FullLayout ? 3 : 4)">
+        <MudItem xs="@(FullLayout ? 4 : 6)" sm="@(FullLayout ? 3 : 4)">
             <div class="spell-container">
                 <div class="spell-name">@spell.Name</div>
                 <div>@spell.Effect</div>

@@ -61,7 +61,7 @@ else if (!Character.IsHomelandValid)
 
 @if (!Character.IsSpellsValid)
 {
-    <MudAlert Severity="Severity.Warning">You must select one spell for each level in Wisdom. You have @Character.ChosenSpells spells selected and need to have @Character.Wisdom spells selected.</MudAlert>
+    <MudAlert Severity="Severity.Warning">You must select one spell for each level in Wisdom. You have @Character.ChosenSpells.Length spells selected and need to have @Character.Wisdom spells selected.</MudAlert>
 }
 
 @if (!Character.IsVantagesValid)
