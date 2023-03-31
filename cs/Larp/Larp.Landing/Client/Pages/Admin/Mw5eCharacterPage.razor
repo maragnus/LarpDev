@@ -1,0 +1,63 @@
+@page "/admin/mw5e/characters/{CharacterId}"
+@using Larp.Landing.Shared
+@using Larp.Landing.Client.Pages.MwFifth
+@using Larp.Landing.Shared.MwFifth
+@inject LandingService LandingService
+@inject ILogger<Mw5eCharacterPage> Logger
+@inject NavigationManager NavigationManager
+
+<PageHeader>Mystwood 5e Characters</PageHeader>
+
+<AdminLayout Title="Review Character">
+    @if (_character == null)
+    {
+        <MudProgressCircular Indeterminate Size="Size.Large"/>
+    }
+    else
+    {
+        <MudStack Row Justify="Justify.FlexStart" AlignItems="AlignItems.Start" Class="mb-4">
+            <MudButton StartIcon="@Icons.Material.Filled.AccountCircle" Variant="Variant.Filled" OnClick="GoToAccount">View Account</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Color="Color.Warning" OnClick="EditCharacter">@(_character.Character.State == CharacterState.Live ? "Revise Character" : "Review Character")</MudButton>
+            <MudAlert Severity="Statuses[_character.Character.State].Severity">
+                @Statuses[_character.Character.State].Description
+            </MudAlert>
+        </MudStack>
+        <CharacterSheet Character="_character"/>
+    }
+</AdminLayout>
+
+@code {
+
+    private static readonly Dictionary<CharacterState, (string Description, Severity Severity)> Statuses = new()
+    {
+        { CharacterState.Archived, ("Character sheet has been archived", Severity.Error) },
+        { CharacterState.Review, ("Character sheet is waiting for review", Severity.Warning) },
+        { CharacterState.Live, ("Character sheet is live", Severity.Success) },
+        { CharacterState.NewDraft, ("Character sheet is drafting a new character", Severity.Info) },
+        { CharacterState.UpdateDraft, ("Character sheet is drafting changes to an existing character", Severity.Info) },
+    };
+
+    [Parameter]
+    public string CharacterId { get; set; } = null!;
+
+    CharacterBuilder? _character;
+    
+    private CharacterAccountSummary[] _items = Array.Empty<CharacterAccountSummary>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var character = await LandingService.Admin.GetMwFifthCharacter(CharacterId);
+        _character = new CharacterBuilder(character, LandingService.MwFifth.GameState, Logger);
+    }
+
+    private void GoToAccount()
+    {
+        NavigationManager.NavigateTo($"/admin/accounts/{_character?.Character.AccountId}");
+    }
+
+    private void EditCharacter()
+    {
+        NavigationManager.NavigateTo($"/admin/mw5e/characters/{CharacterId}/edit");
+    }
+
+}

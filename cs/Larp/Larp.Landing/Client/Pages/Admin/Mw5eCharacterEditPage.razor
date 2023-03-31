@@ -1,0 +1,59 @@
+@page "/admin/mw5e/characters/{CharacterId}/edit"
+@using Larp.Landing.Shared
+@using Larp.Landing.Client.Pages.MwFifth
+@using Larp.Landing.Shared.MwFifth
+@inject LandingService LandingService
+@inject ILogger<Mw5eCharacterPage> Logger
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+
+<PageHeader>Mystwood 5e Characters</PageHeader>
+
+<AdminLayout Title="Review Character">
+    @if (_character == null)
+    {
+        <MudProgressCircular Indeterminate Size="Size.Large"/>
+    }
+    else
+    {
+        <MudStack Row Justify="Justify.FlexStart" Class="mb-4">
+            <MudButton StartIcon="@Icons.Material.Filled.Save" OnClick="Save" Variant="Variant.Filled" Color="Color.Warning">Save Changes</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.Verified" OnClick="Verify" Variant="Variant.Filled" Color="Color.Success">Approve</MudButton>
+        </MudStack>
+        <MudAlert Severity="Severity.Info">Character editing is coming soon</MudAlert>
+    }
+</AdminLayout>
+
+@code {
+
+    [Parameter]
+    public string CharacterId { get; set; } = null!;
+
+    CharacterBuilder? _character;
+    
+    private CharacterAccountSummary[] _items = Array.Empty<CharacterAccountSummary>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var character = await LandingService.Admin.GetMwFifthCharacter(CharacterId);
+        _character = new CharacterBuilder(character, LandingService.MwFifth.GameState, Logger);
+    }
+
+    private void Save()
+    {
+    }
+
+    private async Task Verify()
+    {
+        var result = await DialogService.ShowMessageBox(
+            "Approve this character", 
+            "Are you ready to approve this character? This will make the changes live and contact the player that their changes have been approved.", 
+            "Yes, Approve", 
+            "No, Keep Editing");
+
+        if (result != true) return;
+
+        NavigationManager.NavigateTo($"/admin/mw5e/characters/{_character!.Character.Id}");
+    }
+
+}

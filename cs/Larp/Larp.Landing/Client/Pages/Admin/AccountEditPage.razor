@@ -1,0 +1,105 @@
+@page "/admin/accounts/{AccountId}"
+@inject LandingService LandingService
+@inject NavigationManager NavigationManager
+
+<PageHeader>Account Manager</PageHeader>
+
+@if (_account == null || _characters == null)
+{
+    <AdminLayout Title="Manage Account" Loading/>
+    return;
+}
+
+<AdminLayout Title="Manage Accounts">
+    <MudPaper Class="mb-4">
+        <MudPaper Class="pa-4 mb-4 relative">
+            <MudOverlay DarkBackground Absolute Visible="_saving">
+                <MudText Typo="Typo.h6">Saving...</MudText>
+                <MudProgressCircular Indeterminate Size="Size.Large"/>
+            </MudOverlay>
+            <MudText Typo="Typo.h6">Profile</MudText>
+            <MudGrid>
+                <MudItem xs="12" sm="6">
+                    <MudTextField T="string?" Label="Full Name" InputType="InputType.Text" Value="_account.Name" ValueChanged="(value) => Set(() => _account.Name = value)"/>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField T="string?" Label="Location" InputType="InputType.Text" Placeholder="Harrison, Maine" Value="_account.Location" ValueChanged="(value) => Set(() => _account.Location = value)"/>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField T="string?" Label="Phone" InputType="InputType.Telephone" Value="_account.Phone" ValueChanged="(value) => Set(() => _account.Phone = value)"/>
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <MudDatePicker T="DateTime?" Label="Birthdate" Clearable Date="_account.BirthDate?.ToDateTime(TimeOnly.MinValue)" DateChanged="(value) => Set(() => _account.BirthDate = value.HasValue ? DateOnly.FromDateTime(value.Value) : null)"/>
+                </MudItem>
+                <MudItem xs="12" sm="2">
+                    <MudField T="int?" Label="Age" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Calculate">@_account.Age</MudField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField T="string?" Label="Allergies & Disabilities" InputType="InputType.Text" Value="_account.Notes" ValueChanged="(value) => Set(() => _account.Notes = value)"/>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudButton StartIcon="@Icons.Material.Filled.Save" Disabled="!_changed" OnClick="Save" Color="Color.Primary" Variant="Variant.Outlined">Save Changes</MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+    </MudPaper>
+
+    <MudPaper Class="mb-4">
+        <MudDataGrid T="CharacterSummary" Items="_characters" RowClick="RowClick">
+            <Columns>
+                <PropertyColumn Property="x => x.Name" Title="Character Name"/>
+                <PropertyColumn Property="x => x.HomeChapter" Title="Home Chapter"/>
+                <PropertyColumn Property="x => x.Summary" Title="Summary"/>
+                <PropertyColumn Property="x => x.Level" Title="Level"/>
+            </Columns>
+        </MudDataGrid>
+    </MudPaper>
+</AdminLayout>
+
+@code {
+
+    [Parameter]
+    public string AccountId { get; set; } = null!;
+
+    private bool _saving = true;
+    private bool _changed = false;
+    private Account? _account;
+    private CharacterSummary[]? _characters;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _account = await LandingService.Admin.GetAccount(AccountId);
+        _characters = await LandingService.Admin.GetAccountCharacters(AccountId);
+        _changed = false;
+        _saving = false;
+    }
+
+    private void RowClick(DataGridRowClickEventArgs<CharacterSummary> obj)
+    {
+        NavigationManager.NavigateTo($"/admin/{obj.Item.GameName}/characters/{obj.Item.Id}");
+    }
+
+    private void Set(Action update)
+    {
+        update();
+        _changed = true;
+    }
+
+    private async Task Save()
+    {
+        _saving = true;
+        try
+        {
+            StateHasChanged();
+            await LandingService.Admin.UpdateAccount(AccountId, _account!.Name, _account.Location, _account.Phone, _account.BirthDate, _account.Notes);
+        }
+        finally
+        {
+            _account = await LandingService.Admin.GetAccount(AccountId);
+            _changed = false;
+            _saving = false;
+            StateHasChanged();
+        }
+    }
+
+}

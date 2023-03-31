@@ -2,8 +2,6 @@
 @using Larp.Landing.Client.Pages.MwFifth.Components
 @using Larp.Common
 @using MudBlazor.Services
-@implements IAsyncDisposable
-@inject IBreakpointService BreakpointService
 
 @code {
 
@@ -55,12 +53,6 @@
 
         _spells = Character.AllSpells.TryFromKeys(Character.Character.Spells).ToArray();
     }
-
-    public async ValueTask DisposeAsync()
-    {
-        await BreakpointService.DisposeAsync();
-    }
-
 }
 
 <MudGrid>

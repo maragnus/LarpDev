@@ -1,4 +1,6 @@
-﻿namespace Larp.Data;
+﻿using Larp.Common;
+
+namespace Larp.Data;
 
 [PublicAPI]
 public class Account
@@ -15,6 +17,7 @@ public class Account
     public DateTimeOffset Created { get; set; }
     public DateTimeOffset? LastUpdate { get; set; }
     public DateOnly? BirthDate { get; set; }
+    public int? Age => BirthDate.GetAge();
 
     [BsonIgnore]
     public string? PreferredEmail =>

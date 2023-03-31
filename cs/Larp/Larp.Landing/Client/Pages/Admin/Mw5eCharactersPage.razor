@@ -1,4 +1,5 @@
 @page "/admin/mw5e/characters"
+
 @using Larp.Landing.Shared
 @inject LandingService LandingService
 @inject NavigationManager NavigationManager
@@ -14,16 +15,13 @@
         </EditForm>
     </div>
 
-    <MudDataGrid T="CharacterAccountSummary" Items="_items">
+    <MudDataGrid T="CharacterAccountSummary" Items="_items" RowClick="RowClick">
         <Columns>
             <PropertyColumn Property="x => x.CharacterName" Title="Character Name"/>
             <PropertyColumn Property="x => x.AccountName" Title="Player Name"/>
             <PropertyColumn Property="x => x.HomeChapter" Title="Home Chapter"/>
             <PropertyColumn Property="x => x.Occupation" Title="Occupation"/>
             <PropertyColumn Property="x => x.Level" Title="Level"/>
-            <MudTemplateColumn T="CharacterAccountSummary">
-                <MudIconButton Icon="@Icons.Material.Outlined.AccountCircle" />
-            </MudTemplateColumn>
         </Columns>
     </MudDataGrid>
 </AdminLayout>
@@ -34,7 +32,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _allItems = await LandingService.Admin.GetMwFifthCharacters();
+        _allItems = await LandingService.Admin.GetMwFifthCharacters(CharacterState.Live);
         _items = _allItems;
     }
 
@@ -42,11 +40,6 @@
         (item.CharacterName?.Contains(query, StringComparison.InvariantCultureIgnoreCase) ?? false)
         || (item.AccountName?.Contains(query, StringComparison.InvariantCultureIgnoreCase) ?? false)
         || (item.AccountEmails?.Contains(query, StringComparison.InvariantCultureIgnoreCase) ?? false);
-   
-    private void ItemClick(CharacterAccountSummary item)
-    {
-        NavigationManager.NavigateTo("/admin/mw5e/characters/" + item.CharacterId);
-    }
 
     private readonly SearchModel _search = new();
 
@@ -63,6 +56,11 @@
         else
             _items = _allItems.Where(x => SearchFunc(x, query)).ToArray();
         StateHasChanged();
+    }
+
+    private void RowClick(DataGridRowClickEventArgs<CharacterAccountSummary> item)
+    {
+        NavigationManager.NavigateTo("/admin/mw5e/characters/" + item.Item.CharacterId);
     }
 
 }

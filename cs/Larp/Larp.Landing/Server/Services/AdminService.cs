@@ -1,11 +1,14 @@
 using Larp.Data;
 using Larp.Data.Mongo;
 using Larp.Data.MwFifth;
+using Larp.Landing.Client.Services;
 using Larp.Landing.Shared;
 using Microsoft.Extensions.FileProviders;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using OfficeOpenXml;
 using OfficeOpenXml.Table;
+using MwFifthCharacter = Larp.Data.MwFifth.Character;
 
 namespace Larp.Landing.Server.Services;
 
@@ -27,7 +30,7 @@ public class AdminService : IAdminService
         var accounts = await _db.Accounts.Find(_ => true).ToListAsync();
         return accounts.ToArray();
     }
-    
+
     public async Task<IFileInfo> Export()
     {
         ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -107,8 +110,47 @@ public class AdminService : IAdminService
         return path;
     }
 
-    public Task<CharacterAccountSummary[]> GetMwFifthCharacters()
+    public async Task<CharacterAccountSummary[]> GetMwFifthCharacters(CharacterState state)
     {
-        throw new NotImplementedException();
+        var list = await _db.MwFifthGame.Characters.AsQueryable()
+            .Where(character => character.State == state)
+            .Join(_db.Accounts.AsQueryable(),
+                character => character.AccountId,
+                account => account.AccountId,
+                (character, account) => new { Character = character, Account = account })
+            .ToListAsync();
+        
+        return list
+            .Select(x => new CharacterAccountSummary(x.Character, x.Account))
+            .ToArray();
+    }
+
+    public async Task<MwFifthCharacter> GetMwFifthCharacter(string characterId)
+    {
+        return await _db.MwFifthGame.Characters.Find(x => x.Id == characterId).FirstOrDefaultAsync();
+    }
+
+    public async Task<Account> GetAccount(string accountId)
+    {    
+        return await _db.Accounts.Find(x => x.AccountId == accountId).FirstOrDefaultAsync();
+    }
+
+    public async Task<CharacterSummary[]> GetAccountCharacters(string accountId)
+    {
+        var gameState = await _db.MwFifthGame.GetGameState();
+        var list = await _db.MwFifthGame.Characters.Find(x => x.AccountId == accountId).ToListAsync();
+        return list.Select(x => x.ToSummary(gameState)).ToArray();
+    }
+
+    public async Task UpdateAccount(string accountId, string? name, string? location, string? phone, DateOnly? birthDate, string? notes)
+    {
+        var update = Builders<Account>.Update
+            .Set(x => x.Name, name)
+            .Set(x => x.Location, location)
+            .Set(x => x.Phone, phone)
+            .Set(x => x.Notes, notes)
+            .Set(x => x.BirthDate, birthDate);
+
+        await _db.Accounts.UpdateOneAsync(x => x.AccountId == accountId, update);
     }
 }

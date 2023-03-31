@@ -2,7 +2,7 @@
 @inject LandingService LandingService
 @inject NavigationManager NavigationManager
 
-<PageHeader>Administration Section</PageHeader>
+<PageHeader>Account Manager</PageHeader>
 
 <AdminLayout Title="Manage Accounts">
     <div class="pa-2 mb-4">
@@ -13,12 +13,13 @@
         </EditForm>
     </div>
 
-    <MudDataGrid T="Account" Items="_accounts">
+    <MudDataGrid T="Account" Items="_accounts" RowClick="RowClick">
         <Columns>
             <PropertyColumn Property="x => x.Name" Title="Name"/>
             <PropertyColumn Property="x => x.PreferredEmail" Title="Email"/>
             <PropertyColumn Property="x => x.Phone" Title="Phone"/>
             <PropertyColumn Property="x => x.Location" Title="Location"/>
+            <PropertyColumn Property="x => x.Age" Title="Age"/>
         </Columns>
     </MudDataGrid>
 </AdminLayout>
@@ -41,7 +42,6 @@
 
     private void AccountClick(Account account)
     {
-        NavigationManager.NavigateTo("/admin/accounts/" + account.AccountId);
     }
 
     private readonly SearchModel _search = new();
@@ -59,6 +59,11 @@
         else
             _accounts = _allAccounts.Where(x => SearchFunc(x, query)).ToArray();
         StateHasChanged();
+    }
+
+    private void RowClick(DataGridRowClickEventArgs<Account> item)
+    {
+        NavigationManager.NavigateTo("/admin/accounts/" + item.Item.AccountId);
     }
 
 }

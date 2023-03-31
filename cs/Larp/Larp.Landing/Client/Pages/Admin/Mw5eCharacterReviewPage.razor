@@ -1,0 +1,34 @@
+@page "/admin/mw5e/characters/review"
+
+@using Larp.Landing.Shared
+@inject LandingService LandingService
+@inject NavigationManager NavigationManager
+
+<PageHeader>Mystwood 5e Characters</PageHeader>
+
+<AdminLayout Title="Review Characters">
+    <MudDataGrid T="CharacterAccountSummary" Items="_items" RowClick="RowClick">
+        <Columns>
+            <PropertyColumn Property="x => x.CharacterName" Title="Character Name"/>
+            <PropertyColumn Property="x => x.AccountName" Title="Player Name"/>
+            <PropertyColumn Property="x => x.HomeChapter" Title="Home Chapter"/>
+            <PropertyColumn Property="x => x.Occupation" Title="Occupation"/>
+            <PropertyColumn Property="x => x.Level" Title="Level"/>
+        </Columns>
+    </MudDataGrid>
+</AdminLayout>
+
+@code {
+    private CharacterAccountSummary[] _items = Array.Empty<CharacterAccountSummary>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _items = await LandingService.Admin.GetMwFifthCharacters(CharacterState.Review);
+    }
+
+    private void RowClick(DataGridRowClickEventArgs<CharacterAccountSummary> item)
+    {
+        NavigationManager.NavigateTo("/admin/mw5e/characters/" + item.Item.CharacterId);
+    }
+
+}

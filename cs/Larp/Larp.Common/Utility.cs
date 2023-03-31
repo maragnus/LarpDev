@@ -11,4 +11,29 @@ public static class Utility
             ? (match.Groups[1].Value, int.Parse(match.Groups[2].Value)) 
             : (name, 0);
     }
+    
+    
+    public static int? GetAge(this DateOnly? birthDate)
+    {
+        if (!birthDate.HasValue) return null;
+        
+        var now = DateTime.Now;
+        var age = now.Year - birthDate.Value.Year;
+
+        if (now.Month < birthDate.Value.Month || (now.Month == birthDate.Value.Month && now.Day < birthDate.Value.Day))
+            age--;
+
+        return age;
+    }
+    
+    public static int GetAge(this DateTime birthDate)
+    {
+        var now = DateTime.Now;
+        var age = now.Year - birthDate.Year;
+
+        if (now.Month < birthDate.Month || (now.Month == birthDate.Month && now.Day < birthDate.Day))
+            age--;
+
+        return age;
+    }
 }

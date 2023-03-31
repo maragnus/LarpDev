@@ -17,7 +17,7 @@
             <MudTextField T="string?" Label="Phone" InputType="InputType.Telephone" Value="_phone" ValueChanged="(value) => Set(() => _phone = value)"/>
         </MudItem>
         <MudItem xs="12" sm="6">
-            <MudDatePicker T="DateTime?" Label="Birthdate" Date="_birthDate" DateChanged="(value) => Set(() => _birthDate = value)"/>
+            <MudDatePicker T="DateTime?" Label="Birthdate" Date="_birthDate" Clearable DateChanged="(value) => Set(() => _birthDate = value)"/>
             <MudText Typo="Typo.body2">If you're under 18, we need your birthday.</MudText>
         </MudItem>
         <MudItem xs="12">

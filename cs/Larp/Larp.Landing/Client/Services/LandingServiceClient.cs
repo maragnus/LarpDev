@@ -4,12 +4,13 @@ using Larp.Landing.Shared;
 using Larp.Landing.Shared.Messages;
 using Larp.Landing.Shared.MwFifth;
 using Microsoft.Extensions.FileProviders;
+using MwFifthCharacter = Larp.Data.MwFifth.Character;
 
 namespace Larp.Landing.Client.Services;
 
 public class LandingServiceClient : RestClient, ILandingService, IMwFifthService, IAdminService
 {
-    public LandingServiceClient(HttpClient httpClient, ILogger<LandingServiceClient> logger) 
+    public LandingServiceClient(HttpClient httpClient, ILogger<LandingServiceClient> logger)
         : base(httpClient, logger)
     {
     }
@@ -51,7 +52,8 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public Task AccountEmailPreferred(string email) =>
         Post($"api/account/email/preferred?email={Uri.EscapeDataString(email)}");
 
-    public Task AccountUpdate(string? fullName, string? location, string? phone, string? allergies, DateOnly? birthDate) =>
+    public Task AccountUpdate(string? fullName, string? location, string? phone, string? allergies,
+        DateOnly? birthDate) =>
         Post("api/account", new { fullName, location, phone, allergies, birthDate });
 
     public Task<GameState> GetGameState(string lastRevision) =>
@@ -74,7 +76,24 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
 
     public Task<Account[]> GetAccounts() =>
         Get<Account[]>($"api/admin/accounts");
-    
-    public Task<CharacterAccountSummary[]> GetMwFifthCharacters() =>
-        Get<CharacterAccountSummary[]>("api/admin/mw5e/characters");
+
+    public Task<CharacterAccountSummary[]> GetMwFifthCharacters(CharacterState state) =>
+        Get<CharacterAccountSummary[]>($"api/admin/mw5e/characters?state={state}");
+
+    public Task<MwFifthCharacter> GetMwFifthCharacter(string characterId) =>
+        Get<MwFifthCharacter>($"api/admin/mw5e/characters/{characterId}");
+
+    public Task<Account> GetAccount(string accountId) =>
+        Get<Account>($"api/admin/accounts/{accountId}");
+
+    public Task<CharacterSummary[]> GetAccountCharacters(string accountId) =>
+        Get<CharacterSummary[]>($"api/admin/accounts/{accountId}/characters");
+
+    public Task UpdateAccount(string accountId, string? name, string? location,
+        string? phone, DateOnly? birthDate, string? notes) =>
+        Post($"api/admin/accounts/{accountId}",
+            new
+            {
+                name, location, phone, birthDate, notes
+            });
 }

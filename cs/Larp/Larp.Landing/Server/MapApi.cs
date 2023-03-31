@@ -94,7 +94,7 @@ public static class MapApiExtensions
                     if (httpContext.GetRouteData().Values.TryGetValue(name, out var routeValue))
                         return routeValue;
                     if (httpContext.Request.Query.TryGetValue(name, out var value))
-                        return value.FirstOrDefault();
+                        return Coerce(value.FirstOrDefault(), parameter.ParameterType);
                     if (body?.RootElement.TryGetProperty(name, out var property) == true)
                         return property.Deserialize(parameter.ParameterType, LarpJson.Options);
 
@@ -149,5 +149,20 @@ public static class MapApiExtensions
             httpContext.Response.StatusCode = 500;
             await httpContext.Response.WriteAsync(ex.ToString());
         }
+    }
+
+    private static object? Coerce(string? stringValue, Type desiredType)
+    {
+        if (desiredType == typeof(string))
+            return stringValue;
+        
+        if (desiredType.IsEnum)
+        {
+            if (Enum.TryParse(desiredType, stringValue, true, out var enumValue))
+                return enumValue;
+            throw new BadRequestException($"Value \"{stringValue}\" does not map to enum \"{desiredType.Name}\"");
+        }
+
+        return Convert.ChangeType(stringValue, desiredType);
     }
 }

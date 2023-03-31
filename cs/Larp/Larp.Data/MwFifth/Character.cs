@@ -82,10 +82,11 @@ public class Character
     [BsonId, BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; } = null!;
     
+    [BsonRepresentation(BsonType.ObjectId)]
     public string AccountId { get; set; } = null!;
 
     public CharacterState State { get; set; } = CharacterState.NewDraft;
-    
+
     [BsonRepresentation(BsonType.ObjectId)]
     public string? PreviousId { get; set; }
 
