@@ -148,9 +148,13 @@ public class Character
 
     private static HashSet<string> _skipProperties = new() { nameof(ChangeSummary), nameof(State), nameof(Id),nameof(PreviousId),nameof(AccountId) };
     
-    public static Dictionary<string, string> BuildChangeSummary(Character oldCharacter, Character newCharacter)
+    public static Dictionary<string, string> BuildChangeSummary(Character? oldCharacter, Character? newCharacter)
     {
         var result = new Dictionary<string, string>();
+
+        if (oldCharacter == null || newCharacter == null)
+            return result;
+        
         foreach (var property in typeof(Character).GetProperties())
         {
             if (_skipProperties.Contains(property.Name)) continue;
