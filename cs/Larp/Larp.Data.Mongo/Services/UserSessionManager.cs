@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace Larp.Data.Mongo.Services;
 
@@ -165,7 +166,8 @@ public class UserSessionManager : IUserSessionManager
         var accountFilter = Builders<Account>.Filter.And(
             Builders<Account>.Filter.Eq(x => x.AccountId, accountId),
             Builders<Account>.Filter.ElemMatch(x => x.Emails, x => x.NormalizedEmail == normalizedEmail));
-        var accountUpdate = Builders<Account>.Update.Set(x => x.Emails[0].IsVerified, true);
+        var accountUpdate = Builders<Account>.Update
+            .Set(x => x.Emails.FirstMatchingElement().IsVerified, true);
         await _larpContext.Accounts.UpdateOneAsync(accountFilter, accountUpdate);
         UserAccountChanged(accountId);
     }
@@ -175,13 +177,14 @@ public class UserSessionManager : IUserSessionManager
         var normalizedEmail = email.ToLowerInvariant();
 
         var accountFilter = Builders<Account>.Filter;
+        var accountEmailFilter = Builders<AccountEmail>.Filter;
 
         // Unset previously preferred email
         {
             var filter = accountFilter.Eq(x => x.AccountId, accountId)
-                         & accountFilter.ElemMatch(x => x.Emails,
-                             x => x.NormalizedEmail != normalizedEmail && x.IsPreferred);
-            var update = Builders<Account>.Update.Set(x => x.Emails[-1].IsPreferred, false);
+                         & accountFilter.ElemMatch(x => x.Emails, x => x.NormalizedEmail != normalizedEmail && x.IsPreferred);
+            var update = Builders<Account>.Update
+                .Set(x => x.Emails.FirstMatchingElement().IsPreferred, false);
             await _larpContext.Accounts.UpdateOneAsync(filter, update);
         }
 
@@ -189,7 +192,7 @@ public class UserSessionManager : IUserSessionManager
         {
             var filter = accountFilter.Eq(x => x.AccountId, accountId)
                          & accountFilter.ElemMatch(x => x.Emails, x => x.NormalizedEmail == normalizedEmail);
-            var update = Builders<Account>.Update.Set(x => x.Emails[-1].IsPreferred, true);
+            var update = Builders<Account>.Update.Set(x => x.Emails.FirstMatchingElement().IsPreferred, true);
             await _larpContext.Accounts.UpdateOneAsync(filter, update);
         }
 

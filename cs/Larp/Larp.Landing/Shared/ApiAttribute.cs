@@ -1,5 +1,3 @@
-using JetBrains.Annotations;
-
 namespace Larp.Landing.Shared;
 
 [AttributeUsage(AttributeTargets.Method)]

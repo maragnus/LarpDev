@@ -1,4 +1,3 @@
-using JetBrains.Annotations;
 using Larp.Data;
 using Larp.Landing.Shared.Messages;
 using Microsoft.Extensions.FileProviders;
@@ -26,7 +25,19 @@ public interface ILandingService
 
     [ApiGet("larp/characters"), ApiAuthenticated]
     Task<CharacterSummary[]> GetCharacters();
-    
-    [ApiGet("export"), ApiContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")]
-    Task<IFileInfo> Export();
+
+    [ApiGet("account")]
+    Task<Account> GetAccount();
+
+    [ApiPost("account/email")]
+    Task AccountEmailAdd(string email);
+
+    [ApiDelete("account/email")]
+    Task AccountEmailRemove(string email);
+
+    [ApiPost("account/email/preferred")]
+    Task AccountEmailPreferred(string email);
+
+    [ApiPost("account")]
+    Task AccountUpdate(string? fullName, string? location, string? phone, string? allergies, DateOnly? birthDate);
 }

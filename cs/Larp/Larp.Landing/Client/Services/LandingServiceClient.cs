@@ -7,7 +7,7 @@ using Microsoft.Extensions.FileProviders;
 
 namespace Larp.Landing.Client.Services;
 
-public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
+public class LandingServiceClient : RestClient, ILandingService, IMwFifthService, IAdminService
 {
     public LandingServiceClient(HttpClient httpClient, ILogger<LandingServiceClient> logger) 
         : base(httpClient, logger)
@@ -39,6 +39,21 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
         return Task.FromResult((IFileInfo)null!);
     }
 
+    public Task<Account> GetAccount() =>
+        Get<Account>("api/account");
+
+    public Task AccountEmailAdd(string email) =>
+        Post($"api/account/email?email={Uri.EscapeDataString(email)}");
+
+    public Task AccountEmailRemove(string email) =>
+        Delete($"api/account/email?email={Uri.EscapeDataString(email)}");
+
+    public Task AccountEmailPreferred(string email) =>
+        Post($"api/account/email/preferred?email={Uri.EscapeDataString(email)}");
+
+    public Task AccountUpdate(string? fullName, string? location, string? phone, string? allergies, DateOnly? birthDate) =>
+        Post("api/account", new { fullName, location, phone, allergies, birthDate });
+
     public Task<GameState> GetGameState(string lastRevision) =>
         Get<GameState>($"api/mw5e/gameState?lastRevision={lastRevision}");
 
@@ -56,4 +71,10 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
 
     public async Task DeleteCharacter(string characterId) =>
         await Delete($"api/mw5e/character?characterId={characterId}");
+
+    public Task<Account[]> GetAccounts() =>
+        Get<Account[]>($"api/admin/accounts");
+    
+    public Task<CharacterAccountSummary[]> GetMwFifthCharacters() =>
+        Get<CharacterAccountSummary[]>("api/admin/mw5e/characters");
 }

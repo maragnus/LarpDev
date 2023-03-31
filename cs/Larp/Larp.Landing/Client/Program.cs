@@ -26,6 +26,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
     services.AddSingleton<LandingServiceUpkeep>();
     services.AddSingleton<ILandingService>(provider => provider.GetRequiredService<LandingServiceClient>());
     services.AddSingleton<IMwFifthService>(provider => provider.GetRequiredService<LandingServiceClient>());
+    services.AddSingleton<IAdminService>(provider => provider.GetRequiredService<LandingServiceClient>());
     services.AddSingleton(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
     
     services.AddMudServices();

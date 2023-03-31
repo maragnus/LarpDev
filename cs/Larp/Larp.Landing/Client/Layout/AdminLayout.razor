@@ -1,0 +1,33 @@
+@code {
+
+    [Parameter]
+    public string? Title { get; set; }
+    
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+}
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudGrid>
+        <MudItem md="3">
+            <MudNavMenu Color="Color.Tertiary" Rounded Bordered>
+                <MudText Typo="Typo.h6" Class="px-4">Administration</MudText>
+                <MudText Typo="Typo.body2" Class="px-4 mud-dark-text">Manage accounts and games</MudText>
+                <MudDivider Class="m-2"/>
+                <MudNavLink Href="/admin" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
+                <MudNavLink Href="/admin/accounts" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ManageAccounts">Accounts</MudNavLink>
+                <MudNavLink Href="/admin/events" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Event">Events</MudNavLink>
+                <MudNavGroup Title="Mystwood 5e" Expanded>
+                    <MudNavLink Href="/admin/mw5e/characters/review" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Edit">Review Characters</MudNavLink>
+                    <MudNavLink Href="/admin/mw5e/characters" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Person">Manage Characters</MudNavLink>
+                </MudNavGroup>
+            </MudNavMenu>
+        </MudItem>
+        <MudItem md="9">
+            <MudText Typo="Typo.h6" Class="mb-4">@Title</MudText>
+            @ChildContent
+        </MudItem>
+    </MudGrid>
+
+</MudContainer>

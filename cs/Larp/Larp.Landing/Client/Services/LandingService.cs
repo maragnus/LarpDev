@@ -17,6 +17,7 @@ public enum AutoSaveState
 public class LandingService
 {
     private readonly ILandingService _landing;
+    private readonly IAdminService _adminService;
     private readonly DataCacheService _dataCache;
     private readonly ILogger<LandingService> _logger;
     private readonly ILocalStorageService _localStorage;
@@ -26,6 +27,7 @@ public class LandingService
     private const string SessionIdKey = "SessionId";
 
     public LandingService(ILandingService landing,
+        IAdminService adminService,
         IMwFifthService mwFifth,
         DataCacheService dataCache,
         ILogger<LandingService> logger, 
@@ -33,12 +35,14 @@ public class LandingService
         LandingServiceClient client)
     {
         _landing = landing;
+        _adminService = adminService;
         _dataCache = dataCache;
         _logger = logger;
         _localStorage = localStorage;
         _localStorage.Changed += LocalStorageOnChanged;
         _client = client;
         MwFifth = new MwFifthService(this, mwFifth, localStorage, dataCache);
+        Admin = adminService;
     }
 
     public IReadOnlyDictionary<string, Game> Games { get; private set; } = null!;
@@ -50,7 +54,7 @@ public class LandingService
     public BrowserInfo? BrowserInfo { get; set; }
     public string? LocationName { get; set; }
     public Account? Account { get; set; }
-
+    public IAdminService Admin { get; }
     
     private void LocalStorageOnChanged(object? sender, ChangedEventArgs e)
     {
@@ -149,4 +153,24 @@ public class LandingService
         await Logout(true);
         await _localStorage.ClearAsync();
     }
+
+    public async Task<Account> GetAccount()
+    {
+        Account = await _landing.GetAccount();
+        AuthenticatedChanged?.Invoke(this, EventArgs.Empty);
+        return Account;
+    }
+
+    public async Task AccountEmailAdd(string email) =>
+        await _landing.AccountEmailAdd(email);
+    
+    public async Task AccountEmailRemove(string email) =>
+        await _landing.AccountEmailRemove(email);
+    
+    public async Task AccountEmailPreferred(string email) =>
+        await _landing.AccountEmailPreferred(email);
+
+    public async Task AccountUpdate(string? fullName, string? location, string? phone, string? allergies,
+        DateOnly? birthDate) =>
+        await _landing.AccountUpdate(fullName, location, phone, allergies, birthDate);
 }

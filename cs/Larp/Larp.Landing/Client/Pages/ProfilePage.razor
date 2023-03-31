@@ -1,13 +1,21 @@
+@using Larp.Landing.Client.Pages.Profile
+@inject NavigationManager NavigationManager
 @page "/profile"
+
+@code {
+    private void Logout() => NavigationManager.NavigateTo("/logout");
+}
 
 <PageHeader>Your Profile</PageHeader>
 
-<MudContainer MaxWidth="MaxWidth.Large">
-    <MudPaper Style="margin-top: 2em; padding: 2em">
-        Not implemented
-    </MudPaper>
-</MudContainer>
+<MudContainer MaxWidth="MaxWidth.Small" Class="pt-8">
 
-@code {
-    
-}
+    <ProfileEditor/>
+
+    <EmailsEditor/>
+
+    <MudPaper Class="pa-2 mb-2" >
+        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Logout" Color="Color.Warning" OnClick="Logout">Logout</MudButton>
+    </MudPaper>
+
+</MudContainer>

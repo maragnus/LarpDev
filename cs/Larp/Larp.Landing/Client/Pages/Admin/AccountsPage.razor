@@ -1,0 +1,64 @@
+@page "/admin/accounts"
+@inject LandingService LandingService
+@inject NavigationManager NavigationManager
+
+<PageHeader>Administration Section</PageHeader>
+
+<AdminLayout Title="Manage Accounts">
+    <div class="pa-2 mb-4">
+        <EditForm Model="_search" OnSubmit="Search">
+            <MudStack Row Justify="Justify.Center" AlignItems="AlignItems.Start">
+                <MudTextField T="string?" Clearable Variant="Variant.Filled" Placeholder="Search" Adornment="Adornment.End" AdornmentColor="Color.Primary" AdornmentIcon="@Icons.Material.Outlined.Search" For="() => _search.Query" @bind-Value="_search.Query" OnAdornmentClick="Search"/>
+            </MudStack>
+        </EditForm>
+    </div>
+
+    <MudDataGrid T="Account" Items="_accounts">
+        <Columns>
+            <PropertyColumn Property="x => x.Name" Title="Name"/>
+            <PropertyColumn Property="x => x.PreferredEmail" Title="Email"/>
+            <PropertyColumn Property="x => x.Phone" Title="Phone"/>
+            <PropertyColumn Property="x => x.Location" Title="Location"/>
+        </Columns>
+    </MudDataGrid>
+</AdminLayout>
+
+@code {
+    private Account[] _allAccounts = Array.Empty<Account>();
+    private Account[] _accounts = Array.Empty<Account>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _allAccounts = await LandingService.Admin.GetAccounts();
+        _accounts = _allAccounts;
+    }
+
+    private static bool SearchFunc(Account account, string query) =>
+        (account.Name?.Contains(query, StringComparison.InvariantCultureIgnoreCase) ?? false)
+        || (account.Location?.Contains(query, StringComparison.InvariantCultureIgnoreCase) ?? false)
+        || (account.Phone?.Contains(query) ?? false)
+        || account.Emails.Any(x => x.Email.Contains(query, StringComparison.InvariantCultureIgnoreCase));
+
+    private void AccountClick(Account account)
+    {
+        NavigationManager.NavigateTo("/admin/accounts/" + account.AccountId);
+    }
+
+    private readonly SearchModel _search = new();
+
+    class SearchModel
+    {
+        public string? Query { get; set; }
+    }
+
+    private void Search()
+    {
+        var query = _search.Query;
+        if (string.IsNullOrWhiteSpace(query))
+            _accounts = _allAccounts;
+        else
+            _accounts = _allAccounts.Where(x => SearchFunc(x, query)).ToArray();
+        StateHasChanged();
+    }
+
+}

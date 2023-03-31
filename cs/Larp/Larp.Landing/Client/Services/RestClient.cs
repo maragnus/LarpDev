@@ -30,9 +30,24 @@ public abstract class RestClient
     protected async Task Delete(string uri) =>
         await _httpClient.DeleteAsync(uri);
     
-    protected async Task<TResult> Get<TResult>(string uri) where TResult : new() =>
+    protected async Task<TResult> Get<TResult>(string uri) where TResult : class =>
         (await _httpClient.GetFromJsonAsync<TResult>(uri, LarpJson.Options))!;
 
+    protected async Task Post(string uri)
+    {
+        var response = await _httpClient.PostAsync(uri, content: new StringContent(""));
+        if (!response.IsSuccessStatusCode)
+            throw new LandingServiceException(await response.Content.ReadAsStringAsync());
+    }
+    
+    protected async Task Post(string uri, object body)
+    {
+        var response = await _httpClient.PostAsJsonAsync(uri, body, LarpJson.Options);
+        if (!response.IsSuccessStatusCode)
+            throw new LandingServiceException(await response.Content.ReadAsStringAsync());
+    }
+
+    
     protected async Task<TResult> Post<TResult>(string uri) where TResult : class
     {
         var response = await _httpClient.PostAsync(uri, content: new StringContent(""));

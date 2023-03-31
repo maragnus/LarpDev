@@ -1,0 +1,105 @@
+@using System.ComponentModel.DataAnnotations
+@inject LandingService LandingService
+
+<MudPaper Class="pa-4 mb-4 relative">
+    <MudOverlay DarkBackground Absolute Visible="_saving">
+        <MudText Typo="Typo.h6">Saving...</MudText>
+        <MudProgressCircular Indeterminate Size="Size.Large"/>
+    </MudOverlay>
+    <MudText Typo="Typo.h6">Emails</MudText>
+    <MudStack Spacing="2">
+        @foreach (var email in _emails)
+        {
+            <MudPaper Class="py-1 px-4">
+                <MudStack Row Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
+                    <MudIcon Icon="@Icons.Material.Filled.Email"/>
+                    <MudText Typo="Typo.body1" Class="flex-grow-1">
+                        @email.Email
+                        <MudTooltip Text="@(email.IsVerified ? "This email has been verified" : "This email is NOT yet verified. Log in using it to verify it")">
+                            <MudIcon Icon="@Icons.Material.Filled.Verified" Color="@(email.IsVerified ? Color.Success : Color.Dark)" Size="Size.Small"/>
+                        </MudTooltip>
+                    </MudText>
+
+                    <MudTooltip Text="The preferred email is the one that staff will use to contact you">
+                        <MudSwitch T="bool" Checked="@email.IsPreferred" CheckedChanged="async (value) => await SetPreferred(email.Email, value)" Color="Color.Success"/>
+                    </MudTooltip>
+                    <MudTooltip Text="Remove this email address">
+                        <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.DeleteForever" Color="Color.Error" OnClick="async () => await Delete(email.Email)" Disabled="@(!_emails.Any(x => x.IsVerified && x.Email != email.Email))"/>
+                    </MudTooltip>
+                </MudStack>
+            </MudPaper>
+        }
+    </MudStack>
+
+    <EditForm Model="_newEmailModel" OnValidSubmit="AddEmailSubmit">
+        <DataAnnotationsValidator/>
+        <MudStack Row Spacing="4" Justify="Justify.FlexStart" AlignItems="AlignItems.Center" Class="mt-2">
+            <MudTextField T="string?" @ref="_newEmailField" Label="New Email Address" Variant="Variant.Outlined" Class="flex-grow-1" InputType="InputType.Email" @bind-Value="@_newEmailModel.EmailAddress" For="() => _newEmailModel.EmailAddress"/>
+            <MudButton StartIcon="@Icons.Material.Filled.Add" ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Outlined">Add Email</MudButton>
+        </MudStack>
+    </EditForm>
+</MudPaper>
+
+@code {
+
+    class NewEmailModel
+    {
+        [EmailAddress, Display(Name = "Email Address")]
+        public string? EmailAddress { get; set; }
+    }
+
+    private NewEmailModel _newEmailModel = new();
+    private AccountEmail[] _emails = Array.Empty<AccountEmail>();
+    private bool _saving = true;
+    private MudTextField<string?>? _newEmailField;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Refresh();
+        _saving = false;
+        StateHasChanged();
+    }
+
+    private async Task Refresh()
+    {
+        var account = await LandingService.GetAccount();
+        _emails = account.Emails.ToArray();
+    }
+
+    private async Task RunAction(Func<Task> action)
+    {
+        _saving = true;
+        StateHasChanged();
+        try
+        {
+            await action();
+            await Refresh();
+        }
+        finally
+        {
+            _saving = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SetPreferred(string email, bool preferred)
+    {
+        if (!preferred) return;
+        await RunAction(async () => await LandingService.AccountEmailPreferred(email));
+    }
+
+    private async Task Delete(string email)
+    {
+        await RunAction(async () => await LandingService.AccountEmailRemove(email));
+    }
+
+    private async Task AddEmailSubmit(EditContext context)
+    {
+        var model = (NewEmailModel)context.Model;
+        if (string.IsNullOrWhiteSpace(model.EmailAddress)) return;
+
+        await RunAction(async () => await LandingService.AccountEmailAdd(model.EmailAddress.Trim()));
+        await _newEmailField!.Clear();
+    }
+
+}

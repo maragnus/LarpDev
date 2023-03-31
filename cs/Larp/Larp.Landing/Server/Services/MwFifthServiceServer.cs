@@ -1,6 +1,7 @@
 ﻿using Larp.Data;
 using Larp.Data.Mongo;
 using Larp.Data.MwFifth;
+using Larp.Landing.Shared;
 using Larp.Landing.Shared.Messages;
 using Larp.Landing.Shared.MwFifth;
 using MongoDB.Bson;

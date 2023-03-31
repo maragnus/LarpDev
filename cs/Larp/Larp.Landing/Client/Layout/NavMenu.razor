@@ -4,6 +4,7 @@
 @inject LandingServiceUpkeep LandingServiceUpkeep
 
 @code {
+
     [CascadingParameter]
     protected PageInfo? PageInfo { get; set; }
 
@@ -30,7 +31,7 @@
         await LandingServiceUpkeep.StartAsync(default);
         await LandingService.ValidateSession();
     }
-    
+
     public async ValueTask DisposeAsync()
     {
         await LandingServiceUpkeep.StopAsync(default);
@@ -51,6 +52,7 @@
     {
         NavigationManager.NavigateTo(LandingService.IsAuthenticated ? "/profile" : "/login");
     }
+
 }
 
 @if (!_isPrint)
@@ -67,14 +69,14 @@
             {
                 <MudNavLink Href="/profile" Match="@NavLinkMatch.All" IconColor="@Color.Primary" Icon="@Icons.Material.Filled.AccountCircle">
                     <MudText Typo="@Typo.body1">@(LandingService.Account?.Name ?? "Name Not Set")</MudText>
-                    <MudText Typo="@Typo.body2">Click to update your profile</MudText>
+                    <MudText Typo="@Typo.body2" Class="mud-secondary-text">Click to update your profile</MudText>
                 </MudNavLink>
             }
             else
             {
                 <MudNavLink Href="/login" Match="@NavLinkMatch.All" Icon="@Icons.Material.Filled.AccountCircle">
                     <MudText Typo="@Typo.body1">Guest</MudText>
-                    <MudText Typo="@Typo.body2">Click to log in</MudText>
+                    <MudText Typo="@Typo.body2" Class="mud-secondary-text">Click to log in</MudText>
                 </MudNavLink>
             }
             <MudDivider/>

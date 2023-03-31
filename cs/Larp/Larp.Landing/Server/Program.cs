@@ -26,7 +26,7 @@ builder.Configuration
     services.AddRazorPages();
     services.AddHttpContextAccessor();
     services.AddSingleton<IFileProvider>(_ => new PhysicalFileProvider(Path.GetTempPath()));
-    
+
     // Larp.Notify
     services.AddScoped<INotifyService, NotifyService>();
     services.Configure<NotifyServiceOptions>(
@@ -48,6 +48,7 @@ builder.Configuration
     // Larp.Landing.Server
     services.AddScoped<ILandingService, LandingServiceServer>();
     services.AddScoped<IMwFifthService, MwFifthServiceServer>();
+    services.AddScoped<IAdminService, AdminService>();
     services.AddScoped<IUserSession, UserSession>();
 }
 
@@ -76,6 +77,16 @@ app.UseRouting();
 
 app.MapApi<ILandingService>();
 app.MapApi<IMwFifthService>();
+app.MapApi<IAdminService>();
+
+app.MapMethods("/api/{*path}",
+    new[] { HttpMethods.Get, HttpMethods.Put, HttpMethods.Patch, HttpMethods.Post, HttpMethods.Patch },
+    (HttpContext context, string path) =>
+    {
+        context.Response.StatusCode = 404;
+        context.Response.WriteAsync($"Path /api/{path} is not routed");
+        return Task.CompletedTask;
+    });
 
 app.MapRazorPages();
 app.MapFallbackToFile("index.html");

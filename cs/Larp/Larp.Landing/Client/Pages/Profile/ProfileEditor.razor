@@ -1,0 +1,70 @@
+@inject LandingService LandingService
+
+<MudPaper Class="pa-4 mb-4 relative">
+    <MudOverlay DarkBackground Absolute Visible="_saving">
+        <MudText Typo="Typo.h6">Saving...</MudText>
+        <MudProgressCircular Indeterminate Size="Size.Large"/>
+    </MudOverlay>
+    <MudText Typo="Typo.h6">Profile</MudText>
+    <MudGrid>
+        <MudItem xs="12" sm="6">
+            <MudTextField T="string?" Label="Full Name" InputType="InputType.Text" Value="_fullName" ValueChanged="(value) => Set(() => _fullName = value)"/>
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <MudTextField T="string?" Label="Location" InputType="InputType.Text" Placeholder="Harrison, Maine" Value="_location" ValueChanged="(value) => Set(() => _location = value)"/>
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <MudTextField T="string?" Label="Phone" InputType="InputType.Telephone" Value="_phone" ValueChanged="(value) => Set(() => _phone = value)"/>
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <MudDatePicker T="DateTime?" Label="Birthdate" Date="_birthDate" DateChanged="(value) => Set(() => _birthDate = value)"/>
+            <MudText Typo="Typo.body2">If you're under 18, we need your birthday.</MudText>
+        </MudItem>
+        <MudItem xs="12">
+            <MudTextField T="string?" Label="Allergies & Disabilities" InputType="InputType.Text" Value="_allergies" ValueChanged="(value) => Set(() => _allergies = value)"/>
+            <MudText Typo="Typo.body2">Do you have any allergies or disabilities that the staff should be aware?</MudText>
+        </MudItem>
+        <MudItem xs="12">
+            <MudButton StartIcon="@Icons.Material.Filled.Save" Disabled="!_changed" OnClick="Save" Color="Color.Primary" Variant="Variant.Outlined">Save Changes</MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@code {
+    private string? _fullName;
+    private string? _phone;
+    private string? _location;
+    private string? _allergies;
+    private bool _changed;
+    private bool _saving = true;
+    private DateTime? _birthDate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var account = await LandingService.GetAccount();
+        _fullName = account.Name;
+        _location = account.Location;
+        _phone = account.Phone;
+        _allergies = account.Notes;
+        _birthDate = account.BirthDate?.ToDateTime(TimeOnly.MinValue);
+        _saving = false;
+    }
+
+    private void Set(Action updateFunc)
+    {
+        updateFunc();
+        _changed = true;
+        StateHasChanged();
+    }
+
+    private async Task Save()
+    {
+        _saving = true;
+        await LandingService.AccountUpdate(_fullName, _location, _phone, _allergies, _birthDate.HasValue ? DateOnly.FromDateTime(_birthDate.Value) : null);
+        StateHasChanged();
+
+        _saving = false;
+        StateHasChanged();
+    }
+
+}

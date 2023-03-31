@@ -14,6 +14,14 @@ public class Account
     public string? Notes { get; set; }
     public DateTimeOffset Created { get; set; }
     public DateTimeOffset? LastUpdate { get; set; }
+    public DateOnly? BirthDate { get; set; }
+
+    [BsonIgnore]
+    public string? PreferredEmail =>
+        (Emails.FirstOrDefault(x => x.IsPreferred) ?? Emails.FirstOrDefault(x => x.IsVerified))?.Email;
+    
+    [BsonIgnore]
+    public string? EmailList => string.Join(", ", Emails.Select(x => x.Email));
 }
 
 [PublicAPI]

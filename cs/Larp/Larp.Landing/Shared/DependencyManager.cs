@@ -1,5 +1,4 @@
 using System.Reflection;
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace Larp.Landing.Shared;
