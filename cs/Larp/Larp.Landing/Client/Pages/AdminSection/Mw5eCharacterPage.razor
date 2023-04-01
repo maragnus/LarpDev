@@ -5,6 +5,7 @@
 @inject LandingService LandingService
 @inject ILogger<Mw5eCharacterPage> Logger
 @inject NavigationManager NavigationManager
+@inject IDialogService DialogService
 
 <PageHeader>Mystwood 5e Characters</PageHeader>
 
@@ -15,25 +16,70 @@
     }
     else
     {
-        <MudStack Row Justify="Justify.FlexStart" AlignItems="AlignItems.Start" Class="mb-4">
-            <MudButton StartIcon="@Icons.Material.Filled.AccountCircle" Variant="Variant.Filled" OnClick="GoToAccount">View Account</MudButton>
-            <MudButton StartIcon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Color="Color.Warning" OnClick="EditCharacter">@(_character.Character.State == CharacterState.Live ? "Revise Character" : "Review Character")</MudButton>
-            <MudAlert Severity="Statuses[_character.Character.State].Severity">
-                @Statuses[_character.Character.State].Description
-            </MudAlert>
-        </MudStack>
+        <MudButtonGroup Variant="Variant.Filled" Class="mb-4" OverrideStyles="false">
+            <MudButton StartIcon="@Icons.Material.Filled.AccountCircle" Variant="Variant.Filled" OnClick="GoToAccount">Player</MudButton>
+            @if (_state != CharacterState.Archived)
+            {
+                <MudButton StartIcon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Color="Color.Warning" OnClick="EditCharacter">Edit</MudButton>
+            }
+            @if (_state == CharacterState.Review)
+            {
+                <MudButton StartIcon="@Icons.Material.Filled.Verified" OnClick="Approve" Variant="Variant.Filled" Color="Color.Success">Approve</MudButton>
+                <MudButton StartIcon="@Icons.Material.Filled.Undo" OnClick="Reject" Variant="Variant.Filled" Color="Color.Error">Reject</MudButton>
+            }
+        </MudButtonGroup>
+        <MudAlert Severity="Statuses[_character.Character.State].Severity">
+            @Statuses[_character.Character.State].Description
+        </MudAlert>
         <MudText Typo="Typo.h6" Class="mt-4">Revisions</MudText>
-        
-        <MudDataGrid T="Character" Items="_revisions" RowClick="RowClick">
-            <Columns>
-                <PropertyColumn Property="x => x.CharacterName" Title="Character Name"/>
-                <PropertyColumn Property="x => x.CreatedOn" Format="MMM d, yyyy" Title="Created On"/>
-                <PropertyColumn Property="x => x.SubmittedOn" Format="MMM d, yyyy" Title="Submitted On"/>
-                <PropertyColumn Property="x => x.ApprovedOn" Format="MMM d, yyyy" Title="Approved On"/>
-                <PropertyColumn Property="x => x.Level" Title="Level"/>
-            </Columns>
-        </MudDataGrid>
-        
+
+        @if (_revisions.Length > 0)
+        {
+            <div class="relative">
+                <MudDataGrid T="Character" Items="_revisions">
+                    <Columns>
+                        <PropertyColumn Property="x => x.CharacterName" Title="Character Name"/>
+                        <PropertyColumn Property="x => x.CreatedOn" Format="MMM d, yyyy" Title="Created On"/>
+                        <PropertyColumn Property="x => x.SubmittedOn" Format="MMM d, yyyy" Title="Submitted On"/>
+                        <PropertyColumn Property="x => x.ApprovedOn" Format="MMM d, yyyy" Title="Approved On"/>
+                        <PropertyColumn Property="x => x.Level" Title="Level"/>
+                        <TemplateColumn T="Character">
+                            <CellTemplate>
+                                <MudButtonGroup>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Search" OnClick="() => PreviewChanges(context.Item.ChangeSummary)"/>
+                                    <MudIconButton Icon="@Icons.Material.Filled.OpenInNew" OnClick="() => OpenCharacter(context.Item.Id)"/>
+                                </MudButtonGroup>
+                            </CellTemplate>
+                        </TemplateColumn>
+                    </Columns>
+                </MudDataGrid>
+                <MudPopover Open="_showRevision" Class="pa-4" Paper TransformOrigin="Origin.TopCenter" AnchorOrigin="Origin.TopCenter">
+                    @if (_revisionDictionary == null || _revisionDictionary.Count == 0)
+                    {
+                        <MudText Typo="Typo.body2">There's no changes in this revision</MudText>
+                    }
+                    else
+                    {
+                        <MudStack Spacing="4">
+
+                            <MudText Typo="Typo.h6">Change Summary</MudText>
+
+                            @foreach (var (field, value) in _revisionDictionary)
+                            {
+                                <div>
+                                    <strong>@field:</strong> @value
+                                </div>
+                            }
+                        </MudStack>
+                    }
+                    <MudStack Row Justify="Justify.Center">
+                        <MudButton StartIcon="@Icons.Material.Filled.Close" OnClick="() => _showRevision = false">Close</MudButton>
+                    </MudStack>
+
+                </MudPopover>
+            </div>
+        }
+
         <MudText Typo="Typo.h6" Class="mt-4">Character Sheet</MudText>
         <div class="mt-4">
             <CharacterSheet Character="_character"/>
@@ -55,16 +101,27 @@
     [Parameter]
     public string CharacterId { get; set; } = null!;
 
+    CharacterState _state;
     CharacterBuilder? _character;
+    bool _showRevision;
+    Dictionary<string, string>? _revisionDictionary;
 
     private CharacterAccountSummary[] _items = Array.Empty<CharacterAccountSummary>();
     private Character[] _revisions = Array.Empty<Character>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var character = await LandingService.Admin.GetMwFifthCharacter(CharacterId);
+        _character = new CharacterBuilder(character, LandingService.MwFifth.GameState, Logger);
+        _state = character.State;
+    }
 
     protected override async Task OnInitializedAsync()
     {
         var character = await LandingService.Admin.GetMwFifthCharacter(CharacterId);
         _character = new CharacterBuilder(character, LandingService.MwFifth.GameState, Logger);
         _revisions = await LandingService.Admin.GetMwFifthCharacterRevisions(CharacterId);
+        _state = character.State;
     }
 
     private void GoToAccount()
@@ -77,10 +134,49 @@
         NavigationManager.NavigateTo($"/admin/mw5e/characters/{CharacterId}/edit");
     }
 
-    private void RowClick(DataGridRowClickEventArgs<Character> obj)
+    private async Task OpenCharacter(string characterId)
     {
-        NavigationManager.NavigateTo($"/admin/mw5e/characters/{obj.Item.Id}");
+        NavigationManager.NavigateTo($"/admin/mw5e/characters/{characterId}");
+    }
+
+    private void PreviewChanges(Dictionary<string, string> summary)
+    {
+        _showRevision = true;
+        _revisionDictionary = summary;
+    }
+
+    private async Task Approve()
+    {
+        var result = await DialogService.ShowMessageBox(
+            "Approve this character",
+            "Are you ready to approve this character? This will make the changes live and contact the player that their changes have been approved.",
+            "Yes, Approve",
+            "No, Keep Editing");
+
+        if (result != true) return;
+
+        var characterId = _character!.Character.Id;
+        await LandingService.Admin.ApproveMwFifthCharacter(characterId);
+        NavigationManager.NavigateTo($"/admin/mw5e/characters/{characterId}");
+        await OnInitializedAsync();
+        StateHasChanged();
+    }
+
+    private async Task Reject()
+    {
+        var result = await DialogService.ShowMessageBox(
+            "Return this character",
+            "Are you ready to return this character to the player? This will return the character draft back to the player so they can edit it.",
+            "Yes, Return It",
+            "No, Keep Reviewing");
+
+        if (result != true) return;
+        
+        var characterId = _character!.Character.Id;
+        await LandingService.Admin.RejectMwFifthCharacter(characterId);
+        NavigationManager.NavigateTo($"/admin/mw5e/characters/{characterId}");
+        await OnInitializedAsync();
+        StateHasChanged();
     }
 
 }
-

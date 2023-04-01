@@ -16,9 +16,8 @@
     else
     {
         <MudStack Row Justify="Justify.FlexStart" Class="mb-4">
-            <MudButton StartIcon="@Icons.Material.Filled.Save" OnClick="Save" Variant="Variant.Filled" Color="Color.Warning">Save Changes</MudButton>
-            <MudButton StartIcon="@Icons.Material.Filled.Verified" OnClick="Approve" Variant="Variant.Filled" Color="Color.Success">Approve</MudButton>
-            <MudButton StartIcon="@Icons.Material.Filled.Undo" OnClick="Reject" Variant="Variant.Filled" Color="Color.Error">Reject</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.Save" OnClick="Save" Variant="Variant.Filled" Color="Color.Warning">Save</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.Cancel" OnClick="Cancel" Variant="Variant.Filled">Cancel</MudButton>
         </MudStack>
         <MudAlert Severity="Severity.Info">Character editing is coming soon</MudAlert>
     }
@@ -38,41 +37,23 @@
         var character = await LandingService.Admin.GetMwFifthCharacterLatest(CharacterId);
         if (character.Id != CharacterId)
         {
-            NavigationManager.NavigateTo($"/admin/mw5e/characters/{_character!.Character.Id}/edit");
+            NavigationManager.NavigateTo($"/admin/mw5e/characters/{character.Id}/edit", replace: true);
+            await OnInitializedAsync();
             return;
         }
         _character = new CharacterBuilder(character, LandingService.MwFifth.GameState, Logger);
     }
 
-    private void Save()
+    private async Task Save()
     {
+        await DialogService.ShowMessageBox("Cannot Save", "There is nothing to save");
     }
 
-    private async Task Approve()
+    private async Task Cancel()
     {
-        var result = await DialogService.ShowMessageBox(
-            "Approve this character", 
-            "Are you ready to approve this character? This will make the changes live and contact the player that their changes have been approved.", 
-            "Yes, Approve", 
-            "No, Keep Editing");
-
+        var result = await DialogService.ShowMessageBox("Cancel Revisions", "Are you sure you want to cancel without saving changes?", "Yes, Undo", "No, Keep Working");
         if (result != true) return;
-
-        await LandingService.Admin.ApproveMwFifthCharacter(CharacterId);
         NavigationManager.NavigateTo($"/admin/mw5e/characters/{_character!.Character.Id}");
     }
 
-    private async Task Reject()
-    {
-        var result = await DialogService.ShowMessageBox(
-            "Return this character", 
-            "Are you ready to return this character to the player? This will return the character draft back to the player so they can edit it.", 
-            "Yes, Return It", 
-            "No, Keep Reviewing");
-
-        if (result != true) return;
-
-        await LandingService.Admin.RejectMwFifthCharacter(CharacterId);
-        NavigationManager.NavigateTo($"/admin/mw5e/characters/{_character!.Character.Id}");
-    }
 }

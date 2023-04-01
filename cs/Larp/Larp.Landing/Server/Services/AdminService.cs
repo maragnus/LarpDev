@@ -185,7 +185,7 @@ public class AdminService : IAdminService
     public async Task<CharacterSummary[]> GetAccountCharacters(string accountId)
     {
         var gameState = await _db.MwFifthGame.GetGameState();
-        var list = await _db.MwFifthGame.Characters.Find(x => x.AccountId == accountId).ToListAsync();
+        var list = await _db.MwFifthGame.Characters.Find(x => x.AccountId == accountId && (x.State == CharacterState.Live || x.State == CharacterState.Review)).ToListAsync();
         return list.Select(x => x.ToSummary(gameState)).ToArray();
     }
 
