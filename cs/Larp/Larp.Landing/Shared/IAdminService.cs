@@ -1,5 +1,4 @@
 using Larp.Data;
-using Larp.Data.MwFifth;
 using MwFifthCharacter = Larp.Data.MwFifth.Character;
 using Microsoft.Extensions.FileProviders;
 
@@ -29,4 +28,26 @@ public interface IAdminService
 
     [ApiPost("accounts/{accountId}"), ApiAuthenticated]
     Task UpdateAccount(string accountId, string? name, string? location, string? phone, DateOnly? birthDate, string? notes);
+
+    [ApiGet("mw5e/characters/{characterId}/latest"), ApiAuthenticated]
+    Task<MwFifthCharacter> GetMwFifthCharacterLatest(string characterId);
+
+    [ApiGet("mw5e/characters/{characterId}/revisions"), ApiAuthenticated]
+    Task<MwFifthCharacter[]> GetMwFifthCharacterRevisions(string characterId);
+
+    [ApiPost("mw5e/characters/{characterId}/approve"), ApiAuthenticated]
+    Task ApproveMwFifthCharacter(string characterId);
+
+    [ApiPost("mw5e/characters/{characterId}/reject"), ApiAuthenticated]
+    Task RejectMwFifthCharacter(string characterId);
+
+    [ApiGet("dashboard"), ApiAuthenticated]
+    Task<Dashboard> GetDashboard();
+}
+
+public class Dashboard
+{
+    public int MwFifthCharacters { get; set; }
+    public int MwFifthReview { get; set; }
+    public int Accounts { get; set; }
 }

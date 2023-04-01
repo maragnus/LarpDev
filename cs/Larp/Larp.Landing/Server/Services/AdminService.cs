@@ -3,7 +3,9 @@ using Larp.Data.Mongo;
 using Larp.Data.MwFifth;
 using Larp.Landing.Client.Services;
 using Larp.Landing.Shared;
+using Larp.Landing.Shared.Messages;
 using Microsoft.Extensions.FileProviders;
+using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using OfficeOpenXml;
@@ -27,7 +29,9 @@ public class AdminService : IAdminService
 
     public async Task<Account[]> GetAccounts()
     {
-        var accounts = await _db.Accounts.Find(_ => true).ToListAsync();
+        var accounts = await _db.Accounts
+            .Find(_ => true)
+            .ToListAsync();
         return accounts.ToArray();
     }
 
@@ -110,6 +114,52 @@ public class AdminService : IAdminService
         return path;
     }
 
+    public async Task ApproveMwFifthCharacter(string characterId)
+    {
+        var character = await GetMwFifthCharacter(characterId);
+
+        if (character.PreviousId != null)
+        {
+            await _db.MwFifthGame.Characters
+                .UpdateOneAsync(x => x.Id == character.PreviousId, 
+                    Builders<MwFifthCharacter>.Update
+                        .Set(x => x.State, CharacterState.Archived)
+                        .Set(x => x.ArchivedOn, DateTime.UtcNow));
+        }
+
+        await _db.MwFifthGame.Characters
+            .UpdateOneAsync(x => x.Id == characterId, 
+                Builders<MwFifthCharacter>.Update
+                .Set(x => x.State, CharacterState.Live)
+                .Set(x => x.ApprovedOn, DateTime.UtcNow));
+    }
+
+    public async Task RejectMwFifthCharacter(string characterId)
+    {
+        var character = await GetMwFifthCharacter(characterId);
+
+        var state = character.PreviousId == null
+            ? CharacterState.NewDraft
+            : CharacterState.UpdateDraft;
+
+        var update = Builders<MwFifthCharacter>.Update
+            .Set(x => x.State, state);
+
+        await _db.MwFifthGame.Characters
+            .UpdateOneAsync(x => x.Id == characterId, update);
+    }
+
+    public async Task<Dashboard> GetDashboard()
+    {
+        var dashboard = new Dashboard();
+        
+        dashboard.Accounts = (int)await _db.Accounts.CountDocumentsAsync( _=> true);
+        dashboard.MwFifthCharacters = (int)await _db.MwFifthGame.Characters.CountDocumentsAsync(x => x.State == CharacterState.Live);
+        dashboard.MwFifthReview = (int)await _db.MwFifthGame.Characters.CountDocumentsAsync(x => x.State == CharacterState.Review);
+
+        return dashboard;
+    }
+
     public async Task<CharacterAccountSummary[]> GetMwFifthCharacters(CharacterState state)
     {
         var list = await _db.MwFifthGame.Characters.AsQueryable()
@@ -119,7 +169,7 @@ public class AdminService : IAdminService
                 account => account.AccountId,
                 (character, account) => new { Character = character, Account = account })
             .ToListAsync();
-        
+
         return list
             .Select(x => new CharacterAccountSummary(x.Character, x.Account))
             .ToArray();
@@ -131,7 +181,7 @@ public class AdminService : IAdminService
     }
 
     public async Task<Account> GetAccount(string accountId)
-    {    
+    {
         return await _db.Accounts.Find(x => x.AccountId == accountId).FirstOrDefaultAsync();
     }
 
@@ -142,7 +192,8 @@ public class AdminService : IAdminService
         return list.Select(x => x.ToSummary(gameState)).ToArray();
     }
 
-    public async Task UpdateAccount(string accountId, string? name, string? location, string? phone, DateOnly? birthDate, string? notes)
+    public async Task UpdateAccount(string accountId, string? name, string? location, string? phone,
+        DateOnly? birthDate, string? notes)
     {
         var update = Builders<Account>.Update
             .Set(x => x.Name, name)
@@ -152,5 +203,72 @@ public class AdminService : IAdminService
             .Set(x => x.BirthDate, birthDate);
 
         await _db.Accounts.UpdateOneAsync(x => x.AccountId == accountId, update);
+    }
+
+    public async Task<MwFifthCharacter> GetMwFifthCharacterLatest(string characterId)
+    {
+        // var subject = _db.MwFifthGame.Characters;
+        // var connectFromField = (FieldDefinition<MwFifthCharacter, string>)"PreviousId";
+        // var connectToField = (FieldDefinition<MwFifthCharacter, string>)"_id";
+        // var startWith = (AggregateExpressionDefinition<MwFifthCharacter, string>)"$reportsTo";
+        // var @as = (FieldDefinition<MwFifthCharacterHierarchy, IEnumerable<MwFifthCharacter>>)"ReportingHierarchy";
+        //
+        //
+        // // TODO -- replace with graph lookup
+        // var list = await subject
+        //     .Aggregate()
+        //     .Match(x => x.Id == characterId)
+        //     .GraphLookup(subject, connectFromField, connectToField, startWith, @as)
+        //     .ToListAsync();
+
+        var character = await GetMwFifthCharacter(characterId)
+                        ?? throw new Exception("Character not found");
+
+        while (true)
+        {
+            var id = character.Id;
+            var nextCharacter = await _db.MwFifthGame.Characters
+                .Find(x => x.PreviousId == id)
+                .FirstOrDefaultAsync();
+            if (nextCharacter == null)
+                return character;
+            character = nextCharacter;
+        }
+    }
+
+    public async Task<MwFifthCharacter[]> GetMwFifthCharacterRevisions(string characterId)
+    {
+        var characters = new LinkedList<MwFifthCharacter>();
+
+        var firstCharacter = await GetMwFifthCharacter(characterId)
+                             ?? throw new Exception("Character not found");
+        characters.AddFirst(firstCharacter);
+        var character = firstCharacter;
+
+        while (true)
+        {
+            var id = character.Id;
+            var nextCharacter = await _db.MwFifthGame.Characters
+                .Find(x => x.PreviousId == id)
+                .FirstOrDefaultAsync();
+            if (nextCharacter == null)
+                break;
+            character = nextCharacter;
+            characters.AddLast(character);
+        }
+
+        character = firstCharacter;
+        while (true)
+        {
+            var nextCharacter = await _db.MwFifthGame.Characters
+                .Find(x => x.Id == character.PreviousId)
+                .FirstOrDefaultAsync();
+            if (nextCharacter == null)
+                break;
+            character = nextCharacter;
+            characters.AddFirst(character);
+        }
+
+        return characters.ToArray();
     }
 }

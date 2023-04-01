@@ -66,7 +66,7 @@ public class CharacterVantage
     }
 
     public string Name { get; set; } = null!;
-    public int Rank { get; set; }  
+    public int Rank { get; set; }
     public string Title => Rank == 0 ? Name : $"{Name} {Rank}";
 
     public void Deconstruct(out string name, out int rank)
@@ -81,7 +81,7 @@ public class Character
 {
     [BsonId, BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; } = null!;
-    
+
     [BsonRepresentation(BsonType.ObjectId)]
     public string AccountId { get; set; } = null!;
 
@@ -91,6 +91,11 @@ public class Character
     public string? PreviousId { get; set; }
 
     public Dictionary<string, string>? ChangeSummary { get; set; }
+
+    public DateTime CreatedOn { get; set; }
+    public DateTime? SubmittedOn { get; set; }
+    public DateTime? ApprovedOn { get; set; }
+    public DateTime? ArchivedOn { get; set; }
 
     public string? CharacterName { get; set; }
     public string? Religion { get; set; }
@@ -127,12 +132,13 @@ public class Character
     public bool NoHistory { get; set; }
     public bool NoAdvantages { get; set; }
     public bool NoOccupation { get; set; }
-    
+
     public int StartingLevel => NoHistory ? 5 : 6;
     public int GiftMoonstone { get; set; }
     public int SkillMoonstone { get; set; }
-    
-    public static int Triangle(int level) {
+
+    public static int Triangle(int level)
+    {
         return Math.Max(0, level * (level + 1) / 2);
     }
 
@@ -143,19 +149,20 @@ public class Character
             GameState.GameName,
             AccountId,
             HomeChapter ?? "Undefined",
-            $"{gameState.HomeChapters.FirstOrDefault(x=>x.Name == HomeChapter)?.Title ?? "No Home Chapter"}, {Occupation ?? "No Occupation"}, {gameState.Religions.FirstOrDefault(x=>x.Name == Religion)?.Title ?? "Not Religious"}",
+            $"{gameState.HomeChapters.FirstOrDefault(x => x.Name == HomeChapter)?.Title ?? "No Home Chapter"}, {Occupation ?? "No Occupation"}, {gameState.Religions.FirstOrDefault(x => x.Name == Religion)?.Title ?? "Not Religious"}",
             Level,
             State);
 
-    private static HashSet<string> _skipProperties = new() { nameof(ChangeSummary), nameof(State), nameof(Id),nameof(PreviousId),nameof(AccountId) };
-    
+    private static HashSet<string> _skipProperties = new()
+        { nameof(ChangeSummary), nameof(State), nameof(Id), nameof(PreviousId), nameof(AccountId) };
+
     public static Dictionary<string, string> BuildChangeSummary(Character? oldCharacter, Character? newCharacter)
     {
         var result = new Dictionary<string, string>();
 
         if (oldCharacter == null || newCharacter == null)
             return result;
-        
+
         foreach (var property in typeof(Character).GetProperties())
         {
             if (_skipProperties.Contains(property.Name)) continue;

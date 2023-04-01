@@ -108,7 +108,10 @@ public class MwFifthServiceServer : IMwFifthService
                 .Find(x => x.Id == character.PreviousId)
                 .FirstOrDefaultAsync();
 
+            if (character.State == CharacterState.Review)
+                character.SubmittedOn = DateTime.UtcNow;
             character.ChangeSummary = Character.BuildChangeSummary(previousCharacter, character);
+            character.CreatedOn = oldCharacter.CreatedOn;
 
             await _mwFifth.Characters.ReplaceOneAsync(x => x.Id == character.Id, character);
             return StringResult.Success(character.Id);
@@ -123,6 +126,7 @@ public class MwFifthServiceServer : IMwFifthService
             throw new ResourceForbiddenException();
 
         character.AccountId = _userSession.AccountId!;
+        character.CreatedOn = DateTime.UtcNow;
 
         await _mwFifth.Characters.InsertOneAsync(character);
         return StringResult.Success(character.Id);

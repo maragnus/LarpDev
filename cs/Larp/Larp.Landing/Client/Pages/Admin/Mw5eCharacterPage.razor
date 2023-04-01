@@ -22,7 +22,22 @@
                 @Statuses[_character.Character.State].Description
             </MudAlert>
         </MudStack>
-        <CharacterSheet Character="_character"/>
+        <MudText Typo="Typo.h6" Class="mt-4">Revisions</MudText>
+        
+        <MudDataGrid T="Character" Items="_revisions" RowClick="RowClick">
+            <Columns>
+                <PropertyColumn Property="x => x.CharacterName" Title="Character Name"/>
+                <PropertyColumn Property="x => x.CreatedOn" Format="MMM d, yyyy" Title="Created On"/>
+                <PropertyColumn Property="x => x.SubmittedOn" Format="MMM d, yyyy" Title="Submitted On"/>
+                <PropertyColumn Property="x => x.ApprovedOn" Format="MMM d, yyyy" Title="Approved On"/>
+                <PropertyColumn Property="x => x.Level" Title="Level"/>
+            </Columns>
+        </MudDataGrid>
+        
+        <MudText Typo="Typo.h6" Class="mt-4">Character Sheet</MudText>
+        <div class="mt-4">
+            <CharacterSheet Character="_character"/>
+        </div>
     }
 </AdminLayout>
 
@@ -41,13 +56,15 @@
     public string CharacterId { get; set; } = null!;
 
     CharacterBuilder? _character;
-    
+
     private CharacterAccountSummary[] _items = Array.Empty<CharacterAccountSummary>();
+    private Character[] _revisions = Array.Empty<Character>();
 
     protected override async Task OnInitializedAsync()
     {
         var character = await LandingService.Admin.GetMwFifthCharacter(CharacterId);
         _character = new CharacterBuilder(character, LandingService.MwFifth.GameState, Logger);
+        _revisions = await LandingService.Admin.GetMwFifthCharacterRevisions(CharacterId);
     }
 
     private void GoToAccount()
@@ -60,4 +77,10 @@
         NavigationManager.NavigateTo($"/admin/mw5e/characters/{CharacterId}/edit");
     }
 
+    private void RowClick(DataGridRowClickEventArgs<Character> obj)
+    {
+        NavigationManager.NavigateTo($"/admin/mw5e/characters/{obj.Item.Id}");
+    }
+
 }
+

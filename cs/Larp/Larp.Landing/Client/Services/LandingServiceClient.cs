@@ -91,9 +91,21 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
 
     public Task UpdateAccount(string accountId, string? name, string? location,
         string? phone, DateOnly? birthDate, string? notes) =>
-        Post($"api/admin/accounts/{accountId}",
-            new
-            {
-                name, location, phone, birthDate, notes
-            });
+        Post($"api/admin/accounts/{accountId}", new { name, location, phone, birthDate, notes });
+
+    public Task<MwFifthCharacter> GetMwFifthCharacterLatest(string characterId) =>
+        Get<MwFifthCharacter>($"api/admin/mw5e/characters/{characterId}/latest");
+
+    public Task<MwFifthCharacter[]> GetMwFifthCharacterRevisions(string characterId) =>
+        Get<MwFifthCharacter[]>($"api/admin/mw5e/characters/{characterId}/revisions");
+
+    public Task ApproveMwFifthCharacter(string characterId) =>
+        Post($"api/admin/mw5e/characters/{characterId}/approve");
+    
+    public Task RejectMwFifthCharacter(string characterId) =>
+        Post($"api/admin/mw5e/characters/{characterId}/reject");
+
+    public Task<Dashboard> GetDashboard() =>
+        Get<Dashboard>($"api/admin/dashboard");
+
 }

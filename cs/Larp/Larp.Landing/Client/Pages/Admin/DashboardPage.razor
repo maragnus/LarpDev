@@ -1,6 +1,39 @@
 @page "/admin"
+@using Larp.Landing.Shared
+
+@inject LandingService LandingService
 
 <PageHeader>Administration Section</PageHeader>
 
-<AdminLayout>
+<AdminLayout Loading="_dashboard == null" Title="Dashboard">
+    <MudGrid>
+                <MudItem md="4">
+                    <MudPaper Style="text-align: center" Class="pa-4">
+                        <MudText Typo="Typo.h2" Align="Align.Center">@_dashboard.Accounts</MudText>
+                        <MudText Typo="Typo.caption" Align="Align.Center">Accounts</MudText>
+                    </MudPaper>
+                </MudItem>
+        <MudItem md="4">
+            <MudPaper Style="text-align: center" Class="pa-4">
+                <MudText Typo="Typo.h2" Align="Align.Center">@_dashboard.MwFifthCharacters</MudText>
+                <MudText Typo="Typo.caption" Align="Align.Center">Live Characters</MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem md="4">
+            <MudPaper Style="text-align: center" Class="pa-4">
+                <MudText Typo="Typo.h2" Align="Align.Center">@_dashboard.MwFifthReview</MudText>
+                <MudText Typo="Typo.caption" Align="Align.Center">Reviews Needed</MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
 </AdminLayout>
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        _dashboard = await LandingService.Admin.GetDashboard();
+    }
+
+    private Dashboard? _dashboard;
+}

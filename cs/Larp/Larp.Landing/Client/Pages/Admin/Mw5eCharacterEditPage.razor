@@ -1,6 +1,5 @@
 @page "/admin/mw5e/characters/{CharacterId}/edit"
 @using Larp.Landing.Shared
-@using Larp.Landing.Client.Pages.MwFifth
 @using Larp.Landing.Shared.MwFifth
 @inject LandingService LandingService
 @inject ILogger<Mw5eCharacterPage> Logger
@@ -18,7 +17,8 @@
     {
         <MudStack Row Justify="Justify.FlexStart" Class="mb-4">
             <MudButton StartIcon="@Icons.Material.Filled.Save" OnClick="Save" Variant="Variant.Filled" Color="Color.Warning">Save Changes</MudButton>
-            <MudButton StartIcon="@Icons.Material.Filled.Verified" OnClick="Verify" Variant="Variant.Filled" Color="Color.Success">Approve</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.Verified" OnClick="Approve" Variant="Variant.Filled" Color="Color.Success">Approve</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.Undo" OnClick="Reject" Variant="Variant.Filled" Color="Color.Error">Reject</MudButton>
         </MudStack>
         <MudAlert Severity="Severity.Info">Character editing is coming soon</MudAlert>
     }
@@ -35,7 +35,12 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var character = await LandingService.Admin.GetMwFifthCharacter(CharacterId);
+        var character = await LandingService.Admin.GetMwFifthCharacterLatest(CharacterId);
+        if (character.Id != CharacterId)
+        {
+            NavigationManager.NavigateTo($"/admin/mw5e/characters/{_character!.Character.Id}/edit");
+            return;
+        }
         _character = new CharacterBuilder(character, LandingService.MwFifth.GameState, Logger);
     }
 
@@ -43,7 +48,7 @@
     {
     }
 
-    private async Task Verify()
+    private async Task Approve()
     {
         var result = await DialogService.ShowMessageBox(
             "Approve this character", 
@@ -53,7 +58,21 @@
 
         if (result != true) return;
 
+        await LandingService.Admin.ApproveMwFifthCharacter(CharacterId);
         NavigationManager.NavigateTo($"/admin/mw5e/characters/{_character!.Character.Id}");
     }
 
+    private async Task Reject()
+    {
+        var result = await DialogService.ShowMessageBox(
+            "Return this character", 
+            "Are you ready to return this character to the player? This will return the character draft back to the player so they can edit it.", 
+            "Yes, Return It", 
+            "No, Keep Reviewing");
+
+        if (result != true) return;
+
+        await LandingService.Admin.RejectMwFifthCharacter(CharacterId);
+        NavigationManager.NavigateTo($"/admin/mw5e/characters/{_character!.Character.Id}");
+    }
 }
