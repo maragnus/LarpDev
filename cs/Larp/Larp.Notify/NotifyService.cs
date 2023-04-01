@@ -1,6 +1,5 @@
 ﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Net.Mail;
 using System.Text.Json;
 using Larp.Notify.Sendinblue;
 using Microsoft.Extensions.Logging;

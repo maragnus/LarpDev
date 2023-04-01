@@ -14,7 +14,6 @@
 
 @using PSC.Blazor.Components.BrowserDetect
 @using System.ComponentModel.DataAnnotations
-@using System.ComponentModel
 @using Larp.Landing.Client.Pages.Dialogs
 
 <BrowserDetect BrowserInfoChanged="info => LandingService.UpdateBrowserInfo(info)"/>
@@ -76,6 +75,9 @@
                 <EditForm Model="@_confirmModel" OnValidSubmit="SubmitConfirm">
                     <DataAnnotationsValidator/>
                     <MudStack Spacing="4">
+                        <MudAlert Severity="Severity.Warning" Icon="@Icons.Material.Outlined.Email">
+                            Grab your code from your email!
+                        </MudAlert>
                         <MudTextField T="string?" InputType="InputType.Email" Label="Email Address" Variant="Variant.Outlined" @bind-Value="_confirmModel.EmailAddress" For="@(() => _confirmModel.EmailAddress)" Disabled="_isBusy"/>
                         <MudTextField T="string?" InputType="InputType.Text" Label="Code" Variant="Variant.Outlined" AutoFocus="true" @bind-Value="_confirmModel.Token" For="@(() => _confirmModel.Token)" Disabled="_isBusy"/>
                         <MudTextField T="string?" InputType="InputType.Text" Label="Device Name" Variant="Variant.Outlined" @bind-Value="_confirmModel.DeviceName" For="@(() => _confirmModel.DeviceName)" Disabled="_isBusy"/>
