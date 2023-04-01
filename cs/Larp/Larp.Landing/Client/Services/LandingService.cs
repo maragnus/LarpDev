@@ -61,6 +61,7 @@ public class LandingService
         if (e.Key == SessionIdKey)
             SetSessionId((string)e.NewValue);
     }
+    
     private void SetSessionId(string? sessionId)
     {
         _client.SetSessionId(sessionId);
@@ -74,6 +75,7 @@ public class LandingService
         var sessionId = await _localStorage.GetItemAsStringAsync(SessionIdKey);
         SetSessionId(sessionId);
         _logger.LogInformation("Refresh starting...");
+        Account = await GetAccount();
         await GetGames();
         await MwFifth.Refresh();
         _logger.LogInformation("Refresh complete");

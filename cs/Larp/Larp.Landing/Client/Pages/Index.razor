@@ -6,19 +6,38 @@
 <div class="buffer"></div>
 
 <style>
-     .index a { color: #fff; text-decoration: underline }
+     .links a { color: #fff; text-decoration: underline }
 </style>
 
 <MudContainer MaxWidth="MaxWidth.Small" Class="index">
-     <MudText Typo="Typo.h4" Align="Align.Center" Style="color: white">Welcome to the Landing!</MudText>
+    <MudText Typo="Typo.h4" Align="Align.Center" Style="color: white">Welcome to the Landing!</MudText>
 
-     <MudPaper Elevation="2" Style="background-color: rgba(255, 255, 255, 0.25); margin: 4em 0; padding: 2em">
-          <MudText Typo="Typo.body1" Align="Align.Center" Style="color: #fff">
-               Check the menu to <a href="/login">sign in</a>, access your <a href="/characters">characters</a>, check <a href="/events">upcoming events</a>, or <a href="/clarify">clarify</a> game terminology!<br/>
-               <br/>
-               Visit the <a href="http://mystwood.org/">Mystwood</a> homepage for more information.
-          </MudText>
-     </MudPaper>
-     <MudText Typo="Typo.body2" Align="Align.Center" Style="color: #ccc;">Revision <Revision /></MudText>
+    <MudPaper Elevation="2" Style="background-color: rgba(255, 255, 255, 0.25); margin: 4em 0; padding: 2em">
+        <MudText Typo="Typo.body1" Align="Align.Center" Style="color: #fff" Class="links">
+            Check the menu to <a href="/login">sign in</a>, access your <a href="/characters">characters</a>, check <a href="/events">upcoming events</a>, or <a href="/clarify">clarify</a> game terminology!<br/>
+        </MudText>
+    </MudPaper>
+
+    <MudPaper Elevation="2" Style="background-color: rgba(255, 255, 255, 0.25); margin: 4em 0; padding: 2em">
+        <MudStack Row Justify="Justify.Center" Class="links">
+            <img src="/tree-white.webp" style="height: 4em; width: auto" alt="Myswood Tree Logo"/>
+            <div>
+            <MudText Typo="Typo.h6" Align="Align.Left" Style="color: #fff">
+                   Mystwood
+            </MudText>
+            <MudText Typo="Typo.body1" Align="Align.Left" Style="color: #fff">
+                Visit the <a href="http://mystwood.org/">Mystwood</a> homepage for more information.
+            </MudText>
+            </div>
+        </MudStack>
+    </MudPaper>
+
+    <MudText Typo="Typo.body2" Align="Align.Center" Style="color: #ccc;">Revision <Revision/></MudText>
+    <MudStack Row Spacing="4">
+        <MudTooltip Text="LARP Landing is open source developed by Josh Brown. Please feel free to participate in its development.">
+            <MudButton Style="white-space: nowrap" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.GitHub" Variant="Variant.Filled" Href="https://github.com/maragnus/LarpDev">LARP Landing</MudButton>
+        </MudTooltip>
+        <MudButton Style="white-space: nowrap"  Color="Color.Secondary" StartIcon="@Icons.Custom.Brands.GitHub" Variant="Variant.Filled" Href="https://github.com/maragnus/LarpDev/issues/new">Report an issue</MudButton>
+        <MudButton Style="white-space: nowrap"  Color="Color.Tertiary" StartIcon="@Icons.Custom.Brands.MicrosoftVisualStudio" Variant="Variant.Filled" Href="https://dotnet.microsoft.com/en-us/apps/aspnet/web-apps/blazor">Made with Blazor</MudButton>
+    </MudStack>
 </MudContainer>
-
