@@ -1,8 +1,16 @@
+using Larp.Data;
+
 namespace Larp.Landing.Shared;
 
 [AttributeUsage(AttributeTargets.Method)]
 public class ApiAuthenticatedAttribute : Attribute
 {
+    public AccountRole[] Roles { get; }
+
+    public ApiAuthenticatedAttribute(params AccountRole[] roles)
+    {
+        Roles = roles;
+    }
 }
 
 [AttributeUsage(AttributeTargets.Method)]

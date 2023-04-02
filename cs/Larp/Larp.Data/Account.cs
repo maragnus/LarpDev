@@ -2,6 +2,13 @@
 
 namespace Larp.Data;
 
+public enum AccountRole
+{
+    AdminAccess,
+    AccountAdmin,
+    MwFifthGameMaster
+}
+
 [PublicAPI]
 public class Account
 {
@@ -11,13 +18,14 @@ public class Account
     public string? Name { get; set; }
     public string? Location { get; set; }
     public string? Phone { get; set; }
-    public List<AccountEmail> Emails { get; set; } = new List<AccountEmail>();
+    public List<AccountEmail> Emails { get; set; } = new();
     public bool IsSuperAdmin { get; set; }
     public string? Notes { get; set; }
     public DateTimeOffset Created { get; set; }
     public DateTimeOffset? LastUpdate { get; set; }
     public DateOnly? BirthDate { get; set; }
     public int? Age => BirthDate.GetAge();
+    public AccountRole[] Roles { get; set; } = Array.Empty<AccountRole>();
 
     [BsonIgnore]
     public string? PreferredEmail =>

@@ -8,41 +8,55 @@ namespace Larp.Landing.Shared;
 [ApiRoot("/api/admin")]
 public interface IAdminService
 {
-    [ApiGet("accounts"), ApiAuthenticated]
+    [ApiGet("dashboard"), ApiAuthenticated(AccountRole.AdminAccess)]
+    Task<Dashboard> GetDashboard();
+
+    [ApiGet("accounts"), ApiAuthenticated(AccountRole.AdminAccess)]
     Task<Account[]> GetAccounts();
 
-    [ApiGet("export"), ApiContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")]
+    [ApiGet("export"), ApiAuthenticated(AccountRole.AccountAdmin)]
+    [ApiContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")]
     Task<IFileInfo> Export();
-
-    [ApiGet("mw5e/characters"), ApiAuthenticated]
-    Task<CharacterAccountSummary[]> GetMwFifthCharacters(CharacterState state);
-
-    [ApiGet("mw5e/characters/{characterId}"), ApiAuthenticated]
-    Task<MwFifthCharacter> GetMwFifthCharacter(string characterId);
-
-    [ApiGet("accounts/{accountId}"), ApiAuthenticated]
-    Task<Account> GetAccount(string accountId);
     
-    [ApiGet("accounts/{accountId}/characters"), ApiAuthenticated]
+    [ApiGet("accounts/{accountId}"), ApiAuthenticated(AccountRole.AdminAccess)]
+    Task<Account> GetAccount(string accountId);
+
+    [ApiGet("accounts/{accountId}/characters"), ApiAuthenticated(AccountRole.AdminAccess)]
     Task<CharacterSummary[]> GetAccountCharacters(string accountId);
 
-    [ApiPost("accounts/{accountId}"), ApiAuthenticated]
-    Task UpdateAccount(string accountId, string? name, string? location, string? phone, DateOnly? birthDate, string? notes);
+    [ApiPost("accounts/{accountId}"), ApiAuthenticated(AccountRole.AccountAdmin)]
+    Task UpdateAccount(string accountId, string? name, string? location, string? phone, DateOnly? birthDate,
+        string? notes);
 
-    [ApiGet("mw5e/characters/{characterId}/latest"), ApiAuthenticated]
+    [ApiPost("accounts/{accountId}/roles/{role}"), ApiAuthenticated(AccountRole.AccountAdmin)]
+    Task AddAccountRole(string accountId, AccountRole role);
+    
+    [ApiDelete("accounts/{accountId}/roles/{role}"), ApiAuthenticated(AccountRole.AccountAdmin)]
+    Task RemoveAccountRole(string accountId, AccountRole role);
+    
+    [ApiGet("mw5e/characters"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
+    Task<CharacterAccountSummary[]> GetMwFifthCharacters(CharacterState state);
+
+    [ApiGet("mw5e/characters/{characterId}"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
+    Task<MwFifthCharacter> GetMwFifthCharacter(string characterId);
+
+    [ApiGet("mw5e/characters/{characterId}/latest"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
     Task<MwFifthCharacter> GetMwFifthCharacterLatest(string characterId);
 
-    [ApiGet("mw5e/characters/{characterId}/revisions"), ApiAuthenticated]
+    [ApiGet("mw5e/characters/{characterId}/revisions"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
     Task<MwFifthCharacter[]> GetMwFifthCharacterRevisions(string characterId);
 
-    [ApiPost("mw5e/characters/{characterId}/approve"), ApiAuthenticated]
+    [ApiPost("mw5e/characters/{characterId}/approve"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
     Task ApproveMwFifthCharacter(string characterId);
 
-    [ApiPost("mw5e/characters/{characterId}/reject"), ApiAuthenticated]
+    [ApiPost("mw5e/characters/{characterId}/reject"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
     Task RejectMwFifthCharacter(string characterId);
 
-    [ApiGet("dashboard"), ApiAuthenticated]
-    Task<Dashboard> GetDashboard();
+    [ApiPost("mw5e/characters/{characterId}/revise"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
+    Task<MwFifthCharacter> ReviseMwFifthCharacter(string characterId);
+
+    [ApiPost("mw5e/characters/{characterId}"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
+    Task SaveMwFifthCharacter(MwFifthCharacter character);
 }
 
 public class Dashboard

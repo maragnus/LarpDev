@@ -85,6 +85,9 @@ public class Character
     [BsonRepresentation(BsonType.ObjectId)]
     public string AccountId { get; set; } = null!;
 
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string UniqueId { get; set; } = null!;
+
     public CharacterState State { get; set; } = CharacterState.NewDraft;
 
     [BsonRepresentation(BsonType.ObjectId)]

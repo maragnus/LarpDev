@@ -53,7 +53,7 @@ public static class MapApiExtensions
             .Select(x => (
                 MethodInfo: x,
                 Api: x.GetCustomAttribute<ApiRouteAttribute>(),
-                AuthRequired: x.GetCustomAttribute<ApiAuthenticatedAttribute>() != null,
+                AuthRequired: x.GetCustomAttribute<ApiAuthenticatedAttribute>(),
                 ContentType: x.GetCustomAttribute<ApiContentTypeAttribute>()))
             .Where(x => x.Api != null);
 
@@ -70,14 +70,27 @@ public static class MapApiExtensions
     }
 
     static async Task HandleRequest<TInterface>(HttpContext httpContext, MethodInfo methodInfo, TInterface obj,
-        ILogger logger, IUserSession userSession, bool authRequired, ApiContentTypeAttribute? contentType)
+        ILogger logger, IUserSession userSession, ApiAuthenticatedAttribute? authRequired, ApiContentTypeAttribute? contentType)
     {
-        if (authRequired && !userSession.IsAuthenticated)
+        if (authRequired != null)
         {
-            // 401 Unauthorized is the status code to return when the client provides no credentials or invalid credentials.
-            httpContext.Response.StatusCode = 401;
-            await httpContext.Response.WriteAsJsonAsync(Result.Failed("Must be logged in to access this section"), LarpJson.Options);
-            return;
+            if (!userSession.IsAuthenticated)
+            {
+                // 401 Unauthorized is the status code to return when the client provides no credentials or invalid credentials.
+                httpContext.Response.StatusCode = 401;
+                await httpContext.Response.WriteAsJsonAsync(Result.Failed("Must be logged in to access this section"),
+                    LarpJson.Options);
+                return;
+            }
+
+            if (!userSession.HasAnyRole(authRequired.Roles))
+            {
+                // 401 Unauthorized is the status code to return when the client provides no credentials or invalid credentials.
+                httpContext.Response.StatusCode = 401;
+                await httpContext.Response.WriteAsJsonAsync(Result.Failed("You do not have the required role"),
+                    LarpJson.Options);
+                return;
+            }
         }
 
         try
@@ -92,7 +105,7 @@ public static class MapApiExtensions
                     var name = parameter.Name!;
 
                     if (httpContext.GetRouteData().Values.TryGetValue(name, out var routeValue))
-                        return routeValue;
+                        return Coerce(routeValue, parameter.ParameterType);
                     if (httpContext.Request.Query.TryGetValue(name, out var value))
                         return Coerce(value.FirstOrDefault(), parameter.ParameterType);
                     if (body?.RootElement.TryGetProperty(name, out var property) == true)
@@ -151,18 +164,21 @@ public static class MapApiExtensions
         }
     }
 
-    private static object? Coerce(string? stringValue, Type desiredType)
+    private static object? Coerce(object? value, Type desiredType)
     {
-        if (desiredType == typeof(string))
-            return stringValue;
+        if (value is not string stringValue) 
+            return Convert.ChangeType(value, desiredType);
         
+        if (desiredType == typeof(string))
+            return value;
+
         if (desiredType.IsEnum)
         {
             if (Enum.TryParse(desiredType, stringValue, true, out var enumValue))
                 return enumValue;
-            throw new BadRequestException($"Value \"{stringValue}\" does not map to enum \"{desiredType.Name}\"");
+            throw new BadRequestException($"Value \"{value}\" does not map to enum \"{desiredType.Name}\"");
         }
 
-        return Convert.ChangeType(stringValue, desiredType);
+        return Convert.ChangeType(value, desiredType);
     }
 }

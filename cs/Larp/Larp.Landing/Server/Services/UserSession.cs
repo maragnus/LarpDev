@@ -9,6 +9,8 @@ public interface IUserSession
     string? SessionId { get; }
     bool IsAuthenticated { get; }
     string? AccountId { get; }
+    bool HasAnyRole(AccountRole[] anyOfRoles);
+    bool HasRole(AccountRole role);
 }
 
 public class UserSession : IUserSession
@@ -35,6 +37,14 @@ public class UserSession : IUserSession
     }
 
     public string? AccountId { get; private set; }
+
+    public bool HasAnyRole(AccountRole[] anyOfRoles) =>
+        anyOfRoles.Length == 0
+        || (CurrentUser?.Roles.Intersect(anyOfRoles).Any() ?? false);
+
+    public bool HasRole(AccountRole role) => 
+        CurrentUser?.Roles.Contains(role) ?? false;
+
     public Account? CurrentUser { get; private set; }
     public string? SessionId { get; private set; }
     public bool IsAuthenticated { get; private set; }

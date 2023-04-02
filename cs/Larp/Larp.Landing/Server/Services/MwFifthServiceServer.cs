@@ -58,76 +58,79 @@ public class MwFifthServiceServer : IMwFifthService
         character.PreviousId = character.Id;
         character.Id = ObjectId.GenerateNewId().ToString();
         character.State = CharacterState.UpdateDraft;
+        character.UniqueId = character.UniqueId;
+        character.CreatedOn = character.CreatedOn;
 
         await _mwFifth.Characters.InsertOneAsync(character);
         return character;
     }
 
-    public Task<Character> GetNewCharacter()
+    public async Task<Character> GetNewCharacter()
     {
-        return Task.FromResult(new Character
+        var character = new Character
         {
             Id = ObjectId.GenerateNewId().ToString(),
             AccountId = _userSession.AccountId!,
-            State = CharacterState.NewDraft
-        });
+            State = CharacterState.NewDraft,
+            UniqueId = ObjectId.GenerateNewId().ToString(),
+            CreatedOn = DateTime.UtcNow
+        };
+
+        await _mwFifth.Characters.InsertOneAsync(character);
+        
+        return character;
     }
 
     public async Task<StringResult> SaveCharacter(Character character)
     {
-        var oldCharacter = await _mwFifth.Characters
+        var saved = await _mwFifth.Characters
             .Find(x => x.Id == character.Id)
             .FirstOrDefaultAsync();
+        
+        var live = saved?.PreviousId != null
+            ? await _mwFifth.Characters
+                .Find(x => x.Id == character.PreviousId)
+                .FirstOrDefaultAsync() : null;
+        var isLive = live != null;
+        
+        if (saved == null)
+            throw new BadRequestException("Character does not exist");
+        
+        if (saved.AccountId != _userSession.AccountId)
+            throw new BadRequestException("Character does not belong to Account");
+        
+        if (saved.AccountId != character.AccountId)
+            throw new BadRequestException("Character cannot change owner");
 
-        if (oldCharacter != null)
+        if (isLive)
         {
             // User cannot change the state inappropriately
-            if (character.PreviousId == null &&
-                character.State is not (CharacterState.NewDraft or CharacterState.Review))
-                throw new BadRequestException("State may only be NewDraft or Review");
-
-            if (character.PreviousId != null &&
-                character.State is not (CharacterState.UpdateDraft or CharacterState.Review))
+            if (character.State is not (CharacterState.UpdateDraft or CharacterState.Review))
                 throw new BadRequestException("State may only be UpdateDraft or Review");
-
-            // Properties are admin-only
-            if (character.UnlockedAllSpells != oldCharacter.UnlockedAllSpells
-                || character.PreviousId != oldCharacter.PreviousId)
-                throw new BadRequestException("Cannot update restricted fields");
-
-            // User can only edit their own characters
-            if (oldCharacter.AccountId != _userSession.AccountId)
-                throw new BadRequestException("Cannot change owner");
-
-            // User cannot edit character that is live or waiting for review
-            if (oldCharacter.State is not (CharacterState.NewDraft or CharacterState.UpdateDraft))
-                throw new BadRequestException("Character must be in draft to edit");
-
-            var previousCharacter = await _mwFifth.Characters
-                .Find(x => x.Id == character.PreviousId)
-                .FirstOrDefaultAsync();
-
-            if (character.State == CharacterState.Review)
-                character.SubmittedOn = DateTime.UtcNow;
-            character.ChangeSummary = Character.BuildChangeSummary(previousCharacter, character);
-            character.CreatedOn = oldCharacter.CreatedOn;
-
-            await _mwFifth.Characters.ReplaceOneAsync(x => x.Id == character.Id, character);
-            return StringResult.Success(character.Id);
+            
+            character.ChangeSummary = Character.BuildChangeSummary(live, character);
+        }
+        else
+        {
+            // User cannot change the state inappropriately
+            if (character.State is not (CharacterState.NewDraft or CharacterState.Review))
+                throw new BadRequestException("State may only be NewDraft or Review");
+            
+            character.ChangeSummary = new();
         }
 
-        // Property is admin-only
-        if (character.UnlockedAllSpells || character.PreviousId != null || character.ChangeSummary != null)
-            throw new BadRequestException();
+        // User cannot edit character that is live or waiting for review
+        if (saved.State is CharacterState.Live or CharacterState.Archived or CharacterState.Review)
+            throw new BadRequestException("Character must be in draft to edit");
 
-        // User cannot change the state inappropriately
-        if (character.State is not (CharacterState.NewDraft or CharacterState.Review))
-            throw new ResourceForbiddenException();
+        if (saved.State is not CharacterState.Review && character.State is CharacterState.Review)
+            character.SubmittedOn = DateTime.UtcNow;
+        
+        character.UnlockedAllSpells = saved.UnlockedAllSpells;
+        character.CreatedOn = saved.CreatedOn;
+        character.UniqueId = saved.UniqueId;
 
-        character.AccountId = _userSession.AccountId!;
-        character.CreatedOn = DateTime.UtcNow;
-
-        await _mwFifth.Characters.InsertOneAsync(character);
+        await _mwFifth.Characters.ReplaceOneAsync(x => x.Id == character.Id, character);
         return StringResult.Success(character.Id);
     }
 

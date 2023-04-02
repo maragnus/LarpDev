@@ -93,6 +93,12 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
         string? phone, DateOnly? birthDate, string? notes) =>
         Post($"api/admin/accounts/{accountId}", new { name, location, phone, birthDate, notes });
 
+    public Task AddAccountRole(string accountId, AccountRole role) =>
+        Post($"api/admin/accounts/{accountId}/roles/{role}");
+
+    public Task RemoveAccountRole(string accountId, AccountRole role) =>
+        Delete($"api/admin/accounts/{accountId}/roles/{role}");
+    
     public Task<MwFifthCharacter> GetMwFifthCharacterLatest(string characterId) =>
         Get<MwFifthCharacter>($"api/admin/mw5e/characters/{characterId}/latest");
 
@@ -101,11 +107,16 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
 
     public Task ApproveMwFifthCharacter(string characterId) =>
         Post($"api/admin/mw5e/characters/{characterId}/approve");
-    
+
     public Task RejectMwFifthCharacter(string characterId) =>
         Post($"api/admin/mw5e/characters/{characterId}/reject");
 
     public Task<Dashboard> GetDashboard() =>
         Get<Dashboard>($"api/admin/dashboard");
 
+    public Task<Character> ReviseMwFifthCharacter(string characterId) =>
+        Post<Character>($"api/admin/mw5e/characters/{characterId}/revise");
+
+    public Task SaveMwFifthCharacter(Character character) =>
+        Post($"api/admin/mw5e/characters/{character.Id}");
 }

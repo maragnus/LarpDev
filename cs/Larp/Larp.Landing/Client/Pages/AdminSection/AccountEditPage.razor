@@ -44,9 +44,38 @@
         </MudPaper>
     </MudPaper>
 
+    <MudPaper Class="pa-4 mb-4 relative">
+        <MudOverlay DarkBackground Absolute Visible="_saving">
+            <MudText Typo="Typo.h6">Saving...</MudText>
+            <MudProgressCircular Indeterminate Size="Size.Large"/>
+        </MudOverlay>
+        <MudStack Spacing="4">
+            <MudText Typo="Typo.h6">Roles</MudText>
+            <MudSwitch T="bool" Checked="_account.Roles.Contains(AccountRole.AdminAccess)" CheckedChanged="value => SetRole(AccountRole.AdminAccess, value)" Color="Color.Success" UnCheckedColor="Color.Error">Access to administration section</MudSwitch>
+            <MudSwitch T="bool" Checked="_account.Roles.Contains(AccountRole.AccountAdmin)" CheckedChanged="value => SetRole(AccountRole.AccountAdmin, value)" Color="Color.Success" UnCheckedColor="Color.Error">Can manage accounts and access</MudSwitch>
+            <MudSwitch T="bool" Checked="_account.Roles.Contains(AccountRole.MwFifthGameMaster)" CheckedChanged="value => SetRole(AccountRole.MwFifthGameMaster, value)" Color="Color.Success" UnCheckedColor="Color.Error">Can manage Mystwood 5e characters</MudSwitch>
+        </MudStack>
+    </MudPaper>
+
     <MudPaper Class="mb-4">
         <MudDataGrid T="CharacterSummary" Items="_characters" RowClick="RowClick">
             <Columns>
+                <TemplateColumn T="CharacterSummary" Title="Status">
+                    <CellTemplate>
+                        @switch (context.Item.State)
+                        {
+                            case CharacterState.Live:
+                                <MudChip Size="Size.Small" Color="Color.Success">Live</MudChip>
+                                break;
+                            case CharacterState.Review:
+                                <MudChip Size="Size.Small" Color="@Color.Warning">Review</MudChip>
+                                break;
+                            case CharacterState.NewDraft or CharacterState.UpdateDraft:
+                                <MudChip Size="Size.Small" Color="@Color.Info">Draft</MudChip>
+                                break;
+                        }
+                    </CellTemplate>
+                </TemplateColumn>
                 <PropertyColumn Property="x => x.Name" Title="Character Name"/>
                 <PropertyColumn Property="x => x.HomeChapter" Title="Home Chapter"/>
                 <PropertyColumn Property="x => x.Summary" Title="Summary"/>
@@ -97,6 +126,25 @@
         {
             _account = await LandingService.Admin.GetAccount(AccountId);
             _changed = false;
+            _saving = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SetRole(AccountRole role, bool hasRole)
+    {
+        _saving = true;
+        try
+        {
+            if (hasRole)
+                await LandingService.Admin.AddAccountRole(AccountId, role);
+            else
+                await LandingService.Admin.RemoveAccountRole(AccountId, role);
+
+            _account = await LandingService.Admin.GetAccount(AccountId);
+        }
+        finally
+        {
             _saving = false;
             StateHasChanged();
         }

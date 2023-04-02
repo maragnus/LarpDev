@@ -2,6 +2,7 @@
 @using Larp.Landing.Shared
 @using Larp.Landing.Client.Pages.MwFifth
 @using Larp.Landing.Shared.MwFifth
+@using System.Text.Json
 @inject LandingService LandingService
 @inject ILogger<Mw5eCharacterPage> Logger
 @inject NavigationManager NavigationManager
@@ -18,12 +19,17 @@
     {
         <MudButtonGroup Variant="Variant.Filled" Class="mb-4" OverrideStyles="false">
             <MudButton StartIcon="@Icons.Material.Filled.AccountCircle" Variant="Variant.Filled" OnClick="GoToAccount">Player</MudButton>
-            @if (_state != CharacterState.Archived)
+            @if (_state is CharacterState.NewDraft or CharacterState.UpdateDraft)
             {
                 <MudButton StartIcon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Color="Color.Warning" OnClick="EditCharacter">Edit</MudButton>
             }
+            @if (_state is CharacterState.Live)
+            {
+                <MudButton StartIcon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Color="Color.Warning" OnClick="ReviseCharacter">Revise</MudButton>
+            }
             @if (_state == CharacterState.Review)
             {
+                <MudButton StartIcon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Color="Color.Warning" OnClick="EditCharacter">Edit</MudButton>
                 <MudButton StartIcon="@Icons.Material.Filled.Verified" OnClick="Approve" Variant="Variant.Filled" Color="Color.Success">Approve</MudButton>
                 <MudButton StartIcon="@Icons.Material.Filled.Undo" OnClick="Reject" Variant="Variant.Filled" Color="Color.Error">Reject</MudButton>
             }
@@ -31,18 +37,57 @@
         <MudAlert Severity="Statuses[_character.Character.State].Severity">
             @Statuses[_character.Character.State].Description
         </MudAlert>
-        <MudText Typo="Typo.h6" Class="mt-4">Revisions</MudText>
 
         @if (_revisions.Length > 0)
         {
+            <MudText Typo="Typo.h6" Class="mt-4">Revisions</MudText>
+
             <div class="relative">
                 <MudDataGrid T="Character" Items="_revisions">
                     <Columns>
-                        <PropertyColumn Property="x => x.CharacterName" Title="Character Name"/>
-                        <PropertyColumn Property="x => x.CreatedOn" Format="MMM d, yyyy" Title="Created On"/>
-                        <PropertyColumn Property="x => x.SubmittedOn" Format="MMM d, yyyy" Title="Submitted On"/>
-                        <PropertyColumn Property="x => x.ApprovedOn" Format="MMM d, yyyy" Title="Approved On"/>
+                        <TemplateColumn T="Character" Title="Name">
+                            <CellTemplate>
+                                @if (context.Item.Id == CharacterId)
+                                {
+                                    <MudText Color="Color.Primary">
+                                        <strong>@context.Item.CharacterName</strong>
+                                    </MudText>
+                                }
+                                else
+                                {
+                                    @context.Item.CharacterName
+                                }
+                            </CellTemplate>
+                        </TemplateColumn>
+                            <PropertyColumn Property="x => x.CreatedOn" Format="MMM d, yyyy" Title="Created"/>
+                        <TemplateColumn T="Character" Title="Submitted">
+                            <CellTemplate>@DisplayDateTime(context.Item.SubmittedOn)</CellTemplate>
+                        </TemplateColumn>
+                        <TemplateColumn T="Character" Title="Approved">
+                            <CellTemplate>@DisplayDateTime(context.Item.ApprovedOn)</CellTemplate>
+                        </TemplateColumn>
                         <PropertyColumn Property="x => x.Level" Title="Level"/>
+                        <TemplateColumn T="Character">
+                            <CellTemplate>
+                                <MudStack Row>
+                                    @switch (context.Item.State)
+                                    {
+                                        case CharacterState.Archived:
+                                            <MudChip Size="Size.Small" Color="Color.Error">Archived</MudChip>
+                                            break;
+                                        case CharacterState.Live:
+                                            <MudChip Size="Size.Small" Color="Color.Success">Live</MudChip>
+                                            break;
+                                        case CharacterState.Review:
+                                            <MudChip Size="Size.Small" Color="@Color.Warning">Review</MudChip>
+                                            break;
+                                        case CharacterState.NewDraft or CharacterState.UpdateDraft:
+                                            <MudChip Size="Size.Small" Color="@Color.Info">Draft</MudChip>
+                                            break;
+                                    }
+                                </MudStack>
+                            </CellTemplate>
+                        </TemplateColumn>
                         <TemplateColumn T="Character">
                             <CellTemplate>
                                 <MudButtonGroup>
@@ -89,6 +134,9 @@
 
 @code {
 
+    private string DisplayDateTime(DateTime? value) =>
+        value.HasValue ? value.Value.ToString("MMM d, yyyy") : "Not Set";
+
     private static readonly Dictionary<CharacterState, (string Description, Severity Severity)> Statuses = new()
     {
         { CharacterState.Archived, ("Character sheet has been archived", Severity.Error) },
@@ -121,6 +169,7 @@
         var character = await LandingService.Admin.GetMwFifthCharacter(CharacterId);
         _character = new CharacterBuilder(character, LandingService.MwFifth.GameState, Logger);
         _revisions = await LandingService.Admin.GetMwFifthCharacterRevisions(CharacterId);
+        Logger.LogWarning("{asdf}", JsonSerializer.Serialize(_revisions));
         _state = character.State;
     }
 
@@ -171,7 +220,7 @@
             "No, Keep Reviewing");
 
         if (result != true) return;
-        
+
         var characterId = _character!.Character.Id;
         await LandingService.Admin.RejectMwFifthCharacter(characterId);
         NavigationManager.NavigateTo($"/admin/mw5e/characters/{characterId}");
@@ -179,4 +228,11 @@
         StateHasChanged();
     }
 
+    private async Task ReviseCharacter()
+    {
+        var character = await LandingService.Admin.ReviseMwFifthCharacter(CharacterId);
+        NavigationManager.NavigateTo($"/admin/mw5e/characters/{character.Id}/edit");
+    }
+
 }
+

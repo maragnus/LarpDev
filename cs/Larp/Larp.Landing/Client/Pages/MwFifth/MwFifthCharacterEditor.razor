@@ -13,6 +13,9 @@
     [Parameter]
     public string? CharacterId { get; set; }
 
+    [Parameter]
+    public bool Admin { get; set; }
+
     private bool _isNewCharacter;
     private LoadingState _loadingState = LoadingState.Loading;
     private Game _game = new();
@@ -24,14 +27,25 @@
     private int _lastMoonstoneCost = 0;
     private int _newMoonstoneCost = 0;
 
-    protected override async Task OnInitializedAsync()
+    private async Task Reload()
     {
-        _game = LandingService.MwFifth.Game;
-        _gameState = LandingService.MwFifth.GameState;
+        var character = Admin
+            ? await LandingService.Admin.GetMwFifthCharacter(CharacterId!)
+            : await LandingService.MwFifth.GetCharacter(CharacterId!);
 
-        var character = string.IsNullOrEmpty(CharacterId)
-            ? await LandingService.MwFifth.GetDraftCharacter()
-            : await LandingService.MwFifth.GetCharacter(CharacterId);
+        Logger.LogInformation("Character {CharacterId}", character.Id);
+
+        if (!Admin && character.State is not CharacterState.NewDraft and not CharacterState.UpdateDraft)
+        {
+            await DialogService.ShowMessageBox("Unable to Edit Character", "Character must be in a draft status to edit it.");
+            return;
+        }
+        
+        if (Admin && character.State is not CharacterState.Review and not  CharacterState.NewDraft and not CharacterState.UpdateDraft)
+        {
+            await DialogService.ShowMessageBox("Unable to Edit Character", "Character must be in a review or draft status to edit it.");
+            return;
+        }
 
         _character = new CharacterBuilder(character, _gameState, Logger)
         {
@@ -53,10 +67,12 @@
         _isNewCharacter = character.PreviousId == null;
         if (character.PreviousId != null)
         {
-            var previousCharacter = await LandingService.MwFifth.GetCharacter(character.PreviousId);
+            var previousCharacter = Admin
+                ? await LandingService.Admin.GetMwFifthCharacter(character.PreviousId)
+                : await LandingService.MwFifth.GetCharacter(character.PreviousId);
             _lastMoonstoneCost = previousCharacter.GiftMoonstone + previousCharacter.SkillMoonstone;
         }
-
+        
         _steps = new Step[]
         {
             new(
@@ -122,6 +138,27 @@
 
         _currentStep = _steps[0];
         _loadingState = LoadingState.Loaded;
+    }
+    
+    protected override async Task OnParametersSetAsync()
+    {
+        await Reload();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _game = LandingService.MwFifth.Game;
+        _gameState = LandingService.MwFifth.GameState;
+        
+        // If a new character, generate it and load it up
+        if (string.IsNullOrEmpty(CharacterId))
+        {
+            var newCharacter = await LandingService.MwFifth.GetDraftCharacter();
+            NavigationManager.NavigateTo($"/characters/mw5e/{newCharacter.Id}/edit", new NavigationOptions() { ReplaceHistoryEntry = true });
+            return;
+        }
+        
+        await Reload();
     }
 
     record Step(string Title, RenderFragment Content, RenderFragment Icon, Func<bool> IsComplete, Func<bool>? IsAvailable = null);
