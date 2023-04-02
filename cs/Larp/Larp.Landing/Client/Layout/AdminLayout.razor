@@ -28,7 +28,10 @@
             </MudNavMenu>
         </MudItem>
         <MudItem md="9" Class="relative">
-            <MudText Typo="Typo.h6" Class="mb-4">@Title</MudText>
+            @if (Title != null)
+            {
+                <MudText Typo="Typo.h6" Class="mb-4">@Title</MudText>
+            }
             @if (Loading)
             {
                 <MudOverlay DarkBackground Absolute Visible>

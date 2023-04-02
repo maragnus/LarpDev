@@ -73,7 +73,7 @@ else if (_loadingState != LoadingState.Loaded)
 {
     switch (_character.Character.State)
     {
-        case CharacterState.NewDraft or CharacterState.UpdateDraft:
+        case CharacterState.Draft:
             <MudButton Color="@Color.Error" OnClick="@DeleteDraft" Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.DeleteForever">Delete Draft</MudButton>
             <StepDivider/>
             break;

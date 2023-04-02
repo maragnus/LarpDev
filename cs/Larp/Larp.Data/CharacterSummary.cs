@@ -2,20 +2,17 @@ namespace Larp.Data;
 
 public enum CharacterState
 {
-    /// <summary>New Character, still in edit mode</summary>
-    NewDraft,
-    
-    /// <summary>Existing Character, still in edit mode</summary>
-    UpdateDraft,
-    
-    /// <summary>Revisions are waiting for Game Master approval</summary>
-    Review,
+    /// <summary>Previously Live but replaced with a new revision</summary>
+    Archived = 0,
     
     /// <summary>Current character ready for game</summary>
-    Live,
+    Live = 1,
     
-    /// <summary>Previously Live but replaced with a new revision</summary>
-    Archived
+    /// <summary>Revisions are waiting for Game Master approval</summary>
+    Review = 2,
+
+    /// <summary>Draft of a character revision</summary>
+    Draft = 3,
 }
 
 // Game agnostic character summary

@@ -88,7 +88,7 @@ public class Character
     [BsonRepresentation(BsonType.ObjectId)]
     public string UniqueId { get; set; } = null!;
 
-    public CharacterState State { get; set; } = CharacterState.NewDraft;
+    public CharacterState State { get; set; } = CharacterState.Draft;
 
     [BsonRepresentation(BsonType.ObjectId)]
     public string? PreviousId { get; set; }

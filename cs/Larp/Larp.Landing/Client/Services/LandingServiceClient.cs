@@ -68,8 +68,8 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public Task<Character> GetNewCharacter() =>
         Get<Character>($"api/mw5e/character/new")!;
 
-    public Task<StringResult> SaveCharacter(Character character) =>
-        Post<StringResult>("api/mw5e/character", new { character });
+    public Task SaveCharacter(Character character) =>
+        Post("api/mw5e/character", new { character });
 
     public async Task DeleteCharacter(string characterId) =>
         await Delete($"api/mw5e/character?characterId={characterId}");
@@ -98,7 +98,7 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
 
     public Task RemoveAccountRole(string accountId, AccountRole role) =>
         Delete($"api/admin/accounts/{accountId}/roles/{role}");
-    
+
     public Task<MwFifthCharacter> GetMwFifthCharacterLatest(string characterId) =>
         Get<MwFifthCharacter>($"api/admin/mw5e/characters/{characterId}/latest");
 
@@ -118,5 +118,8 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
         Post<Character>($"api/admin/mw5e/characters/{characterId}/revise");
 
     public Task SaveMwFifthCharacter(Character character) =>
-        Post($"api/admin/mw5e/characters/{character.Id}");
+        Post($"api/admin/mw5e/characters", new { character });
+
+    public Task DeleteMwFifthCharacter(string characterId) =>
+        Delete($"api/admin/mw5e/characters/{characterId}");
 }

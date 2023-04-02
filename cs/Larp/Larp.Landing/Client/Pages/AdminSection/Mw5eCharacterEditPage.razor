@@ -1,25 +1,17 @@
 @page "/admin/mw5e/characters/{CharacterId}/edit"
-@using Larp.Landing.Shared
 @using Larp.Landing.Client.Pages.MwFifth
 @inject LandingService LandingService
-@inject ILogger<Mw5eCharacterPage> Logger
 @inject NavigationManager NavigationManager
-@inject IDialogService DialogService
 
 <PageHeader>Mystwood 5e Characters</PageHeader>
 
-<AdminLayout Title="Review Character">
+<AdminLayout>
     @if (!_loaded)
     {
         <MudProgressCircular Indeterminate Size="Size.Large"/>
     }
     else
     {
-        <MudStack Row Justify="Justify.FlexStart" Class="mb-4">
-            <MudButton StartIcon="@Icons.Material.Filled.Save" OnClick="Save" Variant="Variant.Filled" Color="Color.Warning">Save</MudButton>
-            <MudButton StartIcon="@Icons.Material.Filled.Cancel" OnClick="Cancel" Variant="Variant.Filled">Cancel</MudButton>
-        </MudStack>
-        
         <MwFifthCharacterEditor Admin CharacterId="@CharacterId" />
     }
 </AdminLayout>
@@ -30,7 +22,7 @@
     public string CharacterId { get; set; } = null!;
 
     bool _loaded;
-    
+
     protected override async Task OnInitializedAsync()
     {
         var character = await LandingService.Admin.GetMwFifthCharacterLatest(CharacterId);
@@ -47,17 +39,4 @@
     {
         await OnInitializedAsync();
     }
-
-    private async Task Save()
-    {
-        await DialogService.ShowMessageBox("Cannot Save", "There is nothing to save");
-    }
-
-    private async Task Cancel()
-    {
-        var result = await DialogService.ShowMessageBox("Cancel Revisions", "Are you sure you want to cancel without saving changes?", "Yes, Undo", "No, Keep Working");
-        if (result != true) return;
-        NavigationManager.NavigateTo($"/admin/mw5e/characters/{CharacterId}");
-    }
-
 }

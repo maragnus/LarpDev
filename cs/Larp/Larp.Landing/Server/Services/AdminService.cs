@@ -15,14 +15,17 @@ namespace Larp.Landing.Server.Services;
 public class AdminService : IAdminService
 {
     private readonly LarpContext _db;
-    private readonly IUserSession _userSession;
     private readonly IFileProvider _fileProvider;
+    private readonly MwFifthCharacterManager _manager;
+    private readonly Account _account;
 
-    public AdminService(LarpContext db, IUserSession userSession, IFileProvider fileProvider)
+    public AdminService(LarpContext db, IUserSession userSession, IFileProvider fileProvider,
+        MwFifthCharacterManager manager)
     {
         _db = db;
-        _userSession = userSession;
         _fileProvider = fileProvider;
+        _manager = manager;
+        _account = userSession.CurrentUser!;
     }
 
     public async Task<Account[]> GetAccounts()
@@ -112,104 +115,20 @@ public class AdminService : IAdminService
         return path;
     }
 
-    public async Task ApproveMwFifthCharacter(string characterId)
-    {
-        var character = await GetMwFifthCharacter(characterId);
-        if (character.State != CharacterState.Review)
-            throw new BadRequestException("Character is not in review state");
+    public async Task ApproveMwFifthCharacter(string characterId) =>
+        await _manager.Approve(characterId);
 
-        // Mark all (hopefully only one) Live characters are Archive
-        await _db.MwFifthGame.Characters
-            .UpdateOneAsync(x => x.UniqueId == character.UniqueId && x.State == CharacterState.Live,
-                Builders<MwFifthCharacter>.Update
-                    .Set(x => x.State, CharacterState.Archived)
-                    .Set(x => x.ArchivedOn, DateTime.UtcNow));
+    public async Task RejectMwFifthCharacter(string characterId) =>
+        await _manager.Reject(characterId);
 
-        await _db.MwFifthGame.Characters
-            .UpdateOneAsync(x => x.Id == characterId,
-                Builders<MwFifthCharacter>.Update
-                    .Set(x => x.State, CharacterState.Live)
-                    .Set(x => x.ApprovedOn, DateTime.UtcNow));
-    }
+    public async Task<Character> ReviseMwFifthCharacter(string characterId) =>
+        await _manager.GetDraft(characterId, _account, true);
 
-    public async Task RejectMwFifthCharacter(string characterId)
-    {
-        var character = await GetMwFifthCharacter(characterId);
-        if (character.State != CharacterState.Review)
-            throw new BadRequestException("Character is not in review state");
+    public async Task SaveMwFifthCharacter(Character character) =>
+        await _manager.Save(character, _account, true);
 
-        var state = character.PreviousId == null
-            ? CharacterState.NewDraft
-            : CharacterState.UpdateDraft;
-
-        var update = Builders<MwFifthCharacter>.Update
-            .Set(x => x.State, state);
-
-        await _db.MwFifthGame.Characters
-            .UpdateOneAsync(x => x.Id == characterId, update);
-    }
-
-    public async Task<Dashboard> GetDashboard()
-    {
-        return new Dashboard
-        {
-            Accounts = (int)await _db.Accounts.CountDocumentsAsync(_ => true),
-            MwFifthCharacters =
-                (int)await _db.MwFifthGame.Characters.CountDocumentsAsync(x => x.State == CharacterState.Live),
-            MwFifthReview =
-                (int)await _db.MwFifthGame.Characters.CountDocumentsAsync(x => x.State == CharacterState.Review)
-        };
-    }
-
-    public async Task<Character> ReviseMwFifthCharacter(string characterId)
-    {
-        var character = await GetMwFifthCharacterLatest(characterId);
-
-        if (character.State is CharacterState.NewDraft or CharacterState.UpdateDraft)
-            return character;
-
-        if (character.State != CharacterState.Live)
-            throw new BadRequestException("Character must be Live to revise");
-
-        character.PreviousId = character.Id;
-        character.Id = ObjectId.GenerateNewId().ToString();
-        character.State = CharacterState.UpdateDraft;
-        character.UniqueId = character.UniqueId;
-        character.CreatedOn = character.CreatedOn;
-
-        await _db.MwFifthGame.Characters.InsertOneAsync(character);
-        return character;
-    }
-
-    public Task SaveMwFifthCharacter(Character character)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task RemoveAccountRole(string accountId, AccountRole role)
-    {
-        var account = await _db.Accounts.FindOneAsync(x=>x.AccountId == accountId)
-                      ?? throw new ResourceNotFoundException();
-
-        var roles = account.Roles.ToHashSet();
-        if (!roles.Remove(role)) return;
-
-        await _db.Accounts.UpdateByIdAsync(x=>x.AccountId == accountId,
-            x =>
-                x.Set(a => a.Roles, roles.ToArray()));
-    }
-
-    public async Task AddAccountRole(string accountId, AccountRole role)
-    {
-        var account = await _db.Accounts.FindOneAsync(x=>x.AccountId == accountId)
-                      ?? throw new ResourceNotFoundException();
-        var roles = account.Roles.ToHashSet();
-        if (!roles.Add(role)) return;
-
-        await _db.Accounts.UpdateByIdAsync(x=>x.AccountId == accountId,
-            x =>
-                x.Set(a => a.Roles, roles.ToArray()));
-    }
+    public async Task DeleteMwFifthCharacter(string characterId) =>
+        await _manager.Delete(characterId, _account, true);
 
     public async Task<CharacterAccountSummary[]> GetMwFifthCharacters(CharacterState state)
     {
@@ -226,9 +145,45 @@ public class AdminService : IAdminService
             .ToArray();
     }
 
-    public async Task<MwFifthCharacter> GetMwFifthCharacter(string characterId)
+    public async Task<MwFifthCharacter> GetMwFifthCharacter(string characterId) =>
+        await _manager.Get(characterId, _account, true)
+        ?? throw new ResourceNotFoundException();
+
+    public async Task<Dashboard> GetDashboard()
     {
-        return await _db.MwFifthGame.Characters.Find(x => x.Id == characterId).FirstOrDefaultAsync();
+        return new Dashboard
+        {
+            Accounts = (int)await _db.Accounts.CountDocumentsAsync(_ => true),
+            MwFifthCharacters =
+                (int)await _db.MwFifthGame.Characters.CountDocumentsAsync(x => x.State == CharacterState.Live),
+            MwFifthReview =
+                (int)await _db.MwFifthGame.Characters.CountDocumentsAsync(x => x.State == CharacterState.Review)
+        };
+    }
+
+    public async Task RemoveAccountRole(string accountId, AccountRole role)
+    {
+        var account = await _db.Accounts.FindOneAsync(x => x.AccountId == accountId)
+                      ?? throw new ResourceNotFoundException();
+
+        var roles = account.Roles.ToHashSet();
+        if (!roles.Remove(role)) return;
+
+        await _db.Accounts.UpdateByIdAsync(x => x.AccountId == accountId,
+            x =>
+                x.Set(a => a.Roles, roles.ToArray()));
+    }
+
+    public async Task AddAccountRole(string accountId, AccountRole role)
+    {
+        var account = await _db.Accounts.FindOneAsync(x => x.AccountId == accountId)
+                      ?? throw new ResourceNotFoundException();
+        var roles = account.Roles.ToHashSet();
+        if (!roles.Add(role)) return;
+
+        await _db.Accounts.UpdateByIdAsync(x => x.AccountId == accountId,
+            x =>
+                x.Set(a => a.Roles, roles.ToArray()));
     }
 
     public async Task<Account> GetAccount(string accountId)
@@ -239,9 +194,11 @@ public class AdminService : IAdminService
     public async Task<CharacterSummary[]> GetAccountCharacters(string accountId)
     {
         var gameState = await _db.MwFifthGame.GetGameState();
+
         var list = await _db.MwFifthGame.Characters.Find(x =>
                 x.AccountId == accountId && (x.State == CharacterState.Live || x.State == CharacterState.Review))
             .ToListAsync();
+
         return list.Select(x => x.ToSummary(gameState)).ToArray();
     }
 
@@ -258,32 +215,9 @@ public class AdminService : IAdminService
         await _db.Accounts.UpdateOneAsync(x => x.AccountId == accountId, update);
     }
 
-    public async Task<MwFifthCharacter> GetMwFifthCharacterLatest(string characterId)
-    {
-        var character = await GetMwFifthCharacter(characterId)
-                        ?? throw new Exception("Character not found");
+    public async Task<MwFifthCharacter> GetMwFifthCharacterLatest(string characterId) =>
+        await _manager.GetLatest(characterId, _account, true);
 
-        var revisions = await _db.MwFifthGame.Characters
-            .Find(x => x.UniqueId == character.UniqueId && x.State != CharacterState.Archived)
-            .ToListAsync();
-
-        return revisions.FirstOrDefault(x => x.State is CharacterState.NewDraft or CharacterState.UpdateDraft)
-               ?? revisions.FirstOrDefault(x => x.State == CharacterState.Review)
-               ?? revisions.FirstOrDefault(x => x.State == CharacterState.Live)
-               ?? character;
-    }
-
-    public async Task<MwFifthCharacter[]> GetMwFifthCharacterRevisions(string characterId)
-    {
-        var character = await GetMwFifthCharacter(characterId)
-                             ?? throw new Exception("Character not found");
-
-        var revisions = await _db.MwFifthGame.Characters
-            .Find(x => x.UniqueId == character.UniqueId)
-            .ToListAsync();
-
-        return revisions
-            .OrderBy(x => x.ApprovedOn ?? x.SubmittedOn ?? x.ArchivedOn ?? x.CreatedOn)
-            .ToArray();
-    }
+    public async Task<MwFifthCharacter[]> GetMwFifthCharacterRevisions(string characterId) =>
+        await _manager.GetRevisions(characterId, _account, true);
 }

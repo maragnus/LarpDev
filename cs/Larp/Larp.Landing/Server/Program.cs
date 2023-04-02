@@ -50,6 +50,7 @@ builder.Configuration
     services.AddScoped<IMwFifthService, MwFifthServiceServer>();
     services.AddScoped<IAdminService, AdminService>();
     services.AddScoped<IUserSession, UserSession>();
+    services.AddScoped<MwFifthCharacterManager>();
 }
 
 var app = builder.Build();

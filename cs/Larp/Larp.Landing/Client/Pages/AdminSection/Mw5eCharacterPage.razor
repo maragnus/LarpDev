@@ -2,7 +2,6 @@
 @using Larp.Landing.Shared
 @using Larp.Landing.Client.Pages.MwFifth
 @using Larp.Landing.Shared.MwFifth
-@using System.Text.Json
 @inject LandingService LandingService
 @inject ILogger<Mw5eCharacterPage> Logger
 @inject NavigationManager NavigationManager
@@ -19,7 +18,7 @@
     {
         <MudButtonGroup Variant="Variant.Filled" Class="mb-4" OverrideStyles="false">
             <MudButton StartIcon="@Icons.Material.Filled.AccountCircle" Variant="Variant.Filled" OnClick="GoToAccount">Player</MudButton>
-            @if (_state is CharacterState.NewDraft or CharacterState.UpdateDraft)
+            @if (_state is CharacterState.Draft)
             {
                 <MudButton StartIcon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Color="Color.Warning" OnClick="EditCharacter">Edit</MudButton>
             }
@@ -43,8 +42,15 @@
             <MudText Typo="Typo.h6" Class="mt-4">Revisions</MudText>
 
             <div class="relative">
-                <MudDataGrid T="Character" Items="_revisions">
+                <MudDataGrid T="Character" Items="_revisions" Hover Dense ReadOnly>
+                    <PagerContent>
+                        <MudDataGridPager T="Character"/>
+                    </PagerContent>
+                    <ChildRowContent>
+                        <Mw5eChangeSummary Character="@context.Item"></Mw5eChangeSummary>
+                    </ChildRowContent>
                     <Columns>
+                        <HierarchyColumn T="Character" ButtonDisabledFunc="@(x => x.ChangeSummary?.Count == 0)"/>
                         <TemplateColumn T="Character" Title="Name">
                             <CellTemplate>
                                 @if (context.Item.Id == CharacterId)
@@ -59,7 +65,7 @@
                                 }
                             </CellTemplate>
                         </TemplateColumn>
-                            <PropertyColumn Property="x => x.CreatedOn" Format="MMM d, yyyy" Title="Created"/>
+                        <PropertyColumn Property="x => x.CreatedOn" Format="MMM d, yyyy" Title="Created"/>
                         <TemplateColumn T="Character" Title="Submitted">
                             <CellTemplate>@DisplayDateTime(context.Item.SubmittedOn)</CellTemplate>
                         </TemplateColumn>
@@ -81,7 +87,7 @@
                                         case CharacterState.Review:
                                             <MudChip Size="Size.Small" Color="@Color.Warning">Review</MudChip>
                                             break;
-                                        case CharacterState.NewDraft or CharacterState.UpdateDraft:
+                                        case CharacterState.Draft:
                                             <MudChip Size="Size.Small" Color="@Color.Info">Draft</MudChip>
                                             break;
                                     }
@@ -90,10 +96,7 @@
                         </TemplateColumn>
                         <TemplateColumn T="Character">
                             <CellTemplate>
-                                <MudButtonGroup>
-                                    <MudIconButton Icon="@Icons.Material.Filled.Search" OnClick="() => PreviewChanges(context.Item.ChangeSummary)"/>
-                                    <MudIconButton Icon="@Icons.Material.Filled.OpenInNew" OnClick="() => OpenCharacter(context.Item.Id)"/>
-                                </MudButtonGroup>
+                                <MudIconButton Icon="@Icons.Material.Filled.OpenInNew" OnClick="() => OpenCharacter(context.Item.Id)"/>
                             </CellTemplate>
                         </TemplateColumn>
                     </Columns>
@@ -142,8 +145,7 @@
         { CharacterState.Archived, ("Character sheet has been archived", Severity.Error) },
         { CharacterState.Review, ("Character sheet is waiting for review", Severity.Warning) },
         { CharacterState.Live, ("Character sheet is live", Severity.Success) },
-        { CharacterState.NewDraft, ("Character sheet is drafting a new character", Severity.Info) },
-        { CharacterState.UpdateDraft, ("Character sheet is drafting changes to an existing character", Severity.Info) },
+        { CharacterState.Draft, ("Character sheet is drafting a character revision", Severity.Info) },
     };
 
     [Parameter]
@@ -169,7 +171,6 @@
         var character = await LandingService.Admin.GetMwFifthCharacter(CharacterId);
         _character = new CharacterBuilder(character, LandingService.MwFifth.GameState, Logger);
         _revisions = await LandingService.Admin.GetMwFifthCharacterRevisions(CharacterId);
-        Logger.LogWarning("{asdf}", JsonSerializer.Serialize(_revisions));
         _state = character.State;
     }
 
@@ -235,4 +236,3 @@
     }
 
 }
-

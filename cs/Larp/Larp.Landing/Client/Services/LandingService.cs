@@ -30,7 +30,7 @@ public class LandingService
         IAdminService adminService,
         IMwFifthService mwFifth,
         DataCacheService dataCache,
-        ILogger<LandingService> logger, 
+        ILogger<LandingService> logger,
         ILocalStorageService localStorage,
         LandingServiceClient client)
     {
@@ -41,7 +41,7 @@ public class LandingService
         _localStorage = localStorage;
         _localStorage.Changed += LocalStorageOnChanged;
         _client = client;
-        MwFifth = new MwFifthService(this, mwFifth, localStorage, dataCache);
+        MwFifth = new MwFifthService(this, mwFifth, dataCache);
         Admin = adminService;
     }
 
@@ -55,13 +55,13 @@ public class LandingService
     public string? LocationName { get; set; }
     public Account? Account { get; set; }
     public IAdminService Admin { get; }
-    
+
     private void LocalStorageOnChanged(object? sender, ChangedEventArgs e)
     {
         if (e.Key == SessionIdKey)
             SetSessionId((string)e.NewValue);
     }
-    
+
     private void SetSessionId(string? sessionId)
     {
         _client.SetSessionId(sessionId);
@@ -69,7 +69,7 @@ public class LandingService
         IsAuthenticated = !string.IsNullOrEmpty(sessionId);
         AuthenticatedChanged?.Invoke(this, EventArgs.Empty);
     }
-    
+
     public async Task Refresh()
     {
         var sessionId = await _localStorage.GetItemAsStringAsync(SessionIdKey);
@@ -95,7 +95,7 @@ public class LandingService
     {
         await _landing.Login(email, LocationName ?? "unknown");
     }
-    
+
     public async Task LoginConfirm(string email, string token, string deviceName)
     {
         var sessionId = await _landing.Confirm(email, token, deviceName);
@@ -104,7 +104,7 @@ public class LandingService
         await _localStorage.SetItemAsStringAsync(SessionIdKey, sessionId.Value ?? "");
         SetSessionId(sessionId.Value);
     }
-    
+
     public async Task<bool> Logout(bool force)
     {
         try
@@ -119,7 +119,7 @@ public class LandingService
             _logger.LogError(ex, "Failed to log out");
             if (!force)
                 throw;
-            
+
             await _localStorage.RemoveItemAsync(SessionIdKey);
             SetSessionId(null);
             return false;
@@ -130,14 +130,15 @@ public class LandingService
     {
         BrowserInfo = info;
         LocationName =
-            $"{info.BrowserName} on {info.OSName} {info.OSVersion} {info.DeviceModel} {info.DeviceType}".Replace("  ", " ").Trim();
+            $"{info.BrowserName} on {info.OSName} {info.OSVersion} {info.DeviceModel} {info.DeviceType}"
+                .Replace("  ", " ").Trim();
     }
 
     public async Task ValidateSession()
     {
         if (!IsAuthenticated)
             return;
-        
+
         try
         {
             var result = await _landing.Validate();
@@ -165,10 +166,10 @@ public class LandingService
 
     public async Task AccountEmailAdd(string email) =>
         await _landing.AccountEmailAdd(email);
-    
+
     public async Task AccountEmailRemove(string email) =>
         await _landing.AccountEmailRemove(email);
-    
+
     public async Task AccountEmailPreferred(string email) =>
         await _landing.AccountEmailPreferred(email);
 

@@ -55,8 +55,11 @@ public interface IAdminService
     [ApiPost("mw5e/characters/{characterId}/revise"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
     Task<MwFifthCharacter> ReviseMwFifthCharacter(string characterId);
 
-    [ApiPost("mw5e/characters/{characterId}"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
+    [ApiPost("mw5e/characters"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
     Task SaveMwFifthCharacter(MwFifthCharacter character);
+
+    [ApiDelete("mw5e/characters/{characterId}"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
+    Task DeleteMwFifthCharacter(string characterId);
 }
 
 public class Dashboard

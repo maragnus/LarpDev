@@ -20,7 +20,7 @@ public interface IMwFifthService
     Task<Character> GetNewCharacter();
     
     [ApiPost("character"), ApiAuthenticated]
-    Task<StringResult> SaveCharacter(Character character);
+    Task SaveCharacter(Character character);
     
     [ApiDelete("character"), ApiAuthenticated]
     Task DeleteCharacter(string characterId);

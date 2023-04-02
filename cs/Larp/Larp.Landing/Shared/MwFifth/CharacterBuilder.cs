@@ -322,7 +322,7 @@ public class CharacterBuilder
         {
             if (AgeGroup == Data.MwFifth.AgeGroup.PreTeen)
                 return Level == 0;
-            if (Character.State == CharacterState.NewDraft)
+            if (Character is { State: CharacterState.Draft, PreviousId: null })
                 return (NoHistory && Level == 5) || (!NoHistory && Level == 6);
             return (NoHistory && Level >= 5) || (!NoHistory && Level >= 6);
         }
@@ -344,7 +344,7 @@ public class CharacterBuilder
 
     public bool IsSkillsValid => true;
 
-    public bool HasSkills => Character.State != CharacterState.NewDraft;
+    public bool HasSkills => Character.PreviousId != null;
 
     [DependsOn(nameof(PopulateAbilities), nameof(Courage), nameof(Dexterity), nameof(Empathy), nameof(Passion),
         nameof(Prowess), nameof(Wisdom))]
@@ -442,7 +442,7 @@ public class CharacterBuilder
             .Where(x => x.Type == OccupationType.Enhancement && x.IsChapter(HomeChapter))
             .ToDictionary(x => x.Name);
 
-        if (Character.State == CharacterState.NewDraft)
+        if (Character.PreviousId == null)
         {
             switch (Character.AgeGroup)
             {

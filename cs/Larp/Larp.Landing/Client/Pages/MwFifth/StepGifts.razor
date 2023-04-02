@@ -82,8 +82,8 @@
 
     protected override void OnInitialized()
     {
-        _isNewCharacter = Character.Character.State == CharacterState.NewDraft;
-        
+        _isNewCharacter = Character.Character.PreviousId == null;
+
         _gifts = new[]
         {
             new GiftInfo("Courage", Character.Courage, value => Character.Courage = value, GiftChanged),
@@ -102,4 +102,5 @@
         _abilities = Character.Abilities;
         _properties = Character.Properties;
     }
+
 }

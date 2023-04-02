@@ -1,0 +1,36 @@
+@using System.Text.Json
+<MudPaper>
+    @foreach (var (fieldName, value) in Character.ChangeSummary!)
+    {
+        <MudStack Row>
+            <MudText Typo="Typo.body1">@fieldName</MudText>
+            @if (fieldName == nameof(Character.Skills))
+            {
+                var skills = JsonSerializer.Deserialize<CharacterSkill[]>(value);
+                foreach (var skill in skills!)
+                {
+                    <MudChip>@skill.Title</MudChip>
+                }
+            }
+            else if (fieldName is nameof(Character.Advantages) or nameof(Character.Disadvantages))
+            {
+                var items = JsonSerializer.Deserialize<Vantage[]>(value);
+                foreach (var item in items!)
+                {
+                    <MudChip>@item.Title</MudChip>
+                }
+            }
+            else
+            {
+                <MudText Typo="Typo.body2">@value</MudText>
+            }
+        </MudStack>
+    }
+</MudPaper>
+
+@code {
+
+    [Parameter]
+    public Character Character { get; set; } = null!;
+
+}

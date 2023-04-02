@@ -51,12 +51,7 @@
                                 color = Color.Success;
                                 break;
                                 
-                            case CharacterState.NewDraft:
-                                uri = $"/characters/{game.Name}/{character.Id}/edit";
-                                chip = "Drafting new character";
-                                break;
-                                
-                            case CharacterState.UpdateDraft:
+                            case CharacterState.Draft:
                                 uri = $"/characters/{game.Name}/{character.Id}/edit";
                                 chip = "Drafting changes";
                                 break;
