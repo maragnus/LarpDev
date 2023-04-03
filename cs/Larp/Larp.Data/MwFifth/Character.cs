@@ -1,6 +1,4 @@
-using System.Text.Json;
 using Larp.Common;
-using Larp.Landing.Shared;
 
 namespace Larp.Data.MwFifth;
 
@@ -76,6 +74,8 @@ public class CharacterVantage
     }
 }
 
+public record ChangeSummary(object Old, object New);
+
 [PublicAPI]
 public class Character
 {
@@ -93,7 +93,7 @@ public class Character
     [BsonRepresentation(BsonType.ObjectId)]
     public string? PreviousId { get; set; }
 
-    public Dictionary<string, string>? ChangeSummary { get; set; }
+    public Dictionary<string, ChangeSummary>? ChangeSummary { get; set; }
 
     public DateTime CreatedOn { get; set; }
     public DateTime? SubmittedOn { get; set; }
@@ -159,9 +159,19 @@ public class Character
     private static HashSet<string> _skipProperties = new()
         { nameof(ChangeSummary), nameof(State), nameof(Id), nameof(PreviousId), nameof(AccountId) };
 
-    public static Dictionary<string, string> BuildChangeSummary(Character? oldCharacter, Character? newCharacter)
+    private record ChangeMap(string[] Added, string[] Removed);
+
+    private static bool Summarize<T>(IEnumerable<T> oldList, IEnumerable<T> newList, Func<T, string> transformer,
+        out string[] oldItems, out string[] newItems)
     {
-        var result = new Dictionary<string, string>();
+        oldItems = oldList.Select(transformer).OrderBy(x => x).ToArray();
+        newItems = newList.Select(transformer).OrderBy(x => x).ToArray();
+        return !oldItems.SequenceEqual(newItems);
+    }
+
+    public static Dictionary<string, ChangeSummary> BuildChangeSummary(Character? oldCharacter, Character? newCharacter)
+    {
+        var result = new Dictionary<string, ChangeSummary>();
 
         if (oldCharacter == null || newCharacter == null)
             return result;
@@ -171,9 +181,21 @@ public class Character
             if (_skipProperties.Contains(property.Name)) continue;
             var oldValue = property.GetValue(oldCharacter);
             var newValue = property.GetValue(newCharacter);
-            if (oldValue?.Equals(newValue) == false)
+            if (newValue is CharacterSkill[] newSkills
+                && oldValue is CharacterSkill[] oldSkills
+                && Summarize(oldSkills, newSkills, x => x.Title, out var oldItems, out var newItems))
             {
-                result.Add(property.Name, JsonSerializer.Serialize(oldValue, LarpJson.Options));
+                result.Add(property.Name, new ChangeSummary(oldItems, newItems));
+            }
+            else if (newValue is CharacterVantage[] newVantages
+                     && oldValue is CharacterVantage[] oldVantages
+                     && Summarize(newVantages, oldVantages, x => x.Title, out oldItems, out newItems))
+            {
+                result.Add(property.Name, new ChangeSummary(oldItems, newItems));
+            }
+            else if (oldValue?.Equals(newValue) == false)
+            {
+                result.Add(property.Name, new ChangeSummary(oldValue, newValue!));
             }
         }
 

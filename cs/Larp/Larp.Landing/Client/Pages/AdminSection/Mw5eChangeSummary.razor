@@ -1,29 +1,23 @@
 @using System.Text.Json
+@using System.Text.Json.Nodes
 <MudPaper>
     @foreach (var (fieldName, value) in Character.ChangeSummary!)
     {
+        var oldValue = (JsonElement)value.Old;
+        var newValue = (JsonElement)value.New;
         <MudStack Row>
-            <MudText Typo="Typo.body1">@fieldName</MudText>
-            @if (fieldName == nameof(Character.Skills))
-            {
-                var skills = JsonSerializer.Deserialize<CharacterSkill[]>(value);
-                foreach (var skill in skills!)
-                {
-                    <MudChip>@skill.Title</MudChip>
-                }
-            }
-            else if (fieldName is nameof(Character.Advantages) or nameof(Character.Disadvantages))
-            {
-                var items = JsonSerializer.Deserialize<Vantage[]>(value);
-                foreach (var item in items!)
-                {
-                    <MudChip>@item.Title</MudChip>
-                }
-            }
-            else
-            {
-                <MudText Typo="Typo.body2">@value</MudText>
-            }
+            <MudText Typo="Typo.body1"><strong>@fieldName</strong></MudText>
+            <MudStack Spacing="0">
+                <MudStack Row>
+                    <MudText Typo="@Typo.body1">Old: </MudText>
+                    <MudText Typo="@Typo.body2">@oldValue</MudText>
+                </MudStack>
+
+                <MudStack Row>
+                    <MudText Typo="@Typo.body1">New: </MudText>
+                    <MudText Typo="@Typo.body2">@newValue</MudText>
+                </MudStack>
+            </MudStack>
         </MudStack>
     }
 </MudPaper>

@@ -180,7 +180,7 @@ public class MwFifthCharacterManager
         if (isLive)
             character.ChangeSummary = Character.BuildChangeSummary(live, character);
         else
-            character.ChangeSummary = new Dictionary<string, string>();
+            character.ChangeSummary = new Dictionary<string, ChangeSummary>();
 
         if (saved.State is not CharacterState.Review && character.State is CharacterState.Review)
             character.SubmittedOn = DateTime.UtcNow;
