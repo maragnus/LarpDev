@@ -74,7 +74,26 @@ public class CharacterVantage
     }
 }
 
-public record ChangeSummary(object Old, object New);
+public class ChangeSummary
+{
+    public ChangeSummary()
+    {
+    }
+
+    public ChangeSummary(string? old, string? @new) :
+        this(new[] { old }, new[] { @new })
+    {
+    }
+
+    public ChangeSummary(string?[] old, string?[] @new)
+    {
+        Old = old;
+        New = @new;
+    }
+
+    public string?[] Old { get; set; } = Array.Empty<string>();
+    public string?[] New { get; set; } = Array.Empty<string>();
+}
 
 [PublicAPI]
 public class Character
@@ -146,7 +165,7 @@ public class Character
     }
 
     public CharacterSummary ToSummary(GameState gameState) =>
-        new CharacterSummary(
+        new(
             Id,
             CharacterName ?? "Unnamed",
             GameState.GameName,
@@ -181,21 +200,20 @@ public class Character
             if (_skipProperties.Contains(property.Name)) continue;
             var oldValue = property.GetValue(oldCharacter);
             var newValue = property.GetValue(newCharacter);
-            if (newValue is CharacterSkill[] newSkills
-                && oldValue is CharacterSkill[] oldSkills
-                && Summarize(oldSkills, newSkills, x => x.Title, out var oldItems, out var newItems))
+
+            if (newValue is CharacterSkill[] newSkills && oldValue is CharacterSkill[] oldSkills)
             {
-                result.Add(property.Name, new ChangeSummary(oldItems, newItems));
+                if (Summarize(oldSkills, newSkills, x => x.Title, out var oldItems, out var newItems))
+                    result.Add(property.Name, new ChangeSummary(oldItems, newItems));
             }
-            else if (newValue is CharacterVantage[] newVantages
-                     && oldValue is CharacterVantage[] oldVantages
-                     && Summarize(newVantages, oldVantages, x => x.Title, out oldItems, out newItems))
+            else if (newValue is CharacterVantage[] newVantages && oldValue is CharacterVantage[] oldVantages)
             {
-                result.Add(property.Name, new ChangeSummary(oldItems, newItems));
+                if (Summarize(newVantages, oldVantages, x => x.Title, out var oldItems, out var newItems))
+                    result.Add(property.Name, new ChangeSummary(oldItems, newItems));
             }
-            else if (oldValue?.Equals(newValue) == false)
+            else if (((oldValue == null) != (newValue == null)) || oldValue?.Equals(newValue) == false)
             {
-                result.Add(property.Name, new ChangeSummary(oldValue, newValue!));
+                result.Add(property.Name, new ChangeSummary(oldValue?.ToString(), newValue?.ToString()));
             }
         }
 

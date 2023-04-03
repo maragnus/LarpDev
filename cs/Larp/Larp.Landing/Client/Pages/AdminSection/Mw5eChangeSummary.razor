@@ -1,30 +1,36 @@
 @using System.Text.Json
 @using System.Text.Json.Nodes
-<MudPaper>
-    @foreach (var (fieldName, value) in Character.ChangeSummary!)
-    {
-        var oldValue = (JsonElement)value.Old;
-        var newValue = (JsonElement)value.New;
-        <MudStack Row>
-            <MudText Typo="Typo.body1"><strong>@fieldName</strong></MudText>
-            <MudStack Spacing="0">
-                <MudStack Row>
-                    <MudText Typo="@Typo.body1">Old: </MudText>
-                    <MudText Typo="@Typo.body2">@oldValue</MudText>
-                </MudStack>
-
-                <MudStack Row>
-                    <MudText Typo="@Typo.body1">New: </MudText>
-                    <MudText Typo="@Typo.body2">@newValue</MudText>
-                </MudStack>
-            </MudStack>
-        </MudStack>
-    }
-</MudPaper>
+<MudDataGrid T="RowItem" Items="_items" Dense>
+    <Columns>
+        <PropertyColumn Property="x => x.PropertyName" Title="Field"/>
+        <PropertyColumn Property="x => x.OldValue" Title="Old Value"/>
+        <PropertyColumn Property="x => x.NewValue" Title="New Value"/>
+    </Columns>
+</MudDataGrid>
 
 @code {
 
     [Parameter]
     public Character Character { get; set; } = null!;
+
+    private RowItem[] _items = Array.Empty<RowItem>();
+
+    private record RowItem(string PropertyName, string OldValue, string NewValue);
+
+    protected override void OnInitialized()
+    {
+        string Translate(string?[] items)
+        {
+            if (items.Length == 0 || items[0] == null) return "Not Set";
+            return string.Join(", ", items);
+        }
+
+        _items =
+            Character.ChangeSummary?
+                .Select(x =>
+                    new RowItem(x.Key, Translate(x.Value.Old), Translate(x.Value.New)))
+                .ToArray()
+            ?? Array.Empty<RowItem>();
+    }
 
 }

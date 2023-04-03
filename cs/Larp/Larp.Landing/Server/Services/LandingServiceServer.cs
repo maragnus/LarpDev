@@ -5,6 +5,7 @@ using Larp.Landing.Shared;
 using Larp.Landing.Shared.Messages;
 using Larp.Notify;
 using MongoDB.Driver;
+using OfficeOpenXml;
 
 namespace Larp.Landing.Server.Services;
 
@@ -44,6 +45,22 @@ public class LandingServiceServer : ILandingService
     public async Task<StringResult> Confirm(string email, string token, string deviceName)
     {
         var sessionId = await _userSessionManager.CreateUserSession(email, token, deviceName);
+
+        var result = await _userSessionManager.ValidateUserSession(sessionId);
+        if (result.Account?.IsSuperAdmin == true)
+        {
+            if (!result.Account.Roles.Contains(AccountRole.AdminAccess))
+                await _userSessionManager.UpdateUserAccount(result.Account.AccountId,
+                    x =>
+                        x.Set(y => y.Roles,
+                            new[]
+                            {
+                                AccountRole.AccountAdmin,
+                                AccountRole.AdminAccess,
+                                AccountRole.MwFifthGameMaster
+                            }));
+        }
+
         return StringResult.Success(sessionId);
     }
 

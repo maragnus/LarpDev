@@ -7,7 +7,7 @@
 <PageHeader>Mystwood 5e Characters</PageHeader>
 
 <AdminLayout Title="Review Characters">
-    <MudDataGrid T="CharacterAccountSummary" Items="_items" RowClick="RowClick">
+    <MudDataGrid T="CharacterAccountSummary" Items="_items" RowClick="RowClick" Dense Groupable Hover Loading="_isLoading">
         <Columns>
             <PropertyColumn Property="x => x.CharacterName" Title="Character Name"/>
             <PropertyColumn Property="x => x.AccountName" Title="Player Name"/>
@@ -19,11 +19,13 @@
 </AdminLayout>
 
 @code {
+    private bool _isLoading = true;
     private CharacterAccountSummary[] _items = Array.Empty<CharacterAccountSummary>();
 
     protected override async Task OnInitializedAsync()
     {
         _items = await LandingService.Admin.GetMwFifthCharacters(CharacterState.Review);
+        _isLoading = false;
     }
 
     private void RowClick(DataGridRowClickEventArgs<CharacterAccountSummary> item)

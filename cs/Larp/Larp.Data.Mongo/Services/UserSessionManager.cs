@@ -34,6 +34,8 @@ public interface IUserSessionManager
     Task<Account> GetUserAccount(string accountId);
     Task UpdateUserAccount(string accountId, Func<UpdateDefinitionBuilder<Account>, UpdateDefinition<Account>> builder);
     void UserAccountChanged(string accountId);
+    Task AddAccountRole(string accountId, AccountRole role);
+    Task RemoveAccountRole(string accountId, AccountRole role);
 }
 
 public class UserSessionManager : IUserSessionManager
@@ -60,11 +62,11 @@ public class UserSessionManager : IUserSessionManager
         var normalizedEmail = email.ToLowerInvariant();
 
         var accountId = await GetAccountIdFromEmail(email);
-        if (accountId != null) 
+        if (accountId != null)
             return await GenerateToken(accountId, email, deviceId);
-        
+
         _logger.LogInformation("Creating new account for {Email} on {DeviceId}", email, deviceId);
-        
+
         var account = new Account
         {
             AccountId = ObjectId.GenerateNewId().ToString(),
@@ -73,8 +75,8 @@ public class UserSessionManager : IUserSessionManager
             {
                 new AccountEmail()
                 {
-                    Email = email, 
-                    NormalizedEmail = normalizedEmail, 
+                    Email = email,
+                    NormalizedEmail = normalizedEmail,
                     IsPreferred = true,
                     IsVerified = false
                 }
@@ -84,11 +86,11 @@ public class UserSessionManager : IUserSessionManager
 
         return await GenerateToken(account.AccountId, email, deviceId);
     }
-    
+
     public async Task<string> GenerateToken(string accountId, string email, string deviceId)
     {
         var normalizedEmail = email.ToLowerInvariant();
-        
+
         await TokenLock.WaitAsync();
         try
         {
@@ -107,8 +109,8 @@ public class UserSessionManager : IUserSessionManager
                 SessionId = ObjectId.GenerateNewId().ToString(),
                 IsAuthenticated = false // Set to true after Token is received
             };
-            
-            _logger.LogInformation("Generating token {Token} for {Email} on {DeviceId}",  token, email, deviceId);
+
+            _logger.LogInformation("Generating token {Token} for {Email} on {DeviceId}", token, email, deviceId);
 
             await _larpContext.Sessions.InsertOneAsync(session);
 
@@ -128,7 +130,7 @@ public class UserSessionManager : IUserSessionManager
             await _larpContext.Sessions.Find(x => x.Token == token && x.AccountId == accountId).FirstOrDefaultAsync()
             ?? throw new UserSessionException("Token was not found");
 
-        _logger.LogInformation("User {Email} has signed in on {DeviceId}",  email, deviceName);
+        _logger.LogInformation("User {Email} has signed in on {DeviceId}", email, deviceName);
 
         await ConfirmEmailAddress(session.AccountId, session.Email!);
 
@@ -182,7 +184,8 @@ public class UserSessionManager : IUserSessionManager
         // Unset previously preferred email
         {
             var filter = accountFilter.Eq(x => x.AccountId, accountId)
-                         & accountFilter.ElemMatch(x => x.Emails, x => x.NormalizedEmail != normalizedEmail && x.IsPreferred);
+                         & accountFilter.ElemMatch(x => x.Emails,
+                             x => x.NormalizedEmail != normalizedEmail && x.IsPreferred);
             var update = Builders<Account>.Update
                 .Set(x => x.Emails.FirstMatchingElement().IsPreferred, false);
             await _larpContext.Accounts.UpdateOneAsync(filter, update);
@@ -284,9 +287,8 @@ public class UserSessionManager : IUserSessionManager
         if (_cache.TryGetValue(accountId, out Account account))
             return account;
 
-        account = await _larpContext.Accounts
-            .Find(x => x.AccountId == accountId)
-            .FirstOrDefaultAsync();
+        account = await _larpContext.Accounts.FindOneAsync(x => x.AccountId == accountId)
+                  ?? throw new Exception("Account not found");
 
         _cache.Set(accountId, account, _options.CacheDuration);
 
@@ -310,11 +312,35 @@ public class UserSessionManager : IUserSessionManager
         _cache.Remove(accountId);
     }
 
+    public async Task AddAccountRole(string accountId, AccountRole role)
+    {
+        var account = await GetUserAccount(accountId)
+                      ?? throw new UserSessionException("Account not found");
+
+        var roles = account.Roles.ToHashSet();
+        if (!roles.Add(role)) return;
+
+        await UpdateUserAccount(accountId, x =>
+            x.Set(a => a.Roles, roles.ToArray()));
+    }
+
+    public async Task RemoveAccountRole(string accountId, AccountRole role)
+    {
+        var account = await GetUserAccount(accountId)
+                      ?? throw new UserSessionException("Account not found");
+
+        var roles = account.Roles.ToHashSet();
+        if (!roles.Remove(role)) return;
+
+        await UpdateUserAccount(accountId, x =>
+            x.Set(a => a.Roles, roles.ToArray()));
+    }
+
     public async Task<UserSessionValidationResult> ValidateUserSession(string? sessionId)
     {
         if (string.IsNullOrWhiteSpace(sessionId))
             return new UserSessionValidationResult(UserSessionValidationResultStatusCode.Invalid);
-        
+
         if (!_cache.TryGetValue(sessionId, out Session session))
         {
             session =

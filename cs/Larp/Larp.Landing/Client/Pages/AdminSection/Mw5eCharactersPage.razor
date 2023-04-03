@@ -15,7 +15,7 @@
         </EditForm>
     </div>
 
-    <MudDataGrid T="CharacterAccountSummary" Items="_items" RowClick="RowClick">
+    <MudDataGrid T="CharacterAccountSummary" Items="_items" RowClick="RowClick" Dense Groupable Hover Loading="_isLoading">
         <Columns>
             <PropertyColumn Property="x => x.CharacterName" Title="Character Name"/>
             <PropertyColumn Property="x => x.AccountName" Title="Player Name"/>
@@ -27,6 +27,7 @@
 </AdminLayout>
 
 @code {
+    private bool _isLoading = true;
     private CharacterAccountSummary[] _allItems = Array.Empty<CharacterAccountSummary>();
     private CharacterAccountSummary[] _items = Array.Empty<CharacterAccountSummary>();
 
@@ -34,6 +35,7 @@
     {
         _allItems = await LandingService.Admin.GetMwFifthCharacters(CharacterState.Live);
         _items = _allItems;
+        _isLoading = false;
     }
 
     private static bool SearchFunc(CharacterAccountSummary item, string query) =>

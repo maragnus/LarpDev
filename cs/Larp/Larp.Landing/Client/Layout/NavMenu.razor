@@ -12,6 +12,7 @@
     private bool _isDrawerOpen;
     private bool _isPrint;
     private string _accountName = "Guest";
+    private HashSet<AccountRole> _roles = new();
 
     protected override void OnInitialized()
     {
@@ -32,6 +33,8 @@
     {
         await LandingServiceUpkeep.StartAsync(default);
         await LandingService.ValidateSession();
+        var account = await LandingService.GetAccount();
+        _roles = account?.Roles?.ToHashSet() ?? new HashSet<AccountRole>();
     }
 
     public async ValueTask DisposeAsync()
@@ -46,6 +49,7 @@
         _accountName = LandingService.IsAuthenticated
             ? (LandingService.Account?.Name ?? "Name Not Set") 
             : "Guest";
+        _roles = LandingService.Account?.Roles.ToHashSet() ?? new HashSet<AccountRole>();
         StateHasChanged();
     }
 
@@ -98,7 +102,10 @@
             {
                 <MudDivider/>
                 <MudNavLink Href="/profile" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person">Profile</MudNavLink>
-                <MudNavLink Href="/admin" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Shield">Administration</MudNavLink>
+                @if (_roles.Contains(AccountRole.AdminAccess))
+                {
+                    <MudNavLink Href="/admin" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Shield">Administration</MudNavLink>
+                }
             }
         </MudNavMenu>
     </MudDrawer>

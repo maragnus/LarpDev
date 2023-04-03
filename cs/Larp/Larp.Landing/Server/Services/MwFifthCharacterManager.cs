@@ -54,10 +54,6 @@ public class MwFifthCharacterManager
         result.AddRange(revisions.Except(result));
         
         return result.ToArray();
-
-        return revisions
-            .OrderByDescending(x => x.State)
-            .ToArray();
     }
 
     public async Task Approve(string characterId)

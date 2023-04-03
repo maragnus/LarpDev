@@ -42,7 +42,7 @@
             <MudText Typo="Typo.h6" Class="mt-4">Revisions</MudText>
 
             <div class="relative">
-                <MudDataGrid T="Character" Items="_revisions" Hover Dense ReadOnly>
+                <MudDataGrid T="Character" Items="_revisions" Hover Dense ReadOnly SortMode="SortMode.None">
                     <PagerContent>
                         <MudDataGridPager T="Character"/>
                     </PagerContent>
@@ -101,30 +101,6 @@
                         </TemplateColumn>
                     </Columns>
                 </MudDataGrid>
-                <MudPopover Open="_showRevision" Class="pa-4" Paper TransformOrigin="Origin.TopCenter" AnchorOrigin="Origin.TopCenter">
-                    @if (_revisionDictionary == null || _revisionDictionary.Count == 0)
-                    {
-                        <MudText Typo="Typo.body2">There's no changes in this revision</MudText>
-                    }
-                    else
-                    {
-                        <MudStack Spacing="4">
-
-                            <MudText Typo="Typo.h6">Change Summary</MudText>
-
-                            @foreach (var (field, value) in _revisionDictionary)
-                            {
-                                <div>
-                                    <strong>@field:</strong> @value
-                                </div>
-                            }
-                        </MudStack>
-                    }
-                    <MudStack Row Justify="Justify.Center">
-                        <MudButton StartIcon="@Icons.Material.Filled.Close" OnClick="() => _showRevision = false">Close</MudButton>
-                    </MudStack>
-
-                </MudPopover>
             </div>
         }
 
@@ -153,8 +129,6 @@
 
     CharacterState _state;
     CharacterBuilder? _character;
-    bool _showRevision;
-    Dictionary<string, string>? _revisionDictionary;
 
     private CharacterAccountSummary[] _items = Array.Empty<CharacterAccountSummary>();
     private Character[] _revisions = Array.Empty<Character>();
@@ -187,12 +161,6 @@
     private async Task OpenCharacter(string characterId)
     {
         NavigationManager.NavigateTo($"/admin/mw5e/characters/{characterId}");
-    }
-
-    private void PreviewChanges(Dictionary<string, string> summary)
-    {
-        _showRevision = true;
-        _revisionDictionary = summary;
     }
 
     private async Task Approve()

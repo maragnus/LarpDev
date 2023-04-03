@@ -76,7 +76,7 @@
                     <DataAnnotationsValidator/>
                     <MudStack Spacing="4">
                         <MudAlert Severity="Severity.Warning" Icon="@Icons.Material.Outlined.Email">
-                            Grab your code from your email!
+                            Grab the code from your email!
                         </MudAlert>
                         <MudTextField T="string?" InputType="InputType.Email" Label="Email Address" Variant="Variant.Outlined" @bind-Value="_confirmModel.EmailAddress" For="@(() => _confirmModel.EmailAddress)" Disabled="_isBusy"/>
                         <MudTextField T="string?" InputType="InputType.Text" Label="Code" Variant="Variant.Outlined" AutoFocus="true" @bind-Value="_confirmModel.Token" For="@(() => _confirmModel.Token)" Disabled="_isBusy"/>
@@ -107,13 +107,15 @@
     {
         [Required, Display(Name = "Email Address"), EmailAddress]
         public string? EmailAddress { get; set; }
+
         [Required, Display(Name = "Code")]
         [RegularExpression(@"[A-Za-z0-9]{6}", ErrorMessage = "Please enter the code carefully from your email")]
         public string? Token { get; set; }
+
         [Required, Display(Name = "Device Name")]
         public string? DeviceName { get; set; }
     }
-    
+
     protected override void OnInitialized()
     {
         NavigationManager.LocationChanged += NavigationManagerOnLocationChanged;
@@ -140,7 +142,7 @@
     {
         NavigationManager.NavigateTo("/logout");
     }
-    
+
     private async Task SubmitConfirm(EditContext context)
     {
         var model = (ConfirmModel)context.Model;
@@ -150,7 +152,10 @@
         try
         {
             await LandingService.LoginConfirm(model.EmailAddress!, model.Token!, model.DeviceName!);
-            NavigationManager.NavigateTo("/");
+            if (LandingService.Account?.IsProfileComplete == true)
+                NavigationManager.NavigateTo("/");
+            else
+                NavigationManager.NavigateTo("/profile");
         }
         catch (Exception ex)
         {
@@ -189,4 +194,5 @@
             _isBusy = false;
         }
     }
+
 }

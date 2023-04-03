@@ -58,7 +58,7 @@
     </MudPaper>
 
     <MudPaper Class="mb-4">
-        <MudDataGrid T="CharacterSummary" Items="_characters" RowClick="RowClick">
+        <MudDataGrid T="CharacterSummary" Items="_characters" RowClick="RowClick" Dense Groupable Hover Loading="_isLoading">
             <Columns>
                 <TemplateColumn T="CharacterSummary" Title="Status">
                     <CellTemplate>
@@ -92,6 +92,7 @@
 
     private bool _saving = true;
     private bool _changed = false;
+    private bool _isLoading = true;
     private Account? _account;
     private CharacterSummary[]? _characters;
 
@@ -101,6 +102,7 @@
         _characters = await LandingService.Admin.GetAccountCharacters(AccountId);
         _changed = false;
         _saving = false;
+        _isLoading = false;
     }
 
     private void RowClick(DataGridRowClickEventArgs<CharacterSummary> obj)

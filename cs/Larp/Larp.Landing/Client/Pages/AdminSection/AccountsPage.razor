@@ -13,7 +13,7 @@
         </EditForm>
     </div>
 
-    <MudDataGrid T="Account" Items="_accounts" RowClick="RowClick">
+    <MudDataGrid T="Account" Items="_accounts" RowClick="RowClick" Dense Hover Loading="_allAccounts.Length == 0">
         <Columns>
             <PropertyColumn Property="x => x.Name" Title="Name"/>
             <PropertyColumn Property="x => x.PreferredEmail" Title="Email"/>
@@ -39,10 +39,6 @@
         || (account.Location?.Contains(query, StringComparison.InvariantCultureIgnoreCase) ?? false)
         || (account.Phone?.Contains(query) ?? false)
         || account.Emails.Any(x => x.Email.Contains(query, StringComparison.InvariantCultureIgnoreCase));
-
-    private void AccountClick(Account account)
-    {
-    }
 
     private readonly SearchModel _search = new();
 

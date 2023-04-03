@@ -33,6 +33,11 @@ public class Account
     
     [BsonIgnore]
     public string? EmailList => string.Join(", ", Emails.Select(x => x.Email));
+
+    public bool IsProfileComplete =>
+        !string.IsNullOrWhiteSpace(Name)
+        && !string.IsNullOrWhiteSpace(Location)
+        && !string.IsNullOrWhiteSpace(Phone);
 }
 
 [PublicAPI]

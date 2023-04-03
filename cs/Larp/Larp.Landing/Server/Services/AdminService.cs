@@ -1,5 +1,6 @@
 using Larp.Data;
 using Larp.Data.Mongo;
+using Larp.Data.Mongo.Services;
 using Larp.Data.MwFifth;
 using Larp.Landing.Shared;
 using Microsoft.Extensions.FileProviders;
@@ -17,14 +18,16 @@ public class AdminService : IAdminService
     private readonly LarpContext _db;
     private readonly IFileProvider _fileProvider;
     private readonly MwFifthCharacterManager _manager;
+    private readonly IUserSessionManager _userSessionManager;
     private readonly Account _account;
 
     public AdminService(LarpContext db, IUserSession userSession, IFileProvider fileProvider,
-        MwFifthCharacterManager manager)
+        MwFifthCharacterManager manager, IUserSessionManager userSessionManager)
     {
         _db = db;
         _fileProvider = fileProvider;
         _manager = manager;
+        _userSessionManager = userSessionManager;
         _account = userSession.CurrentUser!;
     }
 
@@ -163,27 +166,12 @@ public class AdminService : IAdminService
 
     public async Task RemoveAccountRole(string accountId, AccountRole role)
     {
-        var account = await _db.Accounts.FindOneAsync(x => x.AccountId == accountId)
-                      ?? throw new ResourceNotFoundException();
-
-        var roles = account.Roles.ToHashSet();
-        if (!roles.Remove(role)) return;
-
-        await _db.Accounts.UpdateByIdAsync(x => x.AccountId == accountId,
-            x =>
-                x.Set(a => a.Roles, roles.ToArray()));
+        await _userSessionManager.RemoveAccountRole(accountId, role);
     }
 
     public async Task AddAccountRole(string accountId, AccountRole role)
     {
-        var account = await _db.Accounts.FindOneAsync(x => x.AccountId == accountId)
-                      ?? throw new ResourceNotFoundException();
-        var roles = account.Roles.ToHashSet();
-        if (!roles.Add(role)) return;
-
-        await _db.Accounts.UpdateByIdAsync(x => x.AccountId == accountId,
-            x =>
-                x.Set(a => a.Roles, roles.ToArray()));
+        await _userSessionManager.AddAccountRole(accountId, role);
     }
 
     public async Task<Account> GetAccount(string accountId)
