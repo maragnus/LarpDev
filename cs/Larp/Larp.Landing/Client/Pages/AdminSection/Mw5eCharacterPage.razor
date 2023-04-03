@@ -1,5 +1,4 @@
 @page "/admin/mw5e/characters/{CharacterId}"
-@using Larp.Landing.Shared
 @using Larp.Landing.Client.Pages.MwFifth
 @using Larp.Landing.Shared.MwFifth
 @inject LandingService LandingService
@@ -130,7 +129,6 @@
     CharacterState _state;
     CharacterBuilder? _character;
 
-    private CharacterAccountSummary[] _items = Array.Empty<CharacterAccountSummary>();
     private Character[] _revisions = Array.Empty<Character>();
 
     protected override async Task OnParametersSetAsync()
@@ -158,7 +156,7 @@
         NavigationManager.NavigateTo($"/admin/mw5e/characters/{CharacterId}/edit");
     }
 
-    private async Task OpenCharacter(string characterId)
+    private void OpenCharacter(string characterId)
     {
         NavigationManager.NavigateTo($"/admin/mw5e/characters/{characterId}");
     }
