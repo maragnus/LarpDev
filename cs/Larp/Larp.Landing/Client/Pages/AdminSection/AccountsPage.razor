@@ -1,6 +1,8 @@
 @page "/admin/accounts"
+@using Larp.Landing.Shared.Messages
 @inject LandingService LandingService
 @inject NavigationManager NavigationManager
+@inject IDialogService DialogService
 
 <PageHeader>Account Manager</PageHeader>
 
@@ -8,7 +10,7 @@
     <div class="pa-2 mb-4">
         <EditForm Model="_search" OnSubmit="Search">
             <MudStack Row Justify="Justify.Center" AlignItems="AlignItems.Start">
-                <MudTextField T="string?" Clearable Variant="Variant.Filled" Placeholder="Search" Adornment="Adornment.End" AdornmentColor="Color.Primary" AdornmentIcon="@Icons.Material.Outlined.Search" For="() => _search.Query" @bind-Value="_search.Query" OnAdornmentClick="Search"/>
+                <MudTextField T="string?" OnlyValidateIfDirty Clearable Variant="Variant.Filled" Placeholder="Search" Adornment="Adornment.End" AdornmentColor="Color.Primary" AdornmentIcon="@Icons.Material.Outlined.Search" For="() => _search.Query" @bind-Value="_search.Query" OnAdornmentClick="Search"/>
             </MudStack>
         </EditForm>
     </div>
@@ -22,6 +24,8 @@
             <PropertyColumn Property="x => x.Age" Title="Age"/>
         </Columns>
     </MudDataGrid>
+    
+    <MudButton Class="mt-4" Color="Color.Warning" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.SupervisedUserCircle" OnClick="AddAdmin">Add Admin</MudButton>
 </AdminLayout>
 
 @code {
@@ -60,6 +64,17 @@
     private void RowClick(DataGridRowClickEventArgs<Account> item)
     {
         NavigationManager.NavigateTo("/admin/accounts/" + item.Item.AccountId);
+    }
+
+    private async Task AddAdmin()
+    {
+        var dialog = await DialogService.ShowAsync<AddAdminDialog>("Add Administrator");
+        var result = await dialog.Result;
+        var stringResult = (StringResult)result.Data;
+        if (stringResult.IsSuccess)
+            NavigationManager.NavigateTo($"/admin/accounts/{stringResult.Value}");
+        else
+            await DialogService.ShowMessageBox("Adding Administrator", stringResult.ErrorMessage);
     }
 
 }

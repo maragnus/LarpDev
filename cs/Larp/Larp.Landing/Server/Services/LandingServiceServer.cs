@@ -117,4 +117,11 @@ public class LandingServiceServer : ILandingService
             .Set(x => x.Notes, allergies)
             .Set(x => x.BirthDate, birthDate)
         );
+
+    public async Task<Event[]> GetEvents()
+    {
+        var now = DateTimeOffset.Now.AddDays(-4);
+        var events = await _db.Events.Find(x => x.Date >= now).ToListAsync();
+        return events.ToArray();
+    }
 }

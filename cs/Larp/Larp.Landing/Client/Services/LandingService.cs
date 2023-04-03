@@ -176,4 +176,7 @@ public class LandingService
     public async Task AccountUpdate(string? fullName, string? location, string? phone, string? allergies,
         DateOnly? birthDate) =>
         await _landing.AccountUpdate(fullName, location, phone, allergies, birthDate);
+
+    public async Task<Event[]> GetEvents() =>
+        await _landing.GetEvents();
 }

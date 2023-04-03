@@ -39,4 +39,7 @@ public interface ILandingService
 
     [ApiPost("account")]
     Task AccountUpdate(string? fullName, string? location, string? phone, string? allergies, DateOnly? birthDate);
+
+    [ApiGet("events")]
+    Task<Event[]> GetEvents();
 }

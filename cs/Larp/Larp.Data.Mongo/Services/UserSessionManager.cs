@@ -36,6 +36,7 @@ public interface IUserSessionManager
     void UserAccountChanged(string accountId);
     Task AddAccountRole(string accountId, AccountRole role);
     Task RemoveAccountRole(string accountId, AccountRole role);
+    Task<Account?> FindByEmail(string email);
 }
 
 public class UserSessionManager : IUserSessionManager
@@ -142,6 +143,17 @@ public class UserSessionManager : IUserSessionManager
             .Set(s => s.DeviceId, deviceName);
 
         await _larpContext.Sessions.UpdateOneAsync(x => x.Token == token, update);
+
+        // Update first login (if necessary)
+        var firstLogin = await _larpContext.Accounts.Find(x => x.AccountId == accountId)
+            .Project(x => x.FirstLogin)
+            .FirstOrDefaultAsync();
+        if (firstLogin == null)
+        {
+            await _larpContext.Accounts.UpdateOneAsync(
+                x => x.AccountId == accountId,
+                Builders<Account>.Update.Set(x => x.FirstLogin, DateTimeOffset.Now));
+        }
 
         return session.SessionId;
     }
@@ -334,6 +346,17 @@ public class UserSessionManager : IUserSessionManager
 
         await UpdateUserAccount(accountId, x =>
             x.Set(a => a.Roles, roles.ToArray()));
+    }
+
+    public async Task<Account> FindByEmail(string email)
+    {
+        var normalizedEmail = email.ToLowerInvariant();
+        var filter = Builders<Account>.Filter
+            .ElemMatch(x => x.Emails, x => x.NormalizedEmail == normalizedEmail);
+
+        return await _larpContext.Accounts
+            .Find(filter)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<UserSessionValidationResult> ValidateUserSession(string? sessionId)

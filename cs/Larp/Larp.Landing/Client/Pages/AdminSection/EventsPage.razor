@@ -1,7 +1,66 @@
 @page "/admin/events"
+@inject LandingService LandingService
+@inject NavigationManager NavigationManager
 
-<PageHeader>Events Manager</PageHeader>
-
-<AdminLayout>
-    <MudAlert Severity="Severity.Info">Event system is coming soon</MudAlert>
+<AdminLayout Title="Events Manager" Loading="_isLoading">
+    <MudDataGrid T="EventInfo" Items="_events" Dense Filterable Groupable Hover Loading="_isLoading" RowClick="RowClick">
+        <PagerContent>
+            <MudDataGridPager T="EventInfo"/>
+        </PagerContent>
+        <ChildRowContent>
+            <MudDataGrid T="ComponentInfo" Items="context.Item.Components" Dense SortMode="SortMode.None" Loading="_isLoading">
+                <PagerContent>
+                    <MudDataGridPager T="EventInfo"/>
+                </PagerContent>
+                <Columns>
+                    <PropertyColumn Property="x => x.When" Title="Date" Format="dddd, MMM d, yyyy"/>
+                    <PropertyColumn Property="x => x.Title" Title="Title"/>
+                </Columns>
+            </MudDataGrid>
+        </ChildRowContent>
+        <Columns>
+            <HierarchyColumn T="EventInfo" ButtonDisabledFunc="@(x => x.Components.Length == 0)"/>
+            <PropertyColumn Property="x => x.Game" Title="Game"/>
+            <PropertyColumn Property="x => x.When" Title="Date" Format="dddd, MMM d, yyyy"/>
+            <PropertyColumn Property="x => x.Title" Title="Title"/>
+            <PropertyColumn Property="x => x.Location" Title="Location"/>
+        </Columns>
+    </MudDataGrid>
 </AdminLayout>
+
+@code {
+    bool _isLoading = true;
+    private EventInfo[] _events = Array.Empty<EventInfo>();
+
+    record ComponentInfo(string Title, DateOnly When);
+
+    record EventInfo(string Game, string Id, string Title, string Location, DateOnly When, ComponentInfo[] Components)
+    {
+        public EventInfo(string game, Event e) : this(game, e.Id, e.Title ?? "Untitled", e.Location ?? "", DateOnly.FromDateTime(e.Date.LocalDateTime),
+            e.Components
+                .Select(c =>
+                    new ComponentInfo(c.Name ?? "Untitled", DateOnly.FromDateTime(c.Date.LocalDateTime)))
+                .ToArray())
+        {
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var games = LandingService.Games
+            .ToDictionary(x => x.Value.Id, x => x.Value.Title);
+
+        string GameName(string gameId) =>
+            games.TryGetValue(gameId, out var game) ? game ?? "" : "";
+
+        _events = (await LandingService.Admin.GetEvents())
+            .Select(x => new EventInfo(GameName(x.GameId), x)).ToArray();
+        _isLoading = false;
+    }
+
+    private void RowClick(DataGridRowClickEventArgs<EventInfo> row)
+    {
+        NavigationManager.NavigateTo($"/admin/events/{row.Item.Id}");
+    }
+
+}

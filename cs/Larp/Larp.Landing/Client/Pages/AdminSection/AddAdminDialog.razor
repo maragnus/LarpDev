@@ -1,0 +1,58 @@
+@using System.ComponentModel.DataAnnotations
+@inject LandingService LandingService
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.body2">This will create a new account and grant Admin Access role. You can edit this account after you save and add additional roles as necessary.</MudText>
+        <EditForm T="Form" EditContext="_editContext" OnValidSubmit="Save">
+            <DataAnnotationsValidator/>
+            <MudGrid Class="my-4">
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="@_form.FullName" Label="Full Name" For="() => _form.FullName"/>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="@_form.EmailAddress" Label="Email Address" For="() => _form.EmailAddress"/>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Success" OnClick="Save" StartIcon="@Icons.Material.Filled.SupervisedUserCircle" Variant="Variant.Filled">Add User</MudButton>
+        <MudButton Color="Color.Error" OnClick="Close" Variant="Variant.Outlined">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = default!;
+
+    readonly Form _form = new();
+    EditContext _editContext = default!;
+
+    private class Form
+    {
+        [Required]
+        public string? FullName { get; set; }
+
+        [Required, EmailAddress]
+        public string? EmailAddress { get; set; }
+    }
+
+    protected override void OnInitialized()
+    {
+        _editContext = new EditContext(_form);
+    }
+
+    void Close() => MudDialog.Close(DialogResult.Cancel());
+
+    private async Task Save()
+    {
+        if (!_editContext.Validate())
+            return;
+
+        var accountId = await LandingService.Admin.AddAdminAccount(_form.FullName!, _form.EmailAddress!);
+        MudDialog.Close(DialogResult.Ok(accountId));
+    }
+
+}

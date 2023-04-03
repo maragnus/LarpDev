@@ -23,6 +23,7 @@ public class Account
     public string? Notes { get; set; }
     public DateTimeOffset Created { get; set; }
     public DateTimeOffset? LastUpdate { get; set; }
+    public DateTimeOffset? FirstLogin { get; set; }
     public DateOnly? BirthDate { get; set; }
     public int? Age => BirthDate.GetAge();
     public AccountRole[] Roles { get; set; } = Array.Empty<AccountRole>();

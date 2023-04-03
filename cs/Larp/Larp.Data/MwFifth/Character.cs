@@ -114,10 +114,10 @@ public class Character
 
     public Dictionary<string, ChangeSummary>? ChangeSummary { get; set; }
 
-    public DateTime CreatedOn { get; set; }
-    public DateTime? SubmittedOn { get; set; }
-    public DateTime? ApprovedOn { get; set; }
-    public DateTime? ArchivedOn { get; set; }
+    public DateTimeOffset CreatedOn { get; set; }
+    public DateTimeOffset? SubmittedOn { get; set; }
+    public DateTimeOffset? ApprovedOn { get; set; }
+    public DateTimeOffset? ArchivedOn { get; set; }
 
     public string? CharacterName { get; set; }
     public string? Religion { get; set; }

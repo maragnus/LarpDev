@@ -112,8 +112,8 @@
 
 @code {
 
-    private string DisplayDateTime(DateTime? value) =>
-        value.HasValue ? value.Value.ToString("MMM d, yyyy") : "Not Set";
+    private string DisplayDateTime(DateTimeOffset? value) =>
+        value.HasValue ? value.Value.LocalDateTime.ToString("MMM d, yyyy") : "Not Set";
 
     private static readonly Dictionary<CharacterState, (string Description, Severity Severity)> Statuses = new()
     {

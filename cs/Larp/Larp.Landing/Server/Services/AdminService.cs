@@ -3,6 +3,7 @@ using Larp.Data.Mongo;
 using Larp.Data.Mongo.Services;
 using Larp.Data.MwFifth;
 using Larp.Landing.Shared;
+using Larp.Landing.Shared.Messages;
 using Microsoft.Extensions.FileProviders;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -132,6 +133,47 @@ public class AdminService : IAdminService
 
     public async Task DeleteMwFifthCharacter(string characterId) =>
         await _manager.Delete(characterId, _account, true);
+
+    public async Task<Event[]> GetEvents()
+    {
+        var now = DateTimeOffset.Now.AddDays(-4);
+        var events = await _db.Events.Find(x => x.Date >= now)
+            .SortByDescending(x => x.Date)
+            .ToListAsync();
+        return events.ToArray();
+    }
+
+    public async Task<Event> GetEvent(string eventId)
+    {
+        return await _db.Events.FindOneAsync(x => x.Id == eventId)
+               ?? throw new ResourceNotFoundException();
+    }
+
+    public async Task<StringResult> AddAdminAccount(string fullName, string emailAddress)
+    {
+        var result = await _userSessionManager.FindByEmail(emailAddress);
+        if (result != null)
+            return StringResult.Failed($"User {result.Name} exists with email {emailAddress}");
+
+        var account = new Account()
+        {
+            AccountId = ObjectId.GenerateNewId().ToString(),
+            Name = fullName,
+            Emails =
+            {
+                new AccountEmail()
+                {
+                    Email = emailAddress,
+                    NormalizedEmail = emailAddress.ToLowerInvariant(),
+                    IsPreferred = true
+                }
+            },
+            Roles = new[] { AccountRole.AdminAccess },
+            Created = DateTimeOffset.Now
+        };
+        await _db.Accounts.InsertOneAsync(account);
+        return StringResult.Success(account.AccountId);
+    }
 
     public async Task<CharacterAccountSummary[]> GetMwFifthCharacters(CharacterState state)
     {

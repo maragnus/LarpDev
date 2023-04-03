@@ -10,7 +10,7 @@
     <div class="pa-2 mb-4">
         <EditForm Model="_search" OnSubmit="Search">
             <MudStack Row Justify="Justify.Center" AlignItems="AlignItems.Start">
-                <MudTextField T="string?" Clearable Variant="Variant.Filled" Placeholder="Search" Adornment="Adornment.End" AdornmentColor="Color.Primary" AdornmentIcon="@Icons.Material.Outlined.Search" For="() => _search.Query" @bind-Value="_search.Query" OnAdornmentClick="Search"/>
+                <MudTextField T="string?" OnlyValidateIfDirty Clearable Variant="Variant.Filled" Placeholder="Search" Adornment="Adornment.End" AdornmentColor="Color.Primary" AdornmentIcon="@Icons.Material.Outlined.Search" For="() => _search.Query" @bind-Value="_search.Query" OnAdornmentClick="Search"/>
             </MudStack>
         </EditForm>
     </div>

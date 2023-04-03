@@ -1,4 +1,5 @@
 using Larp.Data;
+using Larp.Landing.Shared.Messages;
 using MwFifthCharacter = Larp.Data.MwFifth.Character;
 using Microsoft.Extensions.FileProviders;
 
@@ -33,6 +34,9 @@ public interface IAdminService
     
     [ApiDelete("accounts/{accountId}/roles/{role}"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task RemoveAccountRole(string accountId, AccountRole role);
+
+    [ApiPost("accounts/admin"), ApiAuthenticated(AccountRole.AccountAdmin)]
+    Task<StringResult> AddAdminAccount(string fullName, string emailAddress);
     
     [ApiGet("mw5e/characters"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
     Task<CharacterAccountSummary[]> GetMwFifthCharacters(CharacterState state);
@@ -60,6 +64,12 @@ public interface IAdminService
 
     [ApiDelete("mw5e/characters/{characterId}"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
     Task DeleteMwFifthCharacter(string characterId);
+
+    [ApiGet("events"), ApiAuthenticated(AccountRole.AdminAccess)]
+    Task<Event[]> GetEvents();
+
+    [ApiGet("events/{eventId}"), ApiAuthenticated(AccountRole.AdminAccess)]
+    Task<Event> GetEvent(string eventId);
 }
 
 public class Dashboard

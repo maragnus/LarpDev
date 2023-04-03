@@ -1,0 +1,79 @@
+@page "/admin/events/{EventId}"
+@inject LandingService LandingService
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+
+<AdminLayout Loading="_isLoading" Title="Edit Event">
+    <MudButtonGroup OverrideStyles="false" Class="mb-4">
+        <MudButton Color="Color.Success" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" OnClick="Save">Save</MudButton>
+        <MudButton Color="Color.Error" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" OnClick="Delete">Delete</MudButton>
+    </MudButtonGroup>
+    <MudGrid Class="mb-4">
+        <MudItem xs="12" md="6">
+            <MudTextField T="string?" Label="Title" Required Value="_event.Title"/>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudTextField T="string?" Label="Location" Value="_event.Location"/>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudSelectExtended T="string?" Label="Event Type" Required Value="_event.EventType" ItemCollection="_eventTypes"/>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudDatePicker T="DateTime" Label="When" Required Date="_date"/>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudSwitch T="bool" Label="Has RSVP" Checked="_event.CanRsvp"/>
+        </MudItem>
+    </MudGrid>
+    <MudDataGrid T="EventComponent" Items="_components" EditMode="DataGridEditMode.Cell" ReadOnly="false">
+        <Columns>
+            <PropertyColumn Property="x => x.Name" Title="Component Name" IsEditable/>
+            <PropertyColumn Property="x => x.When" Title="When" Format="dddd, MMM d, yyyy" IsEditable="false"/>
+        </Columns>
+    </MudDataGrid>
+</AdminLayout>
+
+@code {
+
+    [Parameter]
+    public string EventId { get; set; } = default!;
+
+    private class EventComponent
+    {
+        public string Name { get; set; } = default!;
+        public DateTime When { get; set; }
+    }
+
+    bool _isLoading = true;
+    private Event _event = default!;
+    private List<EventComponent> _components = new();
+    private readonly string[] _eventTypes = new[] { "Game", "Cleanup" };
+    private Dictionary<string, string?> _games;
+    private DateTime _date;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _games = LandingService.Games
+            .ToDictionary(x => x.Value.Id, x => x.Value.Title);
+        _event = await LandingService.Admin.GetEvent(EventId);
+        _components = _event.Components.Select(x => new EventComponent { Name = x.Name ?? "No Name", When = x.Date.LocalDateTime })
+            .ToList();
+        _date = _event.Date.Date;
+        _isLoading = false;
+    }
+
+    private async Task Save()
+    {
+        await DialogService.ShowMessageBox("Save event", "Not implemented yet");
+    }
+
+    private async Task Delete()
+    {
+        var result = await DialogService.ShowMessageBox("Delete event", "Are you sure you want to delete this event?", "Yes, Delete It", "No, Keep It");
+        if (result == true)
+        {
+            NavigationManager.NavigateTo("/admin/events");
+        }
+    }
+
+}

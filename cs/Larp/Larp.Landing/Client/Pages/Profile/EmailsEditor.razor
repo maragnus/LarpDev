@@ -34,7 +34,7 @@
     <EditForm Model="_newEmailModel" OnValidSubmit="AddEmailSubmit">
         <DataAnnotationsValidator/>
         <MudStack Row Spacing="4" Justify="Justify.FlexStart" AlignItems="AlignItems.Center" Class="mt-2">
-            <MudTextField T="string?" @ref="_newEmailField" Label="New Email Address" Variant="Variant.Outlined" Class="flex-grow-1" InputType="InputType.Email" @bind-Value="@_newEmailModel.EmailAddress" For="() => _newEmailModel.EmailAddress"/>
+            <MudTextField T="string?" @ref="_newEmailField" OnlyValidateIfDirty Label="New Email Address" Variant="Variant.Outlined" Class="flex-grow-1" InputType="InputType.Email" @bind-Value="@_newEmailModel.EmailAddress" For="() => _newEmailModel.EmailAddress"/>
             <MudButton StartIcon="@Icons.Material.Filled.Add" ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Outlined">Add Email</MudButton>
         </MudStack>
     </EditForm>

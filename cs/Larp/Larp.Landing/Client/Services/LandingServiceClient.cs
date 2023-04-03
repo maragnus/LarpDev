@@ -56,6 +56,12 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
         DateOnly? birthDate) =>
         Post("api/account", new { fullName, location, phone, allergies, birthDate });
 
+    public Task<Event[]> GetEvents() =>
+        Get<Event[]>("api/events");
+
+    Task<Event> IAdminService.GetEvent(string eventId) =>
+        Get<Event>($"api/admin/events/{eventId}");
+
     public Task<GameState> GetGameState(string lastRevision) =>
         Get<GameState>($"api/mw5e/gameState?lastRevision={lastRevision}");
 
@@ -77,6 +83,9 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public Task<Account[]> GetAccounts() =>
         Get<Account[]>($"api/admin/accounts");
 
+    public Task<StringResult> AddAdminAccount(string fullName, string emailAddress) =>
+        Post<StringResult>($"api/admin/accounts/admin", new {fullName, emailAddress});
+    
     public Task<CharacterAccountSummary[]> GetMwFifthCharacters(CharacterState state) =>
         Get<CharacterAccountSummary[]>($"api/admin/mw5e/characters?state={state}");
 
@@ -122,4 +131,7 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
 
     public Task DeleteMwFifthCharacter(string characterId) =>
         Delete($"api/admin/mw5e/characters/{characterId}");
+
+    Task<Event[]> IAdminService.GetEvents() =>
+        Get<Event[]>($"api/admin/events");
 }
