@@ -45,7 +45,7 @@ public class LandingService
         Admin = adminService;
     }
 
-    public IReadOnlyDictionary<string, Game> Games { get; private set; } = null!;
+    public IReadOnlyDictionary<string, Game> Games { get; private set; } = default!;
     public MwFifthService MwFifth { get; }
     public string? SessionId { get; private set; }
     public bool IsAuthenticated { get; private set; }

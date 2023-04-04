@@ -36,8 +36,8 @@ public class CharacterAccountSummary
         Level = level;
     }
 
-    public string CharacterId { get; init; } = null!;
-    public string AccountId { get; init; } = null!;
+    public string CharacterId { get; init; } = default!;
+    public string AccountId { get; init; } = default!;
     public CharacterState State { get; init; }
     public string? AccountName { get; init; }
     public string? AccountEmails { get; init; }

@@ -17,8 +17,8 @@ public class NotifyServiceOptions
 public class EmailOptions
 {
     public List<string> Senders { get; set; } = new();
-    public string ApiKey { get; set; } = null!;
-    public string ApiEndPoint { get; set; } = null!;
+    public string ApiKey { get; set; } = default!;
+    public string ApiEndPoint { get; set; } = default!;
 }
 
 public interface INotifyService

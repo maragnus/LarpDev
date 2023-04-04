@@ -13,7 +13,7 @@ public enum EventRsvp {
 [PublicAPI]
 public class EventComponent
 {
-    public string ComponentId { get; set; } = null!;
+    public string ComponentId { get; set; } = default!;
     public string? Name { get; set; }
     public DateTimeOffset Date { get; set; }
 }
@@ -22,9 +22,9 @@ public class EventComponent
 public class Event
 {
     [BsonId, BsonRepresentation(BsonType.ObjectId)]
-    public string Id { get; set; } = null!;
+    public string Id { get; set; } = default!;
 
-    public string GameId { get; set; } = null!;
+    public string GameId { get; set; } = default!;
     public string? Title { get; set; }
     public string? Location { get; set; }
     public DateTimeOffset Date { get; set; }
@@ -45,15 +45,15 @@ public enum EventAttendanceType
 [PublicAPI]
 public class ComponentAttendance
 {
-    public string ComponentId { get; set; } = null!;
-    public string CharacterId { get; set; } = null!;
+    public string ComponentId { get; set; } = default!;
+    public string CharacterId { get; set; } = default!;
     public EventAttendanceType Type { get; set; }
 }
 
 [PublicAPI]
 public class Attendance
 {
-    public string EventId { get; set; } = null!;
-    public string AccountId { get; set; } = null!;
+    public string EventId { get; set; } = default!;
+    public string AccountId { get; set; } = default!;
     public List<ComponentAttendance> ComponentAttendances { get; set; } = new();
 }

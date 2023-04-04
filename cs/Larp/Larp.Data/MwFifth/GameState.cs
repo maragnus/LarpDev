@@ -3,9 +3,9 @@ namespace Larp.Data.MwFifth;
 [PublicAPI]
 public class GameStateBase
 {
-    public string Name { get; set; } = null!;
-    public string LastUpdated { get; set; } = null!;
-    public string Revision { get; set; } = null!;
+    public string Name { get; set; } = default!;
+    public string LastUpdated { get; set; } = default!;
+    public string Revision { get; set; } = default!;
 }
 
 [PublicAPI]
@@ -26,8 +26,8 @@ public class GameState : GameStateBase
 [PublicAPI]
 public class Gift
 {
-    public string Name { get; set; } = null!;
-    public string Title { get; set; } = null!;
+    public string Name { get; set; } = default!;
+    public string Title { get; set; } = default!;
     public string[] Properties { get; set; } = Array.Empty<string>();
     public GiftRank[] Ranks { get; set; } = Array.Empty<GiftRank>();
 }
@@ -35,8 +35,8 @@ public class Gift
 [PublicAPI]
 public class GiftProperty
 {
-    public string Name { get; set; } = null!;
-    public string Title { get; set; } = null!;
+    public string Name { get; set; } = default!;
+    public string Title { get; set; } = default!;
 }
 
 [PublicAPI]
@@ -52,8 +52,8 @@ public class GiftPropertyValue
         Value = value;
     }
 
-    public string Name { get; set; } = null!;
-    public string Value { get; set; } = null!;
+    public string Name { get; set; } = default!;
+    public string Value { get; set; } = default!;
     
     public void Deconstruct(out string name, out string value)
     {
@@ -91,8 +91,8 @@ public enum SkillPurchasable
 [PublicAPI]
 public class SkillDefinition
 {
-    public string Name { get; set; } = null!;
-    public string Title { get; set; } = null!;
+    public string Name { get; set; } = default!;
+    public string Title { get; set; } = default!;
     public SkillClass Class { get; set; }
     public SkillPurchasable Purchasable { get; set; }
     public int? RanksPerPurchase { get; set; }
@@ -103,9 +103,9 @@ public class SkillDefinition
 [PublicAPI]
 public class Ability
 {
-    public string Name { get; set; } = null!; // Name without rank
+    public string Name { get; set; } = default!; // Name without rank
     public int Rank { get; set; } // 0 if there's only one rank, otherwise represents I, II, IV, 1, 2 ,3
-    public string Title { get; set; } = null!; // Name and Rank verbatim
+    public string Title { get; set; } = default!; // Name and Rank verbatim
 }
 
 [PublicAPI]
@@ -129,7 +129,7 @@ public class SkillChoice
 [PublicAPI]
 public class Occupation
 {
-    public string Name { get; set; } = null!;
+    public string Name { get; set; } = default!;
     public string[] Specialties { get; set; } = Array.Empty<string>();
     public OccupationType Type { get; set; }
     public string[] Skills { get; set; } = Array.Empty<string>();
@@ -158,8 +158,8 @@ public class Occupation
 [PublicAPI]
 public class Vantage
 {
-    public string Name { get; set; } = null!;
-    public string Title { get; set; } = null!;
+    public string Name { get; set; } = default!;
+    public string Title { get; set; } = default!;
     public int Rank { get; set; }
     public bool Physical { get; set; }
     public string? Description { get; set; }
@@ -171,8 +171,8 @@ public class Vantage
 [PublicAPI]
 public class Religion
 {
-    public string Name { get; set; } = null!;
-    public string Title { get; set; } = null!;
+    public string Name { get; set; } = default!;
+    public string Title { get; set; } = default!;
     public string? Description { get; set; }
 
     // ReSharper disable once NonReadonlyMemberInGetHashCode
@@ -182,11 +182,11 @@ public class Religion
 [PublicAPI]
 public class HomeChapter
 {
-    public string Name { get; set; } = null!;
-    public string Title { get; set; } = null!;
-    public string Location { get; set; } = null!;
+    public string Name { get; set; } = default!;
+    public string Title { get; set; } = default!;
+    public string Location { get; set; } = default!;
     public string[] Homelands { get; set; } = Array.Empty<string>();
-    public string Email { get; set; } = null!;
+    public string Email { get; set; } = default!;
 
     // ReSharper disable once NonReadonlyMemberInGetHashCode
     public override int GetHashCode() => Name.GetHashCode();
@@ -207,11 +207,11 @@ public enum SpellType
 [PublicAPI]
 public class Spell
 {
-    public string Name { get; set; } = null!;
+    public string Name { get; set; } = default!;
     public SpellType Type { get; set; }
-    public string Category { get; set; } = null!;
+    public string Category { get; set; } = default!;
     public int Mana { get; set; }
-    public string Effect { get; set; } = null!;
+    public string Effect { get; set; } = default!;
 
     public bool IsBardic => Category is "Bardic";
     public bool IsDivine => Category.StartsWith("Divine");

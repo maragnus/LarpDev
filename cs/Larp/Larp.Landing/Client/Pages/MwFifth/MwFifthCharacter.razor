@@ -17,8 +17,8 @@
 
     private LoadingState _loadingState = LoadingState.Loading;
     private Game _game = new();
-    private GameState _gameState = null!;
-    private CharacterBuilder _character = null!;
+    private GameState _gameState = default!;
+    private CharacterBuilder _character = default!;
     private string? _chapterEmail;
 
     protected override async Task OnInitializedAsync()

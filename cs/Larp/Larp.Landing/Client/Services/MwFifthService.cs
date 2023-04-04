@@ -23,7 +23,7 @@ public class MwFifthService
         await _mwFifth.GetCharacter(characterId);
 
     public Game Game => _landingService.Games[GameState.GameName];
-    public GameState GameState { get; private set; } = null!;
+    public GameState GameState { get; private set; } = default!;
 
     public async Task Refresh()
     {

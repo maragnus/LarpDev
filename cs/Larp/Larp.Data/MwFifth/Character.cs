@@ -42,7 +42,7 @@ public class CharacterSkill
         };
     }
 
-    public string Name { get; set; } = null!;
+    public string Name { get; set; } = default!;
     public int Rank { get; set; }
     public string Title => Rank == 0 ? Name : $"{Name} {Rank}";
     public SkillPurchase Type { get; set; }
@@ -63,7 +63,7 @@ public class CharacterVantage
         };
     }
 
-    public string Name { get; set; } = null!;
+    public string Name { get; set; } = default!;
     public int Rank { get; set; }
     public string Title => Rank == 0 ? Name : $"{Name} {Rank}";
 
@@ -99,10 +99,10 @@ public class ChangeSummary
 public class CharacterAttendance
 {
     [BsonId, BsonRepresentation(BsonType.ObjectId)]
-    public string UniqueId { get; set; } = null!;
+    public string UniqueId { get; set; } = default!;
 
     [BsonRepresentation(BsonType.ObjectId)]
-    public string EventId { get; set; } = null!;
+    public string EventId { get; set; } = default!;
 
     public string[] Components { get; set; } = Array.Empty<string>();
 
@@ -121,10 +121,10 @@ public record CharacterAndRevisions(Character Character, CharacterRevision[] Cha
 public class Character
 {
     [BsonId, BsonRepresentation(BsonType.ObjectId)]
-    public string UniqueId { get; set; } = null!;
+    public string UniqueId { get; set; } = default!;
 
     [BsonRepresentation(BsonType.ObjectId)]
-    public string AccountId { get; set; } = null!;
+    public string AccountId { get; set; } = default!;
 
     public DateTimeOffset CreatedOn { get; set; }
 
@@ -141,13 +141,13 @@ public class Character
 public class CharacterRevision
 {
     [BsonId, BsonRepresentation(BsonType.ObjectId)]
-    public string Id { get; set; } = null!;
+    public string Id { get; set; } = default!;
 
     [BsonRepresentation(BsonType.ObjectId)]
-    public string AccountId { get; set; } = null!;
+    public string AccountId { get; set; } = default!;
 
     [BsonRepresentation(BsonType.ObjectId)]
-    public string UniqueId { get; set; } = null!;
+    public string UniqueId { get; set; } = default!;
 
     public CharacterState State { get; set; } = CharacterState.Draft;
 

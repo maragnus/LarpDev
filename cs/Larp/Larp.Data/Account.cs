@@ -13,7 +13,7 @@ public enum AccountRole
 public class Account
 {
     [BsonId, BsonRepresentation(BsonType.ObjectId)]
-    public string AccountId { get; set; } = null!;
+    public string AccountId { get; set; } = default!;
 
     public string? Name { get; set; }
     public string? Location { get; set; }
@@ -44,8 +44,8 @@ public class Account
 [PublicAPI]
 public class AccountEmail
 {
-    public string Email { get; set; } = null!;
-    public string NormalizedEmail { get; set; } = null!;
+    public string Email { get; set; } = default!;
+    public string NormalizedEmail { get; set; } = default!;
     public bool IsVerified { get; set; }
     public bool IsPreferred { get; set; }
 }

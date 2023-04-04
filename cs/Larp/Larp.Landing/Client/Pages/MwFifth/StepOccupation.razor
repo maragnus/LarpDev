@@ -154,7 +154,7 @@ else if (!Character.NoOccupation)
 
 @code {
     [Parameter]
-    public CharacterBuilder Character { get; set; } = null!;
+    public CharacterBuilder Character { get; set; } = default!;
 
     private Occupation? _occupation;
     private Occupation? _enhancement;
@@ -165,7 +165,7 @@ else if (!Character.NoOccupation)
     class SkillSelector
     {
         public string[] Skills { get; }
-        public string[] SelectedSkills { get; private set; } = null!;
+        public string[] SelectedSkills { get; private set; } = default!;
         public int Count { get; }
         public bool IsError { get; private set; }
 

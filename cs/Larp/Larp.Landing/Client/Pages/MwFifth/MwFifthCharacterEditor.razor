@@ -17,9 +17,9 @@
     private bool _isNewCharacter;
     private LoadingState _loadingState = LoadingState.Loading;
     private Game _game = new();
-    private GameState _gameState = null!;
+    private GameState _gameState = default!;
     private Character _character = default!;
-    private CharacterBuilder _revision = null!;
+    private CharacterBuilder _revision = default!;
     private Step[] _steps = Array.Empty<Step>();
     private Step? _currentStep = null;
     private AutoSaveState _saveState;
@@ -247,15 +247,15 @@
                 {
                     <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
                         <MudAvatar Color="Color.Success">@_myMoonstone</MudAvatar>
-                        <MudText Typo="Typo.caption">My Moonstone</MudText>
+                        <MudText Align="Align.Center"  Typo="Typo.caption">My Moonstone</MudText>
                     </MudStack>
                     <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
                         <MudAvatar Color="Color.Success">@_totalMoonstone</MudAvatar>
-                        <MudText Typo="Typo.caption">Total Moonstone</MudText>
+                        <MudText Align="Align.Center" Typo="Typo.caption">Total Moonstone</MudText>
                     </MudStack>
                     <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
                         <MudAvatar Color="Color.Success">@(_newMoonstoneCost > 0 ? "+" : "")@(_newMoonstoneCost)</MudAvatar>
-                        <MudText Typo="Typo.caption">Revision Cost</MudText>
+                        <MudText Align="Align.Center"  Typo="Typo.caption">Revision Cost</MudText>
                     </MudStack>
                 }
 
