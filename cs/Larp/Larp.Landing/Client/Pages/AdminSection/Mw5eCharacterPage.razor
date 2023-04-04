@@ -33,8 +33,8 @@
     }
     else
     {
-        <MudAlert Severity="@Statuses[_character!.Character.State].Severity">
-            @Statuses[_character.Character.State].Description
+        <MudAlert Severity="@Statuses[_character!.Revision.State].Severity">
+            @Statuses[_character.Revision.State].Description
         </MudAlert>
     }
 
@@ -43,16 +43,16 @@
         <MudText Typo="Typo.h6" Class="mt-4">Revisions</MudText>
 
         <div class="relative">
-            <MudDataGrid T="Character" Items="_revisions" Hover Dense ReadOnly SortMode="SortMode.None">
+            <MudDataGrid T="CharacterRevision" Items="_revisions" Hover Dense ReadOnly SortMode="SortMode.None">
                 <PagerContent>
-                    <MudDataGridPager T="Character"/>
+                    <MudDataGridPager T="CharacterRevision"/>
                 </PagerContent>
                 <ChildRowContent>
-                    <Mw5eChangeSummary Character="@context.Item"></Mw5eChangeSummary>
+                    <Mw5eChangeSummary Revision="@context.Item"></Mw5eChangeSummary>
                 </ChildRowContent>
                 <Columns>
-                    <HierarchyColumn T="Character" ButtonDisabledFunc="@(x => x.ChangeSummary?.Count == 0)"/>
-                    <TemplateColumn T="Character" Title="Name">
+                    <HierarchyColumn T="CharacterRevision" ButtonDisabledFunc="@(x => x.ChangeSummary?.Count == 0)"/>
+                    <TemplateColumn T="CharacterRevision" Title="Name">
                         <CellTemplate>
                             @if (context.Item.Id == CharacterId)
                             {
@@ -67,14 +67,14 @@
                         </CellTemplate>
                     </TemplateColumn>
                     <PropertyColumn Property="x => x.CreatedOn" Format="MMM d, yyyy" Title="Created"/>
-                    <TemplateColumn T="Character" Title="Submitted">
+                    <TemplateColumn T="CharacterRevision" Title="Submitted">
                         <CellTemplate>@DisplayDateTime(context.Item.SubmittedOn)</CellTemplate>
                     </TemplateColumn>
-                    <TemplateColumn T="Character" Title="Approved">
+                    <TemplateColumn T="CharacterRevision" Title="Approved">
                         <CellTemplate>@DisplayDateTime(context.Item.ApprovedOn)</CellTemplate>
                     </TemplateColumn>
                     <PropertyColumn Property="x => x.Level" Title="Level"/>
-                    <TemplateColumn T="Character">
+                    <TemplateColumn T="CharacterRevision">
                         <CellTemplate>
                             <MudStack Row>
                                 @switch (context.Item.State)
@@ -95,7 +95,7 @@
                             </MudStack>
                         </CellTemplate>
                     </TemplateColumn>
-                    <TemplateColumn T="Character">
+                    <TemplateColumn T="CharacterRevision">
                         <CellTemplate>
                             <MudIconButton Icon="@Icons.Material.Filled.OpenInNew" OnClick="() => OpenCharacter(context.Item.Id)"/>
                         </CellTemplate>
@@ -137,7 +137,7 @@
     CharacterBuilder? _character;
     bool _isLoading = true;
 
-    private Character[] _revisions = Array.Empty<Character>();
+    private CharacterRevision[] _revisions = Array.Empty<CharacterRevision>();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -145,7 +145,7 @@
         StateHasChanged();
         var character = await LandingService.Admin.GetMwFifthCharacter(CharacterId);
         _character = new CharacterBuilder(character, LandingService.MwFifth.GameState, Logger);
-        _state = character.State;
+        _state = character.Revision.State;
         _isLoading = false;
         StateHasChanged();
     }
@@ -154,14 +154,15 @@
     {
         var character = await LandingService.Admin.GetMwFifthCharacter(CharacterId);
         _character = new CharacterBuilder(character, LandingService.MwFifth.GameState, Logger);
-        _revisions = await LandingService.Admin.GetMwFifthCharacterRevisions(CharacterId);
-        _state = character.State;
+        var revisions = await LandingService.Admin.GetMwFifthCharacterRevisions(CharacterId);
+        _revisions = revisions.CharacterRevisions;
+        _state = character.Revision.State;
         _isLoading = false;
     }
 
     private void GoToAccount()
     {
-        NavigationManager.NavigateTo($"/admin/accounts/{_character?.Character.AccountId}");
+        NavigationManager.NavigateTo($"/admin/accounts/{_character?.Revision.AccountId}");
     }
 
     private void EditCharacter()
@@ -187,7 +188,7 @@
         _isLoading = true;
         try
         {
-            var characterId = _character!.Character.Id;
+            var characterId = _character!.Revision.Id;
             await LandingService.Admin.ApproveMwFifthCharacter(characterId);
             NavigationManager.NavigateTo($"/admin/mw5e/characters/{characterId}");
             await OnInitializedAsync();
@@ -213,7 +214,7 @@
         {
             _isLoading = true;
 
-            var characterId = _character!.Character.Id;
+            var characterId = _character!.Revision.Id;
             await LandingService.Admin.RejectMwFifthCharacter(characterId);
             NavigationManager.NavigateTo($"/admin/mw5e/characters/{characterId}");
             await OnInitializedAsync();
@@ -228,7 +229,7 @@
     private async Task ReviseCharacter()
     {
         var character = await LandingService.Admin.ReviseMwFifthCharacter(CharacterId);
-        NavigationManager.NavigateTo($"/admin/mw5e/characters/{character.Id}/edit");
+        NavigationManager.NavigateTo($"/admin/mw5e/characters/{character.Revision.Id}/edit");
     }
 
 }

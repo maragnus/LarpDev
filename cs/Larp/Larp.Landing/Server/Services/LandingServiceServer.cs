@@ -88,7 +88,7 @@ public class LandingServiceServer : ILandingService
     public async Task<CharacterSummary[]> GetCharacters()
     {
         var gameState = await _db.MwFifthGame.GetGameState();
-        var characters = await _db.MwFifthGame.Characters
+        var characters = await _db.MwFifthGame.CharacterRevisions
             .Find(x => x.State != CharacterState.Archived && x.AccountId == _userSession.AccountId!)
             .ToListAsync();
         return characters.Select(x => x.ToSummary(gameState)).ToArray();

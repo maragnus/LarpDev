@@ -19,7 +19,7 @@ public class MwFifthService
         _landingService = landingService;
     }
 
-    public async Task<Character> GetCharacter(string characterId) =>
+    public async Task<CharacterAndRevision> GetCharacter(string characterId) =>
         await _mwFifth.GetCharacter(characterId);
 
     public Game Game => _landingService.Games[GameState.GameName];
@@ -36,17 +36,15 @@ public class MwFifthService
             async revision => await _mwFifth.GetGameState(revision));
     }
 
-    public async Task<Character> GetDraftCharacter()
-    {
-        return await _mwFifth.GetNewCharacter();
-    }
+    public async Task<CharacterAndRevision> GetDraftCharacter() =>
+        await _mwFifth.GetNewCharacter();
 
-    public async Task Save(Character character) =>
-        await _mwFifth.SaveCharacter(character);
+    public async Task Save(CharacterRevision revision) =>
+        await _mwFifth.SaveCharacter(revision);
 
     public async Task DeleteCharacter(string characterId) =>
         await _mwFifth.DeleteCharacter(characterId);
 
-    public async Task<Character> StartDraft(string characterId) =>
+    public async Task<CharacterAndRevision> StartDraft(string characterId) =>
         await _mwFifth.ReviseCharacter(characterId);
 }

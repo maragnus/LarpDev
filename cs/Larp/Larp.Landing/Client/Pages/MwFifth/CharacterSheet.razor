@@ -27,7 +27,7 @@
 
     protected override void OnInitialized()
     {
-        _qrCode = $"https://larp.maragnus.com/cs/{Character.Character.Id}";
+        _qrCode = $"https://larp.maragnus.com/cs/{Character.Revision.Id}";
 
         _gifts = new[]
         {
@@ -57,7 +57,7 @@
                 .Select(SkillAggregate)
                 .ToArray();
 
-        _spells = Character.AllSpells.TryFromKeys(Character.Character.Spells).ToArray();
+        _spells = Character.AllSpells.TryFromKeys(Character.Revision.Spells).ToArray();
     }
 }
 
@@ -168,7 +168,7 @@
         <div class="list-container">
             <div class="list-header">Unusual Features</div>
             <div class="list-text">
-                @(Character.Character.UnusualFeatures ?? "No Unusual Features")
+                @(Character.Revision.UnusualFeatures ?? "No Unusual Features")
             </div>
         </div>
     </MudItem>
@@ -176,7 +176,7 @@
         <div class="list-container">
             <div class="list-header">Cures</div>
             <div class="list-text">
-                @(Character.Character.Cures ?? "No Cures")
+                @(Character.Revision.Cures ?? "No Cures")
             </div>
         </div>
     </MudItem>
@@ -184,7 +184,7 @@
         <div class="list-container">
             <div class="list-header">Documents</div>
             <div class="list-text">
-                @(Character.Character.Documents ?? "No Documents")
+                @(Character.Revision.Documents ?? "No Documents")
             </div>
         </div>
     </MudItem>

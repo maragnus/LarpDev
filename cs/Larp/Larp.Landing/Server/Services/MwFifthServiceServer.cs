@@ -26,18 +26,17 @@ public class MwFifthServiceServer : IMwFifthService
             : state;
     }
 
-    public async Task<Character> GetCharacter(string characterId) =>
-        await _manager.Get(characterId, _account, false)
-        ?? throw new ResourceNotFoundException();
+    public async Task<CharacterAndRevision> GetCharacter(string characterId) =>
+        await _manager.Get(characterId, _account, false);
 
-    public async Task<Character> ReviseCharacter(string characterId) =>
+    public async Task<CharacterAndRevision> ReviseCharacter(string characterId) =>
         await _manager.GetDraft(characterId, _account, false);
 
-    public async Task<Character> GetNewCharacter() =>
+    public async Task<CharacterAndRevision> GetNewCharacter() =>
         await _manager.GetNew(_account);
 
-    public async Task SaveCharacter(Character character) =>
-        await _manager.Save(character, _account, false);
+    public async Task SaveCharacter(CharacterRevision revision) =>
+        await _manager.Save(revision, _account, false);
 
     public async Task DeleteCharacter(string characterId) =>
         await _manager.Delete(characterId, _account, false);

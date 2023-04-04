@@ -4,7 +4,6 @@ using Larp.Landing.Shared;
 using Larp.Landing.Shared.Messages;
 using Larp.Landing.Shared.MwFifth;
 using Microsoft.Extensions.FileProviders;
-using MwFifthCharacter = Larp.Data.MwFifth.Character;
 
 namespace Larp.Landing.Client.Services;
 
@@ -65,17 +64,17 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public Task<GameState> GetGameState(string lastRevision) =>
         Get<GameState>($"api/mw5e/gameState?lastRevision={lastRevision}");
 
-    public Task<Character> GetCharacter(string characterId) =>
-        Get<Character>($"api/mw5e/character?characterId={characterId}");
+    public Task<CharacterAndRevision> GetCharacter(string characterId) =>
+        Get<CharacterAndRevision>($"api/mw5e/character?characterId={characterId}");
 
-    public Task<Character> ReviseCharacter(string characterId) =>
-        Post<Character>($"api/mw5e/character/revise?characterId={characterId}");
+    public Task<CharacterAndRevision> ReviseCharacter(string characterId) =>
+        Post<CharacterAndRevision>($"api/mw5e/character/revise?characterId={characterId}");
 
-    public Task<Character> GetNewCharacter() =>
-        Get<Character>($"api/mw5e/character/new")!;
+    public Task<CharacterAndRevision> GetNewCharacter() =>
+        Get<CharacterAndRevision>($"api/mw5e/character/new")!;
 
-    public Task SaveCharacter(Character character) =>
-        Post("api/mw5e/character", new { character });
+    public Task SaveCharacter(CharacterRevision revision) =>
+        Post("api/mw5e/character", new { revision });
 
     public async Task DeleteCharacter(string characterId) =>
         await Delete($"api/mw5e/character?characterId={characterId}");
@@ -89,8 +88,8 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public Task<CharacterAccountSummary[]> GetMwFifthCharacters(CharacterState state) =>
         Get<CharacterAccountSummary[]>($"api/admin/mw5e/characters?state={state}");
 
-    public Task<MwFifthCharacter> GetMwFifthCharacter(string characterId) =>
-        Get<MwFifthCharacter>($"api/admin/mw5e/characters/{characterId}");
+    public Task<CharacterAndRevision> GetMwFifthCharacter(string characterId) =>
+        Get<CharacterAndRevision>($"api/admin/mw5e/characters/{characterId}");
 
     public Task<Account> GetAccount(string accountId) =>
         Get<Account>($"api/admin/accounts/{accountId}");
@@ -108,11 +107,11 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public Task RemoveAccountRole(string accountId, AccountRole role) =>
         Delete($"api/admin/accounts/{accountId}/roles/{role}");
 
-    public Task<MwFifthCharacter> GetMwFifthCharacterLatest(string characterId) =>
-        Get<MwFifthCharacter>($"api/admin/mw5e/characters/{characterId}/latest");
+    public Task<CharacterAndRevision> GetMwFifthCharacterLatest(string characterId) =>
+        Get<CharacterAndRevision>($"api/admin/mw5e/characters/{characterId}/latest");
 
-    public Task<MwFifthCharacter[]> GetMwFifthCharacterRevisions(string characterId) =>
-        Get<MwFifthCharacter[]>($"api/admin/mw5e/characters/{characterId}/revisions");
+    public Task<CharacterAndRevisions> GetMwFifthCharacterRevisions(string characterId) =>
+        Get<CharacterAndRevisions>($"api/admin/mw5e/characters/{characterId}/revisions");
 
     public Task ApproveMwFifthCharacter(string characterId) =>
         Post($"api/admin/mw5e/characters/{characterId}/approve");
@@ -123,11 +122,11 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public Task<Dashboard> GetDashboard() =>
         Get<Dashboard>($"api/admin/dashboard");
 
-    public Task<Character> ReviseMwFifthCharacter(string characterId) =>
-        Post<Character>($"api/admin/mw5e/characters/{characterId}/revise");
+    public Task<CharacterAndRevision> ReviseMwFifthCharacter(string characterId) =>
+        Post<CharacterAndRevision>($"api/admin/mw5e/characters/{characterId}/revise");
 
-    public Task SaveMwFifthCharacter(Character character) =>
-        Post($"api/admin/mw5e/characters", new { character });
+    public Task SaveMwFifthCharacter(CharacterRevision revision) =>
+        Post($"api/admin/mw5e/characters", new { revision });
 
     public Task DeleteMwFifthCharacter(string characterId) =>
         Delete($"api/admin/mw5e/characters/{characterId}");

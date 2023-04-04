@@ -55,6 +55,12 @@ builder.Configuration
 
 var app = builder.Build();
 
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var larpContext = scope.ServiceProvider.GetRequiredService<LarpContext>();
+    await larpContext.Migrate();
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

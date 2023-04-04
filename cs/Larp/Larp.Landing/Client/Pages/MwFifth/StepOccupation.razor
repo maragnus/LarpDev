@@ -43,7 +43,7 @@ else if (!Character.NoOccupation)
                 </MudText>
             </MudExpansionPanel>
 
-            if (Character.Character.PreviousId != null)
+            if (Character.Revision.PreviousId != null)
             {
                 <MudExpansionPanel Text="Advanced Occupations" Icon="@Icons.Material.Outlined.Help">
                     <MudText Typo="Typo.body1">
@@ -169,11 +169,11 @@ else if (!Character.NoOccupation)
         public int Count { get; }
         public bool IsError { get; private set; }
 
-        public SkillSelector(SkillChoice skillChoice, Character character)
+        public SkillSelector(SkillChoice skillChoice, CharacterRevision revision)
         {
             Skills = skillChoice.Choices;
             Count = skillChoice.Count;
-            SelectSkills(character.Skills.Where(skill => skill.Type == SkillPurchase.OccupationChoice).Select(x => x.Name));
+            SelectSkills(revision.Skills.Where(skill => skill.Type == SkillPurchase.OccupationChoice).Select(x => x.Name));
         }
 
         public void SelectSkills(IEnumerable<string> skills)
@@ -188,7 +188,7 @@ else if (!Character.NoOccupation)
         _occupation = Character.GetOccupation();
         _enhancement = Character.GetEnhancement();
         _skillSelectors = Character.OccupationalSkillsChoices
-            .Select(x => new SkillSelector(x, Character.Character))
+            .Select(x => new SkillSelector(x, Character.Revision))
             .ToArray();
         StateHasChanged();
     }

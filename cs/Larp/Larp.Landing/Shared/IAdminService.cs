@@ -1,6 +1,6 @@
 using Larp.Data;
+using Larp.Data.MwFifth;
 using Larp.Landing.Shared.Messages;
-using MwFifthCharacter = Larp.Data.MwFifth.Character;
 using Microsoft.Extensions.FileProviders;
 
 namespace Larp.Landing.Shared;
@@ -42,13 +42,14 @@ public interface IAdminService
     Task<CharacterAccountSummary[]> GetMwFifthCharacters(CharacterState state);
 
     [ApiGet("mw5e/characters/{characterId}"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
-    Task<MwFifthCharacter> GetMwFifthCharacter(string characterId);
+    Task<CharacterAndRevision> GetMwFifthCharacter(string characterId);
 
+    /// <summary>Returns the best revision to start a draft (in order of Draft, Review, Live)</summary>
     [ApiGet("mw5e/characters/{characterId}/latest"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
-    Task<MwFifthCharacter> GetMwFifthCharacterLatest(string characterId);
+    Task<CharacterAndRevision> GetMwFifthCharacterLatest(string characterId);
 
     [ApiGet("mw5e/characters/{characterId}/revisions"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
-    Task<MwFifthCharacter[]> GetMwFifthCharacterRevisions(string characterId);
+    Task<CharacterAndRevisions> GetMwFifthCharacterRevisions(string characterId);
 
     [ApiPost("mw5e/characters/{characterId}/approve"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
     Task ApproveMwFifthCharacter(string characterId);
@@ -57,10 +58,10 @@ public interface IAdminService
     Task RejectMwFifthCharacter(string characterId);
 
     [ApiPost("mw5e/characters/{characterId}/revise"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
-    Task<MwFifthCharacter> ReviseMwFifthCharacter(string characterId);
+    Task<CharacterAndRevision> ReviseMwFifthCharacter(string characterId);
 
     [ApiPost("mw5e/characters"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
-    Task SaveMwFifthCharacter(MwFifthCharacter character);
+    Task SaveMwFifthCharacter(CharacterRevision revision);
 
     [ApiDelete("mw5e/characters/{characterId}"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
     Task DeleteMwFifthCharacter(string characterId);

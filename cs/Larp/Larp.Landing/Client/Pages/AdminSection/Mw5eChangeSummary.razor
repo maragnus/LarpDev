@@ -11,7 +11,7 @@
 @code {
 
     [Parameter]
-    public Character Character { get; set; } = null!;
+    public CharacterRevision Revision { get; set; } = null!;
 
     private RowItem[] _items = Array.Empty<RowItem>();
 
@@ -26,7 +26,7 @@
         }
 
         _items =
-            Character.ChangeSummary?
+            Revision.ChangeSummary?
                 .Select(x =>
                     new RowItem(x.Key, Translate(x.Value.Old), Translate(x.Value.New)))
                 .ToArray()

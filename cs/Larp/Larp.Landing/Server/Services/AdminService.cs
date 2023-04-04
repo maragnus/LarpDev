@@ -10,7 +10,6 @@ using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using OfficeOpenXml;
 using OfficeOpenXml.Table;
-using MwFifthCharacter = Larp.Data.MwFifth.Character;
 
 namespace Larp.Landing.Server.Services;
 
@@ -68,7 +67,7 @@ public class AdminService : IAdminService
 
         var characterSheet = workbook.Worksheets.Add("Characters");
         {
-            var players = await _db.MwFifthGame.Characters
+            var players = await _db.MwFifthGame.CharacterRevisions
                 .Find(x => x.State == CharacterState.Live)
                 .ToListAsync();
             characterSheet.Cells.LoadFromCollection(players.Select(p => new
@@ -125,11 +124,11 @@ public class AdminService : IAdminService
     public async Task RejectMwFifthCharacter(string characterId) =>
         await _manager.Reject(characterId);
 
-    public async Task<Character> ReviseMwFifthCharacter(string characterId) =>
+    public async Task<CharacterAndRevision> ReviseMwFifthCharacter(string characterId) =>
         await _manager.GetDraft(characterId, _account, true);
 
-    public async Task SaveMwFifthCharacter(Character character) =>
-        await _manager.Save(character, _account, true);
+    public async Task SaveMwFifthCharacter(CharacterRevision revision) =>
+        await _manager.Save(revision, _account, true);
 
     public async Task DeleteMwFifthCharacter(string characterId) =>
         await _manager.Delete(characterId, _account, true);
@@ -177,7 +176,7 @@ public class AdminService : IAdminService
 
     public async Task<CharacterAccountSummary[]> GetMwFifthCharacters(CharacterState state)
     {
-        var list = await _db.MwFifthGame.Characters.AsQueryable()
+        var list = await _db.MwFifthGame.CharacterRevisions.AsQueryable()
             .Where(character => character.State == state)
             .Join(_db.Accounts.AsQueryable(),
                 character => character.AccountId,
@@ -190,7 +189,7 @@ public class AdminService : IAdminService
             .ToArray();
     }
 
-    public async Task<MwFifthCharacter> GetMwFifthCharacter(string characterId) =>
+    public async Task<CharacterAndRevision> GetMwFifthCharacter(string characterId) =>
         await _manager.Get(characterId, _account, true)
         ?? throw new ResourceNotFoundException();
 
@@ -200,9 +199,9 @@ public class AdminService : IAdminService
         {
             Accounts = (int)await _db.Accounts.CountDocumentsAsync(_ => true),
             MwFifthCharacters =
-                (int)await _db.MwFifthGame.Characters.CountDocumentsAsync(x => x.State == CharacterState.Live),
+                (int)await _db.MwFifthGame.CharacterRevisions.CountDocumentsAsync(x => x.State == CharacterState.Live),
             MwFifthReview =
-                (int)await _db.MwFifthGame.Characters.CountDocumentsAsync(x => x.State == CharacterState.Review)
+                (int)await _db.MwFifthGame.CharacterRevisions.CountDocumentsAsync(x => x.State == CharacterState.Review)
         };
     }
 
@@ -225,7 +224,7 @@ public class AdminService : IAdminService
     {
         var gameState = await _db.MwFifthGame.GetGameState();
 
-        var list = await _db.MwFifthGame.Characters.Find(x =>
+        var list = await _db.MwFifthGame.CharacterRevisions.Find(x =>
                 x.AccountId == accountId && (x.State == CharacterState.Live || x.State == CharacterState.Review))
             .ToListAsync();
 
@@ -245,9 +244,9 @@ public class AdminService : IAdminService
         await _db.Accounts.UpdateOneAsync(x => x.AccountId == accountId, update);
     }
 
-    public async Task<MwFifthCharacter> GetMwFifthCharacterLatest(string characterId) =>
+    public async Task<CharacterAndRevision> GetMwFifthCharacterLatest(string characterId) =>
         await _manager.GetLatest(characterId, _account, true);
 
-    public async Task<MwFifthCharacter[]> GetMwFifthCharacterRevisions(string characterId) =>
+    public async Task<CharacterAndRevisions> GetMwFifthCharacterRevisions(string characterId) =>
         await _manager.GetRevisions(characterId, _account, true);
 }

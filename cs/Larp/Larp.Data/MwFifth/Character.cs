@@ -96,7 +96,49 @@ public class ChangeSummary
 }
 
 [PublicAPI]
+public class CharacterAttendance
+{
+    [BsonId, BsonRepresentation(BsonType.ObjectId)]
+    public string UniqueId { get; set; } = null!;
+
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string EventId { get; set; } = null!;
+
+    public string[] Components { get; set; } = Array.Empty<string>();
+
+    public int AttendanceMoonstone { get; set; }
+    public int CleanupMoonstone { get; set; }
+    public int WaystonesMoonstone { get; set; }
+}
+
+[PublicAPI]
+public record CharacterAndRevision(Character Character, CharacterRevision Revision);
+
+[PublicAPI]
+public record CharacterAndRevisions(Character Character, CharacterRevision[] CharacterRevisions);
+
+[PublicAPI]
 public class Character
+{
+    [BsonId, BsonRepresentation(BsonType.ObjectId)]
+    public string UniqueId { get; set; } = null!;
+
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string AccountId { get; set; } = null!;
+
+    public DateTimeOffset CreatedOn { get; set; }
+
+    public int Moonstone { get; set; }
+
+    public int UsedMoonstone { get; set; }
+
+    public CharacterAttendance[] Attendances { get; set; } = Array.Empty<CharacterAttendance>();
+
+    public string? CharacterName { get; set; }
+}
+
+[PublicAPI]
+public class CharacterRevision
 {
     [BsonId, BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; } = null!;
@@ -188,14 +230,15 @@ public class Character
         return !oldItems.SequenceEqual(newItems);
     }
 
-    public static Dictionary<string, ChangeSummary> BuildChangeSummary(Character? oldCharacter, Character? newCharacter)
+    public static Dictionary<string, ChangeSummary> BuildChangeSummary(CharacterRevision? oldCharacter,
+        CharacterRevision? newCharacter)
     {
         var result = new Dictionary<string, ChangeSummary>();
 
         if (oldCharacter == null || newCharacter == null)
             return result;
 
-        foreach (var property in typeof(Character).GetProperties())
+        foreach (var property in typeof(CharacterRevision).GetProperties())
         {
             if (_skipProperties.Contains(property.Name)) continue;
             var oldValue = property.GetValue(oldCharacter);

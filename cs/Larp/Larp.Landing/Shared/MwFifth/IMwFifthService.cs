@@ -11,16 +11,16 @@ public interface IMwFifthService
     Task<GameState> GetGameState(string lastRevision);
     
     [ApiGet("character"), ApiAuthenticated]
-    Task<Character> GetCharacter(string characterId);
+    Task<CharacterAndRevision> GetCharacter(string characterId);
     
     [ApiPost("character/revise"), ApiAuthenticated]
-    Task<Character> ReviseCharacter(string characterId);
+    Task<CharacterAndRevision> ReviseCharacter(string characterId);
 
     [ApiGet("character/new"), ApiAuthenticated]
-    Task<Character> GetNewCharacter();
+    Task<CharacterAndRevision> GetNewCharacter();
     
     [ApiPost("character"), ApiAuthenticated]
-    Task SaveCharacter(Character character);
+    Task SaveCharacter(CharacterRevision revision);
     
     [ApiDelete("character"), ApiAuthenticated]
     Task DeleteCharacter(string characterId);

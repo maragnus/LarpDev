@@ -16,11 +16,13 @@ public class MwFifthGameContext
     public MwFifthGameContext(IMongoDatabase database, LarpDataCache cache)
     {
         _cache = cache;
-        Characters = database.GetCollection<Character>($"{PrefixName}.{nameof(Characters)}");
+        Characters = database.GetCollection<Character>($"{PrefixName}.{nameof(Character)}");
+        CharacterRevisions = database.GetCollection<CharacterRevision>($"{PrefixName}.{nameof(CharacterRevisions)}");
         _gameStates = database.GetCollection<BsonDocument>(nameof(LarpContext.GameStates));
     }
 
     public IMongoCollection<Character> Characters { get; }
+    public IMongoCollection<CharacterRevision> CharacterRevisions { get; }
 
     public async ValueTask<GameState> GetGameState()
     {

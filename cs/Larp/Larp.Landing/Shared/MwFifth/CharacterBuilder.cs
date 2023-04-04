@@ -18,6 +18,7 @@ public class CharacterBuilder
     #region GameState
 
     public Character Character { get; }
+    public CharacterRevision Revision { get; }
     public GameState GameState { get; }
 
     public Spell[] AllWisdomSpells { get; }
@@ -55,10 +56,11 @@ public class CharacterBuilder
 
     #endregion
 
-    public CharacterBuilder(Character character, GameState gameState, ILogger logger)
+    public CharacterBuilder(CharacterAndRevision character, GameState gameState, ILogger logger)
     {
         _logger = logger;
-        Character = character;
+        Character = character.Character;
+        Revision = character.Revision;
         GameState = gameState;
         DependencyManager = new DependencyManager<CharacterBuilder>(logger);
 
@@ -75,7 +77,7 @@ public class CharacterBuilder
             .ToDictionary(x => x.Key, x => x.First());
 
         _chosenSpells = AllSpells
-            .TryFromKeys(Character.Spells)
+            .TryFromKeys(Revision.Spells)
             .Where(x => x.IsGiftOfWisdom)
             .Select(x => x.Name)
             .ToArray();
@@ -89,79 +91,79 @@ public class CharacterBuilder
 
     public string? CharacterName
     {
-        get => Character.CharacterName;
+        get => Revision.CharacterName;
         set => Set(c => c.CharacterName = value);
     }
 
     public AgeGroup? AgeGroup
     {
-        get => Character.AgeGroup;
+        get => Revision.AgeGroup;
         set => Set(c => c.AgeGroup = value);
     }
 
     public string? HomeChapter
     {
-        get => Character.HomeChapter;
+        get => Revision.HomeChapter;
         set => Set(c => c.HomeChapter = value);
     }
 
     public string? Homeland
     {
-        get => Character.Homeland;
+        get => Revision.Homeland;
         set => Set(c => c.Homeland = value);
     }
 
     public string? Occupation
     {
-        get => Character.Occupation;
+        get => Revision.Occupation;
         set => Set(x => x.Occupation = value);
     }
 
     public string? Enhancement
     {
-        get => Character.Enhancement;
+        get => Revision.Enhancement;
         set => Set(x => x.Enhancement = value);
     }
 
     public string? Specialty
     {
-        get => Character.Specialty;
+        get => Revision.Specialty;
         set => Set(x => x.Specialty = value);
     }
 
     public string? Religion
     {
-        get => Character.Religion;
+        get => Revision.Religion;
         set => Set(x => x.Religion = value);
     }
 
     public bool NoOccupation
     {
-        get => Character.NoOccupation;
+        get => Revision.NoOccupation;
         set => Set(x => x.NoOccupation = value);
     }
 
     public bool NoHistory
     {
-        get => Character.NoHistory;
+        get => Revision.NoHistory;
         set => Set(x => x.NoHistory = value);
     }
 
     public bool NoAdvantages
     {
-        get => Character.NoAdvantages;
+        get => Revision.NoAdvantages;
         set => Set(x => x.NoAdvantages = value);
     }
 
     public string? PublicHistory
     {
-        get => Character.PublicHistory;
+        get => Revision.PublicHistory;
         set => Set(x => x.PublicHistory = value);
     }
 
     public string? PrivateHistory
     {
-        get => Character.PrivateHistory;
+        get => Revision.PrivateHistory;
         set => Set(x => x.PrivateHistory = value);
     }
 
@@ -178,58 +180,58 @@ public class CharacterBuilder
         }
     }
 
-    public int GiftMoonstone => Character.GiftMoonstone;
+    public int GiftMoonstone => Revision.GiftMoonstone;
 
-    public int SkillMoonstone => Character.SkillMoonstone;
+    public int SkillMoonstone => Revision.SkillMoonstone;
 
     public int Level => Courage + Dexterity + Empathy + Passion + Prowess + Wisdom;
 
     public int Courage
     {
-        get => Character.Courage;
+        get => Revision.Courage;
         set => Set(x => x.Courage = value);
     }
 
     public int Dexterity
     {
-        get => Character.Dexterity;
+        get => Revision.Dexterity;
         set => Set(x => x.Dexterity = value);
     }
 
     public int Empathy
     {
-        get => Character.Empathy;
+        get => Revision.Empathy;
         set => Set(x => x.Empathy = value);
     }
 
     public int Passion
     {
-        get => Character.Passion;
+        get => Revision.Passion;
         set => Set(x => x.Passion = value);
     }
 
     public int Prowess
     {
-        get => Character.Prowess;
+        get => Revision.Prowess;
         set => Set(x => x.Prowess = value);
     }
 
     public int Wisdom
     {
-        get => Character.Wisdom;
+        get => Revision.Wisdom;
         set => Set(x => x.Wisdom = value);
     }
 
     public string[] OccupationalChosenSkills
     {
-        get => Character.Skills
+        get => Revision.Skills
             .Where(x => x.Type == SkillPurchase.OccupationChoice)
             .Select(x => x.Name)
             .ToArray();
 
         set
         {
-            Character.Skills = Character.Skills
+            Revision.Skills = Revision.Skills
                 .Where(x => x.Type != SkillPurchase.OccupationChoice)
                 .Concat(value.Select(x => CharacterSkill.FromTitle(x, SkillPurchase.OccupationChoice)))
                 .ToArray();
@@ -240,13 +242,13 @@ public class CharacterBuilder
 
     public CharacterSkill[] PurchasedSkills
     {
-        get => Character.Skills
+        get => Revision.Skills
             .Where(x => x.Type == SkillPurchase.Purchased)
             .ToArray();
 
         set
         {
-            Character.Skills = Character.Skills
+            Revision.Skills = Revision.Skills
                 .Where(x => x.Type != SkillPurchase.Purchased)
                 .Concat(value)
                 .ToArray();
@@ -258,27 +260,27 @@ public class CharacterBuilder
 
     public CharacterVantage[] Advantages
     {
-        get => Character.Advantages;
+        get => Revision.Advantages;
         set => Set(x => x.Advantages = value);
     }
 
     public CharacterVantage[] Disadvantages
     {
-        get => Character.Disadvantages;
+        get => Revision.Disadvantages;
         set => Set(x => x.Disadvantages = value);
     }
 
     public HomeChapter? GetHomeChapter() =>
-        GameState.HomeChapters.FirstOrDefault(x => x.Name == Character.HomeChapter);
+        GameState.HomeChapters.FirstOrDefault(x => x.Name == Revision.HomeChapter);
 
     public Occupation? GetOccupation() =>
-        GameState.Occupations.FirstOrDefault(x => x.Name == Character.Occupation);
+        GameState.Occupations.FirstOrDefault(x => x.Name == Revision.Occupation);
 
     public Occupation? GetEnhancement() =>
-        GameState.Occupations.FirstOrDefault(x => x.Name == Character.Enhancement);
+        GameState.Occupations.FirstOrDefault(x => x.Name == Revision.Enhancement);
 
     public Religion? GetReligion() =>
-        AllReligions.FirstOrDefault(x => x.Name == Character.Religion);
+        AllReligions.FirstOrDefault(x => x.Name == Revision.Religion);
 
     #endregion
 
@@ -288,7 +290,7 @@ public class CharacterBuilder
         nameof(PurchasedSkills))]
     public HashSet<string> Skills { get; private set; } = new();
 
-    public bool HasEnhancements => AvailableOccupations.Count > 0 && Character.PreviousId != null;
+    public bool HasEnhancements => AvailableOccupations.Count > 0 && Revision.PreviousId != null;
 
     [DependsOn(nameof(PopulateSpells), nameof(Wisdom))]
     public bool HasWisdomSpells { get; private set; }
@@ -302,10 +304,10 @@ public class CharacterBuilder
     [DependsOn(nameof(PopulateSpells), nameof(Wisdom), nameof(Occupation), nameof(NoOccupation))]
     public bool HasOccupationalSpells { get; private set; }
 
-    public bool IsNameValid => !string.IsNullOrWhiteSpace(Character.CharacterName);
-    public bool IsAgeGroupValid => Character.AgeGroup != null;
-    public bool IsHomeChapterValid => !string.IsNullOrEmpty(Character.HomeChapter);
-    public bool IsHomelandValid => !string.IsNullOrWhiteSpace(Character.Homeland);
+    public bool IsNameValid => !string.IsNullOrWhiteSpace(Revision.CharacterName);
+    public bool IsAgeGroupValid => Revision.AgeGroup != null;
+    public bool IsHomeChapterValid => !string.IsNullOrEmpty(Revision.HomeChapter);
+    public bool IsHomelandValid => !string.IsNullOrWhiteSpace(Revision.Homeland);
 
     [DependsOn(nameof(PopulateIsOccupationValid), nameof(AgeGroup), nameof(Occupation), nameof(NoOccupation),
         nameof(OccupationalChosenSkills),
@@ -322,13 +324,13 @@ public class CharacterBuilder
         {
             if (AgeGroup == Data.MwFifth.AgeGroup.PreTeen)
                 return Level == 0;
-            if (Character is { State: CharacterState.Draft, PreviousId: null })
+            if (Revision is { State: CharacterState.Draft, PreviousId: null })
                 return (NoHistory && Level == 5) || (!NoHistory && Level == 6);
             return (NoHistory && Level >= 5) || (!NoHistory && Level >= 6);
         }
     }
 
-    public bool IsReligionValid => !string.IsNullOrEmpty(Character.Religion);
+    public bool IsReligionValid => !string.IsNullOrEmpty(Revision.Religion);
 
     [DependsOn(nameof(PopulateSpells), nameof(Wisdom), nameof(Occupation), nameof(NoOccupation), nameof(ChosenSpells))]
     public bool IsSpellsValid { get; private set; }
@@ -344,7 +346,7 @@ public class CharacterBuilder
 
     public bool IsSkillsValid => true;
 
-    public bool HasSkills => Character.PreviousId != null;
+    public bool HasSkills => Revision.PreviousId != null;
 
     [DependsOn(nameof(PopulateAbilities), nameof(Courage), nameof(Dexterity), nameof(Empathy), nameof(Passion),
         nameof(Prowess), nameof(Wisdom))]
@@ -358,16 +360,16 @@ public class CharacterBuilder
 
     #region Populate
 
-    private void Set(Action<Character> set, [CallerMemberName] string memberName = null!)
+    private void Set(Action<CharacterRevision> set, [CallerMemberName] string memberName = null!)
     {
-        set.Invoke(Character);
+        set.Invoke(Revision);
         DependencyManager.Update(this, memberName);
         StateChanged?.Invoke();
     }
 
     public void UpdateMoonstone()
     {
-        Character.GiftMoonstone = Math.Max(0, Character.Triangle(Level) - Character.Triangle(Character.StartingLevel));
+        Revision.GiftMoonstone = Math.Max(0, CharacterRevision.Triangle(Level) - CharacterRevision.Triangle(Revision.StartingLevel));
 
         var purchasedSkills = PurchasedSkills
             .Select(purchase => (
@@ -377,15 +379,15 @@ public class CharacterBuilder
 
         if (purchasedSkills.Count == 0)
         {
-            Character.SkillMoonstone = 0;
+            Revision.SkillMoonstone = 0;
             return;
         }
 
         var purchaseCount = purchasedSkills.Sum(x => x.PurchaseCount);
-        var purchaseCountCost = Character.Triangle(purchaseCount - 1);
+        var purchaseCountCost = CharacterRevision.Triangle(purchaseCount - 1);
         var purchaseCostSum = purchasedSkills.Sum(x => x.CostPerPurchase * x.PurchaseCount);
 
-        Character.SkillMoonstone = Math.Max(0, purchaseCountCost + purchaseCostSum - Character.SkillTokens);
+        Revision.SkillMoonstone = Math.Max(0, purchaseCountCost + purchaseCostSum - Revision.SkillTokens);
     }
 
     private void PopulateAbilities()
@@ -442,9 +444,9 @@ public class CharacterBuilder
             .Where(x => x.Type == OccupationType.Enhancement && x.IsChapter(HomeChapter))
             .ToDictionary(x => x.Name);
 
-        if (Character.PreviousId == null)
+        if (Revision.PreviousId == null)
         {
-            switch (Character.AgeGroup)
+            switch (Revision.AgeGroup)
             {
                 case null:
                 case Data.MwFifth.AgeGroup.PreTeen:
@@ -464,7 +466,7 @@ public class CharacterBuilder
         }
         else
         {
-            switch (Character.AgeGroup)
+            switch (Revision.AgeGroup)
             {
                 case null:
                 case Data.MwFifth.AgeGroup.PreTeen:
@@ -517,8 +519,8 @@ public class CharacterBuilder
             .ToArray();
 
         AllSpecialties = occupation?.Specialties ?? Array.Empty<string>();
-        if (!AllSpecialties.Contains(Character.Specialty))
-            Character.Specialty = null;
+        if (!AllSpecialties.Contains(Revision.Specialty))
+            Revision.Specialty = null;
     }
 
     private void PopulateSkills()
@@ -568,7 +570,7 @@ public class CharacterBuilder
 
         else if (OccupationalSkillsChoices.Length > 0)
         {
-            var chosenSkills = Character.Skills
+            var chosenSkills = Revision.Skills
                 .Where(x => x.Type == SkillPurchase.OccupationChoice)
                 .Select(x => x.Title)
                 .ToHashSet();
@@ -603,20 +605,20 @@ public class CharacterBuilder
 
     private void PopulateSpells()
     {
-        HasWisdomSpells = Character.Wisdom > 0;
+        HasWisdomSpells = Revision.Wisdom > 0;
         HasBardicSpells = HasWisdomSpells && HasSkill("Bardic Voice");
         HasDivineSpells = HasWisdomSpells && HasSkill("Divine Spells");
         HasOccupationalSpells = HasWisdomSpells && HasSkill("Occupational Spells");
-        OccupationalSpells = AllOccupationalSpells.Where(x => x.Category == Character.Occupation).ToArray();
+        OccupationalSpells = AllOccupationalSpells.Where(x => x.Category == Revision.Occupation).ToArray();
 
         var spells = new HashSet<string>();
         if (HasWisdomSpells) spells.AddRange(ChosenSpells);
         if (HasBardicSpells) spells.AddRange(AllBardicSpells.Select(x => x.Name));
         if (HasDivineSpells) spells.AddRange(AllDivineSpells.Select(x => x.Name));
         if (HasOccupationalSpells) spells.AddRange(OccupationalSpells.Select(x => x.Name));
-        Character.Spells = spells.ToArray();
+        Revision.Spells = spells.ToArray();
 
-        IsSpellsValid = ChosenSpells.Length == Character.Wisdom;
+        IsSpellsValid = ChosenSpells.Length == Revision.Wisdom;
         HasSpells = HasWisdomSpells;
     }
 

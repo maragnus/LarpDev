@@ -9,9 +9,9 @@ public class CharacterAccountSummary
     {
     }
     
-    public CharacterAccountSummary(Character character, Account account)
-        : this(character.Id, account.AccountId, character.State, account.Name, account.EmailList,
-            character.CharacterName, character.HomeChapter, character.Occupation, character.Level)
+    public CharacterAccountSummary(CharacterRevision revision, Account account)
+        : this(revision.Id, account.AccountId, revision.State, account.Name, account.EmailList,
+            revision.CharacterName, revision.HomeChapter, revision.Occupation, revision.Level)
     {
     }
 

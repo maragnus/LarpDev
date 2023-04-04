@@ -18,34 +18,39 @@
     private LoadingState _loadingState = LoadingState.Loading;
     private Game _game = new();
     private GameState _gameState = null!;
-    private CharacterBuilder _character = null!;
+    private Character _character = default!;
+    private CharacterBuilder _revision = null!;
     private Step[] _steps = Array.Empty<Step>();
     private Step? _currentStep = null;
     private AutoSaveState _saveState;
     private int _lastMoonstoneCost = 0;
     private int _newMoonstoneCost = 0;
+    private int _totalMoonstone = 0;
+    private int _myMoonstone;
 
     private async Task Reload()
     {
-        var character = Admin
+        var characterAndRevision = Admin
             ? await LandingService.Admin.GetMwFifthCharacter(CharacterId!)
             : await LandingService.MwFifth.GetCharacter(CharacterId!);
+        _character = characterAndRevision.Character;
+        var revision = characterAndRevision.Revision;
+        
+        Logger.LogInformation("Character {CharacterId}", revision.Id);
 
-        Logger.LogInformation("Character {CharacterId}", character.Id);
-
-        if (!Admin && character.State is not CharacterState.Draft)
+        if (!Admin && revision.State is not CharacterState.Draft)
         {
             await DialogService.ShowMessageBox("Unable to Edit Character", "Character must be in a draft status to edit it.");
             return;
         }
 
-        if (Admin && character.State is not CharacterState.Review and not  CharacterState.Draft)
+        if (Admin && revision.State is not CharacterState.Review and not  CharacterState.Draft)
         {
             await DialogService.ShowMessageBox("Unable to Edit Character", "Character must be in a review or draft status to edit it.");
             return;
         }
 
-        _character = new CharacterBuilder(character, _gameState, Logger)
+        _revision = new CharacterBuilder(characterAndRevision, _gameState, Logger)
         {
             StateChanged = () =>
             {
@@ -58,78 +63,74 @@
 
         void UpdateCharacter()
         {
-            _character.UpdateMoonstone();
-            _newMoonstoneCost = _character.GiftMoonstone + _character.SkillMoonstone;
+            _revision.UpdateMoonstone();
+            _myMoonstone = _character.Moonstone;
+            _totalMoonstone = _revision.GiftMoonstone + _revision.SkillMoonstone;
+            _newMoonstoneCost = _totalMoonstone - _lastMoonstoneCost;
         }
 
-        _isNewCharacter = character.PreviousId == null;
-        if (character.PreviousId != null)
-        {
-            var previousCharacter = Admin
-                ? await LandingService.Admin.GetMwFifthCharacter(character.PreviousId)
-                : await LandingService.MwFifth.GetCharacter(character.PreviousId);
-            _lastMoonstoneCost = previousCharacter.GiftMoonstone + previousCharacter.SkillMoonstone;
-        }
+        _isNewCharacter = revision.PreviousId == null;
+        _lastMoonstoneCost = characterAndRevision.Character.UsedMoonstone;
 
         _steps = new Step[]
         {
             new(
                 "Name",
-                @<StepName Character="_character"/>,
+                @<StepName Character="_revision"/>,
                 @<MudIcon Icon="@Icons.Material.Outlined.PermIdentity"/>,
-                () => _character.IsNameValid && _character.IsAgeGroupValid),
+                () => _revision.IsNameValid && _revision.IsAgeGroupValid),
             new(
                 "Home Chapter",
-                @<StepHomeChapter Character="_character"/>,
+                @<StepHomeChapter Character="_revision"/>,
                 @<MudIcon Icon="@Icons.Material.Outlined.Flag"/>,
-                () => _character.IsHomeChapterValid),
+                () => _revision.IsHomeChapterValid),
             new(
                 "Homeland",
-                @<StepHomeland Character="_character"/>,
+                @<StepHomeland Character="_revision"/>,
                 @<MudIcon Icon="@Icons.Material.Outlined.Home"/>,
-                () => _character.IsHomelandValid),
+                () => _revision.IsHomelandValid),
             new(
                 "Occupation",
-                @<StepOccupation Character="_character"/>,
+                @<StepOccupation Character="_revision"/>,
                 @<MudIcon Icon="@Icons.Material.Outlined.Work"/>,
-                () => _character.IsOccupationValid,
-                () => _character.AgeGroup != AgeGroup.PreTeen),
+                () => _revision.IsOccupationValid,
+                () => _revision.AgeGroup != AgeGroup.PreTeen),
             new(
                 "Gifts",
-                @<StepGifts Character="_character"/>,
+                @<StepGifts Character="_revision"/>,
                 @<MudIcon Icon="@Icons.Material.Outlined.FitnessCenter"/>,
-                () => _character.IsGiftsValid,
-                () => _character.AgeGroup != AgeGroup.PreTeen),
+                () => _revision.IsGiftsValid,
+                () => _revision.AgeGroup != AgeGroup.PreTeen),
             new(
                 "Religion",
-                @<StepReligion Character="_character"/>,
+                @<StepReligion Character="_revision"/>,
                 @<MudIcon Icon="@Icons.Material.Outlined.GroupWork"/>,
-                () => _character.IsReligionValid),
+                () => _revision.IsReligionValid),
             new(
                 "Skills",
-                @<StepSkills Character="_character"/>,
+                @<StepSkills Character="_revision"/>,
                 @<MudIcon Icon="@Icons.Material.Outlined.Handyman"/>,
-                () => _character.IsSkillsValid,
-                () => _character.HasSkills),
+                () => _revision.IsSkillsValid,
+                () => _revision.HasSkills),
             new(
                 "Spells",
-                @<StepSpells Character="_character"/>,
+                @<StepSpells Character="_revision"/>,
                 @<MudIcon Icon="@Icons.Material.Outlined.Book"/>,
-                () => _character.IsSpellsValid,
-                () => _character.HasWisdomSpells),
+                () => _revision.IsSpellsValid,
+                () => _revision.HasWisdomSpells),
             new(
                 "Advantages",
-                @<StepVantages Character="_character"/>,
+                @<StepVantages Character="_revision"/>,
                 @<MudIcon Icon="@Icons.Material.Outlined.Blind"/>,
-                () => _character.IsVantagesValid),
+                () => _revision.IsVantagesValid),
             new(
                 "History",
-                @<StepHistory Character="_character"/>,
+                @<StepHistory Character="_revision"/>,
                 @<MudIcon Icon="@Icons.Material.Outlined.History"/>,
-                () => _character.IsHistoryValid),
+                () => _revision.IsHistoryValid),
             new(
                 "Review",
-                @<StepReview Character="_character" Submit="Submit"/>,
+                @<StepReview Character="_revision" Submit="Submit"/>,
                 @<MudIcon Icon="@Icons.Material.Outlined.Verified"/>,
                 () => false)
         };
@@ -152,7 +153,7 @@
         if (string.IsNullOrEmpty(CharacterId))
         {
             var newCharacter = await LandingService.MwFifth.GetDraftCharacter();
-            NavigationManager.NavigateTo($"/characters/mw5e/{newCharacter.Id}/edit", new NavigationOptions() { ReplaceHistoryEntry = true });
+            NavigationManager.NavigateTo($"/characters/mw5e/{newCharacter.Revision.Id}/edit", new NavigationOptions() { ReplaceHistoryEntry = true });
             return;
         }
 
@@ -173,10 +174,10 @@
         try
         {
             if (Admin)
-                await LandingService.Admin.SaveMwFifthCharacter(_character.Character);
+                await LandingService.Admin.SaveMwFifthCharacter(_revision.Revision);
             else
-                await LandingService.MwFifth.Save(_character.Character);
-            CharacterId = _character.Character.Id;
+                await LandingService.MwFifth.Save(_revision.Revision);
+            CharacterId = _revision.Revision.Id;
         }
         finally
         {
@@ -191,12 +192,12 @@
         {
             if (Admin)
             {
-                await LandingService.Admin.DeleteMwFifthCharacter(_character.Character.Id);
+                await LandingService.Admin.DeleteMwFifthCharacter(_revision.Revision.Id);
                 NavigationManager.NavigateTo("/admin/mw5e/characters");
             }
             else
             {
-                await LandingService.MwFifth.DeleteCharacter(_character.Character.Id);
+                await LandingService.MwFifth.DeleteCharacter(_revision.Revision.Id);
                 NavigationManager.NavigateTo("/characters");
             }
         }
@@ -207,15 +208,15 @@
         var result = await DialogService.ShowMessageBox("Submit Character for Review", "Are you sure you want to submit this draft for review? You cannot edit it again until it is approved.", "Yes, I'm Done", "No, Keep Editing");
         if (result == true)
         {
-            _character.Character.State = CharacterState.Review;
+            _revision.Revision.State = CharacterState.Review;
             if (Admin)
             {
-                await LandingService.Admin.SaveMwFifthCharacter(_character.Character);
+                await LandingService.Admin.SaveMwFifthCharacter(_revision.Revision);
                 NavigationManager.NavigateTo($"/admin/mw5e/characters/{CharacterId}", new NavigationOptions() { ReplaceHistoryEntry = true });
             }
             else
             {
-                await LandingService.MwFifth.Save(_character.Character);
+                await LandingService.MwFifth.Save(_revision.Revision);
                 NavigationManager.NavigateTo($"/characters/mw5e/{CharacterId}", new NavigationOptions() { ReplaceHistoryEntry = true });
             }
         }
@@ -241,23 +242,31 @@
                 <MudText Typo="Typo.h6">Updating @_game.Title Character</MudText>
             }
 
-            <MudStack Row>
+            <MudStack Row AlignItems="AlignItems.Start">
                 @if (!_isNewCharacter)
                 {
                     <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                        <MudAvatar Color="Color.Success">@_myMoonstone</MudAvatar>
+                        <MudText Typo="Typo.caption">My Moonstone</MudText>
+                    </MudStack>
+                    <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                        <MudAvatar Color="Color.Success">@_totalMoonstone</MudAvatar>
+                        <MudText Typo="Typo.caption">Total Moonstone</MudText>
+                    </MudStack>
+                    <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
                         <MudAvatar Color="Color.Success">@(_newMoonstoneCost > 0 ? "+" : "")@(_newMoonstoneCost)</MudAvatar>
-                        <MudText Typo="Typo.caption">Moonstone</MudText>
+                        <MudText Typo="Typo.caption">Revision Cost</MudText>
                     </MudStack>
                 }
 
-                <ButtonGroup>
+                <MudButtonGroup OverrideStyles="false">
                     <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="DeleteDraft" StartIcon="@Icons.Material.Outlined.DeleteForever">Delete draft</MudButton>
                     <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="Save" Disabled="_saveState != AutoSaveState.ChangeAvailable">Save Changes</MudButton>
                     @if (Admin)
                     {
                         <MudButton Variant="Variant.Filled" Color="Color.Warning" StartIcon="@Icons.Material.Outlined.Verified" OnClick="Submit">Submit</MudButton>
                     }
-                </ButtonGroup>
+                </MudButtonGroup>
             </MudStack>
         </MudStack>
     </MudItem>
