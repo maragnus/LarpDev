@@ -197,7 +197,11 @@ public class AdminService : IAdminService
     {
         return new Dashboard
         {
-            Accounts = (int)await _db.Accounts.CountDocumentsAsync(_ => true),
+            Accounts =
+                (int)await _db.Accounts.CountDocumentsAsync(_ => true),
+            VerifiedAccounts =
+                (int)await _db.Accounts.CountDocumentsAsync(
+                    Builders<Account>.Filter.ElemMatch(x => x.Emails, x => x.IsVerified)),
             MwFifthCharacters =
                 (int)await _db.MwFifthGame.CharacterRevisions.CountDocumentsAsync(x => x.State == CharacterState.Live),
             MwFifthReview =
