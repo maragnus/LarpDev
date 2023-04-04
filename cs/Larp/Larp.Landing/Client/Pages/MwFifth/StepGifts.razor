@@ -13,6 +13,7 @@
                 <div>
                     <MudText Typo="Typo.h6">@gift.Name</MudText>
                     <MudRating SelectedValue="@gift.Value" MaxValue="10" SelectedValueChanged="@gift.Update"/>
+                    <MudText Typo="Typo.caption">@gift.Description</MudText>
                 </div>
             </MudStack>
         </MudItem>
@@ -58,13 +59,15 @@
         private readonly Action _changed;
         public string Name { get; }
         public int Value { get; set; }
+        public string Description { get; }
 
-        public GiftInfo(string name, int value, Action<int> update, Action changed)
+        public GiftInfo(string name, int value, Action<int> update, Action changed, string description)
         {
             _update = update;
             _changed = changed;
             Name = name;
             Value = value;
+            Description = description;
         }
 
         public void Update(int newValue)
@@ -86,12 +89,18 @@
 
         _gifts = new[]
         {
-            new GiftInfo("Courage", Character.Courage, value => Character.Courage = value, GiftChanged),
-            new GiftInfo("Dexterity", Character.Dexterity, value => Character.Dexterity = value, GiftChanged),
-            new GiftInfo("Empathy", Character.Empathy, value => Character.Empathy = value, GiftChanged),
-            new GiftInfo("Passion", Character.Passion, value => Character.Passion = value, GiftChanged),
-            new GiftInfo("Prowess", Character.Prowess, value => Character.Prowess = value, GiftChanged),
-            new GiftInfo("Wisdom", Character.Wisdom, value => Character.Wisdom = value, GiftChanged)
+            new GiftInfo("Courage", Character.Courage, value => Character.Courage = value, GiftChanged,
+                "The Gift of Courage increases your constitution, resolve, resistance to fear, and tolerance for pain. With this Gift, you will gain the ability to triumph over adversity. You will be more durable in combat, and less dependent on healing from others."),
+            new GiftInfo("Dexterity", Character.Dexterity, value => Character.Dexterity = value, GiftChanged,
+                "The Gift of Dexterity grants you quick wits and nimbleness. You may or may not be agile (that really depends on what you, the player, are capable of), but your coordination allows you to perform prodigious feats."),
+            new GiftInfo("Empathy", Character.Empathy, value => Character.Empathy = value, GiftChanged,
+                "This gives you the kindness and compassion to help those who are wounded, whether with magic, a few encouraging words, mundane bandaging, or a kick in the pants."),
+            new GiftInfo("Passion", Character.Passion, value => Character.Passion = value, GiftChanged,
+                "Characters with the gift of Passion are often called “summoners” or “elementalists”. They are able to channel naturally occurring elemental energy through themselves into damaging bolts, bursts, and storms."),
+            new GiftInfo("Prowess", Character.Prowess, value => Character.Prowess = value, GiftChanged,
+                "Prowess is a Gift that thrives in the heart of battle. Warriors with this Gift have a natural talent for weapons, and the strength to challenge their enemies head on."),
+            new GiftInfo("Wisdom", Character.Wisdom, value => Character.Wisdom = value, GiftChanged,
+                "The Gift of Wisdom is based on knowledge and understanding of the Mystwood world, which unlocks the power of magic. A character with this Gift can rely on powerful spells, unleashed with a mere gesture, and can counter the spells of other")
         };
         _abilities = Character.Abilities;
         _properties = Character.Properties;

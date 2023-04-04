@@ -6,7 +6,7 @@
 
 <PageHeader>Account Manager</PageHeader>
 
-<AdminLayout Title="Manage Accounts">
+<AdminLayout Title="Manage Accounts" Loading="_isLoading">
     <div class="pa-2 mb-4">
         <EditForm Model="_search" OnSubmit="Search">
             <MudStack Row Justify="Justify.Center" AlignItems="AlignItems.Start">
@@ -29,6 +29,7 @@
 </AdminLayout>
 
 @code {
+    private bool _isLoading = true;
     private Account[] _allAccounts = Array.Empty<Account>();
     private Account[] _accounts = Array.Empty<Account>();
 
@@ -36,6 +37,7 @@
     {
         _allAccounts = await LandingService.Admin.GetAccounts();
         _accounts = _allAccounts;
+        _isLoading = false;
     }
 
     private static bool SearchFunc(Account account, string query) =>

@@ -2,22 +2,16 @@
 
 @inject LandingService LandingService
 @inject NavigationManager NavigationManager
-@inject ILogger<CharacterList> Logger
 
 <PageHeader>Your Characters</PageHeader>
 
 <MudContainer MaxWidth="MaxWidth.Medium">
-    <MudPaper Elevation="2" Style="margin-top: 1em;">
-        @if (_characters == null || _games == null)
-        {
-            <MudList>
-                <MudListItem>
-                    <MudProgressCircular Style="margin: 32px;"/>
-                </MudListItem>
-            </MudList>
-        }
+    <MudPaper Elevation="2" Class="mt-4 relative" Style="min-height: 150px">
+        <MudOverlay Absolute DarkBackground Visible="_isLoading">
+            <MudProgressCircular Indeterminate/>
+        </MudOverlay>
 
-        @if (_characters != null && _games != null)
+        @if (!_isLoading && _characters != null && _games != null)
         {
             <MudList Clickable Style="width: 100%; margin: 0" SelectedValueChanged="href => NavigationManager.NavigateTo((string)href)">
                 @foreach (var game in _games)
@@ -42,7 +36,7 @@
                         var uri = "/";
                         var chip = "";
                         var color = Color.Primary;
-                        
+
                         switch (character.State)
                         {
                             case CharacterState.Live:
@@ -50,19 +44,19 @@
                                 chip = "Live in game";
                                 color = Color.Success;
                                 break;
-                                
+
                             case CharacterState.Draft:
                                 uri = $"/characters/{game.Name}/{character.Id}/edit";
                                 chip = "Drafting changes";
                                 break;
-                                
+
                             case CharacterState.Review:
                                 uri = $"/characters/{game.Name}/{character.Id}";
                                 chip = "Submitted for review";
                                 color = Color.Info;
                                 break;
                         }
-                        
+
                         <MudListItem
                             Icon="@Icons.Material.Filled.Person"
                             AdornmentColor="Color.Primary"
@@ -93,6 +87,7 @@
 
     CharacterSummary[]? _characters;
     Game[]? _games;
+    bool _isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -101,6 +96,8 @@
 
         if (GameName != null)
             _games = _games.Where(x => x.Name == GameName).ToArray();
+        
+        _isLoading = false;
     }
 
 }

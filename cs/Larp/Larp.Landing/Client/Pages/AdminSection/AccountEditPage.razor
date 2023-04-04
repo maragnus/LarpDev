@@ -10,10 +10,10 @@
     return;
 }
 
-<AdminLayout Title="Manage Accounts">
+<AdminLayout Title="Manage Accounts" Loading="_isLoading">
     <MudPaper Class="mb-4">
         <MudPaper Class="pa-4 mb-4 relative">
-            <MudOverlay DarkBackground Absolute Visible="_saving">
+            <MudOverlay DarkBackground Absolute Visible="_savingProfile">
                 <MudText Typo="Typo.h6">Saving...</MudText>
                 <MudProgressCircular Indeterminate Size="Size.Large"/>
             </MudOverlay>
@@ -45,7 +45,7 @@
     </MudPaper>
 
     <MudPaper Class="pa-4 mb-4 relative">
-        <MudOverlay DarkBackground Absolute Visible="_saving">
+        <MudOverlay DarkBackground Absolute Visible="_savingRoles">
             <MudText Typo="Typo.h6">Saving...</MudText>
             <MudProgressCircular Indeterminate Size="Size.Large"/>
         </MudOverlay>
@@ -90,7 +90,8 @@
     [Parameter]
     public string AccountId { get; set; } = null!;
 
-    private bool _saving = true;
+    private bool _savingProfile = true;
+    private bool _savingRoles = true;
     private bool _changed = false;
     private bool _isLoading = true;
     private Account? _account;
@@ -101,7 +102,8 @@
         _account = await LandingService.Admin.GetAccount(AccountId);
         _characters = await LandingService.Admin.GetAccountCharacters(AccountId);
         _changed = false;
-        _saving = false;
+        _savingProfile = false;
+        _savingRoles = false;
         _isLoading = false;
     }
 
@@ -118,7 +120,7 @@
 
     private async Task Save()
     {
-        _saving = true;
+        _savingProfile = true;
         try
         {
             StateHasChanged();
@@ -128,14 +130,14 @@
         {
             _account = await LandingService.Admin.GetAccount(AccountId);
             _changed = false;
-            _saving = false;
+            _savingProfile = false;
             StateHasChanged();
         }
     }
 
     private async Task SetRole(AccountRole role, bool hasRole)
     {
-        _saving = true;
+        _savingRoles = true;
         try
         {
             if (hasRole)
@@ -147,7 +149,7 @@
         }
         finally
         {
-            _saving = false;
+            _savingRoles = false;
             StateHasChanged();
         }
     }

@@ -5,15 +5,8 @@
 
 <PageHeader>Mystwood 5e Characters</PageHeader>
 
-<AdminLayout>
-    @if (!_loaded)
-    {
-        <MudProgressCircular Indeterminate Size="Size.Large"/>
-    }
-    else
-    {
-        <MwFifthCharacterEditor Admin CharacterId="@CharacterId" />
-    }
+<AdminLayout Loading="_isLoading">
+    <MwFifthCharacterEditor Admin CharacterId="@CharacterId" />
 </AdminLayout>
 
 @code {
@@ -21,7 +14,7 @@
     [Parameter]
     public string CharacterId { get; set; } = null!;
 
-    bool _loaded;
+    bool _isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -32,11 +25,12 @@
             await OnInitializedAsync();
             return;
         }
-        _loaded = true;
+        _isLoading = false;
     }
 
     protected override async Task OnParametersSetAsync()
     {
+        _isLoading = true;
         await OnInitializedAsync();
     }
 }

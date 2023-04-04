@@ -6,8 +6,8 @@
 
 <PageHeader>Mystwood 5e Characters</PageHeader>
 
-<AdminLayout Title="Review Characters">
-    <MudDataGrid T="CharacterAccountSummary" Items="_items" RowClick="RowClick" Dense Groupable Hover Loading="_isLoading">
+<AdminLayout Title="Review Characters" Loading="_isLoading">
+    <MudDataGrid T="CharacterAccountSummary" Items="_items" RowClick="RowClick" Dense Groupable Hover>
         <Columns>
             <PropertyColumn Property="x => x.CharacterName" Title="Character Name"/>
             <PropertyColumn Property="x => x.AccountName" Title="Player Name"/>

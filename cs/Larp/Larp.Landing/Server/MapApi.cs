@@ -6,12 +6,13 @@ using Larp.Landing.Shared.Messages;
 using Microsoft.Extensions.FileProviders;
 
 namespace Larp.Landing.Server;
+
 public class ResourceForbiddenException : Exception
 {
     public ResourceForbiddenException() : base("User is authenticated but not privileged to access this resource")
     {
     }
-    
+
     public ResourceForbiddenException(string message) : base(message)
     {
     }
@@ -22,12 +23,11 @@ public class BadRequestException : Exception
     public BadRequestException() : base("Unexpected parameters in request")
     {
     }
-    
+
     public BadRequestException(string message) : base(message)
     {
     }
 }
-
 
 public class ResourceNotFoundException : Exception
 {
@@ -63,15 +63,17 @@ public static class MapApiExtensions
 
             logger.LogInformation("Map {Method} {Uri} for {Type}", api.HttpMethod, uri, typeof(TInterface).Name);
 
-            app.MapMethods(uri, new [] { api.HttpMethod.Method },
+            app.MapMethods(uri, new[] { api.HttpMethod.Method },
                 async (HttpContext httpContext, TInterface obj, IUserSession session) =>
                     await HandleRequest(httpContext, methodInfo, obj, logger, session, authRequired, contentType));
         }
     }
 
     static async Task HandleRequest<TInterface>(HttpContext httpContext, MethodInfo methodInfo, TInterface obj,
-        ILogger logger, IUserSession userSession, ApiAuthenticatedAttribute? authRequired, ApiContentTypeAttribute? contentType)
+        ILogger logger, IUserSession userSession, ApiAuthenticatedAttribute? authRequired,
+        ApiContentTypeAttribute? contentType)
     {
+        // await Task.Delay(TimeSpan.FromSeconds(1));
         if (authRequired != null)
         {
             if (!userSession.IsAuthenticated)
@@ -116,7 +118,7 @@ public static class MapApiExtensions
                 .ToArray();
 
             var result = (dynamic)methodInfo.Invoke(obj, parameters)!;
-            
+
             if (methodInfo.ReturnType == typeof(Task<IFileInfo>))
             {
                 if (contentType != null)
@@ -126,7 +128,7 @@ public static class MapApiExtensions
                 File.Delete(fileInfo.PhysicalPath!);
                 return;
             }
-            
+
             if (methodInfo.ReturnType == typeof(Task))
             {
                 await (Task)result;
@@ -148,7 +150,7 @@ public static class MapApiExtensions
             logger.LogWarning(ex, "Resource not found: {Uri}", httpContext.Request.Path);
             httpContext.Response.StatusCode = 404;
             await httpContext.Response.WriteAsync(ex.ToString());
-        }     
+        }
         catch (ResourceForbiddenException ex)
         {
             // 403 Forbidden is the status code to return when a client has valid credentials but not enough privileges to perform an action on a resource.
@@ -166,9 +168,9 @@ public static class MapApiExtensions
 
     private static object? Coerce(object? value, Type desiredType)
     {
-        if (value is not string stringValue) 
+        if (value is not string stringValue)
             return Convert.ChangeType(value, desiredType);
-        
+
         if (desiredType == typeof(string))
             return value;
 

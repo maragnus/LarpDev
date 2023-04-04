@@ -19,6 +19,12 @@
     private Spell[] _spells = Array.Empty<Spell>();
     private string[] _aggregateSkills = Array.Empty<string>();
 
+    protected override void OnParametersSet()
+    {
+        OnInitialized();
+        StateHasChanged();
+    }
+
     protected override void OnInitialized()
     {
         _qrCode = $"https://larp.maragnus.com/cs/{Character.Character.Id}";
