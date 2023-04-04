@@ -78,4 +78,5 @@ public class Dashboard
     public int MwFifthCharacters { get; set; }
     public int MwFifthReview { get; set; }
     public int Accounts { get; set; }
+    public int VerifiedAccounts { get; set; }
 }
