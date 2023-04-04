@@ -119,10 +119,11 @@ public class MwFifthCharacterManager
         var reference = await _mwFifth.Characters.AsQueryable()
             .Where(x => x.Id == characterId)
             .Select(x => new { x.AccountId, x.UniqueId })
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync()
+            ?? throw new ResourceNotFoundException("CharacterId was not found");
 
         // If not admin, fail
-        if (!isAdmin && account.AccountId == reference.AccountId)
+        if (!isAdmin && account.AccountId != reference.AccountId)
             throw new ResourceNotFoundException();
 
         var revisions = await _mwFifth.Characters

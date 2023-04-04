@@ -13,7 +13,7 @@ public interface IMwFifthService
     [ApiGet("character"), ApiAuthenticated]
     Task<Character> GetCharacter(string characterId);
     
-    [ApiGet("character/revise"), ApiAuthenticated]
+    [ApiPost("character/revise"), ApiAuthenticated]
     Task<Character> ReviseCharacter(string characterId);
 
     [ApiGet("character/new"), ApiAuthenticated]

@@ -69,7 +69,7 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
         Get<Character>($"api/mw5e/character?characterId={characterId}");
 
     public Task<Character> ReviseCharacter(string characterId) =>
-        Get<Character>($"api/mw5e/character/revise?characterId={characterId}");
+        Post<Character>($"api/mw5e/character/revise?characterId={characterId}");
 
     public Task<Character> GetNewCharacter() =>
         Get<Character>($"api/mw5e/character/new")!;
