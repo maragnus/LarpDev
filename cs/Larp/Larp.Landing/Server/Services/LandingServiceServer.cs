@@ -5,7 +5,7 @@ using Larp.Landing.Shared;
 using Larp.Landing.Shared.Messages;
 using Larp.Notify;
 using MongoDB.Driver;
-using OfficeOpenXml;
+using MongoDB.Driver.Linq;
 
 namespace Larp.Landing.Server.Services;
 
@@ -123,5 +123,34 @@ public class LandingServiceServer : ILandingService
         var now = DateTimeOffset.Now.AddDays(-4);
         var events = await _db.Events.Find(x => x.Date >= now).ToListAsync();
         return events.ToArray();
+    }
+
+    public async Task<Dictionary<string, string>> GetCharacterNames()
+    {
+        var characters = await _db.MwFifthGame.Characters
+            .Find(character => character.AccountId == _userSession.AccountId)
+            .Project(character => new { character.UniqueId, character.CharacterName })
+            .ToListAsync();
+        return characters
+            .ToDictionary(
+                x => x.UniqueId,
+                x => x.CharacterName ?? "No Name Set");
+    }
+
+    public async Task<EventAttendance[]> GetAttendance()
+    {
+        var attendances =
+            await _db.Attendances.AsQueryable()
+                .Where(attendance => attendance.AccountId == _userSession.AccountId)
+                .Join(
+                    _db.Events.AsQueryable(),
+                    attendance => attendance.EventId,
+                    @event => @event.Id,
+                    (attendance, @event) => new { Attedance = attendance, Event = @event })
+                .ToListAsync();
+
+        return attendances
+            .Select(x => new EventAttendance(x.Attedance, x.Event))
+            .ToArray();
     }
 }

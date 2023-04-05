@@ -1,7 +1,10 @@
-﻿namespace Larp.Data;
+﻿using System.Runtime.InteropServices;
+
+namespace Larp.Data;
 
 [PublicAPI]
-public enum EventRsvp {
+public enum EventRsvp
+{
     Unanswered,
     No, // Will not attend
     Maybe, // Potentially attending
@@ -31,7 +34,7 @@ public class Event
     public string? EventType { get; set; }
     public bool CanRsvp { get; set; }
     public bool IsHidden { get; set; }
-    public List<EventComponent> Components { get; set; } = new();
+    public EventComponent[] Components { get; set; } = Array.Empty<EventComponent>();
 }
 
 [PublicAPI]
@@ -43,17 +46,43 @@ public enum EventAttendanceType
 }
 
 [PublicAPI]
-public class ComponentAttendance
+public class EventAttendance : Attendance
 {
-    public string ComponentId { get; set; } = default!;
-    public string CharacterId { get; set; } = default!;
-    public EventAttendanceType Type { get; set; }
+    public EventAttendance()
+    {
+    }
+
+    public EventAttendance(Attendance attendance, Event @event)
+    {
+        Id = attendance.Id;
+        AccountId = attendance.AccountId;
+        MwFifth = attendance.MwFifth;
+        EventId = attendance.EventId;
+        Event = @event;
+    }
+
+    public Event Event { get; set; } = default!;
 }
 
 [PublicAPI]
 public class Attendance
 {
+    [BsonId, BsonRepresentation(BsonType.ObjectId)]
+    public string Id { get; set; } = default!;
+
+    [BsonRepresentation(BsonType.ObjectId)]
     public string EventId { get; set; } = default!;
+
+    [BsonRepresentation(BsonType.ObjectId)]
     public string AccountId { get; set; } = default!;
-    public List<ComponentAttendance> ComponentAttendances { get; set; } = new();
+
+    public MwFifthAttendance? MwFifth { get; set; }
+}
+
+public class MwFifthAttendance
+{
+    public int? Moonstone { get; set; }
+    
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string[] CharacterIds { get; set; }
 }

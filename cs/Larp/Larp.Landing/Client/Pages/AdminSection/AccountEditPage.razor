@@ -28,10 +28,10 @@
                 <MudItem xs="12" sm="6">
                     <MudTextField T="string?" Label="Phone" InputType="InputType.Telephone" Value="_account.Phone" ValueChanged="(value) => Set(() => _account.Phone = value)"/>
                 </MudItem>
-                <MudItem xs="12" sm="4">
+                <MudItem xs="8" sm="4">
                     <MudDatePicker T="DateTime?" Label="Birthdate" Clearable Date="_account.BirthDate?.ToDateTime(TimeOnly.MinValue)" DateChanged="(value) => Set(() => _account.BirthDate = value.HasValue ? DateOnly.FromDateTime(value.Value) : null)"/>
                 </MudItem>
-                <MudItem xs="12" sm="2">
+                <MudItem xs="4" sm="2">
                     <MudField T="int?" Label="Age" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Calculate">@_account.Age</MudField>
                 </MudItem>
                 <MudItem xs="12">

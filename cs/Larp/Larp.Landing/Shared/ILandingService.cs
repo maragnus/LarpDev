@@ -42,4 +42,10 @@ public interface ILandingService
 
     [ApiGet("events")]
     Task<Event[]> GetEvents();
+    
+    [ApiGet("larp/characters/names"), ApiAuthenticated]
+    Task<Dictionary<string,string>> GetCharacterNames();
+
+    [ApiGet("events/attendance"), ApiAuthenticated]
+    Task<EventAttendance[]> GetAttendance();
 }

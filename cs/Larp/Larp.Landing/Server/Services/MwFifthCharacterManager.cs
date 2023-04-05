@@ -26,7 +26,7 @@ public class MwFifthCharacterManager
     private async Task<Character> GetCharacterByUniqueId(string uniqueId) =>
         await _mwFifth.Characters.FindOneAsync(x => x.UniqueId == uniqueId)
         ?? throw new ResourceNotFoundException();
-    
+
     public async Task<CharacterAndRevisions> GetRevisions(string? characterId, Account account, bool isAdmin)
     {
         var reference =
@@ -63,7 +63,19 @@ public class MwFifthCharacterManager
         // Add any drafts 
         result.AddRange(revisions.Except(result));
 
-        return new CharacterAndRevisions(character, result.ToArray());
+        return new CharacterAndRevisions(character, result.ToArray(), await GetAvailableMoonstone(reference.AccountId));
+    }
+
+    private async Task<MoonstoneInfo> GetAvailableMoonstone(string accountId)
+    {
+        var moonstoneUsed = await _mwFifth.Characters.AsQueryable()
+            .Where(character => character.AccountId == accountId)
+            .SumAsync(character => character.UsedMoonstone);
+        var moonstoneTotal = await this._larpContext.Attendances.AsQueryable()
+            .Where(attendance => attendance.AccountId == accountId && attendance.MwFifth != null)
+            .SumAsync(attendance => attendance.MwFifth!.Moonstone ?? 0);
+
+        return new MoonstoneInfo(moonstoneTotal, moonstoneUsed);
     }
 
     public async Task Approve(string characterId)
@@ -129,11 +141,12 @@ public class MwFifthCharacterManager
                        ?? throw new ResourceNotFoundException();
 
         var character = await GetCharacterByUniqueId(revision.UniqueId);
+        var moonstone = await GetAvailableMoonstone(character.AccountId);
 
         if (!isAdmin && character.AccountId != account.AccountId)
             throw new ResourceNotFoundException("Character does not belong to Account");
 
-        return new CharacterAndRevision(character, revision);
+        return new CharacterAndRevision(character, revision, moonstone);
     }
 
     public async Task<CharacterAndRevision> GetDraft(string? characterId, Account account, bool isAdmin)
@@ -148,6 +161,8 @@ public class MwFifthCharacterManager
         if (!isAdmin && account.AccountId != reference.AccountId)
             throw new ResourceNotFoundException("Character does not belong to Account");
 
+        var moonstone = await GetAvailableMoonstone(reference.AccountId);
+
         var character = await GetCharacterByUniqueId(reference.UniqueId);
 
         var revisions = await _mwFifth.CharacterRevisions
@@ -157,12 +172,12 @@ public class MwFifthCharacterManager
         // If we already have a draft, return that
         var revision = revisions.FirstOrDefault(x => x.State == CharacterState.Draft);
         if (revision != null)
-            return new CharacterAndRevision(character, revision);
+            return new CharacterAndRevision(character, revision, moonstone);
 
         // If character is in review, return it if admin, fail if not
         revision = revisions.FirstOrDefault(x => x.State == CharacterState.Review);
         if (isAdmin && revision != null)
-            return new CharacterAndRevision(character, revision);
+            return new CharacterAndRevision(character, revision, moonstone);
 
         if (revision != null)
             throw new BadRequestException("Cannot modify character in review");
@@ -175,7 +190,7 @@ public class MwFifthCharacterManager
         revision.Id = ObjectId.GenerateNewId().ToString();
         revision.State = CharacterState.Draft;
         await _mwFifth.CharacterRevisions.InsertOneAsync(revision);
-        return new CharacterAndRevision(character, revision);
+        return new CharacterAndRevision(character, revision, moonstone);
     }
 
     public async Task Save(CharacterRevision revision, Account account, bool isAdmin)
@@ -236,8 +251,9 @@ public class MwFifthCharacterManager
 
         await _mwFifth.Characters.InsertOneAsync(character);
         await _mwFifth.CharacterRevisions.InsertOneAsync(revision);
+        var moonstone = await GetAvailableMoonstone(account.AccountId);
 
-        return new CharacterAndRevision(character, revision);
+        return new CharacterAndRevision(character, revision, moonstone);
     }
 
     public async Task Delete(string characterId, Account account, bool isAdmin)
@@ -263,6 +279,8 @@ public class MwFifthCharacterManager
         if (!isAdmin && account.AccountId == reference.AccountId)
             throw new ResourceNotFoundException();
 
+        var moonstone = await GetAvailableMoonstone(reference.AccountId);
+
         var revisions = await _mwFifth.CharacterRevisions
             .Find(x => x.UniqueId == reference.UniqueId && x.State != CharacterState.Archived)
             .ToListAsync();
@@ -274,6 +292,6 @@ public class MwFifthCharacterManager
             ?? revisions.FirstOrDefault(x => x.State == CharacterState.Live)
             ?? throw new ResourceNotFoundException();
 
-        return new CharacterAndRevision(character, revision);
+        return new CharacterAndRevision(character, revision, moonstone);
     }
 }

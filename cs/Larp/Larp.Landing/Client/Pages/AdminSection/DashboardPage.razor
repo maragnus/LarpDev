@@ -7,7 +7,7 @@
 
 <AdminLayout Loading="_dashboard == null" Title="Dashboard">
     <MudGrid>
-        <MudItem md="4">
+        <MudItem md="4" xs="6">
             <MudPaper Style="text-align: center" Class="pa-4">
                 <MudTooltip Text="Number of accounts registered">
                     <MudText Typo="Typo.h2" Align="Align.Center">@_dashboard.Accounts</MudText>
@@ -15,7 +15,7 @@
                 </MudTooltip>
             </MudPaper>
         </MudItem>
-        <MudItem md="4">
+        <MudItem md="4" xs="6">
             <MudPaper Style="text-align: center" Class="pa-4">
                 <MudTooltip Text="Number of accounts that logged in and verified their email">
                     <MudText Typo="Typo.h2" Align="Align.Center">@_dashboard.VerifiedAccounts</MudText>
@@ -23,7 +23,7 @@
                 </MudTooltip>
             </MudPaper>
         </MudItem>
-        <MudItem md="4">
+        <MudItem md="4" xs="6">
             <MudPaper Style="text-align: center" Class="pa-4">
                 <MudTooltip Text="Number of characters that have been approved for in-game">
                     <MudText Typo="Typo.h2" Align="Align.Center">@_dashboard.MwFifthCharacters</MudText>
@@ -31,7 +31,7 @@
                 </MudTooltip>
             </MudPaper>
         </MudItem>
-        <MudItem md="4">
+        <MudItem md="4" xs="6">
             <MudPaper Style="text-align: center" Class="pa-4">
                 <MudTooltip Text="Number of characters that are waiting on game master approval">
                     <MudText Typo="Typo.h2" Align="Align.Center">@_dashboard.MwFifthReview</MudText>

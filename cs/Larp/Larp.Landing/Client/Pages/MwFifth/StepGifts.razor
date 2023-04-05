@@ -5,6 +5,12 @@
 <StepDivider/>
 
 <MudGrid>
+
+    @if (!Character.IsGiftsValid)
+    {
+        <MudAlert Severity="Severity.Warning" Class="mb-4">You must allocate all points into your Gifts. You have 6 points <strong>if you added backstory</strong>, otherwise your have 5 points. You have allocated @Character.Level points.</MudAlert>
+    }
+
     @foreach (var gift in _gifts)
     {
         <MudItem xs="12" sm="6" md="6" Class="align-center">

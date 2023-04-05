@@ -3,34 +3,39 @@
 @inject NavigationManager NavigationManager
 
 <AdminLayout Title="Events Manager" Loading="_isLoading">
-    <MudDataGrid T="EventInfo" Items="_events" Dense Filterable Groupable Hover Loading="_isLoading" RowClick="RowClick">
-        <PagerContent>
-            <MudDataGridPager T="EventInfo"/>
-        </PagerContent>
-        <ChildRowContent>
-            <MudDataGrid T="ComponentInfo" Items="context.Item.Components" Dense SortMode="SortMode.None" Loading="_isLoading">
-                <PagerContent>
-                    <MudDataGridPager T="EventInfo"/>
-                </PagerContent>
-                <Columns>
-                    <PropertyColumn Property="x => x.When" Title="Date" Format="dddd, MMM d, yyyy"/>
-                    <PropertyColumn Property="x => x.Title" Title="Title"/>
-                </Columns>
-            </MudDataGrid>
-        </ChildRowContent>
-        <Columns>
-            <HierarchyColumn T="EventInfo" ButtonDisabledFunc="@(x => x.Components.Length == 0)"/>
-            <PropertyColumn Property="x => x.Game" Title="Game"/>
-            <PropertyColumn Property="x => x.When" Title="Date" Format="dddd, MMM d, yyyy"/>
-            <PropertyColumn Property="x => x.Title" Title="Title"/>
-            <PropertyColumn Property="x => x.Location" Title="Location"/>
-        </Columns>
-    </MudDataGrid>
+    @foreach (var (game, events) in _events)
+    {
+        <MudStack Row Class="pb-4">
+            <MudText Typo="Typo.h6" Class="flex-grow-1">@game</MudText>
+            <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" OnClick="() => AddEvent(game)">Add Event</MudButton>
+        </MudStack>
+        <MudDataGrid T="EventInfo" Items="events" Dense Filterable Groupable Hover Loading="_isLoading" RowClick="RowClick">
+            <PagerContent>
+                <MudDataGridPager T="EventInfo"/>
+            </PagerContent>
+            <ChildRowContent>
+                <MudDataGrid T="ComponentInfo" Items="context.Item.Components" Dense SortMode="SortMode.None" Loading="_isLoading">
+                    <PagerContent>
+                        <MudDataGridPager T="EventInfo"/>
+                    </PagerContent>
+                    <Columns>
+                        <PropertyColumn Property="x => x.When" Title="Date" Format="dddd, MMM d, yyyy"/>
+                        <PropertyColumn Property="x => x.Title" Title="Title"/>
+                    </Columns>
+                </MudDataGrid>
+            </ChildRowContent>
+            <Columns>
+                <HierarchyColumn T="EventInfo" ButtonDisabledFunc="@(x => x.Components.Length == 0)"/>
+                <PropertyColumn Property="x => x.When" Title="Date" Format="dddd, MMM d, yyyy"/>
+                <PropertyColumn Property="x => x.Title" Title="Title"/>
+            </Columns>
+        </MudDataGrid>
+    }
 </AdminLayout>
 
 @code {
     bool _isLoading = true;
-    private EventInfo[] _events = Array.Empty<EventInfo>();
+    private (string, EventInfo[])[] _events = Array.Empty<(string, EventInfo[])>();
 
     record ComponentInfo(string Title, DateOnly When);
 
@@ -54,13 +59,22 @@
             games.TryGetValue(gameId, out var game) ? game ?? "" : "";
 
         _events = (await LandingService.Admin.GetEvents())
-            .Select(x => new EventInfo(GameName(x.GameId), x)).ToArray();
+            .Select(x => new EventInfo(GameName(x.GameId), x))
+            .GroupBy(x => x.Game)
+            .Select(x => (x.Key, x.ToArray()))
+            .ToArray();
+
         _isLoading = false;
     }
 
     private void RowClick(DataGridRowClickEventArgs<EventInfo> row)
     {
         NavigationManager.NavigateTo($"/admin/events/{row.Item.Id}");
+    }
+
+    private Task AddEvent(string game)
+    {
+        return Task.CompletedTask;
     }
 
 }

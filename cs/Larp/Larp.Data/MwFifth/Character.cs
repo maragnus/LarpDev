@@ -111,11 +111,30 @@ public class CharacterAttendance
     public int WaystonesMoonstone { get; set; }
 }
 
-[PublicAPI]
-public record CharacterAndRevision(Character Character, CharacterRevision Revision);
+public class MoonstoneInfo
+{
+    public int Total { get; set; }
+    public int Used { get; set; }
+    public int Available { get; set; }
+
+    public MoonstoneInfo()
+    {
+    }
+
+    public MoonstoneInfo(int moonstoneTotal, int moonstoneUsed)
+    {
+        Total = moonstoneTotal;
+        Used = moonstoneUsed;
+        Available = moonstoneTotal - moonstoneUsed;
+    }
+}
 
 [PublicAPI]
-public record CharacterAndRevisions(Character Character, CharacterRevision[] CharacterRevisions);
+public record CharacterAndRevision(Character Character, CharacterRevision Revision, MoonstoneInfo Moonstone);
+
+[PublicAPI]
+public record CharacterAndRevisions(Character Character, CharacterRevision[] CharacterRevisions,
+    MoonstoneInfo Moonstone);
 
 [PublicAPI]
 public class Character
@@ -200,7 +219,8 @@ public class CharacterRevision
     public int StartingLevel => NoHistory ? 5 : 6;
     public int GiftMoonstone { get; set; }
     public int SkillMoonstone { get; set; }
-
+    public int TotalMoonstone => GiftMoonstone + SkillMoonstone;
+    
     public static int Triangle(int level)
     {
         return Math.Max(0, level * (level + 1) / 2);

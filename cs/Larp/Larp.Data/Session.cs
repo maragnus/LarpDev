@@ -8,6 +8,8 @@ public class Session
 
     public string? Token { get; set; }
     public string? Email { get; set; }
+    
+    [BsonRepresentation(BsonType.ObjectId)]
     public string AccountId { get; set; } = default!;
     public string? DeviceId { get; set; }
     public bool IsAuthenticated { get; set; }

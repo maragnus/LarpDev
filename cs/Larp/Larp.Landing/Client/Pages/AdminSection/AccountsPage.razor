@@ -18,13 +18,23 @@
     <MudDataGrid T="Account" Items="_accounts" RowClick="RowClick" Dense Hover Loading="_allAccounts.Length == 0">
         <Columns>
             <PropertyColumn Property="x => x.Name" Title="Name"/>
+            <TemplateColumn T="Account">
+                <CellTemplate>
+                    @if (context.Item.Emails.Any(x => x is { IsVerified: true, IsPreferred: true }))
+                    {
+                        <MudTooltip Text="User has verified their email">
+                            <MudIcon Icon="@Icons.Material.Filled.VerifiedUser" Color="Color.Primary"/>
+                        </MudTooltip>
+                    }
+                </CellTemplate>
+            </TemplateColumn>
             <PropertyColumn Property="x => x.PreferredEmail" Title="Email"/>
             <PropertyColumn Property="x => x.Phone" Title="Phone"/>
             <PropertyColumn Property="x => x.Location" Title="Location"/>
             <PropertyColumn Property="x => x.Age" Title="Age"/>
         </Columns>
     </MudDataGrid>
-    
+
     <MudButton Class="mt-4" Color="Color.Warning" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.SupervisedUserCircle" OnClick="AddAdmin">Add Admin</MudButton>
 </AdminLayout>
 

@@ -148,6 +148,76 @@ public class AdminService : IAdminService
                ?? throw new ResourceNotFoundException();
     }
 
+    public async Task SaveEvent(string eventId, string gameId, string? title, string? type, 
+        string? location, DateTimeOffset date, bool rsvp, bool hidden,
+        EventComponent[] components)
+    {
+        await _db.Events.UpdateOneAsync(x => x.Id == eventId,
+            Builders<Event>.Update
+                .Set(x => x.GameId, gameId)
+                .Set(x => x.Title, title)
+                .Set(x => x.EventType, type)
+                .Set(x => x.Location, location)
+                .Set(x => x.Date, date)
+                .Set(x => x.CanRsvp, rsvp)
+                .Set(x => x.IsHidden, hidden)
+                .Set(x => x.Components, components)
+        );
+    }
+
+    public async Task DeleteEvent(string eventId)
+    {
+        var attendees = await _db.Attendances.CountDocumentsAsync(x => x.EventId == eventId);
+        if (attendees > 0)
+            throw new BadRequestException($"Cannot delete event, it has {attendees} attendees");
+        await _db.Events.DeleteOneAsync(x => x.Id == eventId);
+    }
+
+    public async Task SetEventAttendance(string eventId, string accountId, bool attended, int? moonstone,
+        string[] characterIds)
+    {
+        if (!attended)
+        {
+            await _db.Attendances.DeleteOneAsync(x => x.EventId == eventId && x.AccountId == accountId);
+            return;
+        }
+
+        var update = Builders<Attendance>.Update
+            .Set(x => x.EventId, eventId)
+            .Set(x => x.AccountId, accountId)
+            .Set(x => x.MwFifth,
+                new MwFifthAttendance
+                {
+                    Moonstone = moonstone,
+                    CharacterIds = characterIds
+                });
+        var upsert = new UpdateOptions() { IsUpsert = true };
+
+        await _db.Attendances.UpdateOneAsync(
+            attendance => attendance.EventId == eventId && attendance.AccountId == accountId,
+            update,
+            upsert);
+    }
+
+    public async Task<AccountName[]> GetAccountNames()
+    {
+        var names = await _db.Accounts.Find(_ => true)
+            .Project(account => new AccountName()
+            {
+                AccountId = account.AccountId,
+                Name = account.Name,
+                Emails = account.Emails
+            })
+            .ToListAsync();
+        return names.ToArray();
+    }
+
+    public async Task<Attendance[]> GetEventAttendances(string eventId) =>
+        (await _db.Attendances
+            .Find(attendance => attendance.EventId == eventId)
+            .ToListAsync())
+        .ToArray();
+
     public async Task<StringResult> AddAdminAccount(string fullName, string emailAddress)
     {
         var result = await _userSessionManager.FindByEmail(emailAddress);

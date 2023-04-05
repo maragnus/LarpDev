@@ -11,7 +11,7 @@ public class CharacterAccountSummary
     
     public CharacterAccountSummary(CharacterRevision revision, Account account)
         : this(revision.Id, account.AccountId, revision.State, account.Name, account.EmailList,
-            revision.CharacterName, revision.HomeChapter, revision.Occupation, revision.Level)
+            revision.CharacterName, revision.HomeChapter, revision.Occupation, revision.Level, revision.GiftMoonstone + revision.SkillMoonstone)
     {
     }
 
@@ -23,7 +23,8 @@ public class CharacterAccountSummary
         string? characterName,
         string? homeChapter,
         string? occupation,
-        int? level)
+        int? level,
+        int? moonstone)
     {
         CharacterId = characterId;
         AccountId = accountId;
@@ -34,6 +35,7 @@ public class CharacterAccountSummary
         HomeChapter = homeChapter;
         Occupation = occupation;
         Level = level;
+        Moonstone = moonstone;
     }
 
     public string CharacterId { get; init; } = default!;
@@ -45,4 +47,5 @@ public class CharacterAccountSummary
     public string? HomeChapter { get; init; }
     public string? Occupation { get; init; }
     public int? Level { get; init; }
+    public int? Moonstone { get; set; }
 }

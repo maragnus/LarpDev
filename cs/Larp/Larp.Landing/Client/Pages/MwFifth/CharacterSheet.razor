@@ -59,6 +59,7 @@
 
         _spells = Character.AllSpells.TryFromKeys(Character.Revision.Spells).ToArray();
     }
+
 }
 
 <MudGrid>
@@ -81,7 +82,7 @@
         <MudGrid>
             @foreach (var (name, rank) in _gifts)
             {
-                <MudItem xs="@(FullLayout ? 4 : 6)" sm="@(FullLayout ? 2 : 3)" md="@(FullLayout ? 4 : 2)">
+                <MudItem xs="@(FullLayout ? 4 : 6)" sm="@(FullLayout ? 2 : 3)" md="2">
                     <div class="gift-container">
                         <div class="gift-rank">
                             @rank
@@ -91,6 +92,7 @@
                         </div>
                         @if (FullLayout)
                         {
+/*
                             <MudHidden Breakpoint="Breakpoint.SmAndDown">
                                 <div class="gift-stars">
                                     <div>
@@ -107,6 +109,7 @@
                                     </div>
                                 </div>
                             </MudHidden>
+                        */
                         }
                     </div>
                 </MudItem>

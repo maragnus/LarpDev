@@ -27,6 +27,8 @@
     private int _newMoonstoneCost = 0;
     private int _totalMoonstone = 0;
     private int _myMoonstone;
+    private int _availableMoonstone;
+    private string _availableMoonstoneInfo = "";
 
     private async Task Reload()
     {
@@ -35,7 +37,7 @@
             : await LandingService.MwFifth.GetCharacter(CharacterId!);
         _character = characterAndRevision.Character;
         var revision = characterAndRevision.Revision;
-        
+
         Logger.LogInformation("Character {CharacterId}", revision.Id);
 
         if (!Admin && revision.State is not CharacterState.Draft)
@@ -64,6 +66,8 @@
         void UpdateCharacter()
         {
             _revision.UpdateMoonstone();
+            _availableMoonstone = characterAndRevision.Moonstone.Available;
+            _availableMoonstoneInfo = $"You have allocated {characterAndRevision.Moonstone.Used} of your total {characterAndRevision.Moonstone.Total} Moonstone";
             _myMoonstone = _character.Moonstone;
             _totalMoonstone = _revision.GiftMoonstone + _revision.SkillMoonstone;
             _newMoonstoneCost = _totalMoonstone - _lastMoonstoneCost;
@@ -149,7 +153,7 @@
         _game = LandingService.MwFifth.Game;
         _gameState = LandingService.MwFifth.GameState;
 
-        // If a new character, generate it and load it up
+    // If a new character, generate it and load it up
         if (string.IsNullOrEmpty(CharacterId))
         {
             var newCharacter = await LandingService.MwFifth.GetDraftCharacter();
@@ -205,6 +209,20 @@
 
     private async Task Submit()
     {
+        if (!Admin && !_revision.IsValid)
+        {
+            await LandingService.MwFifth.Save(_revision.Revision);
+            await DialogService.ShowMessageBox("Submit Character for Review", "You cannot submit your character while it has errors.");
+            return;
+        }
+
+        if (_availableMoonstone < _newMoonstoneCost)
+        {
+            await LandingService.MwFifth.Save(_revision.Revision);
+            await DialogService.ShowMessageBox("Submit Character for Review", "You do not have enough moonstone for this change.");
+            return;
+        }
+
         var result = await DialogService.ShowMessageBox("Submit Character for Review", "Are you sure you want to submit this draft for review? You cannot edit it again until it is approved.", "Yes, I'm Done", "No, Keep Editing");
         if (result == true)
         {
@@ -242,21 +260,27 @@
                 <MudText Typo="Typo.h6">Updating @_game.Title Character</MudText>
             }
 
-            <MudStack Row AlignItems="AlignItems.Start">
+            <MudStack Row AlignItems="AlignItems.Start" Justify="Justify.Center">
                 @if (!_isNewCharacter)
                 {
-                    <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
-                        <MudAvatar Color="Color.Success">@_myMoonstone</MudAvatar>
-                        <MudText Align="Align.Center"  Typo="Typo.caption">My Moonstone</MudText>
-                    </MudStack>
-                    <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
-                        <MudAvatar Color="Color.Success">@_totalMoonstone</MudAvatar>
-                        <MudText Align="Align.Center" Typo="Typo.caption">Total Moonstone</MudText>
-                    </MudStack>
-                    <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
-                        <MudAvatar Color="Color.Success">@(_newMoonstoneCost > 0 ? "+" : "")@(_newMoonstoneCost)</MudAvatar>
-                        <MudText Align="Align.Center"  Typo="Typo.caption">Revision Cost</MudText>
-                    </MudStack>
+                    <MudTooltip Text="@_availableMoonstoneInfo">
+                        <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                            <MudAvatar Color="Color.Success">@_availableMoonstone</MudAvatar>
+                            <MudText Align="Align.Center" Typo="Typo.caption">Available Moonstone</MudText>
+                        </MudStack>
+                    </MudTooltip>
+                    <MudTooltip Text="The amount of moonstone allocated for this character">
+                        <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                            <MudAvatar Color="Color.Success">@_totalMoonstone</MudAvatar>
+                            <MudText Align="Align.Center" Typo="Typo.caption">Total Moonstone</MudText>
+                        </MudStack>
+                    </MudTooltip>
+                    <MudTooltip Text="The amount of moonstone needed for this revision">
+                        <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                            <MudAvatar Color="Color.Success">@(_newMoonstoneCost > 0 ? "+" : "")@(_newMoonstoneCost)</MudAvatar>
+                            <MudText Align="Align.Center" Typo="Typo.caption">Revision Cost</MudText>
+                        </MudStack>
+                    </MudTooltip>
                 }
 
                 <MudButtonGroup OverrideStyles="false">

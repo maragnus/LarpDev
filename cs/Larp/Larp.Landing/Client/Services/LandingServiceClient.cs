@@ -58,8 +58,47 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public Task<Event[]> GetEvents() =>
         Get<Event[]>("api/events");
 
+    public Task<Dictionary<string, string>> GetCharacterNames() =>
+        Get<Dictionary<string, string>>("api/larp/characters/names");
+
+    public Task<EventAttendance[]> GetAttendance() =>
+        Get<EventAttendance[]>("api/events/attendance");
+
     Task<Event> IAdminService.GetEvent(string eventId) =>
         Get<Event>($"api/admin/events/{eventId}");
+
+    public Task SaveEvent(string eventId, string gameId, string? title, string? type, 
+        string? location, DateTimeOffset date, bool rsvp, bool hidden,
+        EventComponent[] components) =>
+    Post($"api/admin/events/{eventId}", new
+    {
+        gameId,
+        title,
+        type,
+        location,
+        date,
+        rsvp,
+        hidden,
+        components
+    });
+
+
+    public Task DeleteEvent(string eventId) =>
+        Delete($"api/admin/events/{eventId}");
+
+    public Task SetEventAttendance(string eventId, string accountId, bool attended, int? moonstone, string[] characterIds) =>
+        Post($"api/admin/events/{eventId}/attendance/{accountId}", new
+        {
+            attended,
+            moonstone,
+            characterIds
+        });
+
+    public Task<AccountName[]> GetAccountNames() =>
+        Get<AccountName[]>($"api/admin/accounts/names");
+
+    public Task<Attendance[]> GetEventAttendances(string eventId)  =>
+        Get<Attendance[]>($"api/admin/events/{eventId}/attendance");
 
     public Task<GameState> GetGameState(string lastRevision) =>
         Get<GameState>($"api/mw5e/gameState?lastRevision={lastRevision}");

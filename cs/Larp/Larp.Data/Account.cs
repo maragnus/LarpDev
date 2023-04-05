@@ -10,6 +10,17 @@ public enum AccountRole
 }
 
 [PublicAPI]
+public class AccountName
+{
+    [BsonId, BsonRepresentation(BsonType.ObjectId)]
+    public string AccountId { get; set; } = default!;
+
+    public string? Name { get; set; }
+    public List<AccountEmail> Emails { get; set; } = new();
+}
+
+
+[PublicAPI]
 public class Account
 {
     [BsonId, BsonRepresentation(BsonType.ObjectId)]

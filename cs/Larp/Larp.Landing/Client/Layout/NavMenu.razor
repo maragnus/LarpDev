@@ -96,7 +96,11 @@
             {
                 <MudNavLink Href="/characters" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.People">Characters</MudNavLink>
             }
-            <MudNavLink Href="/events" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Event">Events</MudNavLink>
+            <MudNavLink Href="/events" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Event">Events</MudNavLink>
+           @if (LandingService.IsAuthenticated)
+            {
+                <MudNavLink Href="/events/attendance" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.EmojiPeople">Attendance</MudNavLink>
+            }
             <MudNavLink Href="/clarify" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Book">Clarify</MudNavLink>
             @if (LandingService.IsAuthenticated)
             {

@@ -179,4 +179,10 @@ public class LandingService
 
     public async Task<Event[]> GetEvents() =>
         await _landing.GetEvents();
+
+    public async Task<Dictionary<string, string>> GetCharacterNames() =>
+        await _landing.GetCharacterNames();
+
+    public async Task<EventAttendance[]> GetAttendance() =>
+        await _landing.GetAttendance();
 }

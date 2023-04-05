@@ -1,0 +1,202 @@
+@page "/admin/events/{EventId}/attendance"
+@using MudBlazor.Utilities
+@inject LandingService LandingService
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+
+<AdminLayout Loading="_isLoading" Title="Edit Event">
+    <MudStack Spacing="4">
+        <MudGrid Class="mb-4">
+            <MudItem xs="6" md="4">
+                <MudField T="string?" Label="Title">@_event.Title</MudField>
+            </MudItem>
+            <MudItem xs="6" md="4">
+                <MudField T="string?" Label="Location">@_event.Location</MudField>
+            </MudItem>
+            <MudItem xs="6" md="4">
+                <MudField T="string?" Label="Event Type">@_event.EventType</MudField>
+            </MudItem>
+            <MudItem xs="6" md="4">
+                <MudField T="DateTime" Label="When">@_date.ToString("dddd, MMM d, yyyy")</MudField>
+            </MudItem>
+            <MudItem xs="6" md="4">
+                <MudSwitch T="bool" ReadOnly Label="Has RSVP" Checked="_event.CanRsvp"/>
+            </MudItem>
+            <MudItem xs="6" md="4">
+                <MudSwitch T="bool" ReadOnly Label="Hidden" Checked="_event.IsHidden"/>
+            </MudItem>
+        </MudGrid>
+
+        <MudDataGrid T="EventComponent" Items="_components" EditMode="DataGridEditMode.Cell" ReadOnly="true" Dense SortMode="SortMode.None">
+            <Columns>
+                <PropertyColumn Property="x => x.Name" Title="Component Name"/>
+                <PropertyColumn Property="x => x.When" Title="When" Format="dddd, MMM d, yyyy"/>
+            </Columns>
+        </MudDataGrid>
+
+        <MudText Typo="Typo.h6">Attendance</MudText>
+
+        <MudStack Row AlignItems="AlignItems.Center">
+            <MudSelectExtended
+                T="AccountName" ItemCollection="_players" Clearable @ref="_addPlayerComponent"
+                ValueChanged="AddAccountChanged" Disabled="_isSaving"
+                Placeholder="Add Attendee" Variant="Variant.Outlined" ToStringFunc="@(accountName => accountName.Name ?? "No Name Set")"
+                SearchBox="true" SearchBoxAutoFocus SearchFunc="SearchFunc">
+                <ItemTemplate>
+                    <MudStack Spacing="0">
+                        <MudText Typo="Typo.body1">@context.Value.Name</MudText>
+                        <MudText Typo="Typo.body2"> @string.Join(", ", context.Value.Emails.Select(x => x.Email))</MudText>
+                    </MudStack>
+                </ItemTemplate>
+            </MudSelectExtended>
+            <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Success" Disabled="@(!_saveAllNeeded || _isSaving)" OnClick="SaveAll">Save All Changes</MudButton>
+        </MudStack>
+
+        <MudDataGrid T="Attendance" Items="_attendances" ReadOnly="false" EditMode="DataGridEditMode.Cell" Bordered Dense CommittedItemChanges="AttendanceUpdated" Loading="_isSaving">
+            <Columns>
+                <PropertyColumn Property="x => x.Name" IsEditable="false"/>
+                <PropertyColumn Property="x => x.Attended" IsEditable="true">
+                    <EditTemplate>
+                        <MudSwitch Checked="@context.Item.Attended" Color="Color.Success" UnCheckedColor="Color.Error" CheckedChanged="(bool value) => { context.Item.Attended = value; context.Item.Changed = true; }" />
+                    </EditTemplate>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.Moonstone" IsEditable="true"/>
+                <TemplateColumn CellClass="d-flex justify-end" Sortable="false" IsEditable="false">
+                    <CellTemplate>
+                        <MudIconButton Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Filled.Save" Disabled="@(!context.Item.Changed)" OnClick="async () => await AttendanceUpdate(context.Item)"/>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid>
+    </MudStack>
+
+</AdminLayout>
+
+@code {
+
+    [Parameter]
+    public string EventId { get; set; } = default!;
+
+    private class Attendance
+    {
+        public string AccountId { get; set; } = default!;
+        public string Name { get; set; } = default!;
+        public bool Attended { get; set; }
+        public int? Moonstone { get; set; }
+        public string[] CharacterIds { get; set; } = Array.Empty<string>();
+        public bool Changed { get; set; }
+    }
+
+    private class EventComponent
+    {
+        public string Name { get; set; } = default!;
+        public DateTime When { get; set; }
+    }
+
+    bool _isLoading = true;
+    private Event _event = default!;
+    private List<EventComponent> _components = new();
+    private DateTime _date;
+    private AccountName[] _players = Array.Empty<AccountName>();
+    private readonly List<Attendance> _attendances = new();
+#pragma warning disable CS0649
+    private MudSelectExtended<AccountName>? _addPlayerComponent;
+#pragma warning restore CS0649
+    private bool _saveAllNeeded;
+    private bool _isSaving = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _event = await LandingService.Admin.GetEvent(EventId);
+        _components = _event.Components
+            .Select(x => new EventComponent { Name = x.Name ?? "No Name Set", When = x.Date.LocalDateTime })
+            .ToList();
+        _players = await LandingService.Admin.GetAccountNames();
+        var attendances = await LandingService.Admin.GetEventAttendances(EventId);
+        _attendances.AddRange(attendances.Select(attendance => new Attendance()
+        {
+            Name = _players.FirstOrDefault(account => account.AccountId == attendance.AccountId)?.Name ?? "No Name Set",
+            Attended = true,
+            Moonstone = attendance.MwFifth?.Moonstone ?? 0,
+            AccountId = attendance.AccountId,
+            CharacterIds = attendance.MwFifth?.CharacterIds ?? Array.Empty<string>()
+        }));
+        _date = _event.Date.Date;
+        _isLoading = false;
+        _isSaving = false;
+    }
+
+    private bool SearchFunc(AccountName accountName, string query) =>
+        accountName.Name?.Contains(query, StringComparison.InvariantCultureIgnoreCase) == true
+        || accountName.Emails.Any(email => email.Email.Contains(query, StringComparison.InvariantCultureIgnoreCase));
+
+    private async Task SaveAll()
+    {
+        _isSaving = true;
+        StateHasChanged();
+        try
+        {
+            await Parallel.ForEachAsync(
+                _attendances.Where(x => x.Changed),
+                new ParallelOptions { MaxDegreeOfParallelism = 4 },
+                async (attendance, token) => { await AttendanceUpdate(attendance); });
+            UpdateSaveAllNeeded();
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private void UpdateSaveAllNeeded()
+    {
+        _saveAllNeeded = _attendances.Any(x => x.Changed);
+    }
+
+    private async Task SaveAttendance(Attendance item)
+    {
+        await LandingService.Admin.SetEventAttendance(EventId, item.AccountId, item.Attended, item.Moonstone, Array.Empty<string>());
+        item.Changed = false;
+    }
+
+
+    private async Task AttendanceUpdate(Attendance item)
+    {
+        await SaveAttendance(item);
+        UpdateSaveAllNeeded();
+    }
+
+    private async Task AddAccountChanged(AccountName player)
+    {
+        if ((AccountName?)player == null) return;
+
+        if (_attendances.Any(x => x.AccountId == player.AccountId))
+        {
+            await DialogService.ShowMessageBox("Add Player", "This player is already added to the attendance list.");
+            await _addPlayerComponent!.Clear();
+            return;
+        }
+
+        var item = new Attendance
+        {
+            Attended = true,
+            Moonstone = 0,
+            Name = player.Name ?? "No Name Set",
+            AccountId = player.AccountId,
+            Changed = false
+        };
+        _attendances.Add(item);
+
+        await LandingService.Admin.SetEventAttendance(EventId, item.AccountId, item.Attended, item.Moonstone, Array.Empty<string>());
+
+        await _addPlayerComponent!.Clear();
+        StateHasChanged();
+    }
+
+    private void AttendanceUpdated(Attendance obj)
+    {
+        obj.Changed = true;
+        _saveAllNeeded = true;
+    }
+
+}

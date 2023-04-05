@@ -81,7 +81,7 @@ public class CharacterBuilder
             .Where(x => x.IsGiftOfWisdom)
             .Select(x => x.Name)
             .ToArray();
-        
+
         DependencyManager.UpdateAll(this);
     }
 
@@ -356,6 +356,10 @@ public class CharacterBuilder
         nameof(Prowess), nameof(Wisdom))]
     public GiftPropertyValue[] Properties { get; private set; } = Array.Empty<GiftPropertyValue>();
 
+    public bool IsValid =>
+        IsHistoryValid && IsOccupationValid && IsGiftsValid && IsSpellsValid && IsHomelandValid && IsReligionValid &&
+        IsNameValid && IsVantagesValid && IsAgeGroupValid && IsSpellsValid && IsChosenSkillsValid && IsHomeChapterValid;
+
     #endregion
 
     #region Populate
@@ -369,7 +373,8 @@ public class CharacterBuilder
 
     public void UpdateMoonstone()
     {
-        Revision.GiftMoonstone = Math.Max(0, CharacterRevision.Triangle(Level) - CharacterRevision.Triangle(Revision.StartingLevel));
+        Revision.GiftMoonstone = Math.Max(0,
+            CharacterRevision.Triangle(Level) - CharacterRevision.Triangle(Revision.StartingLevel));
 
         var purchasedSkills = PurchasedSkills
             .Select(purchase => (

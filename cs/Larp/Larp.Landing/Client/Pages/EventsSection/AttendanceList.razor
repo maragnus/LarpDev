@@ -1,0 +1,98 @@
+@page "/events/attendance"
+@using Larp.Common
+@inject LandingService LandingService
+
+<PageHeader>Event Attendance</PageHeader>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="relative">
+    <MudOverlay Absolute DarkBackground Visible="_isLoading">
+        <MudProgressCircular Indeterminate/>
+    </MudOverlay>
+    <MudStack Spacing="4" Class="mt-4">
+
+        <MudText Typo="Typo.h6">Event Attendance</MudText>
+        <MudDataGrid T="AttendanceInfo" Items="_events" Hover Filterable="true" Loading="_isLoading">
+            <Columns>
+                @* <PropertyColumn Property="x => x.Game" Title="Game" Grouping="true"/> *@
+                <TemplateColumn T="AttendanceInfo">
+                    <CellTemplate>
+                        <MudIcon Icon="@context.Item.Icon"/>
+                    </CellTemplate>
+                </TemplateColumn>
+                <PropertyColumn Property="x => x.When" Title="Date" Format="dddd, MMM d, yyyy" Groupable="false"/>
+                <PropertyColumn Property="x => x.EventTitle" Title="Title" Groupable="false"/>
+                <PropertyColumn Property="x => x.EventType" Title="EventType"/>
+                <PropertyColumn Property="x => x.MwFifthMoonstone" Title="Moonstone"/>
+            </Columns>
+        </MudDataGrid>
+        <MudAlert Severity="Severity.Info">Is there an event missing? Please make sure you've completed your <a href="http://www.mystwood.org/post-event-letter.html" target="_blank">Post Event Letter</a> (PEL). If you still need help, please contact <a href="mailto:mystwood@mystwood.org?subject=Missing+event+attendance" target="_blank">Mystwood</a>.</MudAlert>
+    </MudStack>
+</MudContainer>
+
+@code {
+    bool _isLoading = true;
+    private AttendanceInfo[] _events = Array.Empty<AttendanceInfo>();
+
+    private class AttendanceInfo
+    {
+        public IEnumerable<string> MwFifthCharacters { get; init; } = Array.Empty<string>();
+
+        public string MwFifthMoonstone { get; init; } = default!;
+
+        public DateTime When { get; init; }
+
+        public string EventType { get; init; } = default!;
+
+        public string EventTitle { get; init; } = default!;
+
+        public string GameName { get; init; } = default!;
+
+        public string Icon { get; init; } = default!;
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var games = LandingService.Games
+            .ToDictionary(x => x.Value.Id, x => x.Value.Title ?? x.Value.Name);
+
+        var characters = await LandingService.GetCharacterNames();
+
+        var attendances = await LandingService.GetAttendance();
+
+        _events = attendances
+            .Select(attendance =>
+            {
+                return new AttendanceInfo
+                {
+                    Icon = GetIcon(attendance.Event.EventType, attendance.Event.Title),
+                    GameName = games.TryGetValue(attendance.Event.GameId, out var gameName) ? gameName : "No Game",
+                    EventTitle = attendance.Event.Title ?? "No Title",
+                    EventType = attendance.Event.EventType ?? "No Type",
+                    When = attendance.Event.Date.LocalDateTime,
+                    MwFifthMoonstone = attendance.MwFifth?.Moonstone.ToString() ?? "N/A",
+                    MwFifthCharacters = characters.TryFromKeys(attendance.MwFifth?.CharacterIds)
+                };
+
+                string GetIcon(string? type, string? title)
+                {
+                    if (type == null || title == null) return Icons.Material.Filled.Event;
+                    if (type.Contains("Subscription", StringComparison.InvariantCultureIgnoreCase))
+                        return Icons.Material.Filled.AttachMoney;
+                    if (title.Contains("Patreon", StringComparison.InvariantCultureIgnoreCase))
+                        return Icons.Material.Filled.AttachMoney;
+                    if (type.Contains("Game", StringComparison.InvariantCultureIgnoreCase))
+                        return Icons.Material.Filled.SportsHandball;
+                    if (type.Contains("Workday", StringComparison.InvariantCultureIgnoreCase))
+                        return Icons.Material.Filled.Handyman;
+                    if (type.Contains("Contest", StringComparison.InvariantCultureIgnoreCase))
+                        return Icons.Material.Filled.Celebration;
+                    return Icons.Material.Filled.Event;
+                }
+            })
+            .ToArray();
+
+        _isLoading = false;
+    }
+
+}

@@ -45,6 +45,33 @@ public class LarpContext
     {
         await MigrateToCharacterRevisions();
         await FixCharacters();
+        await CreateIndices();
+    }
+
+    private async Task CreateIndices()
+    {
+        await Sessions.Indexes.CreateManyAsync(new[]
+        {
+            new CreateIndexModel<Session>(Builders<Session>.IndexKeys.Ascending(x => x.AccountId)),
+        });
+
+        await Attendances.Indexes.CreateManyAsync(new[]
+        {
+            new CreateIndexModel<Attendance>(Builders<Attendance>.IndexKeys.Ascending(x => x.AccountId)),
+            new CreateIndexModel<Attendance>(Builders<Attendance>.IndexKeys.Ascending(x => x.EventId)),
+        });
+
+        await MwFifthGame.Characters.Indexes.CreateManyAsync(new[]
+        {
+            new CreateIndexModel<Character>(Builders<Character>.IndexKeys.Ascending(x => x.AccountId)),
+            new CreateIndexModel<Character>(Builders<Character>.IndexKeys.Ascending(x => x.UniqueId)),
+        });
+
+        await MwFifthGame.CharacterRevisions.Indexes.CreateManyAsync(new[]
+        {
+            new CreateIndexModel<CharacterRevision>(Builders<CharacterRevision>.IndexKeys.Ascending(x => x.AccountId)),
+            new CreateIndexModel<CharacterRevision>(Builders<CharacterRevision>.IndexKeys.Ascending(x => x.UniqueId))
+        });
     }
 
     private async Task FixCharacters()
@@ -64,7 +91,7 @@ public class LarpContext
             var usedMoonstone = revision.SkillMoonstone + revision.GiftMoonstone;
             if (character.CharacterName == revision.CharacterName && usedMoonstone == character.UsedMoonstone)
                 continue;
-            
+
             await MwFifthGame.Characters.UpdateOneAsync(
                 characterFilter => characterFilter.UniqueId == revision.UniqueId,
                 Builders<Character>.Update
