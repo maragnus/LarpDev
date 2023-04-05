@@ -220,7 +220,7 @@ public class CharacterRevision
     public int GiftMoonstone { get; set; }
     public int SkillMoonstone { get; set; }
     public int TotalMoonstone => GiftMoonstone + SkillMoonstone;
-    
+
     public static int Triangle(int level)
     {
         return Math.Max(0, level * (level + 1) / 2);
@@ -264,7 +264,12 @@ public class CharacterRevision
             var oldValue = property.GetValue(oldCharacter);
             var newValue = property.GetValue(newCharacter);
 
-            if (newValue is CharacterSkill[] newSkills && oldValue is CharacterSkill[] oldSkills)
+            if (newValue is string[] newStrings && oldValue is string[] oldStrings)
+            {
+                if (Summarize(oldStrings, newStrings, x => x, out var oldItems, out var newItems))
+                    result.Add(property.Name, new ChangeSummary(oldItems, newItems));
+            }
+            else if (newValue is CharacterSkill[] newSkills && oldValue is CharacterSkill[] oldSkills)
             {
                 if (Summarize(oldSkills, newSkills, x => x.Title, out var oldItems, out var newItems))
                     result.Add(property.Name, new ChangeSummary(oldItems, newItems));
