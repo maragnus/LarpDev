@@ -39,251 +39,272 @@
         "name": "Creature of the Night",
         "rank": 2,
         "physical": false,
-        "description": ""
+        "description": "You dislike sunlight and must wear a broad brimmed hat, hood, or other protection during the day, as well as staying inside as much as you can. In addition, you lose 1 Maximum Hit Point between dawn and the change of day at 6 PM. In the event you would be reduced to 0 maximum Hit Points, you instead are reduced to 1 and cannot run, jump, or shout."
     },
     {
         "title": "Divine Disfavor: God of the Wild 2",
         "name": "Divine Disfavor: God of the Wild",
         "rank": 2,
         "physical": false,
-        "description": ""
+        "description": "You have done something to anger the god of the Wild. Miracles of Resurrection will not provide the Wild resurrection (typically once per year)."
     },
     {
         "title": "Divine Disfavor: Goddess of Mercy 4",
         "name": "Divine Disfavor: Goddess of Mercy",
         "rank": 4,
         "physical": false,
-        "description": ""
+        "description": "You have done something to anger the goddess of Mercy. Miracles of Resurrection will not provide the Mercy resurrection (typically once per Event). Note that this may result in a short-lived character!"
     },
     {
         "title": "Divine Disfavor: Lord of Justice 1",
         "name": "Divine Disfavor: Lord of Justice",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You have done something to anger the Lord of Justice, or you died before your tenure in the Mystwood, and were mysteriously returned. Miracles of Resurrection will not provide the Justice resurrection (typically once ever)."
     },
     {
         "title": "Eternal Foe: Fae 1",
         "name": "Eternal Foe: Fae",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "One of the great non-human powers of the world, the Fae, senses you as a great enemy, and will go to great lengths to harass, hunt and even kill you, targeting you above all others in any battle. You gain the trait “Fae Foe” if you have this Disadvantage."
     },
     {
         "title": "Eternal Foe: Chaos or Undeath 2",
         "name": "Eternal Foe: Chaos or Undeath",
         "rank": 2,
         "physical": false,
-        "description": ""
+        "description": "One of the great non-human powers of the world senses you as a great enemy, and will go to great lengths to harass, hunt and kill you, targeting you above all others in any battle. Choose Chaos or Undead to be your Eternal Foe. You gain the trait “Chaos Foe”, or “Undead Foe” if you have this Disadvantage."
     },
     {
         "title": "Excessive Curiosity 1",
         "name": "Excessive Curiosity",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You can’t leave any mystery unexplored. Examples: If you possess Hedge Magic and the appropriate components, you must attempt to make an item when confronted with a matrix. If you encounter a book, you must attempt to read it. Etc. "
     },
     {
         "title": "Forgetful 1",
         "name": "Forgetful",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "At least once per Event, you must forget something of importance. You should role play this. "
     },
     {
         "title": "Greed 1",
         "name": "Greed",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "Gold and other valuables bring out the worst in you. You will not spend money if you can avoid it, and must go to almost any length short of directly harming yourself or others to obtain any money on offer."
     },
     {
         "title": "Gullible 1",
         "name": "Gullible",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "Reasonable attempts to trick or mislead you always work. You always assume people are telling the truth, unless they are an obvious monster or evil creature. "
     },
     {
         "title": "Horribly Disfigured 1",
         "name": "Horribly Disfigured",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You have suffered some nasty injury or illness in the past. You must wear significant makeup or prosthetics to show this - scar wax, rigid collodion, a partial mask, or the like."
     },
     {
         "title": "Maimed 3",
         "name": "Maimed",
         "rank": 3,
         "physical": false,
-        "description": ""
+        "description": "You may only use one of your arms. This cannot be cured with “Purge Maim”- it is permanent unless you change your disadvantages. Even so, you should come with up an excellent story! "
     },
     {
         "title": "Mostly Illiterate 1",
         "name": "Mostly Illiterate",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You cannot read, but may sign your name if needed. You do not possess the Literacy Free Skill. "
     },
     {
         "title": "Nearsighted 1",
         "name": "Nearsighted",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You cannot use any ability or weapon that targets someone more than 5 feet away. You cannot identify others at a distance either, or “Resist” any Effect that comes from more than 5 feet away."
     },
     {
         "title": "Pacifist 2",
         "name": "Pacifist",
         "rank": 2,
         "physical": false,
-        "description": ""
+        "description": "You won't harm another human, no matter how tainted or warped, under any circumstances, though animals, daemons, monsters, undead and so on are fine."
     },
     {
         "title": "Perpetual Gloom 1",
         "name": "Perpetual Gloom",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You are always dour and cynical, and must role play seeing the dark side of things. You must respond with “No Effect” to the “Renew” Effect when it is delivered “By my Voice”."
     },
     {
         "title": "Phobia (Chaos) 1",
         "name": "Phobia (Chaos)",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You are deathly afraid of one of the following and must avoid it if at all possible. While in the presence of your fear, you cannot think straight, and may not use any abilities that require you to call an Effect, including Resists, spells, etc."
     },
     {
         "title": "Phobia (Darkness) 1",
         "name": "Phobia (Darkness)",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You are deathly afraid of one of the following and must avoid it if at all possible. While in the presence of your fear, you cannot think straight, and may not use any abilities that require you to call an Effect, including Resists, spells, etc."
     },
     {
         "title": "Phobia (Enclosed Places) 1",
         "name": "Phobia (Enclosed Places)",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You are deathly afraid of one of the following and must avoid it if at all possible. While in the presence of your fear, you cannot think straight, and may not use any abilities that require you to call an Effect, including Resists, spells, etc."
     },
     {
         "title": "Phobia (Fae) 1",
         "name": "Phobia (Fae)",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You are deathly afraid of one of the following and must avoid it if at all possible. While in the presence of your fear, you cannot think straight, and may not use any abilities that require you to call an Effect, including Resists, spells, etc."
     },
     {
         "title": "Phobia (Fire) 1",
         "name": "Phobia (Fire)",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You are deathly afraid of one of the following and must avoid it if at all possible. While in the presence of your fear, you cannot think straight, and may not use any abilities that require you to call an Effect, including Resists, spells, etc."
     },
     {
         "title": "Phobia (Large Animals) 1",
         "name": "Phobia (Large Animals)",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You are deathly afraid of one of the following and must avoid it if at all possible. While in the presence of your fear, you cannot think straight, and may not use any abilities that require you to call an Effect, including Resists, spells, etc."
     },
     {
         "title": "Phobia (Nobles) 1",
         "name": "Phobia (Nobles)",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You are deathly afraid of one of the following and must avoid it if at all possible. While in the presence of your fear, you cannot think straight, and may not use any abilities that require you to call an Effect, including Resists, spells, etc."
     },
     {
         "title": "Phobia (Spell Casters) 1",
         "name": "Phobia (Spell Casters)",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You are deathly afraid of one of the following and must avoid it if at all possible. While in the presence of your fear, you cannot think straight, and may not use any abilities that require you to call an Effect, including Resists, spells, etc."
     },
     {
         "title": "Phobia (Undead) 1",
         "name": "Phobia (Undead)",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You are deathly afraid of one of the following and must avoid it if at all possible. While in the presence of your fear, you cannot think straight, and may not use any abilities that require you to call an Effect, including Resists, spells, etc."
     },
     {
         "title": "Raging Hunger 1",
         "name": "Raging Hunger",
         "rank": 1,
         "physical": true,
-        "description": ""
+        "description": "If you do not consume at least one unit of Food every six hours, you become weak. Until you consume 1 Unit of Food, you lose 1 Maximum Hit Point. If this would cause you to be reduced to 0 maximum Hit Points, you instead are reduced to 1 and cannot run, jump, or shout. "
     },
     {
         "title": "Sickly 3",
         "name": "Sickly",
         "rank": 3,
         "physical": false,
-        "description": ""
+        "description": "You “bleed out” and move from Unstable to Dead after only a 60 count Unstable. "
     },
     {
         "title": "Slow 2",
         "name": "Slow",
         "rank": 2,
         "physical": false,
-        "description": ""
+        "description": "You may not run."
     },
     {
         "title": "Spendthrift 1",
         "name": "Spendthrift",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You must always spend any money you have at the first opportunity. You may not give treasure to others though- you like spending money. Basically you must spend all your money by the end of the Event. "
     },
     {
         "title": "Tainted 1",
         "name": "Tainted",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You start with (or gain) 3 Marks of Chaos. Seven marks of Chaos will cause your character to become an NPC. Once In Game, look in the Book of Woe for the full description of this affliction: “Chaos Mark”"
     },
     {
         "title": "Teetotaler 1",
         "name": "Teetotaler",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You cannot gain a “Renew” by tavern or tavern keeper provided means (for example, drinking). "
     },
     {
         "title": "Troublemaker 1",
         "name": "Troublemaker",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You are always meddling and playing pranks on others. "
     },
     {
         "title": "Truthfulness 2",
         "name": "Truthfulness",
         "rank": 2,
         "physical": false,
-        "description": ""
+        "description": "You are bound to never lie."
     },
     {
         "title": "Unwashed 1",
         "name": "Unwashed",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You are prone to getting sick. At the beginning of each Event, you must roll to discover what Affliction you will suffer from for the duration of the Event. Once In Game, look in the Book of Woe for the full description of this affliction. "
     },
     {
-        "title": "Vulnerability 1",
+        "title": "Vulnerability 1 (Air)",
         "name": "Vulnerability",
         "rank": 1,
         "physical": true,
-        "description": ""
+        "description": "Your humors are imbalanced and this cannot be corrected. You take double damage from any Effect called by Air. "
+    },
+    {
+        "title": "Vulnerability 1 (Earth)",
+        "name": "Vulnerability",
+        "rank": 1,
+        "physical": true,
+        "description": "Your humors are imbalanced and this cannot be corrected. You take double damage from any Effect called by Earth. "
+    },
+    {
+        "title": "Vulnerability 1 (Fire)",
+        "name": "Vulnerability",
+        "rank": 1,
+        "physical": true,
+        "description": "Your humors are imbalanced and this cannot be corrected. You take double damage from any Effect called by Fire. "
+    },
+    {
+        "title": "Vulnerability 1 (Water)",
+        "name": "Vulnerability",
+        "rank": 1,
+        "physical": true,
+        "description": "Your humors are imbalanced and this cannot be corrected. You take double damage from any Effect called by Water. "
     },
     {
         "title": "Wild Heart 1",
         "name": "Wild Heart",
         "rank": 1,
         "physical": true,
-        "description": ""
+        "description": "You are not comfortable with civilized things. Any “by Fire” Effect you suffer also causes the “Frenzy”. "
     }
 ]

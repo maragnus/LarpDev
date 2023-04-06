@@ -4,7 +4,8 @@
     "title": "Absolution",
     "class": "Major",
     "purchasable": "Once",
-    "costPerPurchase": 15
+    "costPerPurchase": 15,
+    "description": "You may offer Absolution to those of your faith, if you deem they have performed a true penance. See the rules in Religion."
   },
   {
     "name": "Agility",

@@ -141,28 +141,28 @@
         "name": "Elemental Resistance (Air)",
         "rank": 1,
         "physical": true,
-        "description": ""
+        "description": "This ability lets you call “Resist” against Air element once per Renew."
     },
     {
         "title": "Elemental Resistance (Earth) 1",
         "name": "Elemental Resistance (Earth)",
         "rank": 1,
         "physical": true,
-        "description": ""
+        "description": "This ability lets you call “Resist” against Earth element once per Renew."
     },
     {
         "title": "Elemental Resistance (Fire) 1",
         "name": "Elemental Resistance (Fire)",
         "rank": 1,
         "physical": true,
-        "description": ""
+        "description": "This ability lets you call “Resist” against Fire element once per Renew."
     },
     {
         "title": "Elemental Resistance (Water) 1",
         "name": "Elemental Resistance (Water)",
         "rank": 1,
         "physical": true,
-        "description": ""
+        "description": "This ability lets you call “Resist” against Water element once per Renew."
     },
     {
         "title": "Evil Eye 1",
@@ -197,118 +197,118 @@
         "name": "Hunter's Senses",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You may use your senses to call “Detect ___ “, a total of three times per Renew. You may choose any combination of “Animal”, “Living”, “Undead”, or “Vermin”."
     },
     {
         "title": "Natural Armor 2",
         "name": "Natural Armor",
         "rank": 2,
         "physical": true,
-        "description": ""
+        "description": "You always count as wearing 1 Armor Point, which adds to your Hit Points. This Armor Point is NOT cumulative with any other armor you may wear."
     },
     {
         "title": "Old Blood 1",
         "name": "Old Blood",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "Once per Day, you may call \"Detect Fae\"."
     },
     {
         "title": "Poison Spittle 2",
         "name": "Poison Spittle",
         "rank": 2,
         "physical": true,
-        "description": ""
+        "description": "Once per Day, you may lick a blade to coat it with venom. You must call “Doom by Poison” on your next swing. If you miss, or the target blocks your attack, the ability is wasted."
     },
     {
         "title": "Purity 1",
         "name": "Purity",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "Once per Renew, you may call “Resist” against a “by Poison” Effect."
     },
     {
         "title": "Skin Changer 2",
         "name": "Skin Changer",
         "rank": 2,
         "physical": false,
-        "description": ""
+        "description": "Once per Day, you may don a mask, transforming yourself into a horrible beast for up to one hour. During this time, in addition to your normal Gifts, Occupation, and Skills, you may use 30” Claws (see page 41) and gain 2 maximum Hit Points. In addition, you may call “Maim” twice with your claws, and may call “Disengage” 3 times. However, you may not speak or wear armor during this time, and many will not react well to your transformation."
     },
     {
         "title": "Stonefast 1",
         "name": "Stonefast",
         "rank": 1,
         "physical": true,
-        "description": ""
+        "description": "Once per Day, you may plant your feet and call “Stonefast”. "
     },
     {
         "title": "Stubborn Courage 1",
         "name": "Stubborn Courage",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "Once per Day, you may take up a defensive position (a roughly 10 foot area) and resolve to hold it to the last. As long as you do not leave your post, your current and maximum Hit Points are increased by 8. This stacks with any armor you might be wearing. You may not use this ability in duels of any sort."
     },
     {
         "title": "Talent 1",
         "name": "Talent",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You gain one Minor skill. You have a skill or knack that does not depend on your Occupation. You must be able to explain how you came by this talent."
     },
     {
         "title": "Talent 2",
         "name": "Talent",
         "rank": 2,
         "physical": false,
-        "description": ""
+        "description": "You gain one Standard skill. You have a skill or knack that does not depend on your Occupation. You must be able to explain how you came by this talent."
     },
     {
         "title": "Talent 3",
         "name": "Talent",
         "rank": 3,
         "physical": false,
-        "description": ""
+        "description": "You gain one Major skill. You have a skill or knack that does not depend on your Occupation. You must be able to explain how you came by this talent."
     },
     {
         "title": "Treewalk 1",
         "name": "Treewalk",
         "rank": 1,
         "physical": true,
-        "description": ""
+        "description": "Once per Day, while in the wild (outside of town, outside of any walls, and off of any cleared path), you may merge yourself with a tree, and remain so for up to 30 minutes. While merged, you must remain in contact with the tree and may not use any abilities or weapons, but cannot be harmed in any way. Call “No Effect”."
     },
     {
         "title": "Undead Bane 1",
         "name": "Undead Bane",
         "rank": 1,
         "physical": false,
-        "description": ""
+        "description": "You may throw two “5 Damage to Undead” packets per Renew."
     },
     {
         "title": "Witchblood 1",
         "name": "Witchblood",
         "rank": 1,
         "physical": true,
-        "description": ""
+        "description": "Each Event at check in, you may roll on a chart that gives you small, random magical powers. Beware though, many are not beneficial. See Appendix 4, Witchblood, on page 145 for the chart."
     },
     {
         "title": "Witchblood 2",
         "name": "Witchblood",
         "rank": 2,
         "physical": true,
-        "description": ""
+        "description": "Each Event at check in, you may roll on a chart that gives you small, random magical powers. Beware though, many are not beneficial. See Appendix 4, Witchblood, on page 145 for the chart."
     },
     {
         "title": "Witchblood 3",
         "name": "Witchblood",
         "rank": 3,
         "physical": true,
-        "description": ""
+        "description": "Each Event at check in, you may roll on a chart that gives you small, random magical powers. Beware though, many are not beneficial. See Appendix 4, Witchblood, on page 145 for the chart."
     },
     {
         "title": "Witchblood 4",
         "name": "Witchblood",
         "rank": 4,
         "physical": true,
-        "description": ""
+        "description": "Each Event at check in, you may roll on a chart that gives you small, random magical powers. Beware though, many are not beneficial. See Appendix 4, Witchblood, on page 145 for the chart."
     }
 ]
