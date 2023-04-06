@@ -216,7 +216,7 @@
             return;
         }
 
-        if (_availableMoonstone < _newMoonstoneCost)
+        if (!Admin && _availableMoonstone < _newMoonstoneCost)
         {
             await LandingService.MwFifth.Save(_revision.Revision);
             await DialogService.ShowMessageBox("Submit Character for Review", "You do not have enough moonstone for this change.");
