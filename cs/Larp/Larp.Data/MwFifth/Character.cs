@@ -154,6 +154,9 @@ public class Character
     public CharacterAttendance[] Attendances { get; set; } = Array.Empty<CharacterAttendance>();
 
     public string? CharacterName { get; set; }
+    
+    public int? ImportId { get; set; }
+
 }
 
 [PublicAPI]

@@ -3,6 +3,7 @@ using Larp.Data.Mongo;
 using Larp.Data.Mongo.Services;
 using Larp.Data.Seeder;
 using Larp.Landing.Server;
+using Larp.Landing.Server.Import;
 using Larp.Landing.Server.Services;
 using Larp.Landing.Shared;
 using Larp.Landing.Shared.MwFifth;
@@ -51,6 +52,7 @@ builder.Configuration
     services.AddScoped<IAdminService, AdminService>();
     services.AddScoped<IUserSession, UserSession>();
     services.AddScoped<MwFifthCharacterManager>();
+    services.AddScoped<ExcelImporter>();
 }
 
 var app = builder.Build();

@@ -39,6 +39,8 @@ public class Account
     public int? Age => BirthDate.GetAge();
     public AccountRole[] Roles { get; set; } = Array.Empty<AccountRole>();
 
+    public int? ImportId { get; set; }
+
     [BsonIgnore]
     public string? PreferredEmail =>
         (Emails.FirstOrDefault(x => x.IsPreferred) ?? Emails.FirstOrDefault(x => x.IsVerified))?.Email;

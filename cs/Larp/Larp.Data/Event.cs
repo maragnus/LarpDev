@@ -34,6 +34,7 @@ public class Event
     public string? EventType { get; set; }
     public bool CanRsvp { get; set; }
     public bool IsHidden { get; set; }
+    public string? ImportId { get; set; }
     public EventComponent[] Components { get; set; } = Array.Empty<EventComponent>();
 }
 

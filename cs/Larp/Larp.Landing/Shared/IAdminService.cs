@@ -87,7 +87,7 @@ public interface IAdminService
     [ApiPost("data/import"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task<StringResult> Import(Stream data);
 
-    [ApiGet("data/export")]
+    [ApiGet("data/export"), ApiAuthenticated(AccountRole.AccountAdmin)]
     [ApiContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")]
     Task<IFileInfo> Export();
 }

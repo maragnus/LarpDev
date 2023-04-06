@@ -2,6 +2,7 @@ using Larp.Data;
 using Larp.Data.Mongo;
 using Larp.Data.Mongo.Services;
 using Larp.Data.MwFifth;
+using Larp.Landing.Server.Import;
 using Larp.Landing.Shared;
 using Larp.Landing.Shared.Messages;
 using Microsoft.Extensions.FileProviders;
@@ -20,16 +21,19 @@ public class AdminService : IAdminService
     private readonly MwFifthCharacterManager _manager;
     private readonly IUserSessionManager _userSessionManager;
     private readonly ILogger<AdminService> _logger;
+    private readonly IServiceProvider _serviceProvider;
     private readonly Account _account;
 
     public AdminService(LarpContext db, IUserSession userSession, IFileProvider fileProvider,
-        MwFifthCharacterManager manager, IUserSessionManager userSessionManager, ILogger<AdminService> logger)
+        MwFifthCharacterManager manager, IUserSessionManager userSessionManager, ILogger<AdminService> logger,
+        IServiceProvider serviceProvider)
     {
         _db = db;
         _fileProvider = fileProvider;
         _manager = manager;
         _userSessionManager = userSessionManager;
         _logger = logger;
+        _serviceProvider = serviceProvider;
         _account = userSession.CurrentUser!;
     }
 
@@ -54,11 +58,9 @@ public class AdminService : IAdminService
                 await data.CopyToAsync(fileStream);
             }
 
-            using var package = new ExcelPackage(file);
-            using var workbook = package.Workbook;
+            var importer = _serviceProvider.GetRequiredService<ExcelImporter>();
+            await importer.Import(file.FullName);
 
-            
-            
             return StringResult.Success("Import successful");
         }
         catch (Exception ex)
@@ -164,8 +166,7 @@ public class AdminService : IAdminService
 
     public async Task<Event[]> GetEvents()
     {
-        var now = DateTimeOffset.Now.AddDays(-4);
-        var events = await _db.Events.Find(x => x.Date >= now)
+        var events = await _db.Events.Find(_ => true)
             .SortByDescending(x => x.Date)
             .ToListAsync();
         return events.ToArray();

@@ -49,117 +49,117 @@
         "description": "Once per Renew, you may call “Resist” to a “Maim” Effect."
     },
     {
-        "title": "Elemental Fury (Air) 1",
-        "name": "Elemental Fury (Air)",
+        "title": "Elemental Fury: Air 1",
+        "name": "Elemental Fury: Air",
         "rank": 1,
         "physical": true,
         "description": "You may throw one “2 Damage by Air” burst once per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
     },
     {
-        "title": "Elemental Fury (Air) 2",
-        "name": "Elemental Fury (Air)",
+        "title": "Elemental Fury: Air 2",
+        "name": "Elemental Fury: Air",
         "rank": 2,
         "physical": true,   
         "description": "You may throw one “2 Damage by Air” burst twice per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
 
     },
     {
-        "title": "Elemental Fury (Air) 3",
-        "name": "Elemental Fury (Air)",
+        "title": "Elemental Fury: Air 3",
+        "name": "Elemental Fury: Air",
         "rank": 3,
         "physical": true,
         "description": "You may throw one “2 Damage by Air” burst three times per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
     },
     {
-        "title": "Elemental Fury (Earth) 1",
-        "name": "Elemental Fury (Earth)",
+        "title": "Elemental Fury: Earth 1",
+        "name": "Elemental Fury: Earth",
         "rank": 1,
         "physical": true,
         "description": "You may throw one “2 Damage by Earth” burst once per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
     },
     {
-        "title": "Elemental Fury (Earth) 2",
-        "name": "Elemental Fury (Earth)",
+        "title": "Elemental Fury: Earth 2",
+        "name": "Elemental Fury: Earth",
         "rank": 2,
         "physical": true,
         "description": "You may throw one “2 Damage by Earth” burst twice per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
 
     },
     {
-        "title": "Elemental Fury (Earth) 3",
-        "name": "Elemental Fury (Earth)",
+        "title": "Elemental Fury: Earth 3",
+        "name": "Elemental Fury: Earth",
         "rank": 3,
         "physical": true,
         "description": "You may throw one “2 Damage by Earth” burst three times per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
     },
     {
-        "title": "Elemental Fury (Fire) 1",
-        "name": "Elemental Fury (Fire)",
+        "title": "Elemental Fury: Fire 1",
+        "name": "Elemental Fury: Fire",
         "rank": 1,
         "physical": true,
         "description": "You may throw one “2 Damage by Fire” burst once per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
     },
     {
-        "title": "Elemental Fury (Fire) 2",
-        "name": "Elemental Fury (Fire)",
+        "title": "Elemental Fury: Fire 2",
+        "name": "Elemental Fury: Fire",
         "rank": 2,
         "physical": true,
         "description": "You may throw one “2 Damage by Fire” burst twice per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
 
     },
     {
-        "title": "Elemental Fury (Fire) 3",
-        "name": "Elemental Fury (Fire)",
+        "title": "Elemental Fury: Fire 3",
+        "name": "Elemental Fury: Fire",
         "rank": 3,
         "physical": true,
         "description": "You may throw one “2 Damage by Fire” burst three times per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
     },
     {
-        "title": "Elemental Fury (Water) 1",
-        "name": "Elemental Fury (Water)",
+        "title": "Elemental Fury: Water 1",
+        "name": "Elemental Fury: Water",
         "rank": 1,
         "physical": true,
         "description": "You may throw one “2 Damage by Water” burst once per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
     },
     {
-        "title": "Elemental Fury (Water) 2",
-        "name": "Elemental Fury (Water)",
+        "title": "Elemental Fury: Water 2",
+        "name": "Elemental Fury: Water",
         "rank": 2,
         "physical": true,
         "description": "You may throw one “2 Damage by Water” burst twice per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
 
     },
     {
-        "title": "Elemental Fury (Water) 3",
-        "name": "Elemental Fury (Water)",
+        "title": "Elemental Fury: Water 3",
+        "name": "Elemental Fury: Water",
         "rank": 3,
         "physical": true,
         "description": "You may throw one “2 Damage by Water” burst three times per Renew. To use this ability, you may gather as many packets as you wish, and throw them all at once in a group."
     },
     {
-        "title": "Elemental Resistance (Air) 1",
-        "name": "Elemental Resistance (Air)",
+        "title": "Elemental Resistance: Air 1",
+        "name": "Elemental Resistance: Air",
         "rank": 1,
         "physical": true,
         "description": "This ability lets you call “Resist” against Air element once per Renew."
     },
     {
-        "title": "Elemental Resistance (Earth) 1",
-        "name": "Elemental Resistance (Earth)",
+        "title": "Elemental Resistance: Earth 1",
+        "name": "Elemental Resistance: Earth",
         "rank": 1,
         "physical": true,
         "description": "This ability lets you call “Resist” against Earth element once per Renew."
     },
     {
-        "title": "Elemental Resistance (Fire) 1",
-        "name": "Elemental Resistance (Fire)",
+        "title": "Elemental Resistance: Fire 1",
+        "name": "Elemental Resistance: Fire",
         "rank": 1,
         "physical": true,
         "description": "This ability lets you call “Resist” against Fire element once per Renew."
     },
     {
-        "title": "Elemental Resistance (Water) 1",
-        "name": "Elemental Resistance (Water)",
+        "title": "Elemental Resistance: Water 1",
+        "name": "Elemental Resistance: Water",
         "rank": 1,
         "physical": true,
         "description": "This ability lets you call “Resist” against Water element once per Renew."

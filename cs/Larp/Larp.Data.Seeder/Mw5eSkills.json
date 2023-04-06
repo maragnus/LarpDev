@@ -876,6 +876,13 @@
     "costPerPurchase": 10
   },
   {
+    "name": "Weapon Specialization (Schiltron)",
+    "title": "Weapon Specialization (Schiltron)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
     "name": "Weapon Specialization (Staff)",
     "title": "Weapon Specialization (Staff)",
     "class": "Standard",
@@ -1023,6 +1030,13 @@
     "costPerPurchase": 10
   },
   {
+    "name": "Weapon Use (Schiltron)",
+    "title": "Weapon Use (Schiltron)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
     "name": "Weapon Use (Thrown Weapon)",
     "title": "Weapon Use (Thrown Weapon)",
     "class": "Standard",
@@ -1058,6 +1072,13 @@
     "costPerPurchase": 10
   },
   {
+    "name": "Weapon Use (Large Shield)",
+    "title": "Weapon Use (Large Shield)",
+    "class": "Standard",
+    "purchasable": "Once",
+    "costPerPurchase": 10
+  },
+  {
     "name": "Wear Armor",
     "title": "Wear Armor X",
     "class": "Minor",
@@ -1085,5 +1106,12 @@
     "title": "Work Rhythm",
     "class": "Unavailable",
     "purchasable": "Unavailable"
+  },
+  {
+    "name": "Thousand Yard Stare",
+    "title": "Thousand Yard Stare",
+    "class": "Minor",
+    "purchasable": "Once",
+    "costPerPurchase": 5
   }
 ]

@@ -36,5 +36,15 @@
             "Prelacy of Kyiv",
             "Voivod of Muscowy"
         ]
+    },
+    {
+        "name": "albion",
+        "title": "Albion",
+        "location": "North Sandwich, NH",
+        "email": "mystwood@mystwood.org",
+        "homelands": [
+            "Retired"
+        ],
+        "retired": true
     }
 ]

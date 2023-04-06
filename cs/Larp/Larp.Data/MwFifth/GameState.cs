@@ -188,6 +188,7 @@ public class HomeChapter
     public string Location { get; set; } = default!;
     public string[] Homelands { get; set; } = Array.Empty<string>();
     public string Email { get; set; } = default!;
+    public bool Retired { get; set; }
 
     // ReSharper disable once NonReadonlyMemberInGetHashCode
     public override int GetHashCode() => Name.GetHashCode();
