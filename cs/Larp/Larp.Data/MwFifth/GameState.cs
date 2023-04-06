@@ -98,6 +98,7 @@ public class SkillDefinition
     public int? RanksPerPurchase { get; set; }
     public int? CostPerPurchase { get; set; }
     public string[] Iterations { get; set; } = Array.Empty<string>();
+    public string Description { get; set; } = default!;
 }
 
 [PublicAPI]
