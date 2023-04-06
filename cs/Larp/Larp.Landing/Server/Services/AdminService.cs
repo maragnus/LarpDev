@@ -19,15 +19,17 @@ public class AdminService : IAdminService
     private readonly IFileProvider _fileProvider;
     private readonly MwFifthCharacterManager _manager;
     private readonly IUserSessionManager _userSessionManager;
+    private readonly ILogger<AdminService> _logger;
     private readonly Account _account;
 
     public AdminService(LarpContext db, IUserSession userSession, IFileProvider fileProvider,
-        MwFifthCharacterManager manager, IUserSessionManager userSessionManager)
+        MwFifthCharacterManager manager, IUserSessionManager userSessionManager, ILogger<AdminService> logger)
     {
         _db = db;
         _fileProvider = fileProvider;
         _manager = manager;
         _userSessionManager = userSessionManager;
+        _logger = logger;
         _account = userSession.CurrentUser!;
     }
 
@@ -37,6 +39,33 @@ public class AdminService : IAdminService
             .Find(_ => true)
             .ToListAsync();
         return accounts.ToArray();
+    }
+
+    public async Task<StringResult> Import(Stream data)
+    {
+        try
+        {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            var path = _fileProvider.GetFileInfo($"{Path.GetRandomFileName()}.xlsx");
+            var file = new FileInfo(path.PhysicalPath!);
+
+            await using (var fileStream = File.OpenWrite(file.FullName))
+            {
+                await data.CopyToAsync(fileStream);
+            }
+
+            using var package = new ExcelPackage(file);
+            using var workbook = package.Workbook;
+
+            
+            
+            return StringResult.Success("Import successful");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to import file");
+            return StringResult.Failed("Failed to import file due to exception: " + ex.Message);
+        }
     }
 
     public async Task<IFileInfo> Export()
@@ -148,7 +177,7 @@ public class AdminService : IAdminService
                ?? throw new ResourceNotFoundException();
     }
 
-    public async Task SaveEvent(string eventId, string gameId, string? title, string? type, 
+    public async Task SaveEvent(string eventId, string gameId, string? title, string? type,
         string? location, DateTimeOffset date, bool rsvp, bool hidden,
         EventComponent[] components)
     {

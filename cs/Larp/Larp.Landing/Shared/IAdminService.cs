@@ -15,10 +15,6 @@ public interface IAdminService
     [ApiGet("accounts"), ApiAuthenticated(AccountRole.AdminAccess)]
     Task<Account[]> GetAccounts();
 
-    [ApiGet("export"), ApiAuthenticated(AccountRole.AccountAdmin)]
-    [ApiContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")]
-    Task<IFileInfo> Export();
-    
     [ApiGet("accounts/{accountId}"), ApiAuthenticated(AccountRole.AdminAccess)]
     Task<Account> GetAccount(string accountId);
 
@@ -31,13 +27,13 @@ public interface IAdminService
 
     [ApiPost("accounts/{accountId}/roles/{role}"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task AddAccountRole(string accountId, AccountRole role);
-    
+
     [ApiDelete("accounts/{accountId}/roles/{role}"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task RemoveAccountRole(string accountId, AccountRole role);
 
     [ApiPost("accounts/admin"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task<StringResult> AddAdminAccount(string fullName, string emailAddress);
-    
+
     [ApiGet("mw5e/characters"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
     Task<CharacterAccountSummary[]> GetMwFifthCharacters(CharacterState state);
 
@@ -75,7 +71,7 @@ public interface IAdminService
     [ApiPost("events/{eventId}"), ApiAuthenticated(AccountRole.AdminAccess)]
     Task SaveEvent(string eventId, string gameId, string? title, string? type, string? location, DateTimeOffset date,
         bool rsvp, bool hidden, EventComponent[] components);
-    
+
     [ApiDelete("events/{eventId}"), ApiAuthenticated(AccountRole.AdminAccess)]
     Task DeleteEvent(string eventId);
 
@@ -87,6 +83,13 @@ public interface IAdminService
 
     [ApiGet("events/{eventId}/attendance"), ApiAuthenticated(AccountRole.AdminAccess)]
     Task<Attendance[]> GetEventAttendances(string eventId);
+
+    [ApiPost("data/import"), ApiAuthenticated(AccountRole.AccountAdmin)]
+    Task<StringResult> Import(Stream data);
+
+    [ApiGet("data/export")]
+    [ApiContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")]
+    Task<IFileInfo> Export();
 }
 
 public class Dashboard

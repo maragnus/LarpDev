@@ -1,8 +1,11 @@
-﻿using System.Reflection;
+﻿using System.Net.Mime;
+using System.Reflection;
 using System.Text.Json;
 using Larp.Landing.Server.Services;
 using Larp.Landing.Shared;
 using Larp.Landing.Shared.Messages;
+using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.FileProviders;
 
 namespace Larp.Landing.Server;
@@ -105,18 +108,26 @@ public static class MapApiExtensions
                 ? await JsonSerializer.DeserializeAsync<JsonDocument>(httpContext.Request.Body, LarpJson.Options)
                 : null;
 
+            var form = httpContext.Request.HasFormContentType
+                ? await httpContext.Request.ReadFormAsync()
+                : null;
+
             var parameters = methodInfo.GetParameters()
                 .Select(parameter =>
                 {
                     var name = parameter.Name!;
 
+                    if (parameter.ParameterType == typeof(Stream))
+                        return form?.Files.FirstOrDefault()?.OpenReadStream() ?? throw new BadRequestException($"Parameter {name} only accepts one file");
                     if (httpContext.GetRouteData().Values.TryGetValue(name, out var routeValue))
                         return Coerce(routeValue, parameter.ParameterType);
                     if (httpContext.Request.Query.TryGetValue(name, out var value))
                         return Coerce(value.FirstOrDefault(), parameter.ParameterType);
                     if (body?.RootElement.TryGetProperty(name, out var property) == true)
                         return property.Deserialize(parameter.ParameterType, LarpJson.Options);
-
+                    if (form?.TryGetValue(name, out value) == true)
+                        return Coerce(value.FirstOrDefault(), parameter.ParameterType);
+                    
                     throw new BadRequestException($"Parameter {name} was not found in route or body");
                 })
                 .ToArray();

@@ -33,11 +33,11 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public async Task<CharacterSummary[]> GetCharacters() =>
         await GetArray<CharacterSummary>("api/larp/characters");
 
-    public Task<IFileInfo> Export()
-    {
-        // This is server-side only
-        return Task.FromResult((IFileInfo)null!);
-    }
+    public async Task<StringResult> Import(Stream data) =>
+        await PostFile<StringResult>("api/admin/data/import", data, "import.xlsx");
+
+    public async Task<IFileInfo> Export() =>
+        await Download("api/admin/data/export");
 
     public Task<Account> GetAccount() =>
         Get<Account>("api/account");
@@ -67,26 +67,27 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     Task<Event> IAdminService.GetEvent(string eventId) =>
         Get<Event>($"api/admin/events/{eventId}");
 
-    public Task SaveEvent(string eventId, string gameId, string? title, string? type, 
+    public Task SaveEvent(string eventId, string gameId, string? title, string? type,
         string? location, DateTimeOffset date, bool rsvp, bool hidden,
         EventComponent[] components) =>
-    Post($"api/admin/events/{eventId}", new
-    {
-        gameId,
-        title,
-        type,
-        location,
-        date,
-        rsvp,
-        hidden,
-        components
-    });
+        Post($"api/admin/events/{eventId}", new
+        {
+            gameId,
+            title,
+            type,
+            location,
+            date,
+            rsvp,
+            hidden,
+            components
+        });
 
 
     public Task DeleteEvent(string eventId) =>
         Delete($"api/admin/events/{eventId}");
 
-    public Task SetEventAttendance(string eventId, string accountId, bool attended, int? moonstone, string[] characterIds) =>
+    public Task SetEventAttendance(string eventId, string accountId, bool attended, int? moonstone,
+        string[] characterIds) =>
         Post($"api/admin/events/{eventId}/attendance/{accountId}", new
         {
             attended,
@@ -97,7 +98,7 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public Task<AccountName[]> GetAccountNames() =>
         Get<AccountName[]>($"api/admin/accounts/names");
 
-    public Task<Attendance[]> GetEventAttendances(string eventId)  =>
+    public Task<Attendance[]> GetEventAttendances(string eventId) =>
         Get<Attendance[]>($"api/admin/events/{eventId}/attendance");
 
     public Task<GameState> GetGameState(string lastRevision) =>
@@ -122,8 +123,8 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
         Get<Account[]>($"api/admin/accounts");
 
     public Task<StringResult> AddAdminAccount(string fullName, string emailAddress) =>
-        Post<StringResult>($"api/admin/accounts/admin", new {fullName, emailAddress});
-    
+        Post<StringResult>($"api/admin/accounts/admin", new { fullName, emailAddress });
+
     public Task<CharacterAccountSummary[]> GetMwFifthCharacters(CharacterState state) =>
         Get<CharacterAccountSummary[]>($"api/admin/mw5e/characters?state={state}");
 
