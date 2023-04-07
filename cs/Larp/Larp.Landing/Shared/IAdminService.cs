@@ -61,6 +61,9 @@ public interface IAdminService
 
     [ApiDelete("mw5e/characters/{characterId}"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
     Task DeleteMwFifthCharacter(string characterId);
+    
+    [ApiPost("mw5e/characters/{characterId}/move"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
+    Task MoveMwFifthCharacter(string characterId, string newAccountId);
 
     [ApiGet("events"), ApiAuthenticated(AccountRole.AdminAccess)]
     Task<Event[]> GetEvents();
@@ -90,6 +93,15 @@ public interface IAdminService
     [ApiGet("data/export"), ApiAuthenticated(AccountRole.AccountAdmin)]
     [ApiContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")]
     Task<IFileInfo> Export();
+
+    [ApiPost("accounts/merge"), ApiAuthenticated(AccountRole.AccountAdmin)]
+    Task MergeAccounts(string fromAccountId, string toAccountId);
+
+    [ApiPost("accounts/{accountId}/emails"), ApiAuthenticated(AccountRole.AccountAdmin)]
+    Task AddAccountEmail(string accountId, string email);
+
+    [ApiDelete("accounts/{accountId}/emails"), ApiAuthenticated(AccountRole.AccountAdmin)]
+    Task RemoveAccountEmail(string accountId, string email);
 }
 
 public class Dashboard

@@ -1,6 +1,7 @@
 @page "/admin/mw5e/characters/{CharacterId}"
 @using Larp.Landing.Client.Pages.MwFifth
 @using Larp.Landing.Shared.MwFifth
+@using Larp.Landing.Client.Pages.Dialogs
 @inject LandingService LandingService
 @inject ILogger<Mw5eCharacterPage> Logger
 @inject NavigationManager NavigationManager
@@ -25,6 +26,7 @@
             <MudButton StartIcon="@Icons.Material.Filled.Verified" OnClick="Approve" Variant="Variant.Filled" Color="Color.Success">Approve</MudButton>
             <MudButton StartIcon="@Icons.Material.Filled.Undo" OnClick="Reject" Variant="Variant.Filled" Color="Color.Error">Reject</MudButton>
         }
+        <MudButton StartIcon="@Icons.Material.Filled.Undo" OnClick="Move" Variant="Variant.Filled" Color="Color.Secondary">Move</MudButton>
     </MudButtonGroup>
 
     @if (_isLoading || _character == null)
@@ -54,7 +56,7 @@
                     <HierarchyColumn T="CharacterRevision" ButtonDisabledFunc="@(x => x.ChangeSummary?.Count == 0)"/>
                     <TemplateColumn T="CharacterRevision" Title="Name">
                         <CellTemplate>
-                            @if (context.Item.Id == CharacterId)
+                            @if (context.Item.RevisionId == CharacterId)
                             {
                                 <MudText Color="Color.Primary">
                                     <strong>@context.Item.CharacterName</strong>
@@ -98,7 +100,7 @@
                     </TemplateColumn>
                     <TemplateColumn T="CharacterRevision">
                         <CellTemplate>
-                            <MudIconButton Icon="@Icons.Material.Filled.OpenInNew" OnClick="() => OpenCharacter(context.Item.Id)"/>
+                            <MudIconButton Icon="@Icons.Material.Filled.OpenInNew" OnClick="() => OpenCharacter(context.Item.RevisionId)"/>
                         </CellTemplate>
                     </TemplateColumn>
                 </Columns>
@@ -138,7 +140,7 @@
                         <MudText Align="Align.Center" Typo="Typo.caption">Revision<br/>Cost</MudText>
                     </MudStack>
                 </MudTooltip>
-                
+
                 @if (_moonstone.Available < _newMoonstoneCost)
                 {
                     <MudAlert Severity="Severity.Error">
@@ -229,7 +231,7 @@
         _isLoading = true;
         try
         {
-            var characterId = _character!.Revision.Id;
+            var characterId = _character!.Revision.RevisionId;
             await LandingService.Admin.ApproveMwFifthCharacter(characterId);
             NavigationManager.NavigateTo($"/admin/mw5e/characters/{characterId}");
             await OnInitializedAsync();
@@ -255,7 +257,7 @@
         {
             _isLoading = true;
 
-            var characterId = _character!.Revision.Id;
+            var characterId = _character!.Revision.RevisionId;
             await LandingService.Admin.RejectMwFifthCharacter(characterId);
             NavigationManager.NavigateTo($"/admin/mw5e/characters/{characterId}");
             await OnInitializedAsync();
@@ -270,7 +272,22 @@
     private async Task ReviseCharacter()
     {
         var character = await LandingService.Admin.ReviseMwFifthCharacter(CharacterId);
-        NavigationManager.NavigateTo($"/admin/mw5e/characters/{character.Revision.Id}/edit");
+        NavigationManager.NavigateTo($"/admin/mw5e/characters/{character.Revision.RevisionId}/edit");
+    }
+
+    private async Task Move()
+    {
+        var dialog = await DialogService.ShowAsync<SelectAccountDialog>("Move Character to another Account", new DialogParameters { { nameof(SelectAccountDialog.ContentText), "Select the account that will be receiving this character." } });
+        var result = await dialog.Result;
+        if (result.Canceled) return;
+
+        var newAccountId = (string)result.Data;
+        if (newAccountId == _character!.Character.AccountId) return;
+
+        await LandingService.Admin.MoveMwFifthCharacter(_character.Character.CharacterId, newAccountId);
+
+        await OnParametersSetAsync();
+        StateHasChanged();
     }
 
 }

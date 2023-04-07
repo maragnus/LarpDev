@@ -39,6 +39,15 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public async Task<IFileInfo> Export() =>
         await Download("api/admin/data/export");
 
+    public async Task MergeAccounts(string fromAccountId, string toAccountId) =>
+        await Post("api/admin/accounts/merge", new { fromAccountId, toAccountId });
+
+    public Task AddAccountEmail(string accountId, string email) =>
+        Post($"api/admin/accounts/{accountId}/emails?email={Uri.EscapeDataString(email)}");
+
+    public Task RemoveAccountEmail(string accountId, string email) =>
+        Delete($"api/admin/accounts/{accountId}/emails?email={Uri.EscapeDataString(email)}");
+
     public Task<Account> GetAccount() =>
         Get<Account>("api/account");
 
@@ -54,6 +63,9 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public Task AccountUpdate(string? fullName, string? location, string? phone, string? allergies,
         DateOnly? birthDate) =>
         Post("api/account", new { fullName, location, phone, allergies, birthDate });
+
+    public Task MoveMwFifthCharacter(string characterId, string newAccountId) =>
+        Post($"api/admin/mw5e/characters/{characterId}/move", new { newAccountId });
 
     public Task<Event[]> GetEvents() =>
         Get<Event[]>("api/events");

@@ -64,13 +64,13 @@ public class LarpContext
         await MwFifthGame.Characters.Indexes.CreateManyAsync(new[]
         {
             new CreateIndexModel<Character>(Builders<Character>.IndexKeys.Ascending(x => x.AccountId)),
-            new CreateIndexModel<Character>(Builders<Character>.IndexKeys.Ascending(x => x.UniqueId)),
+            new CreateIndexModel<Character>(Builders<Character>.IndexKeys.Ascending(x => x.CharacterId)),
         });
 
         await MwFifthGame.CharacterRevisions.Indexes.CreateManyAsync(new[]
         {
             new CreateIndexModel<CharacterRevision>(Builders<CharacterRevision>.IndexKeys.Ascending(x => x.AccountId)),
-            new CreateIndexModel<CharacterRevision>(Builders<CharacterRevision>.IndexKeys.Ascending(x => x.UniqueId))
+            new CreateIndexModel<CharacterRevision>(Builders<CharacterRevision>.IndexKeys.Ascending(x => x.CharacterId))
         });
     }
 
@@ -79,7 +79,7 @@ public class LarpContext
         var characters = (await MwFifthGame.Characters
                 .Find(_ => true)
                 .ToListAsync())
-            .ToDictionary(x => x.UniqueId);
+            .ToDictionary(x => x.CharacterId);
 
         var revisions = await MwFifthGame.CharacterRevisions
             .Find(x => x.State == CharacterState.Live)
@@ -87,13 +87,13 @@ public class LarpContext
 
         foreach (var revision in revisions)
         {
-            var character = characters[revision.UniqueId];
+            var character = characters[revision.CharacterId];
             var usedMoonstone = revision.SkillMoonstone + revision.GiftMoonstone;
             if (character.CharacterName == revision.CharacterName && usedMoonstone == character.UsedMoonstone)
                 continue;
 
             await MwFifthGame.Characters.UpdateOneAsync(
-                characterFilter => characterFilter.UniqueId == revision.UniqueId,
+                characterFilter => characterFilter.CharacterId == revision.CharacterId,
                 Builders<Character>.Update
                     .Set(x => x.CharacterName, revision.CharacterName)
                     .Set(x => x.UsedMoonstone, usedMoonstone));
@@ -106,13 +106,13 @@ public class LarpContext
         if (count == 0)
         {
             var revisions = await MwFifthGame.CharacterRevisions.Find(_ => true).ToListAsync();
-            var ids = revisions.GroupBy(x => x.UniqueId);
+            var ids = revisions.GroupBy(x => x.CharacterId);
             foreach (var id in ids)
             {
                 var first = id.First();
                 await MwFifthGame.Characters.InsertOneAsync(new Character()
                 {
-                    UniqueId = first.UniqueId,
+                    CharacterId = first.CharacterId,
                     AccountId = first.AccountId,
                     CreatedOn = first.CreatedOn
                 });

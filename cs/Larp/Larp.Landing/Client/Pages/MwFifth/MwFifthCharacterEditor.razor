@@ -1,5 +1,6 @@
 @using Larp.Landing.Shared.MwFifth
 @using System.Text.Json
+@using Larp.Landing.Client.Pages.Dialogs
 @using Larp.Landing.Shared
 @inject LandingService LandingService
 @inject ILogger<MwFifthCharacterEditor> Logger;
@@ -38,7 +39,7 @@
         _character = characterAndRevision.Character;
         var revision = characterAndRevision.Revision;
 
-        Logger.LogInformation("Character {CharacterId}", revision.Id);
+        Logger.LogInformation("Character {CharacterId}", revision.RevisionId);
 
         if (!Admin && revision.State is not CharacterState.Draft)
         {
@@ -73,7 +74,7 @@
             _newMoonstoneCost = _totalMoonstone - _lastMoonstoneCost;
         }
 
-        _isNewCharacter = revision.PreviousId == null;
+        _isNewCharacter = revision.PreviousRevisionId == null;
         _lastMoonstoneCost = characterAndRevision.Character.UsedMoonstone;
 
         _steps = new Step[]
@@ -133,6 +134,12 @@
                 @<MudIcon Icon="@Icons.Material.Outlined.History"/>,
                 () => _revision.IsHistoryValid),
             new(
+                "Documents",
+                @<StepDocuments Character="_revision"/>,
+                @<MudIcon Icon="@Icons.Material.Outlined.Notes"/>,
+                () => true,
+                () => _revision.HasDocuments),
+            new(
                 "Review",
                 @<StepReview Character="_revision" Submit="Submit"/>,
                 @<MudIcon Icon="@Icons.Material.Outlined.Verified"/>,
@@ -153,11 +160,11 @@
         _game = LandingService.MwFifth.Game;
         _gameState = LandingService.MwFifth.GameState;
 
-    // If a new character, generate it and load it up
         if (string.IsNullOrEmpty(CharacterId))
         {
+            // If a new character, generate it and load it up
             var newCharacter = await LandingService.MwFifth.GetDraftCharacter();
-            NavigationManager.NavigateTo($"/characters/mw5e/{newCharacter.Revision.Id}/edit", new NavigationOptions() { ReplaceHistoryEntry = true });
+            NavigationManager.NavigateTo($"/characters/mw5e/{newCharacter.Revision.RevisionId}/edit", new NavigationOptions() { ReplaceHistoryEntry = true });
             return;
         }
 
@@ -181,7 +188,7 @@
                 await LandingService.Admin.SaveMwFifthCharacter(_revision.Revision);
             else
                 await LandingService.MwFifth.Save(_revision.Revision);
-            CharacterId = _revision.Revision.Id;
+            CharacterId = _revision.Revision.RevisionId;
         }
         finally
         {
@@ -196,12 +203,12 @@
         {
             if (Admin)
             {
-                await LandingService.Admin.DeleteMwFifthCharacter(_revision.Revision.Id);
+                await LandingService.Admin.DeleteMwFifthCharacter(_revision.Revision.RevisionId);
                 NavigationManager.NavigateTo("/admin/mw5e/characters");
             }
             else
             {
-                await LandingService.MwFifth.DeleteCharacter(_revision.Revision.Id);
+                await LandingService.MwFifth.DeleteCharacter(_revision.Revision.RevisionId);
                 NavigationManager.NavigateTo("/characters");
             }
         }
@@ -239,7 +246,6 @@
             }
         }
     }
-
 }
 
 @if (_loadingState != LoadingState.Loaded)

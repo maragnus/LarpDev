@@ -1,5 +1,8 @@
 @page "/admin/accounts/{AccountId}"
+@using System.ComponentModel.DataAnnotations
+@using Larp.Landing.Client.Pages.Dialogs
 @inject LandingService LandingService
+@inject IDialogService DialogService
 @inject NavigationManager NavigationManager
 
 <PageHeader>Account Manager</PageHeader>
@@ -11,8 +14,8 @@
 }
 
 <AdminLayout Title="Manage Accounts" Loading="_isLoading">
-    <MudPaper Class="mb-4">
-        <MudPaper Class="pa-4 mb-4 relative">
+    <MudStack Spacing="4">
+        <MudPaper Class="pa-4 relative">
             <MudOverlay DarkBackground Absolute Visible="_savingProfile">
                 <MudText Typo="Typo.h6">Saving...</MudText>
                 <MudProgressCircular Indeterminate Size="Size.Large"/>
@@ -42,47 +45,94 @@
                 </MudItem>
             </MudGrid>
         </MudPaper>
-    </MudPaper>
 
-    <MudPaper Class="pa-4 mb-4 relative">
-        <MudOverlay DarkBackground Absolute Visible="_savingRoles">
-            <MudText Typo="Typo.h6">Saving...</MudText>
-            <MudProgressCircular Indeterminate Size="Size.Large"/>
-        </MudOverlay>
-        <MudStack Spacing="4">
-            <MudText Typo="Typo.h6">Roles</MudText>
-            <MudSwitch T="bool" Checked="_account.Roles.Contains(AccountRole.AdminAccess)" CheckedChanged="value => SetRole(AccountRole.AdminAccess, value)" Color="Color.Success" UnCheckedColor="Color.Error">Access to administration section</MudSwitch>
-            <MudSwitch T="bool" Checked="_account.Roles.Contains(AccountRole.AccountAdmin)" CheckedChanged="value => SetRole(AccountRole.AccountAdmin, value)" Color="Color.Success" UnCheckedColor="Color.Error">Can manage accounts and access</MudSwitch>
-            <MudSwitch T="bool" Checked="_account.Roles.Contains(AccountRole.MwFifthGameMaster)" CheckedChanged="value => SetRole(AccountRole.MwFifthGameMaster, value)" Color="Color.Success" UnCheckedColor="Color.Error">Can manage Mystwood 5e characters</MudSwitch>
-        </MudStack>
-    </MudPaper>
+        <MudPaper Class="pa-4 relative">
+            <MudOverlay DarkBackground Absolute Visible="_savingEmails">
+                <MudText Typo="Typo.h6">Saving...</MudText>
+                <MudProgressCircular Indeterminate Size="Size.Large"/>
+            </MudOverlay>
+            <MudText Typo="Typo.h6">Emails</MudText>
+            <EditForm Model="_newEmailModel" OnValidSubmit="AddEmailSubmit">
+                <DataAnnotationsValidator/>
+                <MudStack Row Spacing="4" Justify="Justify.FlexStart" AlignItems="AlignItems.Center" Class="mt-2">
+                    <MudTextField T="string?" @ref="_newEmailField" OnlyValidateIfDirty Label="New Email Address" Variant="Variant.Outlined" Class="flex-grow-1" InputType="InputType.Email" @bind-Value="@_newEmailModel.EmailAddress" For="() => _newEmailModel.EmailAddress"/>
+                    <MudButton StartIcon="@Icons.Material.Filled.Add" ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Outlined">Add Email</MudButton>
+                </MudStack>
+            </EditForm>
+            <MudChipSet OnClose="DeleteEmail" AllClosable="true">
+                @foreach (var email in _account.Emails)
+                {
+                    <MudChip T="string" Value="email.Email">
+                        <MudStack Row AlignItems="AlignItems.Center">
+                            @email.Email
+                            @if (email.IsVerified)
+                            {
+                                <MudTooltip Text="The player has verified this is their email address">
+                                    <MudIcon Size="Size.Small" Color="Color.Primary" Icon="@Icons.Material.Filled.VerifiedUser"/>
+                                </MudTooltip>
+                            }
+                            @if (email.IsPreferred)
+                            {
+                                <MudTooltip Text="The player prefers this email address for contact">
+                                    <MudIcon Size="Size.Small" Color="Color.Warning" Icon="@Icons.Material.Filled.Star"/>
+                                </MudTooltip>
+                            }
+                        </MudStack>
+                    </MudChip>
+                }
+            </MudChipSet>
+        </MudPaper>
 
-    <MudPaper Class="mb-4">
-        <MudDataGrid T="CharacterSummary" Items="_characters" RowClick="RowClick" Dense Groupable Hover Loading="_isLoading">
-            <Columns>
-                <TemplateColumn T="CharacterSummary" Title="Status">
-                    <CellTemplate>
-                        @switch (context.Item.State)
-                        {
-                            case CharacterState.Live:
-                                <MudChip Size="Size.Small" Color="Color.Success">Live</MudChip>
-                                break;
-                            case CharacterState.Review:
-                                <MudChip Size="Size.Small" Color="@Color.Warning">Review</MudChip>
-                                break;
-                            case CharacterState.Draft:
-                                <MudChip Size="Size.Small" Color="@Color.Info">Draft</MudChip>
-                                break;
-                        }
-                    </CellTemplate>
-                </TemplateColumn>
-                <PropertyColumn Property="x => x.Name" Title="Character Name"/>
-                <PropertyColumn Property="x => x.HomeChapter" Title="Home Chapter"/>
-                <PropertyColumn Property="x => x.Summary" Title="Summary"/>
-                <PropertyColumn Property="x => x.Level" Title="Level"/>
-            </Columns>
-        </MudDataGrid>
-    </MudPaper>
+        <MudPaper Class="pa-4 relative">
+            <MudOverlay DarkBackground Absolute Visible="_savingRoles">
+                <MudText Typo="Typo.h6">Saving...</MudText>
+                <MudProgressCircular Indeterminate Size="Size.Large"/>
+            </MudOverlay>
+            <MudStack Spacing="4">
+                <MudText Typo="Typo.h6">Roles</MudText>
+                <MudSwitch T="bool" Checked="_account.Roles.Contains(AccountRole.AdminAccess)" CheckedChanged="value => SetRole(AccountRole.AdminAccess, value)" Color="Color.Success" UnCheckedColor="Color.Error">Access to administration section</MudSwitch>
+                <MudSwitch T="bool" Checked="_account.Roles.Contains(AccountRole.AccountAdmin)" CheckedChanged="value => SetRole(AccountRole.AccountAdmin, value)" Color="Color.Success" UnCheckedColor="Color.Error">Can manage accounts and access</MudSwitch>
+                <MudSwitch T="bool" Checked="_account.Roles.Contains(AccountRole.MwFifthGameMaster)" CheckedChanged="value => SetRole(AccountRole.MwFifthGameMaster, value)" Color="Color.Success" UnCheckedColor="Color.Error">Can manage Mystwood 5e characters</MudSwitch>
+            </MudStack>
+        </MudPaper>
+
+        <MudPaper>
+            <MudDataGrid T="CharacterSummary" Items="_characters" RowClick="RowClick" Dense Groupable Hover Loading="_isLoading">
+                <Columns>
+                    <TemplateColumn T="CharacterSummary" Title="Status">
+                        <CellTemplate>
+                            @switch (context.Item.State)
+                            {
+                                case CharacterState.Live:
+                                    <MudChip Size="Size.Small" Color="Color.Success">Live</MudChip>
+                                    break;
+                                case CharacterState.Review:
+                                    <MudChip Size="Size.Small" Color="@Color.Warning">Review</MudChip>
+                                    break;
+                                case CharacterState.Draft:
+                                    <MudChip Size="Size.Small" Color="@Color.Info">Draft</MudChip>
+                                    break;
+                            }
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <PropertyColumn Property="x => x.Name" Title="Character Name"/>
+                    <PropertyColumn Property="x => x.HomeChapter" Title="Home Chapter"/>
+                    <PropertyColumn Property="x => x.Summary" Title="Summary"/>
+                    <PropertyColumn Property="x => x.Level" Title="Level"/>
+                </Columns>
+            </MudDataGrid>
+        </MudPaper>
+
+        <MudPaper Class="pa-4">
+            <MudStack Spacing="4">
+                <MudText Typo="Typo.h6">Utilities</MudText>
+                <MudTooltip Text="Merge this account (emails, characters, attendance, etc) into another account and delete this account">
+                    <MudButton Color="Color.Error" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Merge" OnClick="Merge">Merge</MudButton>
+                </MudTooltip>
+            </MudStack>
+        </MudPaper>
+    </MudStack>
+
 </AdminLayout>
 
 @code {
@@ -92,18 +142,35 @@
 
     private bool _savingProfile = true;
     private bool _savingRoles = true;
+    private bool _savingEmails = true;
     private bool _changed = false;
     private bool _isLoading = true;
     private Account? _account;
     private CharacterSummary[]? _characters;
 
-    protected override async Task OnInitializedAsync()
+    class NewEmailModel
     {
+        [EmailAddress, Display(Name = "Email Address")]
+        public string? EmailAddress { get; set; }
+    }
+
+    private NewEmailModel _newEmailModel = new();
+    private MudTextField<string?>? _newEmailField;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _savingProfile = true;
+        _savingRoles = true;
+        _savingEmails = true;
+        _isLoading = true;
+        StateHasChanged();
+
         _account = await LandingService.Admin.GetAccount(AccountId);
         _characters = await LandingService.Admin.GetAccountCharacters(AccountId);
         _changed = false;
         _savingProfile = false;
         _savingRoles = false;
+        _savingEmails = false;
         _isLoading = false;
     }
 
@@ -152,6 +219,53 @@
             _savingRoles = false;
             StateHasChanged();
         }
+    }
+
+    private async Task DeleteEmail(MudChip obj)
+    {
+        _savingEmails = true;
+        StateHasChanged();
+        try
+        {
+            await LandingService.Admin.RemoveAccountEmail(AccountId, (string)obj.Value);
+            await OnParametersSetAsync();
+        }
+        finally
+        {
+            _savingEmails = false;
+        }
+    }
+
+    private async Task AddEmailSubmit()
+    {
+        _savingEmails = true;
+        StateHasChanged();
+        try
+        {
+            await LandingService.Admin.AddAccountEmail(AccountId, _newEmailModel.EmailAddress!);
+            await _newEmailField!.Clear();
+            await OnParametersSetAsync();
+        }
+        finally
+        {
+            _savingEmails = false;
+        }
+    }
+
+    private async Task Merge()
+    {
+        var dialog = await DialogService.ShowAsync<SelectAccountDialog>("Merge Accounts", new DialogParameters { { nameof(SelectAccountDialog.ContentText), "Select the account that this account will be merged into. The account you select will be absorb this account." } });
+        var result = await dialog.Result;
+        if (result.Canceled) return;
+
+        var newAccountId = (string)result.Data;
+        if (newAccountId == AccountId) return;
+
+        await LandingService.Admin.MergeAccounts(AccountId, newAccountId);
+
+        NavigationManager.NavigateTo($"/admin/accounts/{newAccountId}");
+        await OnParametersSetAsync();
+        StateHasChanged();
     }
 
 }

@@ -27,7 +27,7 @@ public class MwFifthServiceServer : IMwFifthService
     }
 
     public async Task<CharacterAndRevision> GetCharacter(string characterId) =>
-        await _manager.Get(characterId, _account, false);
+        await _manager.GetRevision(characterId, _account, false);
 
     public async Task<CharacterAndRevision> ReviseCharacter(string characterId) =>
         await _manager.GetDraft(characterId, _account, false);

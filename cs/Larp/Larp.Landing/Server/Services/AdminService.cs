@@ -103,7 +103,7 @@ public class AdminService : IAdminService
                 .ToListAsync();
             characterSheet.Cells.LoadFromCollection(players.Select(p => new
             {
-                CharacterId = p.Id,
+                CharacterId = p.RevisionId,
                 p.AccountId,
                 TotalMoonstone = 0,
                 UnspentMoonstone = 0,
@@ -149,6 +149,48 @@ public class AdminService : IAdminService
         return path;
     }
 
+    public async Task MergeAccounts(string fromAccountId, string toAccountId)
+    {
+        await _manager.MoveAll(fromAccountId, toAccountId);
+        var attendances = await _db.Attendances
+            .Find(attendance => attendance.AccountId == fromAccountId).ToListAsync();
+
+        foreach (var attendance in attendances)
+        {
+            await SetEventAttendance(attendance.EventId, toAccountId, true,
+                attendance.MwFifth?.Moonstone,
+                attendance.MwFifth?.CharacterIds ?? Array.Empty<string>());
+        }
+
+        await _db.Attendances.DeleteManyAsync(attendance => attendance.AccountId == fromAccountId);
+
+        var fromAccount = await GetAccount(fromAccountId);
+        var toAccount = await GetAccount(toAccountId);
+
+        await UpdateAccount(toAccountId,
+            toAccount.Name ?? fromAccount.Name,
+            toAccount.Location ?? fromAccount.Location,
+            toAccount.Phone ?? fromAccount.Phone,
+            toAccount.BirthDate ?? fromAccount.BirthDate,
+            $"{fromAccount.Notes ?? ""} {toAccount.Notes ?? ""}".Trim()
+        );
+
+        await _db.Accounts.DeleteOneAsync(account => account.AccountId == fromAccountId);
+        
+        foreach (var email in fromAccount.Emails)
+            await _userSessionManager.AddEmailAddress(toAccountId, email.Email);
+    }
+
+    public async Task AddAccountEmail(string accountId, string email)
+    {
+        await _userSessionManager.AddEmailAddress(accountId, email);
+    }
+
+    public async Task RemoveAccountEmail(string accountId, string email)
+    {
+        await _userSessionManager.RemoveEmailAddress(accountId, email);
+    }
+
     public async Task ApproveMwFifthCharacter(string characterId) =>
         await _manager.Approve(characterId);
 
@@ -163,6 +205,9 @@ public class AdminService : IAdminService
 
     public async Task DeleteMwFifthCharacter(string characterId) =>
         await _manager.Delete(characterId, _account, true);
+
+    public async Task MoveMwFifthCharacter(string characterId, string newAccountId) =>
+        await _manager.Move(characterId, newAccountId);
 
     public async Task<Event[]> GetEvents()
     {
@@ -290,7 +335,7 @@ public class AdminService : IAdminService
     }
 
     public async Task<CharacterAndRevision> GetMwFifthCharacter(string characterId) =>
-        await _manager.Get(characterId, _account, true)
+        await _manager.GetRevision(characterId, _account, true)
         ?? throw new ResourceNotFoundException();
 
     public async Task<Dashboard> GetDashboard()

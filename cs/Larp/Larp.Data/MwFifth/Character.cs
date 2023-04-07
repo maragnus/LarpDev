@@ -95,22 +95,6 @@ public class ChangeSummary
     public string?[] New { get; set; } = Array.Empty<string>();
 }
 
-[PublicAPI]
-public class CharacterAttendance
-{
-    [BsonId, BsonRepresentation(BsonType.ObjectId)]
-    public string UniqueId { get; set; } = default!;
-
-    [BsonRepresentation(BsonType.ObjectId)]
-    public string EventId { get; set; } = default!;
-
-    public string[] Components { get; set; } = Array.Empty<string>();
-
-    public int AttendanceMoonstone { get; set; }
-    public int CleanupMoonstone { get; set; }
-    public int WaystonesMoonstone { get; set; }
-}
-
 public class MoonstoneInfo
 {
     public int Total { get; set; }
@@ -140,7 +124,7 @@ public record CharacterAndRevisions(Character Character, CharacterRevision[] Cha
 public class Character
 {
     [BsonId, BsonRepresentation(BsonType.ObjectId)]
-    public string UniqueId { get; set; } = default!;
+    public string CharacterId { get; set; } = default!;
 
     [BsonRepresentation(BsonType.ObjectId)]
     public string AccountId { get; set; } = default!;
@@ -151,30 +135,27 @@ public class Character
 
     public int UsedMoonstone { get; set; }
 
-    public CharacterAttendance[] Attendances { get; set; } = Array.Empty<CharacterAttendance>();
-
     public string? CharacterName { get; set; }
-    
-    public int? ImportId { get; set; }
 
+    public int? ImportId { get; set; }
 }
 
 [PublicAPI]
 public class CharacterRevision
 {
     [BsonId, BsonRepresentation(BsonType.ObjectId)]
-    public string Id { get; set; } = default!;
+    public string RevisionId { get; set; } = default!;
 
     [BsonRepresentation(BsonType.ObjectId)]
     public string AccountId { get; set; } = default!;
 
     [BsonRepresentation(BsonType.ObjectId)]
-    public string UniqueId { get; set; } = default!;
+    public string CharacterId { get; set; } = default!;
 
     public CharacterState State { get; set; } = CharacterState.Draft;
 
     [BsonRepresentation(BsonType.ObjectId)]
-    public string? PreviousId { get; set; }
+    public string? PreviousRevisionId { get; set; }
 
     public Dictionary<string, ChangeSummary>? ChangeSummary { get; set; }
 
@@ -231,7 +212,7 @@ public class CharacterRevision
 
     public CharacterSummary ToSummary(GameState gameState) =>
         new(
-            Id,
+            RevisionId,
             CharacterName ?? "Unnamed",
             GameState.GameName,
             AccountId,
@@ -241,7 +222,7 @@ public class CharacterRevision
             State);
 
     private static HashSet<string> _skipProperties = new()
-        { nameof(ChangeSummary), nameof(State), nameof(Id), nameof(PreviousId), nameof(AccountId) };
+        { nameof(ChangeSummary), nameof(State), nameof(RevisionId), nameof(PreviousRevisionId), nameof(AccountId) };
 
     private record ChangeMap(string[] Added, string[] Removed);
 

@@ -1,0 +1,36 @@
+@using Larp.Landing.Shared.MwFifth
+<MudText Typo="Typo.h6">Update additional information</MudText>
+
+<StepDivider/>
+
+@if (!Character.NoHistory)
+{
+    <StepDivider/>
+    <MudTextField T="string?" Lines="6" Label="Documents" Value="@Character.Documents" ValueChanged="DocumentsUpdated" Variant="Variant.Outlined"/>
+    <StepDivider/>
+    <MudTextField T="string?" Lines="6" Label="Cures" Value="@Character.Cures" ValueChanged="CuresUpdated" Variant="Variant.Outlined"/>
+    <StepDivider/>
+    <MudTextField T="string?" Lines="6" Label="Unusual Features" Value="@Character.UnusualFeatures" ValueChanged="UnusualFeaturesUpdated" Variant="Variant.Outlined"/>
+}
+
+@code {
+
+    [Parameter]
+    public CharacterBuilder Character { get; set; } = default!;
+
+    private void DocumentsUpdated(string? newValue)
+    {
+        Character.Documents = newValue;
+    }
+
+    private void CuresUpdated(string? newValue)
+    {
+        Character.Cures = newValue;
+    }
+
+    private void UnusualFeaturesUpdated(string? newValue)
+    {
+        Character.UnusualFeatures = newValue;
+    }
+
+}

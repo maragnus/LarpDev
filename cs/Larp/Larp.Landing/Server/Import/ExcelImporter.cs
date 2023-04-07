@@ -205,7 +205,7 @@ public class ExcelImporter
 
             var character = new Character
             {
-                UniqueId = ObjectId.GenerateNewId().ToString(),
+                CharacterId = ObjectId.GenerateNewId().ToString(),
                 ImportId = importId,
                 AccountId = account!.AccountId,
                 CharacterName = characterName,
@@ -232,9 +232,9 @@ public class ExcelImporter
 
             var revision = new CharacterRevision
             {
-                Id = ObjectId.GenerateNewId().ToString(),
+                RevisionId = ObjectId.GenerateNewId().ToString(),
                 AccountId = account!.AccountId,
-                UniqueId = character.UniqueId,
+                CharacterId = character.CharacterId,
                 State = CharacterState.Live,
                 CreatedOn = _now,
                 ApprovedOn = _now,

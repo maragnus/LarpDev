@@ -1,0 +1,53 @@
+@inject LandingService LandingService
+
+<MudDialog T="string?">
+    <DialogContent>
+        <MudText Typo="Typo.body1">@ContentText</MudText>
+        @if (_accounts.Length == 0)
+        {
+            <MudProgressLinear Indeterminate/>
+        }
+        else
+        {
+            <MudSelectExtended
+                T="AccountName?" ItemCollection="_accounts" Clearable ValueChanged="SelectionChanged"
+                ToStringFunc="@(accountName => accountName?.Name ?? "No Name Set")"
+                SearchBox="true" SearchBoxClearable SearchBoxAutoFocus SearchFunc="SearchFunc"/>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Select" Disabled="_accountId == null">Select</MudButton>
+        <MudButton Color="Color.Default" Variant="Variant.Filled" OnClick="Close">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public string ContentText { get; set; } = default!;
+
+    private AccountName[] _accounts = Array.Empty<AccountName>();
+    private string? _accountId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _accounts = await LandingService.Admin.GetAccountNames();
+    }
+
+    void Close() => MudDialog.Close(DialogResult.Cancel());
+
+    private void Select() => MudDialog.Close(DialogResult.Ok(_accountId));
+
+    private void SelectionChanged(AccountName? account)
+    {
+        _accountId = account?.AccountId;
+    }
+
+    private bool SearchFunc(AccountName? account, string query) =>
+        account?.Name?.Contains(query, StringComparison.InvariantCultureIgnoreCase) == true
+        || account?.Emails.Any(email => email.Email.Contains(query, StringComparison.InvariantCultureIgnoreCase)) == true;
+
+}

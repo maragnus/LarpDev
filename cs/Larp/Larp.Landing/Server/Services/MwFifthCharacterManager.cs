@@ -11,51 +11,77 @@ namespace Larp.Landing.Server.Services;
 public class MwFifthCharacterManager
 {
     private readonly LarpContext _larpContext;
+    private readonly ILogger _logger;
     private readonly MwFifthGameContext _mwFifth;
 
-    public MwFifthCharacterManager(LarpContext larpContext)
+    public MwFifthCharacterManager(LarpContext larpContext, ILogger<MwFifthCharacterManager> logger)
     {
         _larpContext = larpContext;
+        _logger = logger;
         _mwFifth = larpContext.MwFifthGame;
     }
 
-    private async Task<CharacterRevision?> GetLiveByUniqueId(string? uniqueId) =>
+    private async Task<CharacterRevision?> GetLiveRevision(string? uniqueId) =>
         await _mwFifth.CharacterRevisions
-            .FindOneAsync(x => x.UniqueId == uniqueId && x.State == CharacterState.Live);
+            .FindOneAsync(x => x.CharacterId == uniqueId && x.State == CharacterState.Live);
 
-    private async Task<Character> GetCharacterByUniqueId(string uniqueId) =>
-        await _mwFifth.Characters.FindOneAsync(x => x.UniqueId == uniqueId)
+    private async Task<Character> GetCharacter(string characterId) =>
+        await _mwFifth.Characters.FindOneAsync(x => x.CharacterId == characterId)
         ?? throw new ResourceNotFoundException();
+
+    public async Task Move(string characterId, string newAccountId)
+    {
+        var characterResult = await _mwFifth.Characters.UpdateOneAsync(x => x.CharacterId == characterId,
+            Builders<Character>.Update.Set(x => x.AccountId, newAccountId));
+        var revisionResult = await _mwFifth.CharacterRevisions.UpdateManyAsync(x => x.CharacterId == characterId,
+            Builders<CharacterRevision>.Update.Set(x => x.AccountId, newAccountId));
+
+        _logger.LogInformation(
+            "Moved Character {CharacterId} to Account {AccountId}: {CharacterCount} characters, {RevisionCount} revisions",
+            characterId, newAccountId, characterResult.ModifiedCount, revisionResult.ModifiedCount);
+    }
+
+    public async Task MoveAll(string oldAccountId, string newAccountId)
+    {
+        var characterResult = await _mwFifth.Characters.UpdateOneAsync(x => x.AccountId == oldAccountId,
+            Builders<Character>.Update.Set(x => x.AccountId, newAccountId));
+        var revisionResult = await _mwFifth.CharacterRevisions.UpdateManyAsync(x => x.AccountId == oldAccountId,
+            Builders<CharacterRevision>.Update.Set(x => x.AccountId, newAccountId));
+
+        _logger.LogInformation(
+            "Moved Characters from Account {FromAccountId} to Account {ToAccountId}: {CharacterCount} characters, {RevisionCount} revisions",
+            oldAccountId, newAccountId, characterResult.ModifiedCount, revisionResult.ModifiedCount);
+    }
 
     public async Task<CharacterAndRevisions> GetRevisions(string? characterId, Account account, bool isAdmin)
     {
         var reference =
             await _mwFifth.CharacterRevisions.AsQueryable()
-                .Where(x => x.Id == characterId)
-                .Select(x => new { x.AccountId, x.UniqueId })
+                .Where(x => x.RevisionId == characterId)
+                .Select(x => new { x.AccountId, UniqueId = x.CharacterId })
                 .FirstOrDefaultAsync()
             ?? throw new ResourceNotFoundException();
 
-        var character = await GetCharacterByUniqueId(reference.UniqueId);
+        var character = await GetCharacter(reference.UniqueId);
 
         // If not admin, fail
         if (!isAdmin && account.AccountId == reference.AccountId)
             throw new ResourceForbiddenException();
 
         var revisions = await _mwFifth.CharacterRevisions
-            .Find(x => x.UniqueId == reference.UniqueId)
+            .Find(x => x.CharacterId == reference.UniqueId)
             .ToListAsync();
 
         var result = new List<CharacterRevision>();
 
         // Start with the first character revision
-        var revision = revisions.First(x => x.PreviousId == null);
+        var revision = revisions.First(x => x.PreviousRevisionId == null);
         result.Add(revision);
 
         // Add each character revision in order
         while (true)
         {
-            revision = revisions.FirstOrDefault(x => x.PreviousId == revision.Id);
+            revision = revisions.FirstOrDefault(x => x.PreviousRevisionId == revision.RevisionId);
             if (revision == null) break;
             result.Add(revision);
         }
@@ -82,11 +108,11 @@ public class MwFifthCharacterManager
     {
         var reference =
             await _mwFifth.CharacterRevisions.AsQueryable()
-                .Where(x => x.Id == characterId)
+                .Where(x => x.RevisionId == characterId)
                 .Select(x => new
                 {
                     x.State,
-                    x.UniqueId,
+                    UniqueId = x.CharacterId,
                     x.CharacterName,
                     Moonstone = x.GiftMoonstone + x.SkillMoonstone
                 })
@@ -97,20 +123,20 @@ public class MwFifthCharacterManager
             throw new BadRequestException("Character state must be in Review");
 
         await _mwFifth.Characters
-            .UpdateOneAsync(x => x.UniqueId == reference.UniqueId,
+            .UpdateOneAsync(x => x.CharacterId == reference.UniqueId,
                 Builders<Character>.Update
                     .Set(x => x.CharacterName, reference.CharacterName)
                     .Set(x => x.UsedMoonstone, reference.Moonstone));
 
         // Mark all (hopefully only one) Live characters are Archive
         await _mwFifth.CharacterRevisions
-            .UpdateOneAsync(x => x.UniqueId == reference.UniqueId && x.State == CharacterState.Live,
+            .UpdateOneAsync(x => x.CharacterId == reference.UniqueId && x.State == CharacterState.Live,
                 Builders<CharacterRevision>.Update
                     .Set(x => x.State, CharacterState.Archived)
                     .Set(x => x.ArchivedOn, DateTime.UtcNow));
 
         await _mwFifth.CharacterRevisions
-            .UpdateOneAsync(x => x.Id == characterId,
+            .UpdateOneAsync(x => x.RevisionId == characterId,
                 Builders<CharacterRevision>.Update
                     .Set(x => x.State, CharacterState.Live)
                     .Set(x => x.ApprovedOn, DateTime.UtcNow));
@@ -120,8 +146,8 @@ public class MwFifthCharacterManager
     {
         var reference =
             await _mwFifth.CharacterRevisions.AsQueryable()
-                .Where(x => x.Id == characterId)
-                .Select(x => new { x.State, x.UniqueId })
+                .Where(x => x.RevisionId == characterId)
+                .Select(x => new { x.State, UniqueId = x.CharacterId })
                 .FirstOrDefaultAsync()
             ?? throw new ResourceNotFoundException();
 
@@ -130,17 +156,17 @@ public class MwFifthCharacterManager
 
         // Mark all (hopefully only one) Live characters are Archive
         await _mwFifth.CharacterRevisions
-            .UpdateOneAsync(x => x.UniqueId == reference.UniqueId && x.State == CharacterState.Review,
+            .UpdateOneAsync(x => x.CharacterId == reference.UniqueId && x.State == CharacterState.Review,
                 Builders<CharacterRevision>.Update
                     .Set(x => x.State, CharacterState.Draft));
     }
 
-    public async Task<CharacterAndRevision> Get(string characterId, Account account, bool isAdmin)
+    public async Task<CharacterAndRevision> GetRevision(string revisionId, Account account, bool isAdmin)
     {
-        var revision = await _mwFifth.CharacterRevisions.FindOneAsync(x => x.Id == characterId)
+        var revision = await _mwFifth.CharacterRevisions.FindOneAsync(x => x.RevisionId == revisionId)
                        ?? throw new ResourceNotFoundException();
 
-        var character = await GetCharacterByUniqueId(revision.UniqueId);
+        var character = await GetCharacter(revision.CharacterId);
         var moonstone = await GetAvailableMoonstone(character.AccountId);
 
         if (!isAdmin && character.AccountId != account.AccountId)
@@ -152,8 +178,8 @@ public class MwFifthCharacterManager
     public async Task<CharacterAndRevision> GetDraft(string? characterId, Account account, bool isAdmin)
     {
         var reference = await _mwFifth.CharacterRevisions.AsQueryable()
-                            .Where(x => x.Id == characterId)
-                            .Select(x => new { x.AccountId, x.UniqueId })
+                            .Where(x => x.RevisionId == characterId)
+                            .Select(x => new { x.AccountId, UniqueId = x.CharacterId })
                             .FirstOrDefaultAsync()
                         ?? throw new ResourceNotFoundException("CharacterId was not found");
 
@@ -163,10 +189,10 @@ public class MwFifthCharacterManager
 
         var moonstone = await GetAvailableMoonstone(reference.AccountId);
 
-        var character = await GetCharacterByUniqueId(reference.UniqueId);
+        var character = await GetCharacter(reference.UniqueId);
 
         var revisions = await _mwFifth.CharacterRevisions
-            .Find(x => x.UniqueId == reference.UniqueId && x.State != CharacterState.Archived)
+            .Find(x => x.CharacterId == reference.UniqueId && x.State != CharacterState.Archived)
             .ToListAsync();
 
         // If we already have a draft, return that
@@ -186,8 +212,8 @@ public class MwFifthCharacterManager
                    ?? throw new ResourceNotFoundException();
 
         // Create new draft
-        revision.PreviousId = revision.Id;
-        revision.Id = ObjectId.GenerateNewId().ToString();
+        revision.PreviousRevisionId = revision.RevisionId;
+        revision.RevisionId = ObjectId.GenerateNewId().ToString();
         revision.State = CharacterState.Draft;
         await _mwFifth.CharacterRevisions.InsertOneAsync(revision);
         return new CharacterAndRevision(character, revision, moonstone);
@@ -195,7 +221,7 @@ public class MwFifthCharacterManager
 
     public async Task Save(CharacterRevision revision, Account account, bool isAdmin)
     {
-        var saved = await Get(revision.Id, account, isAdmin);
+        var saved = await GetRevision(revision.RevisionId, account, isAdmin);
 
         if (saved == null)
             throw new BadRequestException("Character does not exist");
@@ -214,7 +240,7 @@ public class MwFifthCharacterManager
             throw new BadRequestException("State may only be Draft or Review");
 
         // Update the change summary from the most recent live
-        var live = await GetLiveByUniqueId(revision.UniqueId);
+        var live = await GetLiveRevision(revision.CharacterId);
         revision.ChangeSummary =
             live != null
                 ? CharacterRevision.BuildChangeSummary(live, revision)
@@ -225,9 +251,9 @@ public class MwFifthCharacterManager
 
         revision.UnlockedAllSpells = saved.Revision.UnlockedAllSpells;
         revision.CreatedOn = saved.Revision.CreatedOn;
-        revision.UniqueId = saved.Revision.UniqueId;
+        revision.CharacterId = saved.Revision.CharacterId;
 
-        await _mwFifth.CharacterRevisions.ReplaceOneAsync(x => x.Id == revision.Id, revision);
+        await _mwFifth.CharacterRevisions.ReplaceOneAsync(x => x.RevisionId == revision.RevisionId, revision);
     }
 
     public async Task<CharacterAndRevision> GetNew(Account account)
@@ -235,17 +261,17 @@ public class MwFifthCharacterManager
         var now = DateTime.UtcNow;
         var character = new Character()
         {
-            UniqueId = ObjectId.GenerateNewId().ToString(),
+            CharacterId = ObjectId.GenerateNewId().ToString(),
             AccountId = account.AccountId,
             CreatedOn = now,
         };
 
         var revision = new CharacterRevision
         {
-            Id = ObjectId.GenerateNewId().ToString(),
+            RevisionId = ObjectId.GenerateNewId().ToString(),
             AccountId = account.AccountId,
             State = CharacterState.Draft,
-            UniqueId = character.UniqueId,
+            CharacterId = character.CharacterId,
             CreatedOn = now
         };
 
@@ -258,21 +284,21 @@ public class MwFifthCharacterManager
 
     public async Task Delete(string characterId, Account account, bool isAdmin)
     {
-        var character = await Get(characterId, account, isAdmin)
+        var character = await GetRevision(characterId, account, isAdmin)
                         ?? throw new ResourceNotFoundException();
 
         // User cannot change the state to Live
         if (character.Revision.State is not CharacterState.Draft)
             throw new BadReadException("Character must be in draft");
 
-        await _mwFifth.CharacterRevisions.DeleteOneAsync(x => x.Id == characterId);
+        await _mwFifth.CharacterRevisions.DeleteOneAsync(x => x.RevisionId == characterId);
     }
 
     public async Task<CharacterAndRevision> GetLatest(string characterId, Account account, bool isAdmin)
     {
         var reference = await _mwFifth.CharacterRevisions.AsQueryable()
-            .Where(x => x.Id == characterId)
-            .Select(x => new { x.AccountId, x.UniqueId })
+            .Where(x => x.RevisionId == characterId)
+            .Select(x => new { x.AccountId, UniqueId = x.CharacterId })
             .FirstOrDefaultAsync();
 
         // If not admin, fail
@@ -282,10 +308,10 @@ public class MwFifthCharacterManager
         var moonstone = await GetAvailableMoonstone(reference.AccountId);
 
         var revisions = await _mwFifth.CharacterRevisions
-            .Find(x => x.UniqueId == reference.UniqueId && x.State != CharacterState.Archived)
+            .Find(x => x.CharacterId == reference.UniqueId && x.State != CharacterState.Archived)
             .ToListAsync();
 
-        var character = await GetCharacterByUniqueId(reference.UniqueId);
+        var character = await GetCharacter(reference.UniqueId);
 
         var revision =
             revisions.FirstOrDefault(x => x.State is CharacterState.Draft or CharacterState.Review)

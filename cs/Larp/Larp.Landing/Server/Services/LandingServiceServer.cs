@@ -129,7 +129,7 @@ public class LandingServiceServer : ILandingService
     {
         var characters = await _db.MwFifthGame.Characters
             .Find(character => character.AccountId == _userSession.AccountId)
-            .Project(character => new { character.UniqueId, character.CharacterName })
+            .Project(character => new { UniqueId = character.CharacterId, character.CharacterName })
             .ToListAsync();
         return characters
             .ToDictionary(

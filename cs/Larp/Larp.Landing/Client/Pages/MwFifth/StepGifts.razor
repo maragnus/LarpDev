@@ -91,7 +91,7 @@
 
     protected override void OnInitialized()
     {
-        _isNewCharacter = Character.Revision.PreviousId == null;
+        _isNewCharacter = Character.Revision.PreviousRevisionId == null;
 
         _gifts = new[]
         {

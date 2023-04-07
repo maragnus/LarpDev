@@ -10,7 +10,7 @@ public class CharacterAccountSummary
     }
     
     public CharacterAccountSummary(CharacterRevision revision, Account account)
-        : this(revision.Id, account.AccountId, revision.State, account.Name, account.EmailList,
+        : this(revision.RevisionId, account.AccountId, revision.State, account.Name, account.EmailList,
             revision.CharacterName, revision.HomeChapter, revision.Occupation, revision.Level, revision.GiftMoonstone + revision.SkillMoonstone)
     {
     }

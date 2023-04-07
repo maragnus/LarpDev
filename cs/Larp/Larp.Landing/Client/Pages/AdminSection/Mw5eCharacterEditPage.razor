@@ -19,7 +19,7 @@
     protected override async Task OnInitializedAsync()
     {
         var character = await LandingService.Admin.GetMwFifthCharacterLatest(CharacterId);
-        if (character.Revision.Id != CharacterId)
+        if (character.Revision.RevisionId != CharacterId)
         {
             NavigationManager.NavigateTo($"/admin/mw5e/characters/{character.Revision}/edit", replace: true);
             await OnInitializedAsync();

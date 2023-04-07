@@ -166,6 +166,27 @@ public class CharacterBuilder
         get => Revision.PrivateHistory;
         set => Set(x => x.PrivateHistory = value);
     }
+    
+    
+    public string? Documents
+    {
+        get => Revision.Documents;
+        set => Set(x => x.Documents = value);
+    }
+
+    
+    public string? Cures
+    {
+        get => Revision.Cures;
+        set => Set(x => x.Cures = value);
+    }
+
+    
+    public string? UnusualFeatures
+    {
+        get => Revision.UnusualFeatures;
+        set => Set(x => x.UnusualFeatures = value);
+    }
 
     private string[] _chosenSpells;
 
@@ -290,7 +311,7 @@ public class CharacterBuilder
         nameof(PurchasedSkills))]
     public HashSet<string> Skills { get; private set; } = new();
 
-    public bool HasEnhancements => AvailableOccupations.Count > 0 && Revision.PreviousId != null;
+    public bool HasEnhancements => AvailableOccupations.Count > 0 && Revision.PreviousRevisionId != null;
 
     [DependsOn(nameof(PopulateSpells), nameof(Wisdom))]
     public bool HasWisdomSpells { get; private set; }
@@ -324,7 +345,7 @@ public class CharacterBuilder
         {
             if (AgeGroup == Data.MwFifth.AgeGroup.PreTeen)
                 return Level == 0;
-            if (Revision is { State: CharacterState.Draft, PreviousId: null })
+            if (Revision is { State: CharacterState.Draft, PreviousRevisionId: null })
                 return (NoHistory && Level == 5) || (!NoHistory && Level == 6);
             return (NoHistory && Level >= 5) || (!NoHistory && Level >= 6);
         }
@@ -346,7 +367,9 @@ public class CharacterBuilder
 
     public bool IsSkillsValid => true;
 
-    public bool HasSkills => Revision.PreviousId != null;
+    public bool HasSkills => Revision.PreviousRevisionId != null;
+
+    public bool HasDocuments => Revision.PreviousRevisionId != null;
 
     [DependsOn(nameof(PopulateAbilities), nameof(Courage), nameof(Dexterity), nameof(Empathy), nameof(Passion),
         nameof(Prowess), nameof(Wisdom))]
@@ -449,7 +472,7 @@ public class CharacterBuilder
             .Where(x => x.Type == OccupationType.Enhancement && x.IsChapter(HomeChapter))
             .ToDictionary(x => x.Name);
 
-        if (Revision.PreviousId == null)
+        if (Revision.PreviousRevisionId == null)
         {
             switch (Revision.AgeGroup)
             {
