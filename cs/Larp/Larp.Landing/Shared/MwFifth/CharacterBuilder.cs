@@ -378,7 +378,7 @@ public class CharacterBuilder
 
         var purchasedSkills = PurchasedSkills
             .Select(purchase => (
-                PurchaseCount: purchase.Purchases ?? 1,
+                PurchaseCount: Math.Max(1, purchase.Purchases ?? 1),
                 CostPerPurchase: GameState.Skills.First(x => x.Name == purchase.Name).CostPerPurchase ?? 0))
             .ToList();
 

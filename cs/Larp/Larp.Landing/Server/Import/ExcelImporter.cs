@@ -64,6 +64,66 @@ public class ExcelImporter
         return new ExcelImportResult();
     }
 
+    private class ExcelEvent
+    {
+        public string Name { get; }
+        public Dictionary<int, int> Moonstone { get; } = new();
+
+        public ExcelEvent(string name)
+        {
+            Name = name;
+        }
+    }
+
+    private async Task ProcessEvents(ExcelWorksheet sheet)
+    {
+        var upsert = new UpdateOptions() { IsUpsert = true };
+
+        for (var column = 4; column < sheet.Columns.EndColumn; column++)
+        {
+            var eventName = sheet.Cells[1, column].Value.ToString();
+            if (string.IsNullOrWhiteSpace(eventName)) continue;
+            var excelEvent = new ExcelEvent(eventName);
+
+            for (var row = 2; row < sheet.Rows.EndRow; row++)
+            {
+                if (sheet.Cells[row, 1].Value is not double playerId) continue;
+                if (sheet.Cells[row, column].Value is not double moonstone) continue;
+                excelEvent.Moonstone.Add((int)playerId, (int)moonstone);
+            }
+
+            if (!_events.TryGetValue(eventName, out var @event))
+            {
+                if (!int.TryParse(eventName[0..4], out var year))
+                    year = 2018;
+
+                @event = new Event()
+                {
+                    Date = new DateTimeOffset(new DateTime(year, 1, 1)),
+                    ImportId = eventName,
+                    Title = eventName,
+                    GameId = _gameId,
+                    EventType = "Game"
+                };
+                await _larpContext.Events.InsertOneAsync(@event);
+            }
+
+            foreach (var (playerId, moonstone) in excelEvent.Moonstone)
+            {
+                if (!_players.TryGetValue(playerId, out var account)) continue;
+
+                await _larpContext.Attendances.UpdateOneAsync(
+                    x => x.AccountId == account.AccountId && x.EventId == @event.Id,
+                    Builders<Attendance>.Update
+                        .SetOnInsert(a => a.AccountId, account.AccountId)
+                        .SetOnInsert(a => a.EventId, @event.Id)
+                        .Set(a => a.MwFifth, new MwFifthAttendance() { Moonstone = moonstone }),
+                    upsert
+                );
+            }
+        }
+    }
+
     private async Task ProcessPlayers(ExcelWorksheet sheet)
     {
         for (var row = 2; row < sheet.Rows.EndRow; row++)
@@ -116,17 +176,19 @@ public class ExcelImporter
         var playerNames = _players.Values
             .DistinctBy(x => x.Name)
             .Where(x => x.Name != null)
-            .ToDictionary(x => x.Name!, x=> x, comparer: StringComparer.InvariantCultureIgnoreCase);
+            .ToDictionary(x => x.Name!, x => x, comparer: StringComparer.InvariantCultureIgnoreCase);
+
+        static int ToInt(object? value) => (int)(double)(value ?? 0);
 
         for (var row = 2; row < sheet.Rows.EndRow; row++)
         {
-            var characterId = (double?)sheet.Cells[row, 1].Value;
+            var characterId = sheet.Cells[row, 1].Value;
             if (characterId == null) continue;
 
             var characterName = (string)sheet.Cells[row, 4].Value;
             if (characterName == "Lord Example") continue;
 
-            var importId = (int)characterId.Value;
+            var importId = ToInt(characterId);
             if (_characters.ContainsKey(importId)) continue;
 
             var playerName = (string?)sheet.Cells[row, 5].Value;
@@ -138,8 +200,8 @@ public class ExcelImporter
                 continue;
             }
 
-            var giftMoonstone = (int)(double)sheet.Cells[row, 17].Value;
-            var skillMoonstone = (int)(double)sheet.Cells[row, 21].Value;
+            var giftMoonstone = ToInt(sheet.Cells[row, 17].Value);
+            var skillMoonstone = ToInt(sheet.Cells[row, 21].Value);
 
             var character = new Character
             {
@@ -167,8 +229,6 @@ public class ExcelImporter
 
             TranslateOccupation((string?)sheet.Cells[row, 7].Value, out var occupation, out var occupationSkills);
             TranslateOccupation((string?)sheet.Cells[row, 8].Value, out var enhancement, out var enhancementSkills);
-
-            static int ToInt(object? value) => (int)(double)(value ?? 0);
 
             var revision = new CharacterRevision
             {
@@ -202,6 +262,8 @@ public class ExcelImporter
             };
 
             revision.NoHistory = string.IsNullOrWhiteSpace(revision.PublicHistory);
+            revision.NoAdvantages = revision.Advantages.Length == 0 && revision.Disadvantages.Length == 0;
+            revision.NoOccupation = occupation == null;
 
             var builder = new CharacterBuilder(
                 new CharacterAndRevision(character, revision, new MoonstoneInfo(0, 0)),
@@ -261,7 +323,10 @@ public class ExcelImporter
             return;
 
         name = match.Groups[1].Value;
-        skills = match.Groups[3].Value.Split(',').Select(x => x.Trim()).ToArray();
+        skills = match.Groups[3].Value.Split(',')
+            .Select(x => x.Trim())
+            .Where(x=> !string.IsNullOrWhiteSpace(x))
+            .ToArray();
     }
 
     private CharacterSkill[] TranslateSkills(string? value)
@@ -270,7 +335,7 @@ public class ExcelImporter
 
         return value.Split(',')
             .Select(x => x.Trim())
-            .Where(x => x != "-")
+            .Where(x => !string.IsNullOrWhiteSpace(x) && x != "-")
             .Select(item =>
             {
                 string name;
@@ -285,7 +350,7 @@ public class ExcelImporter
                 {
                     match = Regex.Match(item, @"^(.*) \d", RegexOptions.Compiled);
                     if (!match.Success)
-                        throw new Exception($"Skill {item} is not properly formatted");
+                        throw new Exception($"Skill \"{item}\" is not properly formatted");
                     name = match.Groups[1].Value;
                     count = 1;
                 }
@@ -293,7 +358,7 @@ public class ExcelImporter
                 var skill = _gameState.Skills.FirstOrDefault(x =>
                     string.Equals(x.Name, name, StringComparison.InvariantCultureIgnoreCase));
                 if (skill == null)
-                    throw new Exception($"Skill {name} does not exist");
+                    throw new Exception($"Skill \"{name}\" does not exist");
 
                 return new CharacterSkill()
                 {
@@ -303,6 +368,7 @@ public class ExcelImporter
                     Type = SkillPurchase.Purchased
                 };
             })
+            .Where(x => !string.IsNullOrWhiteSpace(x.Name))
             .ToArray();
     }
 
@@ -339,65 +405,5 @@ public class ExcelImporter
         if (homeChapter.StartsWith("Novgorond", StringComparison.InvariantCultureIgnoreCase))
             return "novgorond";
         return homeChapter;
-    }
-
-    private async Task ProcessEvents(ExcelWorksheet sheet)
-    {
-        var upsert = new UpdateOptions() { IsUpsert = true };
-
-        for (var column = 4; column < sheet.Columns.EndColumn; column++)
-        {
-            var eventName = sheet.Cells[1, column].Value.ToString();
-            if (string.IsNullOrWhiteSpace(eventName)) continue;
-            var excelEvent = new ExcelEvent(eventName);
-
-            for (var row = 2; row < sheet.Rows.EndRow; row++)
-            {
-                if (sheet.Cells[row, 1].Value is not double playerId) continue;
-                if (sheet.Cells[row, column].Value is not double moonstone) continue;
-                excelEvent.Moonstone.Add((int)playerId, (int)moonstone);
-            }
-
-            if (!_events.TryGetValue(eventName, out var @event))
-            {
-                if (!int.TryParse(eventName[0..4], out var year))
-                    year = 2018;
-
-                @event = new Event()
-                {
-                    Date = new DateTimeOffset(new DateTime(year, 1, 1)),
-                    ImportId = eventName,
-                    Title = eventName,
-                    GameId = _gameId,
-                    EventType = "Game"
-                };
-                await _larpContext.Events.InsertOneAsync(@event);
-            }
-
-            foreach (var (playerId, moonstone) in excelEvent.Moonstone)
-            {
-                if (!_players.TryGetValue(playerId, out var account)) continue;
-
-                await _larpContext.Attendances.UpdateOneAsync(
-                    x => x.AccountId == account.AccountId && x.EventId == @event.Id,
-                    Builders<Attendance>.Update
-                        .SetOnInsert(a => a.AccountId, account.AccountId)
-                        .SetOnInsert(a => a.EventId, @event.Id)
-                        .Set(a => a.MwFifth, new MwFifthAttendance() { Moonstone = moonstone }),
-                    upsert
-                );
-            }
-        }
-    }
-
-    public class ExcelEvent
-    {
-        public string Name { get; }
-        public Dictionary<int, int> Moonstone { get; } = new();
-
-        public ExcelEvent(string name)
-        {
-            Name = name;
-        }
     }
 }
