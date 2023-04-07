@@ -4,37 +4,41 @@
 @inject IDialogService DialogService
 
 <AdminLayout Loading="_isLoading" Title="Edit Event">
-    <MudButtonGroup OverrideStyles="false" Class="mb-4">
-        <MudButton Color="Color.Success" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" OnClick="Save">Save</MudButton>
-        <MudButton Color="Color.Error" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" OnClick="Delete">Delete</MudButton>
-        <MudButton Color="Color.Info" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.People" OnClick="Attendance">Attendance</MudButton>
-    </MudButtonGroup>
-    <MudGrid Class="mb-4">
-        <MudItem xs="12" md="6">
-            <MudTextField T="string?" Label="Title" Required @bind-Value="@_event.Title"/>
-        </MudItem>
-        <MudItem xs="12" md="6">
-            <MudTextField T="string?" Label="Location" @bind-Value="@_event.Location"/>
-        </MudItem>
-        <MudItem xs="12" md="6">
-            <MudSelectExtended T="string?" Label="Event Type" Required @bind-Value="@_event.EventType" ItemCollection="_eventTypes"/>
-        </MudItem>
-        <MudItem xs="12" md="6">
-            <MudDatePicker T="DateTime" Label="When" Required Date="@_date" DateChanged="date => _date = date ?? DateTime.Today"/>
-        </MudItem>
-        <MudItem xs="6" md="3">
-            <MudSwitch T="bool" Label="Has RSVP" @bind-Checked="@_event.CanRsvp"/>
-        </MudItem>
-        <MudItem xs="6" md="3">
-            <MudSwitch T="bool" Label="Hidden" @bind-Checked="@_event.IsHidden"/>
-        </MudItem>
-    </MudGrid>
-    <MudDataGrid T="EventComponent" Items="_components" EditMode="DataGridEditMode.Cell" ReadOnly="false">
-        <Columns>
-            <PropertyColumn Property="x => x.Name" Title="Component Name" IsEditable/>
-            <PropertyColumn Property="x => x.When" Title="When" Format="dddd, MMM d, yyyy" IsEditable="false"/>
-        </Columns>
-    </MudDataGrid>
+    <MudStack Spacing="4">
+
+        <MudButtonGroup OverrideStyles="false">
+            <MudButton Color="Color.Success" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" OnClick="Save">Save</MudButton>
+            <MudButton Color="Color.Error" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" OnClick="Delete">Delete</MudButton>
+        </MudButtonGroup>
+        <MudGrid>
+            <MudItem xs="12" md="6">
+                <MudTextField T="string?" Label="Title" Required @bind-Value="@_event.Title"/>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudTextField T="string?" Label="Location" @bind-Value="@_event.Location"/>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudSelectExtended T="string?" Label="Event Type" Required @bind-Value="@_event.EventType" ItemCollection="_eventTypes"/>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudDatePicker T="DateTime" Label="When" Required Date="@_date" DateChanged="date => _date = date ?? DateTime.Today"/>
+            </MudItem>
+            <MudItem xs="6" md="3">
+                <MudSwitch T="bool" Label="Has RSVP" @bind-Checked="@_event.CanRsvp"/>
+            </MudItem>
+            <MudItem xs="6" md="3">
+                <MudSwitch T="bool" Label="Hidden" @bind-Checked="@_event.IsHidden"/>
+            </MudItem>
+        </MudGrid>
+        <MudDataGrid T="EventComponent" Items="_components" EditMode="DataGridEditMode.Cell" ReadOnly="false">
+            <Columns>
+                <PropertyColumn Property="x => x.Name" Title="Component Name" IsEditable/>
+                <PropertyColumn Property="x => x.When" Title="When" Format="dddd, MMM d, yyyy" IsEditable="false"/>
+            </Columns>
+        </MudDataGrid>
+        <MudText Typo="Typo.h6">Attendance</MudText>
+        <EventAttendanceComponent EventId="@EventId"/>
+    </MudStack>
 </AdminLayout>
 
 @code {
