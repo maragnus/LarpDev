@@ -22,11 +22,12 @@ public class AdminService : IAdminService
     private readonly IUserSessionManager _userSessionManager;
     private readonly ILogger<AdminService> _logger;
     private readonly IServiceProvider _serviceProvider;
+    private readonly LetterManager _letterManager;
     private readonly Account _account;
 
     public AdminService(LarpContext db, IUserSession userSession, IFileProvider fileProvider,
         MwFifthCharacterManager manager, IUserSessionManager userSessionManager, ILogger<AdminService> logger,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider, LetterManager letterManager)
     {
         _db = db;
         _fileProvider = fileProvider;
@@ -34,6 +35,7 @@ public class AdminService : IAdminService
         _userSessionManager = userSessionManager;
         _logger = logger;
         _serviceProvider = serviceProvider;
+        _letterManager = letterManager;
         _account = userSession.CurrentUser!;
     }
 
@@ -149,7 +151,72 @@ public class AdminService : IAdminService
         return path;
     }
 
-    public async Task MergeAccounts(string fromAccountId, string toAccountId)
+    public async Task<IFileInfo> ExportLetters(string eventId)
+    {
+        var letters = await _letterManager.GetByEvent(eventId);
+        var attendance = await this.GetEventAttendances(eventId);
+        var players = (await GetAccountNames()).ToDictionary(x => x.AccountId);
+        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+        var path = _fileProvider.GetFileInfo($"{Path.GetRandomFileName()}.xlsx");
+
+        var file = new FileInfo(path.PhysicalPath!);
+        using var package = new ExcelPackage(file);
+
+        using var workbook = package.Workbook;
+
+        var attendanceSheet = workbook.Worksheets.Add("Attendance");
+        {
+            attendanceSheet.Cells.LoadFromCollection(attendance.Select(p => new
+            {
+                PlayerId = p.AccountId,
+                PlayerName = players.TryGetValue(p.AccountId, out var player) ? player.Name : "No Name Set",
+                Moonstone = p.MwFifth?.Moonstone
+            }), true, TableStyles.Light6);
+        }
+
+        var letterSheet = workbook.Worksheets.Add("Letters");
+        if (letters.LetterTemplate != null)
+        {
+            int row = 1, column = 1;
+
+            void Write(string? value) => letterSheet.Cells[row, column++].Value = value;
+
+            void NextRow()
+            {
+                row++;
+                column = 1;
+            }
+
+            var fields = letters.LetterTemplate.Fields.Select(x => x.Name).ToArray();
+            Write("Player Name");
+            foreach (var field in fields)
+            {
+                Write(field);
+            }
+
+            NextRow();
+
+            foreach (var letter in letters.Letters)
+            {
+                var name = players.TryGetValue(letter.AccountId, out var player) ? player.Name : "No Name Set";
+                Write(name);
+                foreach (var field in fields)
+                {
+                    Write(letter.Fields.TryGetValue(field, out var value) ? value : null);
+                }
+
+                NextRow();
+            }
+            
+            letterSheet.Cells[1, 1, row, column].AutoFitColumns();
+        }
+
+        await package.SaveAsync();
+
+        return path;
+    }
+
+    async Task IAdminService.MergeAccounts(string fromAccountId, string toAccountId)
     {
         await _manager.MoveAll(fromAccountId, toAccountId);
         var attendances = await _db.Attendances
@@ -176,7 +243,7 @@ public class AdminService : IAdminService
         );
 
         await _db.Accounts.DeleteOneAsync(account => account.AccountId == fromAccountId);
-        
+
         foreach (var email in fromAccount.Emails)
             await _userSessionManager.AddEmailAddress(toAccountId, email.Email);
     }
@@ -191,8 +258,46 @@ public class AdminService : IAdminService
         await _userSessionManager.RemoveEmailAddress(accountId, email);
     }
 
+    public async Task<LetterTemplate> DraftLetterTemplate() =>
+        await _letterManager.DraftTemplate();
+
+    public async Task SaveLetterTemplate(string templateId, LetterTemplate template)
+    {
+        template.LetterTemplateId = templateId;
+        await _letterManager.SaveTemplate(template);
+    }
+
+    public async Task<LetterTemplate[]> GetLetterTemplates() =>
+        await _letterManager.GetTemplates();
+
+    public async Task<LetterTemplate[]> GetLetterTemplateNames() =>
+        await _letterManager.GetTemplateNames();
+
+    public async Task<LetterTemplate> GetLetterTemplate(string templateId) =>
+        await _letterManager.GetTemplate(templateId);
+
+    public Task<Letter[]> GetLetters()
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task ApproveLetter(string letterId) =>
+        await _letterManager.Approve(letterId, _account.AccountId);
+
+    public async Task RejectLetter(string letterId) =>
+        await _letterManager.Reject(letterId, _account.AccountId);
+
+    public async Task<Letter[]> GetSubmittedLetters() =>
+        await _letterManager.GetByState(LetterState.Submitted);
+
+    public async Task<LettersAndTemplate> GetEventLetters(string eventId) =>
+        await _letterManager.GetByEvent(eventId);
+
+    public async Task<Letter[]> GetTemplateLetters(string templateId) =>
+        await _letterManager.GetByTemplate(templateId);
+
     public async Task ApproveMwFifthCharacter(string characterId) =>
-        await _manager.Approve(characterId);
+        await _manager.Approve(characterId, _account.AccountId);
 
     public async Task RejectMwFifthCharacter(string characterId) =>
         await _manager.Reject(characterId);
@@ -219,24 +324,23 @@ public class AdminService : IAdminService
 
     public async Task<Event> GetEvent(string eventId)
     {
-        return await _db.Events.FindOneAsync(x => x.Id == eventId)
+        return await _db.Events.FindOneAsync(x => x.EventId == eventId)
                ?? throw new ResourceNotFoundException();
     }
 
-    public async Task SaveEvent(string eventId, string gameId, string? title, string? type,
-        string? location, DateTimeOffset date, bool rsvp, bool hidden,
-        EventComponent[] components)
+    public async Task SaveEvent(string eventId, Event @event)
     {
-        await _db.Events.UpdateOneAsync(x => x.Id == eventId,
+        await _db.Events.UpdateOneAsync(x => x.EventId == eventId,
             Builders<Event>.Update
-                .Set(x => x.GameId, gameId)
-                .Set(x => x.Title, title)
-                .Set(x => x.EventType, type)
-                .Set(x => x.Location, location)
-                .Set(x => x.Date, date)
-                .Set(x => x.CanRsvp, rsvp)
-                .Set(x => x.IsHidden, hidden)
-                .Set(x => x.Components, components)
+                .Set(x => x.GameId, @event.GameId)
+                .Set(x => x.Title, @event.Title)
+                .Set(x => x.EventType, @event.EventType)
+                .Set(x => x.Location, @event.Location)
+                .Set(x => x.Date, @event.Date)
+                .Set(x => x.CanRsvp, @event.CanRsvp)
+                .Set(x => x.IsHidden, @event.IsHidden)
+                .Set(x => x.LetterTemplateId, @event.LetterTemplateId)
+                .Set(x => x.Components, @event.Components)
         );
     }
 
@@ -245,7 +349,7 @@ public class AdminService : IAdminService
         var attendees = await _db.Attendances.CountDocumentsAsync(x => x.EventId == eventId);
         if (attendees > 0)
             throw new BadRequestException($"Cannot delete event, it has {attendees} attendees");
-        await _db.Events.DeleteOneAsync(x => x.Id == eventId);
+        await _db.Events.DeleteOneAsync(x => x.EventId == eventId);
     }
 
     public async Task SetEventAttendance(string eventId, string accountId, bool attended, int? moonstone,

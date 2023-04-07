@@ -1,0 +1,90 @@
+<MudContainer MaxWidth="MaxWidth.Small" Class="relative">
+    <MudPaper Class="pa-4 mt-4">
+        <MudStack Spacing="4">
+            <MudText Typo="Typo.h6">@Template.Title</MudText>
+            <MudText Typo="Typo.body2">@Event.Title on @Event.Date.ToString("dddd, MMMM dd, yyyy")</MudText>
+            @if (!string.IsNullOrWhiteSpace(Template.Description))
+            {
+                <MudText Typo="Typo.body1">@Template.Description</MudText>
+            }
+        </MudStack>
+    </MudPaper>
+
+    @foreach (var field in Template.Fields)
+    {
+        if (!ShowField(field)) continue;
+        <MudPaper Class="pa-4 mt-4">
+            <MudStack Spacing="0">
+                <MudText Typo="Typo.body1">@field.Title</MudText>
+                <MudText Typo="Typo.body2">@field.Description</MudText>
+
+                @switch (field.Type)
+                {
+                    case LetterFieldType.Rating:
+                        <MudRating T="int" ReadOnly="true" MaxValue="10" SelectedValue="@(GetField<int>(field.Name))"/>
+                        break;
+                    case LetterFieldType.Text:
+                        <MudTextField T="string?" ReadOnly="true" Variant="Variant.Outlined" Value="@(GetField<string?>(field.Name))"/>
+                        break;
+                    case LetterFieldType.TextBlock:
+                        <MudTextField T="string?" ReadOnly="true" Variant="Variant.Outlined" Lines="4" Value="@(GetField<string?>(field.Name))"/>
+                        break;
+                    case LetterFieldType.Selection:
+                        <MudSelectExtended ReadOnly="true" T="string?" Variant="Variant.Outlined" ItemCollection="field.Options" Value="@(GetField<string>(field.Name))"/>
+                        break;
+                    case LetterFieldType.MultipleSelection:
+                        <MudListExtended Dense T="string" MultiSelection ItemCollection="field.Options" SelectedValues="@(GetField<string[]>(field.Name))"/>
+
+                        break;
+                    case LetterFieldType.YesNo:
+                        <MudSwitch T="bool" ReadOnly="true" Checked="@(GetField<bool>(field.Name))" Color="Color.Success" UnCheckedColor="Color.Error"/>
+                        break;
+                    case LetterFieldType.Removed:
+                    default:
+                        break;
+                }
+            </MudStack>
+        </MudPaper>
+    }
+</MudContainer>
+
+@code {
+
+    [Parameter]
+    public Letter Letter { get; set; } = default!;
+
+    [Parameter]
+    public LetterTemplate Template { get; set; } = default!;
+
+    [Parameter]
+    public Event Event { get; set; } = default!;
+
+    private T? GetField<T>(string fieldName)
+    {
+        if (!Letter.Fields.ContainsKey(fieldName))
+            return default;
+
+        if (typeof(T) == typeof(string[]))
+        {
+            return (T)(object)Letter.Fields[fieldName].Split(',');
+        }
+
+        return (T)Convert.ChangeType(Letter.Fields[fieldName], typeof(T));
+    }
+
+    private bool ShowField(LetterField field)
+    {
+        var condition = field.Conditional;
+        if (condition?.FieldName == null) return true;
+
+        return condition.Operator switch
+        {
+            LetterFieldConditionOperator.Equals => string.Equals(Letter.Fields[condition.FieldName], condition.Value, StringComparison.InvariantCultureIgnoreCase),
+            LetterFieldConditionOperator.NotEquals => !string.Equals(Letter.Fields[condition.FieldName], condition.Value, StringComparison.InvariantCultureIgnoreCase),
+            LetterFieldConditionOperator.Contains => Letter.Fields[condition.FieldName].Contains(condition.Value ?? "---", StringComparison.InvariantCultureIgnoreCase),
+            LetterFieldConditionOperator.DoesNotContain => !Letter.Fields[condition.FieldName].Contains(condition.Value ?? "---", StringComparison.InvariantCultureIgnoreCase),
+            _ => false
+            };
+    }
+
+}

@@ -1,14 +1,30 @@
 @page "/events"
 @inject LandingService LandingService
+@inject NavigationManager NavigationManager
 
 <PageHeader>Upcoming Events</PageHeader>
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="relative">
-     <MudOverlay Absolute DarkBackground Visible="_isLoading">
+    <MudOverlay Absolute DarkBackground Visible="_isLoading">
         <MudProgressCircular Indeterminate/>
     </MudOverlay>
     <MudText Typo="Typo.h6" Class="mt-4 mb-4">Upcoming Events</MudText>
     <MudDataGrid T="EventInfo" Items="_events" Filterable Groupable Hover Loading="_isLoading" GroupExpanded="true">
+        <Columns>
+            <HierarchyColumn T="EventInfo" ButtonDisabledFunc="@(x => x.Components.Length == 0)"/>
+            @* <PropertyColumn Property="x => x.Game" Title="Game" Grouping="true"/> *@
+            <PropertyColumn Property="x => x.When" Title="Date" Format="dddd, MMM d, yyyy" Groupable="false"/>
+            <PropertyColumn Property="x => x.Title" Title="Title" Groupable="false"/>
+            <PropertyColumn Property="x => x.Location" Title="Location"/>
+            <TemplateColumn T="EventInfo" Title="Post Event Letter">
+                <CellTemplate>
+                    @if (context.Item.HasLetter)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Email" Color="Color.Warning" OnClick="() => ViewLetter(context.Item.Id)"/>
+                    }
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
         <ChildRowContent>
             <MudDataGrid T="ComponentInfo" Items="context.Item.Components" Dense SortMode="SortMode.None" Loading="_isLoading">
                 <Columns>
@@ -17,13 +33,6 @@
                 </Columns>
             </MudDataGrid>
         </ChildRowContent>
-        <Columns>
-            <HierarchyColumn T="EventInfo" ButtonDisabledFunc="@(x => x.Components.Length == 0)"/>
-            @* <PropertyColumn Property="x => x.Game" Title="Game" Grouping="true"/> *@
-            <PropertyColumn Property="x => x.When" Title="Date" Format="dddd, MMM d, yyyy" Groupable="false"/>
-            <PropertyColumn Property="x => x.Title" Title="Title" Groupable="false"/>
-            <PropertyColumn Property="x => x.Location" Title="Location"/>
-        </Columns>
     </MudDataGrid>
 </MudContainer>
 
@@ -33,13 +42,19 @@
 
     record ComponentInfo(string Title, DateOnly When);
 
-    record EventInfo(string Game, string Title, string Location, DateOnly When, ComponentInfo[] Components)
+    record EventInfo(string Id, string Game, string Title, string Location, DateOnly When, ComponentInfo[] Components, bool HasLetter)
     {
-        public EventInfo(string game, Event e) : this(game, e.Title ?? "Untitled", e.Location ?? "", DateOnly.FromDateTime(e.Date.LocalDateTime),
-            e.Components
-                .Select(c =>
-                    new ComponentInfo(c.Name ?? "Untitled", DateOnly.FromDateTime(c.Date.LocalDateTime)))
-                .ToArray())
+        public EventInfo(string game, Event e)
+            : this(e.EventId,
+                game,
+                e.Title ?? "Untitled",
+                e.Location ?? "",
+                DateOnly.FromDateTime(e.Date.LocalDateTime),
+                e.Components
+                    .Select(c =>
+                        new ComponentInfo(c.Name ?? "Untitled", DateOnly.FromDateTime(c.Date.LocalDateTime)))
+                    .ToArray(),
+                !string.IsNullOrEmpty(e.LetterTemplateId))
         {
         }
     }
@@ -55,6 +70,11 @@
         _events = (await LandingService.GetEvents())
             .Select(x => new EventInfo(GameName(x.GameId), x)).ToArray();
         _isLoading = false;
+    }
+
+    private void ViewLetter(string eventId)
+    {
+        NavigationManager.NavigateTo($"/events/{eventId}/letter");
     }
 
 }

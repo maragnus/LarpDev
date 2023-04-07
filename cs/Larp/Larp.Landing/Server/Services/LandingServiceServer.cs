@@ -15,14 +15,18 @@ public class LandingServiceServer : ILandingService
     private readonly IUserSessionManager _userSessionManager;
     private readonly IUserSession _userSession;
     private readonly INotifyService _notifyService;
+    private readonly LetterManager _letterManager;
+    private readonly Account? _account;
 
     public LandingServiceServer(LarpContext db, IUserSessionManager userSessionManager, IUserSession userSession,
-        INotifyService notifyService)
+        INotifyService notifyService, LetterManager letterManager)
     {
         _db = db;
         _userSessionManager = userSessionManager;
         _userSession = userSession;
         _notifyService = notifyService;
+        _letterManager = letterManager;
+        _account = userSession.CurrentUser;
     }
 
     public async Task<Result> Login(string email, string deviceName)
@@ -145,7 +149,7 @@ public class LandingServiceServer : ILandingService
                 .Join(
                     _db.Events.AsQueryable(),
                     attendance => attendance.EventId,
-                    @event => @event.Id,
+                    @event => @event.EventId,
                     (attendance, @event) => new { Attedance = attendance, Event = @event })
                 .ToListAsync();
 
@@ -153,4 +157,29 @@ public class LandingServiceServer : ILandingService
             .Select(x => new EventAttendance(x.Attedance, x.Event))
             .ToArray();
     }
+
+    public async Task<Letter> DraftLetter(string eventId)
+    {
+        var templateId =
+            await _db.Events.Find(x => x.EventId == eventId)
+                .Project(x => x.LetterTemplateId)
+                .FirstOrDefaultAsync()
+            ?? throw new BadRequestException($"Event {eventId} does not have {nameof(Event.LetterTemplateId)}");
+        return await _letterManager.Draft(templateId, eventId, _account!.AccountId);
+    }
+
+    public async Task<Letter[]> GetLetters() =>
+        await _letterManager.GetAll(_account!.AccountId);
+
+    public async Task<Letter> GetLetter(string letterId) =>
+        await _letterManager.Get(letterId, _account!.AccountId, isAdmin: false);
+
+    public async Task SaveLetter(string letterId, Letter letter)
+    {
+        letter.LetterId = letterId;
+        await _letterManager.Save(letter, _account!.AccountId);
+    }
+
+    public async Task<LetterAndTemplate> GetEventLetter(string eventId) =>
+        await _letterManager.GetEventLetter(_account!.AccountId, eventId);
 }

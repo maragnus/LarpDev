@@ -72,8 +72,7 @@ public interface IAdminService
     Task<Event> GetEvent(string eventId);
 
     [ApiPost("events/{eventId}"), ApiAuthenticated(AccountRole.AdminAccess)]
-    Task SaveEvent(string eventId, string gameId, string? title, string? type, string? location, DateTimeOffset date,
-        bool rsvp, bool hidden, EventComponent[] components);
+    Task SaveEvent(string eventId, Event @event);
 
     [ApiDelete("events/{eventId}"), ApiAuthenticated(AccountRole.AdminAccess)]
     Task DeleteEvent(string eventId);
@@ -94,6 +93,10 @@ public interface IAdminService
     [ApiContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")]
     Task<IFileInfo> Export();
 
+    [ApiGet("letters/events/{eventId}/export"), ApiAuthenticated(AccountRole.AccountAdmin)]
+    [ApiContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")]
+    Task<IFileInfo> ExportLetters(string eventId);
+
     [ApiPost("accounts/merge"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task MergeAccounts(string fromAccountId, string toAccountId);
 
@@ -102,6 +105,39 @@ public interface IAdminService
 
     [ApiDelete("accounts/{accountId}/emails"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task RemoveAccountEmail(string accountId, string email);
+
+    [ApiPost("letters/templates/new"), ApiAuthenticated(AccountRole.AccountAdmin)]
+    Task<LetterTemplate> DraftLetterTemplate();
+
+    [ApiPost("letters/templates/{templateId}"), ApiAuthenticated(AccountRole.AccountAdmin)]
+    Task SaveLetterTemplate(string templateId, LetterTemplate template);
+    
+    [ApiGet("letters/templates"), ApiAuthenticated(AccountRole.AccountAdmin)]
+    Task<LetterTemplate[]> GetLetterTemplates();
+    
+    [ApiGet("letters/templates/names"), ApiAuthenticated(AccountRole.AccountAdmin)]
+    Task<LetterTemplate[]> GetLetterTemplateNames();
+    
+    [ApiGet("letters/templates/{templateId}"), ApiAuthenticated(AccountRole.AccountAdmin)]
+    Task<LetterTemplate> GetLetterTemplate(string templateId);
+    
+    [ApiGet("letters"), ApiAuthenticated(AccountRole.AccountAdmin)]
+    Task<Letter[]> GetLetters();
+    
+    [ApiPost("letters/{letterId}/approve"), ApiAuthenticated(AccountRole.AccountAdmin)]
+    Task ApproveLetter(string letterId);
+    
+    [ApiPost("letters/{letterId}/reject"), ApiAuthenticated(AccountRole.AccountAdmin)]
+    Task RejectLetter(string letterId);
+
+    [ApiGet("letters/submitted"), ApiAuthenticated(AccountRole.AccountAdmin)]
+    Task<Letter[]> GetSubmittedLetters();
+    
+    [ApiGet("letters/events/{eventId}"), ApiAuthenticated(AccountRole.AccountAdmin)]
+    Task<LettersAndTemplate> GetEventLetters(string eventId);
+    
+    [ApiGet("letters/templates/{templateId}/letters"), ApiAuthenticated(AccountRole.AccountAdmin)]
+    Task<Letter[]> GetTemplateLetters(string templateId);
 }
 
 public class Dashboard

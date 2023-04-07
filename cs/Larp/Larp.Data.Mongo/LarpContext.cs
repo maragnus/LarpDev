@@ -30,6 +30,8 @@ public class LarpContext
         Games = database.GetCollection<Game>(nameof(Games));
         Sessions = database.GetCollection<Session>(nameof(Sessions));
         GameStates = database.GetCollection<BsonDocument>(nameof(GameStates));
+        Letters = database.GetCollection<Letter>(nameof(Letters));
+        LetterTemplates = database.GetCollection<LetterTemplate>(nameof(LetterTemplates));
         MwFifthGame = new MwFifthGameContext(database, cache);
     }
 
@@ -40,6 +42,8 @@ public class LarpContext
     public IMongoCollection<Game> Games { get; }
     public IMongoCollection<Session> Sessions { get; }
     public IMongoCollection<BsonDocument> GameStates { get; }
+    public IMongoCollection<Letter> Letters { get; }
+    public IMongoCollection<LetterTemplate> LetterTemplates { get; }
 
     public async Task Migrate()
     {

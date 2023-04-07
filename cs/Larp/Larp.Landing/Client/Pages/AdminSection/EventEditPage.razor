@@ -2,6 +2,7 @@
 @inject LandingService LandingService
 @inject NavigationManager NavigationManager
 @inject IDialogService DialogService
+@inject IJSRuntime JS
 
 <AdminLayout Loading="_isLoading" Title="Edit Event">
     <MudStack Spacing="4">
@@ -9,19 +10,20 @@
         <MudButtonGroup OverrideStyles="false">
             <MudButton Color="Color.Success" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" OnClick="Save">Save</MudButton>
             <MudButton Color="Color.Error" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" OnClick="Delete">Delete</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.Download" OnClick="DownloadLetters">Download</MudButton>
         </MudButtonGroup>
         <MudGrid>
             <MudItem xs="12" md="6">
-                <MudTextField T="string?" Label="Title" Required @bind-Value="@_event.Title"/>
+                <MudTextField T="string?" Label="Title" Required @bind-Value="@_event.Title" Variant="Variant.Outlined"/>
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudTextField T="string?" Label="Location" @bind-Value="@_event.Location"/>
+                <MudTextField T="string?" Label="Location" @bind-Value="@_event.Location" Variant="Variant.Outlined"/>
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudSelectExtended T="string?" Label="Event Type" Required @bind-Value="@_event.EventType" ItemCollection="_eventTypes"/>
+                <MudSelectExtended T="string?" Label="Event Type" Required @bind-Value="@_event.EventType" ItemCollection="_eventTypes" Variant="Variant.Outlined"/>
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudDatePicker T="DateTime" Label="When" Required Date="@_date" DateChanged="date => _date = date ?? DateTime.Today"/>
+                <MudDatePicker T="DateTime" Label="When" Required Date="@_date" DateChanged="date => _date = date ?? DateTime.Today" Variant="Variant.Outlined"/>
             </MudItem>
             <MudItem xs="6" md="3">
                 <MudSwitch T="bool" Label="Has RSVP" @bind-Checked="@_event.CanRsvp"/>
@@ -29,15 +31,42 @@
             <MudItem xs="6" md="3">
                 <MudSwitch T="bool" Label="Hidden" @bind-Checked="@_event.IsHidden"/>
             </MudItem>
+            <MudItem xs="12" md="6">
+                <MudSelectExtended T="LetterTemplate" Clearable ItemCollection="_letterTemplates" Label="Post Event Letter Template" ToStringFunc="x => x.Title" Value="@_template" ValueChanged="UpdateTemplate" Variant="Variant.Outlined"/>
+            </MudItem>
         </MudGrid>
-        <MudDataGrid T="EventComponent" Items="_components" EditMode="DataGridEditMode.Cell" ReadOnly="false">
+        <MudDataGrid T="EventComponent" Items="_components" EditMode="DataGridEditMode.Cell" ReadOnly="false" Dense>
             <Columns>
                 <PropertyColumn Property="x => x.Name" Title="Component Name" IsEditable/>
-                <PropertyColumn Property="x => x.When" Title="When" Format="dddd, MMM d, yyyy" IsEditable="false"/>
+                <PropertyColumn Property="x => x.When" Title="When" Format="dddd, MMM d, yyyy" IsEditable>
+                    <EditTemplate>
+                        <MudDatePicker T="DateTime" Required Date="@context.Item.When" DateChanged="date => context.Item.When = date ?? DateTime.Today" Variant="Variant.Outlined"/>
+                    </EditTemplate>
+                </PropertyColumn>
             </Columns>
         </MudDataGrid>
         <MudText Typo="Typo.h6">Attendance</MudText>
-        <EventAttendanceComponent EventId="@EventId"/>
+        <EventAttendanceComponent EventId="@EventId" AccountNames="_accountNames"/>
+
+        @if (_template != null)
+        {
+            <MudText Typo="Typo.h6">Letters</MudText>
+            <MudDataGrid T="Letter" Items="_letters" EditMode="DataGridEditMode.Cell" ReadOnly Dense>
+                <Columns>
+                    <HierarchyColumn T="Letter"/>
+                    <TemplateColumn T="Letter" Title="Player Name">
+                        <CellTemplate>
+                            @(_accountNames.FirstOrDefault(x => x.AccountId == context.Item.AccountId)?.Name ?? "No Name Set")
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <PropertyColumn Property="x => x.State"/>
+                    <PropertyColumn Property="x => x.StartedOn" Format="dddd, MMM d, yyyy"/>
+                </Columns>
+                <ChildRowContent>
+                    <EventLetter Event="_event" Template="_template" Letter="@context.Item"></EventLetter>
+                </ChildRowContent>
+            </MudDataGrid>
+        }
     </MudStack>
 </AdminLayout>
 
@@ -62,18 +91,24 @@
 
     bool _isLoading = true;
     private Event _event = default!;
-    private Event _savedEvent = default!;
     private List<EventComponent> _components = new();
-    private readonly string[] _eventTypes = new[] { "Game", "Workday", "Subscription", "Contest" };
+    private readonly string[] _eventTypes = { "Game", "Workday", "Subscription", "Contest" };
     private Dictionary<string, string?> _games = new();
     private DateTime _date;
+    private LetterTemplate[] _letterTemplates = Array.Empty<LetterTemplate>();
+    private LetterTemplate? _template;
+    private Letter[] _letters = Array.Empty<Letter>();
+    private AccountName[] _accountNames = Array.Empty<AccountName>();
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
-        _games = LandingService.Games
-            .ToDictionary(x => x.Value.Id, x => x.Value.Title);
-        _event = await LandingService.Admin.GetEvent(EventId);
-        UpdateSavedEvent();
+        _isLoading = true;
+        StateHasChanged();
+
+        var result = await LandingService.Admin.GetEventLetters(EventId);
+        _event = result.Event;
+        _letters = result.Letters;
+        _template = result.LetterTemplate;
         _components = _event.Components
             .Select(x => new EventComponent { Id = x.ComponentId, Name = x.Name ?? "No Name", When = x.Date.LocalDateTime })
             .ToList();
@@ -81,29 +116,24 @@
         _isLoading = false;
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+        _accountNames = await LandingService.Admin.GetAccountNames();
+        _letterTemplates = await LandingService.Admin.GetLetterTemplateNames();
+        _games = LandingService.Games
+            .ToDictionary(x => x.Value.Id, x => x.Value.Title);
+    }
+
     private async Task Save()
     {
-        _isLoading = true;
-        try
+        await this.AsyncAction(x => x._isLoading, async () =>
         {
-            await LandingService.Admin.SaveEvent(
-                EventId,
-                _event.GameId,
-                _event.Title,
-                _event.EventType,
-                _event.Location,
-                _date,
-                _event.CanRsvp,
-                _event.IsHidden,
-                _components
-                    .Select(x => x.ToComponent())
-                    .ToArray());
-            UpdateSavedEvent();
-        }
-        finally
-        {
-            _isLoading = false;
-        }
+            _event.Components = _components
+                .Select(x => x.ToComponent())
+                .ToArray();
+            _event.LetterTemplateId = _template?.LetterTemplateId;
+            await LandingService.Admin.SaveEvent(EventId, _event);
+        });
     }
 
     private async Task Delete()
@@ -116,45 +146,25 @@
         }
     }
 
-    private async Task Attendance()
+    private async Task UpdateTemplate(LetterTemplate? template)
     {
-        if (HasChanged())
+        if (template == null)
         {
-            var result = await DialogService.ShowMessageBox("Save before leaving", "Would you like to save changes before leaving?", "Yes, Save Changes", "No, Discard Changes", "Cancel, Stay Here");
-            switch (result)
-            {
-                case true: // Yes
-                    await Save();
-                    break;
-                case null: // Cancel
-                    return;
-            }
+            _template = null;
+            _event.LetterTemplateId = null;
+            return;
         }
-        NavigationManager.NavigateTo($"/admin/events/{EventId}/attendance");
+
+        _template = await LandingService.Admin.GetLetterTemplate(template.LetterTemplateId);
+        _event.LetterTemplateId = template?.LetterTemplateId;
     }
 
-    private bool HasChanged() =>
-        _savedEvent.CanRsvp != _event.CanRsvp
-        && _savedEvent.GameId != _event.GameId
-        && _savedEvent.EventType != _event.EventType
-        && _savedEvent.Title != _event.Title
-        && _savedEvent.Location != _event.Location
-        && _savedEvent.Date != _event.Date
-        && _savedEvent.IsHidden != _event.IsHidden;
-
-
-    private void UpdateSavedEvent()
+    private async Task DownloadLetters()
     {
-        _savedEvent = new Event()
-        {
-            CanRsvp = _event.CanRsvp,
-            GameId = _event.GameId,
-            EventType = _event.EventType,
-            Title = _event.Title,
-            Location = _event.Location,
-            Date = _event.Date,
-            IsHidden = _event.IsHidden
-        };
+        var file = await LandingService.Admin.ExportLetters(EventId);
+        var fileStream = file.CreateReadStream();
+        using var streamRef = new DotNetStreamReference(stream: fileStream);
+        await JS.InvokeVoidAsync("downloadFileFromStream", $"larp-landing-export-{DateTime.Now:yyyy-MM-dd}.xlsx", streamRef);
     }
 
 }

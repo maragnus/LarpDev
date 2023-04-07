@@ -42,7 +42,6 @@ public class LandingService
         _localStorage.Changed += LocalStorageOnChanged;
         _client = client;
         MwFifth = new MwFifthService(this, mwFifth, dataCache);
-        Admin = adminService;
     }
 
     public IReadOnlyDictionary<string, Game> Games { get; private set; } = default!;
@@ -54,7 +53,8 @@ public class LandingService
     public BrowserInfo? BrowserInfo { get; set; }
     public string? LocationName { get; set; }
     public Account? Account { get; set; }
-    public IAdminService Admin { get; }
+    public IAdminService Admin => _adminService;
+    public ILandingService Service => _landing;
 
     private void LocalStorageOnChanged(object? sender, ChangedEventArgs e)
     {
@@ -185,4 +185,7 @@ public class LandingService
 
     public async Task<EventAttendance[]> GetAttendance() =>
         await _landing.GetAttendance();
+
+    public async Task<LetterAndTemplate> GetEventLetter(string eventId) => 
+        await _landing.GetEventLetter(eventId);
 }

@@ -39,6 +39,9 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public async Task<IFileInfo> Export() =>
         await Download("api/admin/data/export");
 
+    public async Task<IFileInfo> ExportLetters(string eventId) =>
+        await Download($"api/admin/letters/events/{eventId}/export");
+
     public async Task MergeAccounts(string fromAccountId, string toAccountId) =>
         await Post("api/admin/accounts/merge", new { fromAccountId, toAccountId });
 
@@ -47,6 +50,18 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
 
     public Task RemoveAccountEmail(string accountId, string email) =>
         Delete($"api/admin/accounts/{accountId}/emails?email={Uri.EscapeDataString(email)}");
+
+    public async Task<LetterTemplate> DraftLetterTemplate() =>
+        await Post<LetterTemplate>("api/admin/letters/templates/new");
+
+    public async Task SaveLetterTemplate(string templateId, LetterTemplate template) =>
+        await Post($"api/admin/letters/templates/{templateId}", new { template });
+
+    public async Task<LetterTemplate[]> GetLetterTemplates() =>
+        await Get<LetterTemplate[]>("api/admin/letters/templates");
+
+    public async Task<LetterTemplate[]> GetLetterTemplateNames() =>
+        await Get<LetterTemplate[]>("api/admin/letters/templates/names");
 
     public Task<Account> GetAccount() =>
         Get<Account>("api/account");
@@ -76,25 +91,45 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public Task<EventAttendance[]> GetAttendance() =>
         Get<EventAttendance[]>("api/events/attendance");
 
+    public Task<Letter> DraftLetter(string eventId) =>
+        Post<Letter>("api/letters/new");
+
+    public Task<Letter[]> GetLetters() =>
+        Get<Letter[]>("api/letters");
+
+    public async Task ApproveLetter(string letterId) =>
+        await Post($"api/admin/letters/{letterId}/approve");
+
+    public async Task RejectLetter(string letterId) =>
+        await Post($"api/admin/letters/{letterId}/approve");
+
+    public async Task<Letter[]> GetSubmittedLetters() =>
+        await Get<Letter[]>("api/admin/letters/submitted");
+
+    public async Task<LettersAndTemplate> GetEventLetters(string eventId) =>
+        await Get<LettersAndTemplate>($"api/admin/letters/events/{eventId}");
+
+    public async Task<Letter[]> GetTemplateLetters(string templateId) =>
+        await Get<Letter[]>($"api/admin/letters/templates/{templateId}/letters");
+
+    public async Task<LetterTemplate> GetLetterTemplate(string templateId) =>
+        await Get<LetterTemplate>($"api/admin/letters/templates/{templateId}");
+
+    public Task<Letter> GetLetter(string letterId) =>
+        Get<Letter>($"api/letters/{letterId}");
+
+    public Task SaveLetter(string letterId, Letter letter) =>
+        Post($"api/letters/{letterId}", new { letter });
+
+    public Task<LetterAndTemplate> GetEventLetter(string eventId) =>
+        Get<LetterAndTemplate>($"api/letters/events/{eventId}");
+
     Task<Event> IAdminService.GetEvent(string eventId) =>
         Get<Event>($"api/admin/events/{eventId}");
 
-    public Task SaveEvent(string eventId, string gameId, string? title, string? type,
-        string? location, DateTimeOffset date, bool rsvp, bool hidden,
-        EventComponent[] components) =>
-        Post($"api/admin/events/{eventId}", new
-        {
-            gameId,
-            title,
-            type,
-            location,
-            date,
-            rsvp,
-            hidden,
-            components
-        });
-
-
+    public Task SaveEvent(string eventId, Event @event) =>
+        Post($"api/admin/events/{eventId}", new { @event });
+    
     public Task DeleteEvent(string eventId) =>
         Delete($"api/admin/events/{eventId}");
 
@@ -123,7 +158,7 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
         Post<CharacterAndRevision>($"api/mw5e/character/revise?characterId={characterId}");
 
     public Task<CharacterAndRevision> GetNewCharacter() =>
-        Get<CharacterAndRevision>($"api/mw5e/character/new")!;
+        Get<CharacterAndRevision>($"api/mw5e/character/new");
 
     public Task SaveCharacter(CharacterRevision revision) =>
         Post("api/mw5e/character", new { revision });

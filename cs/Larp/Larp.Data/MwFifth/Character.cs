@@ -164,6 +164,9 @@ public class CharacterRevision
     public DateTimeOffset? ApprovedOn { get; set; }
     public DateTimeOffset? ArchivedOn { get; set; }
 
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string? ApprovedBy { get; set; }
+    
     public string? CharacterName { get; set; }
     public string? Religion { get; set; }
     public string? Occupation { get; set; }

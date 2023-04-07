@@ -25,7 +25,7 @@ public class EventComponent
 public class Event
 {
     [BsonId, BsonRepresentation(BsonType.ObjectId)]
-    public string Id { get; set; } = default!;
+    public string EventId { get; set; } = default!;
 
     public string GameId { get; set; } = default!;
     public string? Title { get; set; }
@@ -36,6 +36,7 @@ public class Event
     public bool IsHidden { get; set; }
     public string? ImportId { get; set; }
     public EventComponent[] Components { get; set; } = Array.Empty<EventComponent>();
+    public string? LetterTemplateId { get; set; }
 }
 
 [PublicAPI]

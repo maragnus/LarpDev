@@ -1,0 +1,48 @@
+@page "/admin/letters/templates"
+@inject LandingService LandingService
+@inject NavigationManager NavigationManager
+
+<AdminLayout Title="Letter Templates" Loading="_isLoading">
+    <MudStack Spacing="4">
+
+        <MudPaper Class="pa-2">
+            <MudListExtended T="LetterTemplate" ItemCollection="_templates" Clickable SelectedValueChanged="Clicked">
+                <ItemTemplate>
+                    <MudStack Row AlignItems="AlignItems.Center">
+                        <MudIcon Icon="@Icons.Material.Filled.Email"/>
+                        <MudText Typo="Typo.body1">@context.Value.Title</MudText>
+                    </MudStack>
+                </ItemTemplate>
+            </MudListExtended>
+        </MudPaper>
+
+        <div>
+            <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="New" Color="Color.Success" Variant="Variant.Filled">New Letter Template</MudButton>
+        </div>
+    </MudStack>
+
+</AdminLayout>
+
+@code {
+
+    private bool _isLoading;
+    private LetterTemplate[] _templates = Array.Empty<LetterTemplate>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _templates = await LandingService.Admin.GetLetterTemplateNames();
+        _isLoading = false;
+    }
+
+    private void Clicked(LetterTemplate template)
+    {
+        NavigationManager.NavigateTo($"/admin/letters/templates/{template.LetterTemplateId}");
+    }
+
+    private async Task New()
+    {
+        var template = await LandingService.Admin.DraftLetterTemplate();
+        NavigationManager.NavigateTo($"/admin/letters/templates/{template.LetterTemplateId}");
+    }
+
+}

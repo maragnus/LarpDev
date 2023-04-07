@@ -48,4 +48,19 @@ public interface ILandingService
 
     [ApiGet("events/attendance"), ApiAuthenticated]
     Task<EventAttendance[]> GetAttendance();
+
+    [ApiPost("letters/new"), ApiAuthenticated]
+    Task<Letter> DraftLetter(string eventId);
+    
+    [ApiGet("letters"), ApiAuthenticated]
+    Task<Letter[]> GetLetters();
+    
+    [ApiGet("letters/{letterId}"), ApiAuthenticated]
+    Task<Letter> GetLetter(string letterId);
+    
+    [ApiPost("letters/{letterId}"), ApiAuthenticated]
+    Task SaveLetter(string letterId, Letter letter);
+
+    [ApiGet("letters/events/{eventId}"), ApiAuthenticated]
+    Task<LetterAndTemplate> GetEventLetter(string eventId);
 }

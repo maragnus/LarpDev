@@ -113,10 +113,10 @@ public class ExcelImporter
                 if (!_players.TryGetValue(playerId, out var account)) continue;
 
                 await _larpContext.Attendances.UpdateOneAsync(
-                    x => x.AccountId == account.AccountId && x.EventId == @event.Id,
+                    x => x.AccountId == account.AccountId && x.EventId == @event.EventId,
                     Builders<Attendance>.Update
                         .SetOnInsert(a => a.AccountId, account.AccountId)
-                        .SetOnInsert(a => a.EventId, @event.Id)
+                        .SetOnInsert(a => a.EventId, @event.EventId)
                         .Set(a => a.MwFifth, new MwFifthAttendance() { Moonstone = moonstone }),
                     upsert
                 );

@@ -53,6 +53,7 @@ builder.Configuration
     services.AddScoped<IUserSession, UserSession>();
     services.AddScoped<MwFifthCharacterManager>();
     services.AddScoped<ExcelImporter>();
+    services.AddScoped<LetterManager>();
 }
 
 var app = builder.Build();

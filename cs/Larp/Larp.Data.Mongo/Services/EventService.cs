@@ -50,7 +50,7 @@ public class EventService : IEventService
     public async Task<Event> GetEvent(string eventId)
     {
         return await _larpContext.Events
-            .Find(x => x.Id == eventId)
+            .Find(x => x.EventId == eventId)
             .FirstOrDefaultAsync();
     }
 }

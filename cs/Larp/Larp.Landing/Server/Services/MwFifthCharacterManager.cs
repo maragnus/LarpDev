@@ -104,7 +104,7 @@ public class MwFifthCharacterManager
         return new MoonstoneInfo(moonstoneTotal, moonstoneUsed);
     }
 
-    public async Task Approve(string characterId)
+    public async Task Approve(string characterId, string accountId)
     {
         var reference =
             await _mwFifth.CharacterRevisions.AsQueryable()
@@ -139,7 +139,8 @@ public class MwFifthCharacterManager
             .UpdateOneAsync(x => x.RevisionId == characterId,
                 Builders<CharacterRevision>.Update
                     .Set(x => x.State, CharacterState.Live)
-                    .Set(x => x.ApprovedOn, DateTime.UtcNow));
+                    .Set(x => x.ApprovedOn, DateTime.UtcNow)
+                    .Set(x => x.ApprovedBy, accountId));
     }
 
     public async Task Reject(string characterId)

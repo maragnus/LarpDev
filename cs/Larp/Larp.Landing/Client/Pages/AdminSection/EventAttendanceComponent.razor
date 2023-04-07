@@ -37,6 +37,9 @@
 @code {
 
     [Parameter]
+    public AccountName[] AccountNames { get; set; } = Array.Empty<AccountName>();
+    
+    [Parameter]
     public string EventId { get; set; } = default!;
 
     private class Attendance
@@ -61,7 +64,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _players = await LandingService.Admin.GetAccountNames();
+        _players = AccountNames;
         var attendances = await LandingService.Admin.GetEventAttendances(EventId);
         _attendances.AddRange(attendances.Select(attendance => new Attendance()
         {
