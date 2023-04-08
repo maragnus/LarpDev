@@ -11,6 +11,12 @@
     [Parameter]
     public bool FullLayout { get; set; }
 
+    [Parameter]
+    public bool Print { get; set; }
+
+    [Parameter]
+    public bool Admin { get; set; }
+
     private (string Name, int Value)[] _gifts = Array.Empty<(string, int)>();
     private string? _homeChapter;
     private string? _specialty;
@@ -18,6 +24,7 @@
     private string? _qrCode;
     private Spell[] _spells = Array.Empty<Spell>();
     private string[] _aggregateSkills = Array.Empty<string>();
+    private CharacterSkill[] _skills = Array.Empty<CharacterSkill>();
 
     protected override void OnParametersSet()
     {
@@ -49,10 +56,15 @@
             return rank == 0 ? item.Key : $"{item.Key} {rank}";
         }
 
-        _aggregateSkills =
+        _skills =
             Character.OccupationalChosenSkills.Select(x => CharacterSkill.FromTitle(x, SkillPurchase.Occupation))
                 .Concat(Character.OccupationalSkills)
                 .Concat(Character.PurchasedSkills)
+                .Concat(Character.FreeSkills)
+                .ToArray();
+
+        _aggregateSkills =
+            _skills
                 .GroupBy(x => x.Name)
                 .Select(SkillAggregate)
                 .ToArray();
@@ -62,7 +74,16 @@
 
 }
 
-<MudGrid>
+@if (Print)
+{
+    <style>
+        .print-sheet {
+            font-size: 80%;
+        }
+    </style>
+}
+
+<MudGrid Class="print-sheet">
     <MudItem xs="12" Class="justify-center">
         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
             <div>
@@ -82,7 +103,7 @@
         <MudGrid>
             @foreach (var (name, rank) in _gifts)
             {
-                <MudItem xs="@(FullLayout ? 4 : 6)" sm="@(FullLayout ? 2 : 3)" md="2">
+                <MudItem xs="@(Print ? 2 : FullLayout ? 4 : 6)" sm="@(Print ? 2 : FullLayout ? 2 : 3)" md="2">
                     <div class="gift-container">
                         <div class="gift-rank">
                             @rank
@@ -119,7 +140,7 @@
     @foreach (var (name, value) in Character.Properties)
     {
         if (value == "-") continue;
-        <MudItem xs="6" sm="4" Style="page-break-inside: avoid">
+        <MudItem xs="Print ? 4 : 6" sm="4" Style="page-break-inside: avoid">
             <div class="property-container">
                 <div class="property-value">@value</div>
                 <div class="property-name">@name</div>
@@ -127,7 +148,7 @@
         </MudItem>
     }
     <MudItem xs="12" Style="height: 0"></MudItem>
-    <MudItem xs="@(FullLayout ? 6 : 12)" sm="@(FullLayout ? 4 : 6)" Style="page-break-inside: avoid">
+    <MudItem xs="@(Print ? 4 : FullLayout ? 6 : 12)" sm="@(Print ? 4 : FullLayout ? 4 : 6)" Style="page-break-inside: avoid">
         <div class="list-container">
             <div class="list-header">Attributes</div>
             @foreach (var name in Character.Abilities)
@@ -136,18 +157,34 @@
             }
         </div>
     </MudItem>
-    <MudItem xs="@(FullLayout ? 6 : 12)" sm="@(FullLayout ? 4 : 6)" Style="page-break-inside: avoid">
+    <MudItem xs="@(Print ? 4 : FullLayout ? 6 : 12)" sm="@(Print ? 4 : FullLayout ? 4 : 6)" Style="page-break-inside: avoid">
         <div class="list-container">
             <div class="list-header">Skills</div>
-            @foreach (var name in _aggregateSkills)
+            @if (Admin)
             {
-                <div class="list-item">@name</div>
+                @foreach (var category in _skills.GroupBy(x => x.Type.ToString()))
+                {
+                    <div class="list-item">
+                        <u>@category.Key</u>
+                    </div>
+                    foreach (var name in category)
+                    {
+                        <div class="list-item">@name.Title</div>
+                    }
+                }
+            }
+            else
+            {
+                @foreach (var name in _aggregateSkills)
+                {
+                    <div class="list-item">@name</div>
+                }
             }
         </div>
     </MudItem>
     @if (Character.Advantages.Length > 0 || Character.Disadvantages.Length > 0)
     {
-        <MudItem xs="@(FullLayout ? 6 : 12)" sm="@(FullLayout ? 4 : 6)" Style="page-break-inside: avoid">
+        <MudItem xs="@(Print ? 4 : FullLayout ? 6 : 12)" sm="@(Print ? 4 : FullLayout ? 4 : 6)" Style="page-break-inside: avoid">
             <div style="display: flex; flex-direction: column; gap: 2em; height: 100%">
                 <div class="list-container" style="height: auto; flex-grow: 1">
                     <div class="list-header">Advantages</div>
@@ -167,7 +204,7 @@
             </div>
         </MudItem>
     }
-    <MudItem xs="@(FullLayout ? 6 : 12)" sm="6" Style="page-break-inside: avoid">
+    <MudItem xs="@(Print ? 4 : FullLayout ? 6 : 12)" sm="6" Style="page-break-inside: avoid">
         <div class="list-container">
             <div class="list-header">Unusual Features</div>
             <div class="list-text">
@@ -175,7 +212,7 @@
             </div>
         </div>
     </MudItem>
-    <MudItem xs="@(FullLayout ? 6 : 12)" sm="6" Style="page-break-inside: avoid">
+    <MudItem xs="@(Print ? 4 : FullLayout ? 6 : 12)" sm="6" Style="page-break-inside: avoid">
         <div class="list-container">
             <div class="list-header">Cures</div>
             <div class="list-text">
@@ -183,7 +220,7 @@
             </div>
         </div>
     </MudItem>
-    <MudItem xs="12" sm="@(FullLayout ? 6 : 12)" Style="page-break-inside: avoid">
+    <MudItem xs="12" sm="@(Print ? 4 : FullLayout ? 6 : 12)" Style="page-break-inside: avoid">
         <div class="list-container">
             <div class="list-header">Documents</div>
             <div class="list-text">
@@ -193,7 +230,7 @@
     </MudItem>
     @foreach (var spell in _spells)
     {
-        <MudItem xs="@(FullLayout ? 4 : 6)" sm="@(FullLayout ? 3 : 4)">
+        <MudItem xs="@(Print ? 4 : FullLayout ? 4 : 6)" sm="@(Print ? 4 : FullLayout ? 3 : 4)">
             <div class="spell-container">
                 <div class="spell-name">@spell.Name</div>
                 <div>@spell.Effect</div>

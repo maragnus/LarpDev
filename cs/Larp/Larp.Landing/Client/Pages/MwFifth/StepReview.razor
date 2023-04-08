@@ -80,7 +80,7 @@ else if (!Character.IsHomelandValid)
 
 <StepDivider/>
 
-<CharacterSheet Character="Character"/>
+<CharacterSheet Character="Character" Admin="Admin"/>
 
 <StepDivider/>
 
@@ -93,4 +93,8 @@ else if (!Character.IsHomelandValid)
     
     [Parameter]
     public EventCallback Submit { get; set; }
+    
+    
+    [Parameter]
+    public bool Admin { get; set; }
 }

@@ -82,6 +82,9 @@ public class CharacterBuilder
             .Select(x => x.Name)
             .ToArray();
 
+        PopulateOccupations();
+        PopulateOccupationalDependencies();
+        PopulateSkills();
         DependencyManager.UpdateAll(this);
     }
 
@@ -166,22 +169,22 @@ public class CharacterBuilder
         get => Revision.PrivateHistory;
         set => Set(x => x.PrivateHistory = value);
     }
-    
-    
+
+
     public string? Documents
     {
         get => Revision.Documents;
         set => Set(x => x.Documents = value);
     }
 
-    
+
     public string? Cures
     {
         get => Revision.Cures;
         set => Set(x => x.Cures = value);
     }
 
-    
+
     public string? UnusualFeatures
     {
         get => Revision.UnusualFeatures;
@@ -278,6 +281,24 @@ public class CharacterBuilder
             StateChanged?.Invoke();
         }
     }
+    
+    public CharacterSkill[] FreeSkills
+    {
+        get => Revision.Skills
+            .Where(x => x.Type == SkillPurchase.Free)
+            .ToArray();
+
+        set
+        {
+            Revision.Skills = Revision.Skills
+                .Where(x => x.Type != SkillPurchase.Free)
+                .Concat(value)
+                .ToArray();
+            DependencyManager.Update(this, nameof(FreeSkills));
+            UpdateMoonstone();
+            StateChanged?.Invoke();
+        }
+    }
 
     public CharacterVantage[] Advantages
     {
@@ -353,7 +374,7 @@ public class CharacterBuilder
 
     public bool IsReligionValid => !string.IsNullOrEmpty(Revision.Religion);
 
-    [DependsOn(nameof(PopulateSpells), nameof(Wisdom), nameof(Occupation), nameof(NoOccupation), nameof(ChosenSpells))]
+    [DependsOn(nameof(PopulateSpells), nameof(Wisdom), nameof(Occupation), nameof(NoOccupation), nameof(PurchasedSkills), nameof(ChosenSpells))]
     public bool IsSpellsValid { get; private set; }
 
     [DependsOn(nameof(PopulateSpells), nameof(Wisdom), nameof(Occupation), nameof(NoOccupation))]
@@ -631,6 +652,9 @@ public class CharacterBuilder
         IsOccupationValid = true;
     }
 
+    private IEnumerable<string> DivineSpells(string category) =>
+        AllDivineSpells.Where(x => x.Category == category).Select(x => x.Name);
+
     private void PopulateSpells()
     {
         HasWisdomSpells = Revision.Wisdom > 0;
@@ -642,7 +666,25 @@ public class CharacterBuilder
         var spells = new HashSet<string>();
         if (HasWisdomSpells) spells.AddRange(ChosenSpells);
         if (HasBardicSpells) spells.AddRange(AllBardicSpells.Select(x => x.Name));
-        if (HasDivineSpells) spells.AddRange(AllDivineSpells.Select(x => x.Name));
+        if (HasDivineSpells)
+        {
+            switch (Religion)
+            {
+                case "justice":
+                    spells.AddRange(DivineSpells("Divine Spells of Justice"));
+                    break;
+                case "mercy":
+                    spells.AddRange(DivineSpells("Divine Spells of Mercy"));
+                    break;
+                case "wild":
+                    spells.AddRange(DivineSpells("Divine Spells of the Wild"));
+                    break;
+                case "all":
+                    spells.AddRange(AllDivineSpells.Select(x => x.Name));
+                    break;
+            }
+        }
+
         if (HasOccupationalSpells) spells.AddRange(OccupationalSpells.Select(x => x.Name));
         Revision.Spells = spells.ToArray();
 

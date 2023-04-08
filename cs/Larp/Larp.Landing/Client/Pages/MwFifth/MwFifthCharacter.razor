@@ -11,7 +11,7 @@
 
     [Parameter]
     public bool Print { get; set; }
-    
+
     [Parameter]
     public bool FullLayout { get; set; }
 
@@ -102,4 +102,4 @@ else if (_loadingState != LoadingState.Loaded)
             break;
     }
 }
-<CharacterSheet Character="_character" FullLayout="FullLayout"/>
+<CharacterSheet Character="_character" FullLayout="FullLayout" Print="Print"/>

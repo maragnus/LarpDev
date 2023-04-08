@@ -26,6 +26,12 @@
                             <MudIcon Icon="@Icons.Material.Filled.VerifiedUser" Color="Color.Primary"/>
                         </MudTooltip>
                     }
+                    @if (context.Item.Roles.Contains(AccountRole.AdminAccess))
+                    {
+                        <MudTooltip Text="User has administrator access">
+                            <MudIcon Icon="@Icons.Material.Filled.ShieldMoon" Color="Color.Primary"/>
+                        </MudTooltip>
+                    }
                 </CellTemplate>
             </TemplateColumn>
             <PropertyColumn Property="x => x.PreferredEmail" Title="Email"/>

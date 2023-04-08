@@ -84,7 +84,7 @@ public class Attendance
 public class MwFifthAttendance
 {
     public int? Moonstone { get; set; }
-    
+
     [BsonRepresentation(BsonType.ObjectId)]
-    public string[] CharacterIds { get; set; }
+    public string[] CharacterIds { get; set; } = Array.Empty<string>();
 }

@@ -23,7 +23,8 @@ public enum LetterFieldConditionOperator
     Equals,
     NotEquals,
     Contains,
-    DoesNotContain
+    DoesNotContain,
+    IsEmpty
 }
 
 public class LetterFieldCondition

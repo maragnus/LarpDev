@@ -1,5 +1,6 @@
 @page "/events/{EventId}/letter"
 @inject LandingService LandingService
+@inject IDialogService DialogService
 
 <PageHeader>Post Event Letter</PageHeader>
 
@@ -63,7 +64,7 @@
                         <MudSelectExtended ReadOnly="_isReadOnly" T="string?" Variant="Variant.Outlined" ItemCollection="field.Options" Value="@(GetField<string>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
                         break;
                     case LetterFieldType.MultipleSelection:
-                        <MudListExtended Dense T="string" MultiSelection ItemCollection="field.Options" SelectedValues="@(GetField<string[]>(field.Name))" SelectedValuesChanged="value => SetStrings(field.Name, value?.ToArray())"/>
+                        <MudListExtended Dense T="string" MultiSelection ItemCollection="field.Options" SelectedValues="@(GetField<string[]>(field.Name))" SelectedValuesChanged="value => SetStrings(field.Name, value.ToArray())"/>
 
                         break;
                     case LetterFieldType.YesNo:
@@ -98,17 +99,18 @@
     Letter _letter = default!;
     LetterTemplate _template = default!;
     bool _isReadOnly;
-    string _eventName;
     Event _event = default!;
 
     protected override async Task OnParametersSetAsync()
     {
         _isLoading = true;
+        _isSaving = true;
         var letter = await LandingService.GetEventLetter(EventId);
         _letter = letter.Letter;
         _template = letter.LetterTemplate;
         _event = letter.Event!;
         _isReadOnly = _letter.State != LetterState.Draft;
+        _isSaving = false;
         _isLoading = false;
     }
 
@@ -164,6 +166,13 @@
 
     private async Task Submit()
     {
+        var result = await DialogService.ShowMessageBox("Submit Letter", "Are you sure you want to submit this letter? You cannot edit it again.", "Yes, I'm Done", "No, Keep Editing");
+        if (result != true)
+        {
+            await Save();
+            return;
+        }
+        
         await this.AsyncAction(x => x._isSaving, async () =>
         {
             _letter.State = LetterState.Submitted;
@@ -177,12 +186,17 @@
         var condition = field.Conditional;
         if (condition?.FieldName == null) return true;
 
+        var value = _letter.Fields.GetOrDefault(condition.FieldName);
+
+        if (value == null)
+            return condition.Operator == LetterFieldConditionOperator.IsEmpty;
+        
         return condition.Operator switch
         {
-            LetterFieldConditionOperator.Equals => string.Equals(_letter.Fields[condition.FieldName], condition.Value, StringComparison.InvariantCultureIgnoreCase),
-            LetterFieldConditionOperator.NotEquals => !string.Equals(_letter.Fields[condition.FieldName], condition.Value, StringComparison.InvariantCultureIgnoreCase),
-            LetterFieldConditionOperator.Contains => _letter.Fields[condition.FieldName].Contains(condition.Value ?? "---", StringComparison.InvariantCultureIgnoreCase),
-            LetterFieldConditionOperator.DoesNotContain => !_letter.Fields[condition.FieldName].Contains(condition.Value ?? "---", StringComparison.InvariantCultureIgnoreCase),
+            LetterFieldConditionOperator.Equals => string.Equals(value, condition.Value, StringComparison.InvariantCultureIgnoreCase),
+            LetterFieldConditionOperator.NotEquals => !string.Equals(value, condition.Value, StringComparison.InvariantCultureIgnoreCase),
+            LetterFieldConditionOperator.Contains => value.Contains(condition.Value ?? "---", StringComparison.InvariantCultureIgnoreCase),
+            LetterFieldConditionOperator.DoesNotContain => !value.Contains(condition.Value ?? "---", StringComparison.InvariantCultureIgnoreCase),
             _ => false
             };
     }

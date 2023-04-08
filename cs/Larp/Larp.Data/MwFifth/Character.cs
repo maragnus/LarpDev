@@ -138,6 +138,8 @@ public class Character
     public string? CharacterName { get; set; }
 
     public int? ImportId { get; set; }
+
+    public int? ImportedMoonstone { get; set; }
 }
 
 [PublicAPI]
@@ -166,7 +168,7 @@ public class CharacterRevision
 
     [BsonRepresentation(BsonType.ObjectId)]
     public string? ApprovedBy { get; set; }
-    
+
     public string? CharacterName { get; set; }
     public string? Religion { get; set; }
     public string? Occupation { get; set; }

@@ -143,15 +143,22 @@ public class LetterManager
 
     public async Task<LetterAndTemplate> GetEventLetter(string accountId, string eventId)
     {
-        var accountName = _larpContext.Accounts.Find(x => x.AccountId == accountId).Project(x => x.Name)
-            .FirstOrDefaultAsync();
+        var accountName =
+            _larpContext.Accounts
+                .Find(x => x.AccountId == accountId)
+                .Project(x => x.Name)
+                .FirstOrDefaultAsync();
         var @event = _larpContext.Events.FindOneAsync(x => x.EventId == eventId);
-        var templateId = await _larpContext.Events.Find(x => x.EventId == eventId).Project(x => x.LetterTemplateId)
-                             .FirstOrDefaultAsync()
-                         ?? throw new BadRequestException("Event does not have a Letter Template associated with it");
+        var templateId =
+            await _larpContext.Events
+                .Find(x => x.EventId == eventId)
+                .Project(x => x.LetterTemplateId)
+                .FirstOrDefaultAsync()
+            ?? throw new BadRequestException("Event does not have a Letter Template associated with it");
         var template = GetTemplate(templateId);
         var letter =
-            await _larpContext.Letters.FindOneAsync(x => x.AccountId == accountId && x.TemplateId == templateId)
+            await _larpContext.Letters.FindOneAsync(x =>
+                x.AccountId == accountId && x.EventId == eventId && x.TemplateId == templateId)
             ?? await Draft(templateId, eventId, accountId);
 
         return new LetterAndTemplate()

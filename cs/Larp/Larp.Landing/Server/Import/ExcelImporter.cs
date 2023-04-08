@@ -200,9 +200,6 @@ public class ExcelImporter
                 continue;
             }
 
-            var giftMoonstone = ToInt(sheet.Cells[row, 17].Value);
-            var skillMoonstone = ToInt(sheet.Cells[row, 21].Value);
-
             var character = new Character
             {
                 CharacterId = ObjectId.GenerateNewId().ToString(),
@@ -210,7 +207,7 @@ public class ExcelImporter
                 AccountId = account!.AccountId,
                 CharacterName = characterName,
                 CreatedOn = _now,
-                UsedMoonstone = giftMoonstone + skillMoonstone
+                ImportedMoonstone = ToInt(sheet.Cells[row, 2].Value)
             };
 
             var homeChapter = TranslateHomeChapter((string)sheet.Cells[row, 6].Value);
@@ -276,6 +273,7 @@ public class ExcelImporter
             };
             builder.UpdateMoonstone();
 
+            character.UsedMoonstone = revision.TotalMoonstone;
             await _larpContext.MwFifthGame.Characters.InsertOneAsync(character);
             await _larpContext.MwFifthGame.CharacterRevisions.InsertOneAsync(revision);
         }
@@ -325,7 +323,7 @@ public class ExcelImporter
         name = match.Groups[1].Value;
         skills = match.Groups[3].Value.Split(',')
             .Select(x => x.Trim())
-            .Where(x=> !string.IsNullOrWhiteSpace(x))
+            .Where(x => !string.IsNullOrWhiteSpace(x))
             .ToArray();
     }
 
@@ -359,7 +357,10 @@ public class ExcelImporter
                     string.Equals(x.Name, name, StringComparison.InvariantCultureIgnoreCase));
                 if (skill == null)
                     throw new Exception($"Skill \"{name}\" does not exist");
-
+                
+                if (skill.Purchasable == SkillPurchasable.Once && count > 1)
+                    count = 1;
+                
                 return new CharacterSkill()
                 {
                     Name = skill.Name,

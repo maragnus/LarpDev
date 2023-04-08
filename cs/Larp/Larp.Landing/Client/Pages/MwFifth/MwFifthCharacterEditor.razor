@@ -118,6 +118,12 @@
                 () => _revision.IsSkillsValid,
                 () => _revision.HasSkills),
             new(
+                "Free Skills",
+                @<StepFreeSkills Character="_revision"/>,
+                @<MudIcon Icon="@Icons.Material.Outlined.CleanHands"/>,
+                () => true,
+                () => _revision.HasSkills),
+            new(
                 "Spells",
                 @<StepSpells Character="_revision"/>,
                 @<MudIcon Icon="@Icons.Material.Outlined.Book"/>,
@@ -141,7 +147,7 @@
                 () => _revision.HasDocuments),
             new(
                 "Review",
-                @<StepReview Character="_revision" Submit="Submit"/>,
+                @<StepReview Character="_revision" Submit="Submit" Admin/>,
                 @<MudIcon Icon="@Icons.Material.Outlined.Verified"/>,
                 () => false)
         };

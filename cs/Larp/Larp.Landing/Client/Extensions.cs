@@ -53,6 +53,9 @@ public static class Extensions
             typeof(ComponentBase).GetMethod("StateHasChanged", BindingFlags.Instance | BindingFlags.NonPublic)!;
     }
 
+    public static string? GetOrDefault(this Dictionary<string, string> dict, string key) =>
+        dict.TryGetValue(key, out var value) ? value : default;
+
     public static async Task AsyncAction<TType>(this TType component, Expression<Func<TType, bool>> busyIndicator,
         Func<Task> action)
         where TType : ComponentBase
