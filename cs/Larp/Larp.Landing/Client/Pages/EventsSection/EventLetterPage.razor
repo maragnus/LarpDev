@@ -1,0 +1,79 @@
+@page "/events/{EventId}/letter"
+@inject LandingService LandingService
+@inject IDialogService DialogService
+
+<PageHeader>Post Event Letter</PageHeader>
+
+@if (_isLoading)
+{
+    <MudOverlay Absolute DarkBackground Visible="_isLoading">
+        <MudProgressCircular Indeterminate/>
+    </MudOverlay>
+    return;
+}
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="relative">
+    <MudOverlay Absolute DarkBackground Visible="_isSaving">
+        <MudProgressCircular Indeterminate/>
+    </MudOverlay>
+    
+    <EventLetter Letter="_letter" Template="_template" Event="_event" ReadOnly="_isReadOnly" />
+
+    @if (_letter.State == LetterState.Draft)
+    {
+        <div class="my-4">
+            <MudButtonGroup OverrideStyles="false">
+                <MudButton Color="Color.Success" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" OnClick="Save">Save</MudButton>
+                <MudButton Color="Color.Warning" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.VerifiedUser" OnClick="Submit">Submit</MudButton>
+            </MudButtonGroup>
+        </div>
+    }
+</MudContainer>
+
+@code {
+    [Parameter]
+    public string EventId { get; set; } = default!;
+
+    bool _isLoading = true;
+    bool _isSaving;
+    Letter _letter = default!;
+    LetterTemplate _template = default!;
+    bool _isReadOnly;
+    Event _event = default!;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _isLoading = true;
+        _isSaving = true;
+        var letter = await LandingService.GetEventLetter(EventId);
+        _letter = letter.Letter;
+        _template = letter.LetterTemplate;
+        _event = letter.Event!;
+        _isReadOnly = _letter.State != LetterState.Draft;
+        _isSaving = false;
+        _isLoading = false;
+    }
+
+    private async Task Save()
+    {
+        await this.AsyncAction(x => x._isSaving, async () => { await LandingService.Service.SaveLetter(_letter.LetterId, _letter); });
+    }
+
+    private async Task Submit()
+    {
+        var result = await DialogService.ShowMessageBox("Submit Letter", "Are you sure you want to submit this letter? You cannot edit it again.", "Yes, I'm Done", "No, Keep Editing");
+        if (result != true)
+        {
+            await Save();
+            return;
+        }
+
+        await this.AsyncAction(x => x._isSaving, async () =>
+        {
+            _letter.State = LetterState.Submitted;
+            await LandingService.Service.SaveLetter(_letter.LetterId, _letter);
+            await OnParametersSetAsync();
+        });
+    }
+
+}

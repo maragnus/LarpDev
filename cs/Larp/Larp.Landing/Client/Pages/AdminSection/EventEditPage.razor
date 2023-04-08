@@ -10,7 +10,7 @@
         <MudButtonGroup OverrideStyles="false">
             <MudButton Color="Color.Success" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" OnClick="Save">Save</MudButton>
             <MudButton Color="Color.Error" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" OnClick="Delete">Delete</MudButton>
-            <MudButton StartIcon="@Icons.Material.Filled.Download" OnClick="DownloadLetters">Download</MudButton>
+            <MudButton Color="Color.Default" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Download" OnClick="DownloadLetters">Download</MudButton>
         </MudButtonGroup>
         <MudGrid>
             <MudItem xs="12" md="6">
@@ -46,27 +46,7 @@
             </Columns>
         </MudDataGrid>
         <MudText Typo="Typo.h6">Attendance</MudText>
-        <EventAttendanceComponent EventId="@EventId" AccountNames="_accountNames"/>
-
-        @if (_template != null)
-        {
-            <MudText Typo="Typo.h6">Letters</MudText>
-            <MudDataGrid T="Letter" Items="_letters" EditMode="DataGridEditMode.Cell" ReadOnly Dense>
-                <Columns>
-                    <HierarchyColumn T="Letter"/>
-                    <TemplateColumn T="Letter" Title="Player Name">
-                        <CellTemplate>
-                            @(_accountNames.FirstOrDefault(x => x.AccountId == context.Item.AccountId)?.Name ?? "No Name Set")
-                        </CellTemplate>
-                    </TemplateColumn>
-                    <PropertyColumn Property="x => x.State"/>
-                    <PropertyColumn Property="x => x.StartedOn" Format="dddd, MMM d, yyyy"/>
-                </Columns>
-                <ChildRowContent>
-                    <EventLetter Event="_event" Template="_template" Letter="@context.Item"></EventLetter>
-                </ChildRowContent>
-            </MudDataGrid>
-        }
+        <EventAttendanceComponent Event="@_event" LetterTemplate="@_template" Letters="@_letters" AccountNames="_accountNames"/>
     </MudStack>
 </AdminLayout>
 
@@ -97,8 +77,8 @@
     private DateTime _date;
     private LetterTemplate[] _letterTemplates = Array.Empty<LetterTemplate>();
     private LetterTemplate? _template;
-    private Letter[] _letters = Array.Empty<Letter>();
     private AccountName[] _accountNames = Array.Empty<AccountName>();
+    private Letter[] _letters = default!;
 
     protected override async Task OnParametersSetAsync()
     {

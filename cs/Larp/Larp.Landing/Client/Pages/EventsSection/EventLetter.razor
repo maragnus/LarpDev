@@ -1,184 +1,133 @@
-@page "/events/{EventId}/letter"
-@inject LandingService LandingService
-@inject IDialogService DialogService
+<MudPaper Class="pa-4 mt-4">
+    <MudStack Spacing="4">
+        <MudText Typo="Typo.h6">@Template.Title</MudText>
+        <MudText Typo="Typo.body2">@Event.Title on @Event.Date.ToString("dddd, MMMM dd, yyyy")</MudText>
+        @if (!string.IsNullOrWhiteSpace(Template.Description))
+        {
+            <MudText Typo="Typo.body1">@Template.Description</MudText>
+        }
+    </MudStack>
+</MudPaper>
 
-<PageHeader>Post Event Letter</PageHeader>
-
-@if (_isLoading)
+@if (Letter.State == LetterState.Submitted)
 {
-    <MudOverlay Absolute DarkBackground Visible="_isLoading">
-        <MudProgressCircular Indeterminate/>
-    </MudOverlay>
-    return;
+    <MudAlert Severity="Severity.Info" Class="pa-4 mt-4">
+        This letter has been submitted and is waiting for admin approval. You can no longer make changes.
+    </MudAlert>
+}
+else if (Letter.State == LetterState.Approved)
+{
+    <MudAlert Severity="Severity.Info" Class="pa-4 mt-4">
+        This letter has been approved! You can no longer make changes.
+    </MudAlert>
 }
 
-<MudContainer MaxWidth="MaxWidth.Small" Class="relative">
-    <MudOverlay Absolute DarkBackground Visible="_isSaving">
-        <MudProgressCircular Indeterminate/>
-    </MudOverlay>
-
+@foreach (var field in Template.Fields)
+{
+    if (!field.ShowField(Letter.Fields)) continue;
     <MudPaper Class="pa-4 mt-4">
-        <MudStack Spacing="4">
-            <MudText Typo="Typo.h6">@_template.Title</MudText>
-            <MudText Typo="Typo.body2">@_event.Title on @_event.Date.ToString("dddd, MMMM dd, yyyy")</MudText>
-            @if (!string.IsNullOrWhiteSpace(_template.Description))
+        <MudStack Spacing="0">
+            <MudText Typo="@(field.Type == LetterFieldType.Header ? Typo.h6 : Typo.body1)">@field.Title</MudText>
+            <MudText Typo="Typo.body2">@field.Description</MudText>
+
+            @switch (field.Type)
             {
-                <MudText Typo="Typo.body1">@_template.Description</MudText>
+                case LetterFieldType.Rating:
+                    <MudRating T="int" ReadOnly="ReadOnly" MaxValue="10" SelectedValue="@(GetField<int>(field.Name))" SelectedValueChanged="value => SetInt(field.Name, value)"/>
+                    break;
+                case LetterFieldType.Text:
+                    <MudTextField T="string?" ReadOnly="ReadOnly" Variant="Variant.Outlined" Value="@(GetField<string?>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
+                    break;
+                case LetterFieldType.TextBlock:
+                    <MudTextField T="string?" ReadOnly="ReadOnly" Variant="Variant.Outlined" Lines="4" Value="@(GetField<string?>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
+                    break;
+                case LetterFieldType.Selection:
+                    <MudSelectExtended T="string?" ReadOnly="ReadOnly" Variant="Variant.Outlined" ItemCollection="field.Options" Value="@(GetField<string>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
+                    break;
+                case LetterFieldType.MultipleSelection:
+                    @if (ReadOnly)
+                    {
+                        <MudChipSet MultiSelection ReadOnly>
+                            @foreach (var value in GetField<string[]>(field.Name) ?? Array.Empty<string>())
+                            {
+                                <MudChip>@value</MudChip>
+                            }
+                        </MudChipSet>
+                    }
+                    else
+                    {
+                        <MudListExtended Dense T="string" Disabled="ReadOnly" MultiSelection ItemCollection="field.Options" SelectedValues="@(GetField<string[]>(field.Name))" SelectedValuesChanged="value => SetStrings(field.Name, value.ToArray())"/>
+                    }
+                    break;
+                case LetterFieldType.YesNo:
+                    <MudSwitch T="bool" ReadOnly="ReadOnly" Checked="@(GetField<bool>(field.Name))" CheckedChanged="value => SetBool(field.Name, value)" Color="Color.Success" UnCheckedColor="Color.Error"/>
+                    break;
+                case LetterFieldType.Removed:
+                default:
+                    break;
             }
         </MudStack>
     </MudPaper>
-
-    @if (_letter.State == LetterState.Submitted)
-    {
-        <MudAlert Severity="Severity.Info" Class="pa-4 mt-4">
-            This letter has been submitted and is waiting for admin approval. You can no longer make changes.
-        </MudAlert>
-    }
-    else if (_letter.State == LetterState.Approved)
-    {
-        <MudAlert Severity="Severity.Info" Class="pa-4 mt-4">
-            This letter has been approved! You can no longer make changes.
-        </MudAlert>
-    }
-
-    @foreach (var field in _template.Fields)
-    {
-        if (!field.ShowField(_letter.Fields)) continue;
-        <MudPaper Class="pa-4 mt-4">
-            <MudStack Spacing="0">
-                <MudText Typo="Typo.body1">@field.Title</MudText>
-                <MudText Typo="Typo.body2">@field.Description</MudText>
-
-                @switch (field.Type)
-                {
-                    case LetterFieldType.Rating:
-                        <MudRating T="int" ReadOnly="_isReadOnly" MaxValue="10" SelectedValue="@(GetField<int>(field.Name))" SelectedValueChanged="value => SetInt(field.Name, value)"/>
-                        break;
-                    case LetterFieldType.Text:
-                        <MudTextField T="string?" ReadOnly="_isReadOnly" Variant="Variant.Outlined" Value="@(GetField<string?>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
-                        break;
-                    case LetterFieldType.TextBlock:
-                        <MudTextField T="string?" ReadOnly="_isReadOnly" Variant="Variant.Outlined" Lines="4" Value="@(GetField<string?>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
-                        break;
-                    case LetterFieldType.Selection:
-                        <MudSelectExtended ReadOnly="_isReadOnly" T="string?" Variant="Variant.Outlined" ItemCollection="field.Options" Value="@(GetField<string>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
-                        break;
-                    case LetterFieldType.MultipleSelection:
-                        <MudListExtended Dense T="string" MultiSelection ItemCollection="field.Options" SelectedValues="@(GetField<string[]>(field.Name))" SelectedValuesChanged="value => SetStrings(field.Name, value.ToArray())"/>
-
-                        break;
-                    case LetterFieldType.YesNo:
-                        <MudSwitch T="bool" ReadOnly="_isReadOnly" Checked="@(GetField<bool>(field.Name))" CheckedChanged="value => SetBool(field.Name, value)" Color="Color.Success" UnCheckedColor="Color.Error"/>
-                        break;
-                    case LetterFieldType.Removed:
-                    default:
-                        break;
-                }
-            </MudStack>
-        </MudPaper>
-    }
-
-    @if (_letter.State == LetterState.Draft)
-    {
-        <div class="my-4">
-            <MudButtonGroup OverrideStyles="false">
-                <MudButton Color="Color.Success" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" OnClick="Save">Save</MudButton>
-                <MudButton Color="Color.Warning" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.VerifiedUser" OnClick="Submit">Submit</MudButton>
-            </MudButtonGroup>
-        </div>
-    }
-</MudContainer>
+}
 
 @code {
 
     [Parameter]
-    public string EventId { get; set; } = default!;
+    public bool ReadOnly { get; set; }
 
-    bool _isLoading = true;
-    bool _isSaving;
-    Letter _letter = default!;
-    LetterTemplate _template = default!;
-    bool _isReadOnly;
-    Event _event = default!;
+    [Parameter]
+    public Event Event { get; set; } = default!;
 
-    protected override async Task OnParametersSetAsync()
-    {
-        _isLoading = true;
-        _isSaving = true;
-        var letter = await LandingService.GetEventLetter(EventId);
-        _letter = letter.Letter;
-        _template = letter.LetterTemplate;
-        _event = letter.Event!;
-        _isReadOnly = _letter.State != LetterState.Draft;
-        _isSaving = false;
-        _isLoading = false;
-    }
+    [Parameter]
+    public Letter Letter { get; set; } = default!;
+
+    [Parameter]
+    public LetterTemplate Template { get; set; } = default!;
+
 
     private T? GetField<T>(string fieldName)
     {
-        if (!_letter.Fields.ContainsKey(fieldName))
+        if (!Letter.Fields.ContainsKey(fieldName))
             return default;
 
         if (typeof(T) == typeof(string[]))
         {
-            return (T)(object)_letter.Fields[fieldName].Split(',');
+            return (T)(object)Letter.Fields[fieldName].Split(',');
         }
 
-        return (T)Convert.ChangeType(_letter.Fields[fieldName], typeof(T));
+        return (T)Convert.ChangeType(Letter.Fields[fieldName], typeof(T));
     }
 
     private void SetString(string fieldName, string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            _letter.Fields.Remove(fieldName);
+            Letter.Fields.Remove(fieldName);
         else
-            _letter.Fields[fieldName] = value.Trim();
+            Letter.Fields[fieldName] = value.Trim();
     }
 
     private void SetInt(string fieldName, int? value)
     {
         if (!value.HasValue)
-            _letter.Fields.Remove(fieldName);
+            Letter.Fields.Remove(fieldName);
         else
-            _letter.Fields[fieldName] = value.Value.ToString();
+            Letter.Fields[fieldName] = value.Value.ToString();
     }
 
     private void SetBool(string fieldName, bool? value)
     {
         if (!value.HasValue)
-            _letter.Fields.Remove(fieldName);
+            Letter.Fields.Remove(fieldName);
         else
-            _letter.Fields[fieldName] = value.Value.ToString();
+            Letter.Fields[fieldName] = value.Value.ToString();
     }
 
     private void SetStrings(string fieldName, string[]? values)
     {
         if (values == null || values.Length == 0)
-            _letter.Fields.Remove(fieldName);
+            Letter.Fields.Remove(fieldName);
         else
-            _letter.Fields[fieldName] = string.Join(",", values);
-    }
-
-    private async Task Save()
-    {
-        await this.AsyncAction(x => x._isSaving, async () => { await LandingService.Service.SaveLetter(_letter.LetterId, _letter); });
-    }
-
-    private async Task Submit()
-    {
-        var result = await DialogService.ShowMessageBox("Submit Letter", "Are you sure you want to submit this letter? You cannot edit it again.", "Yes, I'm Done", "No, Keep Editing");
-        if (result != true)
-        {
-            await Save();
-            return;
-        }
-
-        await this.AsyncAction(x => x._isSaving, async () =>
-        {
-            _letter.State = LetterState.Submitted;
-            await LandingService.Service.SaveLetter(_letter.LetterId, _letter);
-            await OnParametersSetAsync();
-        });
+            Letter.Fields[fieldName] = string.Join(",", values);
     }
 
 }

@@ -1,9 +1,10 @@
+@using MongoDB.Driver.Linq
 @inject LandingService LandingService
 @inject IDialogService DialogService
 
 <MudStack Row AlignItems="AlignItems.Center">
     <MudSelectExtended
-        T="AccountName" ItemCollection="_players" Clearable @ref="_addPlayerComponent"
+        T="AccountName" ItemCollection="AccountNames" Clearable @ref="_addPlayerComponent"
         ValueChanged="AddAccountChanged" Disabled="_isSaving"
         Placeholder="Add Attendee" Variant="Variant.Outlined" ToStringFunc="@(accountName => accountName.Name ?? "No Name Set")"
         SearchBox="true" SearchBoxAutoFocus SearchFunc="SearchFunc">
@@ -28,6 +29,7 @@
         <PropertyColumn Property="x => x.Moonstone" IsEditable="true"/>
         <TemplateColumn CellClass="d-flex justify-end" Sortable="false" IsEditable="false">
             <CellTemplate>
+                <MudIconButton Size="Size.Medium" Color="Color.Secondary" Icon="@Icons.Material.Filled.Email" Disabled="@(context.Item.Letter == null)" OnClick="async () => await ShowLetter(context.Item)"/>
                 <MudIconButton Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Filled.Save" Disabled="@(!context.Item.Changed)" OnClick="async () => await AttendanceUpdate(context.Item)"/>
             </CellTemplate>
         </TemplateColumn>
@@ -38,9 +40,15 @@
 
     [Parameter]
     public AccountName[] AccountNames { get; set; } = Array.Empty<AccountName>();
-    
+
     [Parameter]
-    public string EventId { get; set; } = default!;
+    public Event Event { get; set; } = default!;
+
+    [Parameter]
+    public LetterTemplate? LetterTemplate { get; set; } = default!;
+
+    [Parameter]
+    public Letter[] Letters { get; set; } = default!;
 
     private class Attendance
     {
@@ -50,29 +58,36 @@
         public int? Moonstone { get; set; }
         public string[] CharacterIds { get; set; } = Array.Empty<string>();
         public bool Changed { get; set; }
+        public Letter? Letter { get; set; }
     }
 
     bool _isLoading = true;
     private List<EventComponent> _components = new();
-    private AccountName[] _players = Array.Empty<AccountName>();
     private readonly List<Attendance> _attendances = new();
-#pragma warning disable CS0649
     private MudSelectExtended<AccountName>? _addPlayerComponent;
-#pragma warning restore CS0649
     private bool _saveAllNeeded;
     private bool _isSaving = true;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
-        _players = AccountNames;
-        var attendances = await LandingService.Admin.GetEventAttendances(EventId);
+        _isLoading = true;
+        var letterLookup = Letters.ToDictionary(x => x.AccountId);
+        var attendances = await LandingService.Admin.GetEventAttendances(Event.EventId);
         _attendances.AddRange(attendances.Select(attendance => new Attendance()
         {
-            Name = _players.FirstOrDefault(account => account.AccountId == attendance.AccountId)?.Name ?? "No Name Set",
+            Name = AccountNames.FirstOrDefault(account => account.AccountId == attendance.AccountId)?.Name ?? "No Name Set",
             Attended = true,
             Moonstone = attendance.MwFifth?.Moonstone ?? 0,
             AccountId = attendance.AccountId,
-            CharacterIds = attendance.MwFifth?.CharacterIds ?? Array.Empty<string>()
+            CharacterIds = attendance.MwFifth?.CharacterIds ?? Array.Empty<string>(),
+            Letter = letterLookup.Remove(attendance.AccountId, out var letter) ? letter : null
+        }));
+        _attendances.AddRange(letterLookup.Values.Select(letter => new Attendance()
+        {
+            Name = AccountNames.FirstOrDefault(account => account.AccountId == letter.AccountId)?.Name ?? "No Name Set",
+            Attended = false,
+            AccountId = letter.AccountId,
+            Letter = letter
         }));
         _isLoading = false;
         _isSaving = false;
@@ -107,7 +122,7 @@
 
     private async Task SaveAttendance(Attendance item)
     {
-        await LandingService.Admin.SetEventAttendance(EventId, item.AccountId, item.Attended, item.Moonstone, Array.Empty<string>());
+        await LandingService.Admin.SetEventAttendance(Event.EventId, item.AccountId, item.Attended, item.Moonstone, Array.Empty<string>());
         item.Changed = false;
     }
 
@@ -139,7 +154,7 @@
         };
         _attendances.Add(item);
 
-        await LandingService.Admin.SetEventAttendance(EventId, item.AccountId, item.Attended, item.Moonstone, Array.Empty<string>());
+        await LandingService.Admin.SetEventAttendance(Event.EventId, item.AccountId, item.Attended, item.Moonstone, Array.Empty<string>());
 
         await _addPlayerComponent!.Clear();
         StateHasChanged();
@@ -149,6 +164,29 @@
     {
         obj.Changed = true;
         _saveAllNeeded = true;
+    }
+
+    private async Task ShowLetter(Attendance attendance)
+    {
+        if (attendance.Letter == null)
+            return;
+        
+        var template = 
+            LetterTemplate 
+            ?? await LandingService.Admin.GetLetterTemplate(attendance.Letter.TemplateId);
+        
+        var options = new DialogOptions()
+        {
+            CloseOnEscapeKey = true, CloseButton = true, Position = DialogPosition.TopCenter
+        };
+        var parameters = new DialogParameters()
+        {
+            { nameof(LetterDialog.Template), template },
+            { nameof(LetterDialog.Letter), attendance.Letter },
+            { nameof(LetterDialog.Event), Event },
+            { nameof(LetterDialog.ReadOnly), true }
+        };
+        await DialogService.ShowAsync<LetterDialog>(attendance.Name, parameters, options);
     }
 
 }

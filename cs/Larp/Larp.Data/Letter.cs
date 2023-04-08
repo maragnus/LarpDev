@@ -15,7 +15,8 @@ public enum LetterFieldType
     Selection,
     MultipleSelection,
     Rating,
-    TextBlock
+    TextBlock,
+    Header
 }
 
 public enum LetterFieldConditionOperator
@@ -104,6 +105,8 @@ public class LetterTemplate
     public LetterField[] Fields { get; set; } = Array.Empty<LetterField>();
 
     public string? Description { get; set; }
+    
+    public bool Retired { get; set; }
 }
 
 public class Letter

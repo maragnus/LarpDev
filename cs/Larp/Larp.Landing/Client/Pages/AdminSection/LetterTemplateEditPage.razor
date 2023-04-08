@@ -1,7 +1,6 @@
 @page "/admin/letters/templates/{TemplateId}"
-@using System.Reflection
-@using Microsoft.VisualBasic.FileIO
 @inject LandingService LandingService
+@inject IDialogService DialogService
 
 <AdminLayout Title="Letter Templates" Loading="_isLoading">
     <MudStack Spacing="4" Class="relative">
@@ -11,16 +10,27 @@
         </MudOverlay>
 
         <div>
-            <MudButton StartIcon="@Icons.Material.Filled.Save" OnClick="Save" Variant="Variant.Filled" Color="Color.Success">Save</MudButton>
+            <MudButtonGroup OverrideStyles="false">
+                <MudButton StartIcon="@Icons.Material.Filled.Save" OnClick="Save" Variant="Variant.Filled" Color="Color.Success">Save</MudButton>
+                <MudButton StartIcon="@Icons.Material.Filled.Preview" OnClick="Preview" Variant="Variant.Filled" Color="Color.Warning">Preview</MudButton>
+            </MudButtonGroup>
         </div>
+
+        @if (_template.Retired)
+        {
+            <MudAlert Severity="Severity.Warning">This letter template is retired. New letters cannot be composed and it will not appear in the list for the Event Editor.</MudAlert>
+        }
 
         <MudPaper Class="pa-4">
             <MudGrid>
-                <MudItem xs="12" md="6">
+                <MudItem xs="12" md="4">
                     <MudTextField T="string" @bind-Value="@_template.Name" Label="Name" Variant="Variant.Outlined"/>
                 </MudItem>
                 <MudItem xs="12" md="6">
                     <MudTextField T="string" @bind-Value="@_template.Title" Label="Title" Variant="Variant.Outlined"/>
+                </MudItem>
+                <MudItem xs="12" md="2">
+                    <MudSwitch T="bool" @bind-Checked="@_template.Retired" Label="Retired" Color="Color.Error" UnCheckedColor="Color.Success"/>
                 </MudItem>
                 <MudItem xs="12">
                     <MudTextField Lines="6" T="string?" @bind-Value="@_template.Description" Label="Description" Variant="Variant.Outlined"/>
@@ -31,7 +41,7 @@
         <MudDataGrid
             Dense Bordered
             T="LetterField" Items="_template.Fields" SortMode="SortMode.None"
-            EditMode="DataGridEditMode.Cell" ReadOnly="false">
+            EditMode="DataGridEditMode.Cell" ReadOnly="false" CommittedItemChanges="UpdateFieldNames">
             <Columns>
                 <HierarchyColumn T="LetterField"/>
                 <PropertyColumn Property="x => x.Name"/>
@@ -46,29 +56,38 @@
                             <MudSelectItem T="LetterFieldType" Value="LetterFieldType.Rating">Rating</MudSelectItem>
                             <MudSelectItem T="LetterFieldType" Value="LetterFieldType.Selection">Selection</MudSelectItem>
                             <MudSelectItem T="LetterFieldType" Value="LetterFieldType.MultipleSelection">Multiple Selection</MudSelectItem>
+                            <MudSelectItem T="LetterFieldType" Value="LetterFieldType.Header">Header</MudSelectItem>
                         </MudSelect>
                     </EditTemplate>
                 </PropertyColumn>
+                <TemplateColumn T="LetterField" Sortable="false" IsEditable="false">
+                    <CellTemplate>
+                        <MudIconButton Size="Size.Small" Color="Color.Secondary" Icon="@Icons.Material.Filled.MoveUp" OnClick="() => MoveUp(context.Item)"/>
+                        <MudIconButton Size="Size.Small" Color="Color.Primary" Icon="@Icons.Material.Filled.MoveDown" OnClick="() => MoveDown(context.Item)"/>
+                    </CellTemplate>
+                </TemplateColumn>
             </Columns>
             <ChildRowContent>
                 @if (context.Item.Type is LetterFieldType.Selection or LetterFieldType.MultipleSelection)
                 {
                     <MudChipField T="string" @bind-Values="@context.Item.Options" Label="Options (comma-delimited)" Variant="Variant.Outlined" ChipSize="Size.Medium" ChipVariant="Variant.Filled" Delimiter="@Delimiter"/>
                 }
-                <MudTextField T="string?" Variant="Variant.Outlined" @bind-Value="@context.Item.Description" Label="Description"/>
-                <MudText Typo="Typo.caption">Only show this field when:</MudText>
-                <MudStack Row>
-                    <MudTextField T="string?" @bind-Value="@context.Item.Conditional.FieldName" Label="Field Name" Variant="Variant.Outlined"/>
-                    <MudSelect T="LetterFieldConditionOperator" @bind-Value="@context.Item.Conditional.Operator" Variant="Variant.Outlined">
-                        <MudSelectItem T="LetterFieldConditionOperator" Value="LetterFieldConditionOperator.Always">Always Show</MudSelectItem>
-                        <MudSelectItem T="LetterFieldConditionOperator" Value="LetterFieldConditionOperator.IsEmpty">IsEmpty</MudSelectItem>
-                        <MudSelectItem T="LetterFieldConditionOperator" Value="LetterFieldConditionOperator.IsNotEmpty">IsNotEmpty</MudSelectItem>
-                        <MudSelectItem T="LetterFieldConditionOperator" Value="LetterFieldConditionOperator.Equals">Equals</MudSelectItem>
-                        <MudSelectItem T="LetterFieldConditionOperator" Value="LetterFieldConditionOperator.NotEquals">Not Equals</MudSelectItem>
-                        <MudSelectItem T="LetterFieldConditionOperator" Value="LetterFieldConditionOperator.Contains">Contains</MudSelectItem>
-                        <MudSelectItem T="LetterFieldConditionOperator" Value="LetterFieldConditionOperator.DoesNotContain">Does Not Contain</MudSelectItem>
-                    </MudSelect>
-                    <MudTextField T="string?" @bind-Value="@context.Item.Conditional.Value" Label="Value" Variant="Variant.Outlined"/>
+                <MudStack>
+                    <MudTextField T="string?" Variant="Variant.Outlined" @bind-Value="@context.Item.Description" Label="Description"/>
+                    <MudText Typo="Typo.caption">Only show this field when:</MudText>
+                    <MudStack Row>
+                        <MudSelectExtended ItemCollection="_fieldNames" @bind-Value="@context.Item.Conditional.FieldName" Label="Field Name" Variant="Variant.Outlined"/>
+                        <MudSelect T="LetterFieldConditionOperator" @bind-Value="@context.Item.Conditional.Operator" Variant="Variant.Outlined">
+                            <MudSelectItem T="LetterFieldConditionOperator" Value="LetterFieldConditionOperator.Always">Always Show</MudSelectItem>
+                            <MudSelectItem T="LetterFieldConditionOperator" Value="LetterFieldConditionOperator.IsEmpty">IsEmpty</MudSelectItem>
+                            <MudSelectItem T="LetterFieldConditionOperator" Value="LetterFieldConditionOperator.IsNotEmpty">IsNotEmpty</MudSelectItem>
+                            <MudSelectItem T="LetterFieldConditionOperator" Value="LetterFieldConditionOperator.Equals">Equals</MudSelectItem>
+                            <MudSelectItem T="LetterFieldConditionOperator" Value="LetterFieldConditionOperator.NotEquals">Not Equals</MudSelectItem>
+                            <MudSelectItem T="LetterFieldConditionOperator" Value="LetterFieldConditionOperator.Contains">Contains</MudSelectItem>
+                            <MudSelectItem T="LetterFieldConditionOperator" Value="LetterFieldConditionOperator.DoesNotContain">Does Not Contain</MudSelectItem>
+                        </MudSelect>
+                        <MudTextField T="string?" @bind-Value="@context.Item.Conditional.Value" Label="Value" Variant="Variant.Outlined"/>
+                    </MudStack>
                 </MudStack>
             </ChildRowContent>
         </MudDataGrid>
@@ -89,6 +108,7 @@
     private bool _isLoading;
     private LetterTemplate _template = default!;
     private bool _saving;
+    private string[] _fieldNames = Array.Empty<string>();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -96,7 +116,15 @@
         _template = await LandingService.Admin.GetLetterTemplate(TemplateId);
         foreach (var field in _template.Fields)
             field.Conditional ??= new LetterFieldCondition();
+        UpdateFieldNames();
         _isLoading = false;
+    }
+
+    private void UpdateFieldNames()
+    {
+        _fieldNames = _template.Fields.Select(x => x.Name)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToArray();
     }
 
     private async Task Save()
@@ -109,6 +137,42 @@
         _template.Fields = _template.Fields
             .Concat(new[] { new LetterField { Name = "new-field", Type = LetterFieldType.Text, Conditional = new LetterFieldCondition() } })
             .ToArray();
+    }
+
+    private async Task Preview()
+    {
+        var options = new DialogOptions()
+        {
+            CloseOnEscapeKey = true, CloseButton = true, Position = DialogPosition.TopCenter
+        };
+        var parameters = new DialogParameters()
+        {
+            { nameof(LetterDialog.Template), _template },
+            { nameof(LetterDialog.Letter), new Letter() { } },
+            { nameof(LetterDialog.Event), new Event() { Title = "Sample Event", Date = DateTimeOffset.Now } },
+            { nameof(LetterDialog.ReadOnly), false }
+        };
+        await DialogService.ShowAsync<LetterDialog>("Letter Preview", parameters, options);
+    }
+
+    private void MoveUp(LetterField field)
+    {
+        var position = Array.IndexOf(_template.Fields, field);
+        if (position == 0) return;
+        
+        var old = _template.Fields[position - 1];
+        _template.Fields[position - 1] = field;
+        _template.Fields[position] = old;
+    }
+
+    private void MoveDown(LetterField field)
+    {
+        var position = Array.IndexOf(_template.Fields, field);
+        if (position == _template.Fields.Length-1 ) return;
+
+        var old = _template.Fields[position + 1];
+        _template.Fields[position + 1] = field;
+        _template.Fields[position] = old;
     }
 
 }

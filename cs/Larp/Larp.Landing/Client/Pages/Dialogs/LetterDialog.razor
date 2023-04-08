@@ -1,0 +1,30 @@
+@using Larp.Landing.Client.Pages.EventsSection
+
+<MudDialog T="string?">
+    <DialogContent>
+        <EventLetter Event="Event" Letter="Letter" Template="Template" ReadOnly="ReadOnly"/>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Default" Variant="Variant.Filled" OnClick="Close">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public bool ReadOnly { get; set; }
+
+    [Parameter]
+    public Event Event { get; set; } = default!;
+
+    [Parameter]
+    public Letter Letter { get; set; } = default!;
+
+    [Parameter]
+    public LetterTemplate Template { get; set; } = default!;
+
+    void Close() => MudDialog.Close(DialogResult.Cancel());
+}
