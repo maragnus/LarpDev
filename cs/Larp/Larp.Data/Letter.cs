@@ -20,11 +20,13 @@ public enum LetterFieldType
 
 public enum LetterFieldConditionOperator
 {
+    Always = 0,
     Equals,
     NotEquals,
     Contains,
     DoesNotContain,
-    IsEmpty
+    IsEmpty,
+    IsNotEmpty
 }
 
 public class LetterFieldCondition
@@ -45,11 +47,35 @@ public class LetterField
     public LetterFieldType Type { get; set; }
 
     public List<string> Options { get; set; } = new();
-    
-    [BsonIgnoreIfNull]
-    public LetterFieldCondition? Conditional { get; set; }
 
+    [BsonIgnoreIfNull] public LetterFieldCondition? Conditional { get; set; }
+
+    private const StringComparison Sc = StringComparison.InvariantCultureIgnoreCase;
+
+    public bool ShowField(Dictionary<string, string> fields)
+    {
+        var condition = Conditional;
+        if (string.IsNullOrWhiteSpace(condition?.FieldName)) return true;
+        if (condition.Operator == LetterFieldConditionOperator.Always)
+            return true;
+
+        var value = fields.TryGetValue(condition.FieldName, out var v) ? v : null;
+
+        if (string.IsNullOrWhiteSpace(value))
+            return condition.Operator is LetterFieldConditionOperator.IsEmpty;
+
+        return condition.Operator switch
+        {
+            LetterFieldConditionOperator.IsNotEmpty => true,
+            LetterFieldConditionOperator.Equals => string.Equals(value, condition.Value, Sc),
+            LetterFieldConditionOperator.NotEquals => !string.Equals(value, condition.Value, Sc),
+            LetterFieldConditionOperator.Contains => value.Contains(condition.Value ?? "---", Sc),
+            LetterFieldConditionOperator.DoesNotContain => !value.Contains(condition.Value ?? "---", Sc),
+            _ => false
+        };
+    }
 }
+
 public class LettersAndTemplate
 {
     public LetterTemplate? LetterTemplate { get; set; } = default!;

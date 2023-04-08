@@ -43,7 +43,7 @@
 
     @foreach (var field in _template.Fields)
     {
-        if (!ShowField(field)) continue;
+        if (!field.ShowField(_letter.Fields)) continue;
         <MudPaper Class="pa-4 mt-4">
             <MudStack Spacing="0">
                 <MudText Typo="Typo.body1">@field.Title</MudText>
@@ -172,33 +172,13 @@
             await Save();
             return;
         }
-        
+
         await this.AsyncAction(x => x._isSaving, async () =>
         {
             _letter.State = LetterState.Submitted;
             await LandingService.Service.SaveLetter(_letter.LetterId, _letter);
             await OnParametersSetAsync();
         });
-    }
-
-    private bool ShowField(LetterField field)
-    {
-        var condition = field.Conditional;
-        if (condition?.FieldName == null) return true;
-
-        var value = _letter.Fields.GetOrDefault(condition.FieldName);
-
-        if (value == null)
-            return condition.Operator == LetterFieldConditionOperator.IsEmpty;
-        
-        return condition.Operator switch
-        {
-            LetterFieldConditionOperator.Equals => string.Equals(value, condition.Value, StringComparison.InvariantCultureIgnoreCase),
-            LetterFieldConditionOperator.NotEquals => !string.Equals(value, condition.Value, StringComparison.InvariantCultureIgnoreCase),
-            LetterFieldConditionOperator.Contains => value.Contains(condition.Value ?? "---", StringComparison.InvariantCultureIgnoreCase),
-            LetterFieldConditionOperator.DoesNotContain => !value.Contains(condition.Value ?? "---", StringComparison.InvariantCultureIgnoreCase),
-            _ => false
-            };
     }
 
 }

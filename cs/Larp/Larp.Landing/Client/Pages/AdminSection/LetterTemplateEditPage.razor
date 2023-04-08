@@ -60,6 +60,9 @@
                 <MudStack Row>
                     <MudTextField T="string?" @bind-Value="@context.Item.Conditional.FieldName" Label="Field Name" Variant="Variant.Outlined"/>
                     <MudSelect T="LetterFieldConditionOperator" @bind-Value="@context.Item.Conditional.Operator" Variant="Variant.Outlined">
+                        <MudSelectItem T="LetterFieldConditionOperator" Value="LetterFieldConditionOperator.Always">Always Show</MudSelectItem>
+                        <MudSelectItem T="LetterFieldConditionOperator" Value="LetterFieldConditionOperator.IsEmpty">IsEmpty</MudSelectItem>
+                        <MudSelectItem T="LetterFieldConditionOperator" Value="LetterFieldConditionOperator.IsNotEmpty">IsNotEmpty</MudSelectItem>
                         <MudSelectItem T="LetterFieldConditionOperator" Value="LetterFieldConditionOperator.Equals">Equals</MudSelectItem>
                         <MudSelectItem T="LetterFieldConditionOperator" Value="LetterFieldConditionOperator.NotEquals">Not Equals</MudSelectItem>
                         <MudSelectItem T="LetterFieldConditionOperator" Value="LetterFieldConditionOperator.Contains">Contains</MudSelectItem>

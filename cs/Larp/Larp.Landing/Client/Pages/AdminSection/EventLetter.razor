@@ -12,7 +12,7 @@
 
     @foreach (var field in Template.Fields)
     {
-        if (!ShowField(field)) continue;
+        if (!field.ShowField(Letter.Fields)) continue;
         <MudPaper Class="pa-4 mt-4">
             <MudStack Spacing="0">
                 <MudText Typo="Typo.body1">@field.Title</MudText>
@@ -72,19 +72,5 @@
         return (T)Convert.ChangeType(Letter.Fields[fieldName], typeof(T));
     }
 
-    private bool ShowField(LetterField field)
-    {
-        var condition = field.Conditional;
-        if (condition?.FieldName == null) return true;
-
-        return condition.Operator switch
-        {
-            LetterFieldConditionOperator.Equals => string.Equals(Letter.Fields[condition.FieldName], condition.Value, StringComparison.InvariantCultureIgnoreCase),
-            LetterFieldConditionOperator.NotEquals => !string.Equals(Letter.Fields[condition.FieldName], condition.Value, StringComparison.InvariantCultureIgnoreCase),
-            LetterFieldConditionOperator.Contains => Letter.Fields[condition.FieldName].Contains(condition.Value ?? "---", StringComparison.InvariantCultureIgnoreCase),
-            LetterFieldConditionOperator.DoesNotContain => !Letter.Fields[condition.FieldName].Contains(condition.Value ?? "---", StringComparison.InvariantCultureIgnoreCase),
-            _ => false
-            };
-    }
 
 }
