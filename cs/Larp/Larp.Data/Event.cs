@@ -18,7 +18,7 @@ public class EventComponent
 {
     public string ComponentId { get; set; } = default!;
     public string? Name { get; set; }
-    public DateTimeOffset Date { get; set; }
+    public DateOnly Date { get; set; }
 }
 
 [PublicAPI]
@@ -30,7 +30,7 @@ public class Event
     public string GameId { get; set; } = default!;
     public string? Title { get; set; }
     public string? Location { get; set; }
-    public DateTimeOffset Date { get; set; }
+    public DateOnly Date { get; set; }
     public string? EventType { get; set; }
     public bool CanRsvp { get; set; }
     public bool IsHidden { get; set; }

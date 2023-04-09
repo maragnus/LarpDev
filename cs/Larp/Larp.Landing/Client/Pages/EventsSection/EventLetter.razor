@@ -87,15 +87,22 @@ else if (Letter.State == LetterState.Approved)
 
     private T? GetField<T>(string fieldName)
     {
-        if (!Letter.Fields.ContainsKey(fieldName))
-            return default;
-
-        if (typeof(T) == typeof(string[]))
+        try
         {
-            return (T)(object)Letter.Fields[fieldName].Split(',');
-        }
+            if (!Letter.Fields.ContainsKey(fieldName))
+                return default;
 
-        return (T)Convert.ChangeType(Letter.Fields[fieldName], typeof(T));
+            if (typeof(T) == typeof(string[]))
+            {
+                return (T)(object)Letter.Fields[fieldName].Split(',');
+            }
+
+            return (T)Convert.ChangeType(Letter.Fields[fieldName], typeof(T));
+        }
+        catch
+        {
+            return default;
+        }
     }
 
     private void SetString(string fieldName, string? value)

@@ -49,10 +49,10 @@
                 game,
                 e.Title ?? "Untitled",
                 e.Location ?? "",
-                DateOnly.FromDateTime(e.Date.LocalDateTime),
+                e.Date,
                 e.Components
                     .Select(c =>
-                        new ComponentInfo(c.Name ?? "Untitled", DateOnly.FromDateTime(c.Date.LocalDateTime)))
+                        new ComponentInfo(c.Name ?? "Untitled", c.Date))
                     .ToArray(),
                 !string.IsNullOrEmpty(e.LetterTemplateId))
         {

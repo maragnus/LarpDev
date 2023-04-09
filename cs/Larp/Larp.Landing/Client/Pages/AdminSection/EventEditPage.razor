@@ -45,6 +45,9 @@
                 </PropertyColumn>
             </Columns>
         </MudDataGrid>
+        <div>
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="AddComponent">Add Component</MudButton>
+        </div>
         <MudText Typo="Typo.h6">Attendance</MudText>
         <EventAttendanceComponent Event="@_event" LetterTemplate="@_template" Letters="@_letters" AccountNames="_accountNames"/>
     </MudStack>
@@ -64,7 +67,7 @@
         public Larp.Data.EventComponent ToComponent() => new()
         {
             ComponentId = Id,
-            Date = When,
+            Date = DateOnly.FromDateTime(When),
             Name = Name,
         };
     }
@@ -90,9 +93,9 @@
         _letters = result.Letters;
         _template = result.LetterTemplate;
         _components = _event.Components
-            .Select(x => new EventComponent { Id = x.ComponentId, Name = x.Name ?? "No Name", When = x.Date.LocalDateTime })
+            .Select(x => new EventComponent { Id = x.ComponentId, Name = x.Name ?? "No Name", When = x.Date.ToDateTime(TimeOnly.MinValue) })
             .ToList();
-        _date = _event.Date.Date;
+        _date = _event.Date.ToDateTime(TimeOnly.MinValue);
         _isLoading = false;
     }
 
@@ -108,6 +111,7 @@
     {
         await this.AsyncAction(x => x._isLoading, async () =>
         {
+            _event.Date = DateOnly.FromDateTime(_date);
             _event.Components = _components
                 .Select(x => x.ToComponent())
                 .ToArray();
@@ -145,6 +149,11 @@
         var fileStream = file.CreateReadStream();
         using var streamRef = new DotNetStreamReference(stream: fileStream);
         await JS.InvokeVoidAsync("downloadFileFromStream", $"larp-landing-export-{DateTime.Now:yyyy-MM-dd}.xlsx", streamRef);
+    }
+
+    private void AddComponent()
+    {
+        _components.Add(new EventComponent() { Name = "New Component", When = _date });
     }
 
 }

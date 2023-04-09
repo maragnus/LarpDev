@@ -99,7 +99,7 @@ public class ExcelImporter
 
                 @event = new Event()
                 {
-                    Date = new DateTimeOffset(new DateTime(year, 1, 1)),
+                    Date = new DateOnly(year, 1, 1),
                     ImportId = eventName,
                     Title = eventName,
                     GameId = _gameId,

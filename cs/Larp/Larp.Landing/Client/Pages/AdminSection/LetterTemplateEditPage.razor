@@ -112,12 +112,13 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        _isLoading = true;
-        _template = await LandingService.Admin.GetLetterTemplate(TemplateId);
-        foreach (var field in _template.Fields)
-            field.Conditional ??= new LetterFieldCondition();
-        UpdateFieldNames();
-        _isLoading = false;
+        await this.AsyncAction(DialogService, x => x._isLoading, async () =>
+        {
+            _template = await LandingService.Admin.GetLetterTemplate(TemplateId);
+            foreach (var field in _template.Fields)
+                field.Conditional ??= new LetterFieldCondition();
+            UpdateFieldNames();
+        });
     }
 
     private void UpdateFieldNames()
@@ -149,7 +150,7 @@
         {
             { nameof(LetterDialog.Template), _template },
             { nameof(LetterDialog.Letter), new Letter() { } },
-            { nameof(LetterDialog.Event), new Event() { Title = "Sample Event", Date = DateTimeOffset.Now } },
+            { nameof(LetterDialog.Event), new Event() { Title = "Sample Event", Date = DateOnly.FromDateTime(DateTime.Today) } },
             { nameof(LetterDialog.ReadOnly), false }
         };
         await DialogService.ShowAsync<LetterDialog>("Letter Preview", parameters, options);

@@ -35,7 +35,6 @@ builder.Configuration
 
     // Larp.Data.Mongo
     services.AddSingleton<LarpDataCache>();
-    services.AddScoped<IEventService, EventService>();
     services.AddScoped<IUserSessionManager, UserSessionManager>();
     services.Configure<UserSessionManagerOptions>(
         builder.Configuration.GetSection(UserSessionManagerOptions.SectionName));

@@ -124,7 +124,7 @@ public class LandingServiceServer : ILandingService
 
     public async Task<Event[]> GetEvents()
     {
-        var now = DateTimeOffset.Now.AddDays(-4);
+        var now = DateOnly.FromDateTime(DateTime.Today.AddDays(-4));
         var events = await _db.Events.Find(x => x.Date >= now).ToListAsync();
         return events.ToArray();
     }

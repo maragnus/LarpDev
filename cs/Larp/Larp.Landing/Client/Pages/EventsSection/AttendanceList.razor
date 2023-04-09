@@ -39,7 +39,7 @@
 
         public string MwFifthMoonstone { get; init; } = default!;
 
-        public DateTime When { get; init; }
+        public DateOnly When { get; init; }
 
         public string EventType { get; init; } = default!;
 
@@ -69,7 +69,7 @@
                     GameName = games.TryGetValue(attendance.Event.GameId, out var gameName) ? gameName : "No Game",
                     EventTitle = attendance.Event.Title ?? "No Title",
                     EventType = attendance.Event.EventType ?? "No Type",
-                    When = attendance.Event.Date.LocalDateTime,
+                    When = attendance.Event.Date,
                     MwFifthMoonstone = attendance.MwFifth?.Moonstone.ToString() ?? "N/A",
                     MwFifthCharacters = characters.TryFromKeys(attendance.MwFifth?.CharacterIds)
                 };

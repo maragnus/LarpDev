@@ -56,14 +56,16 @@ public static class Extensions
     public static string? GetOrDefault(this Dictionary<string, string> dict, string key) =>
         dict.TryGetValue(key, out var value) ? value : default;
 
-    public static async Task AsyncAction<TType>(this TType component, Expression<Func<TType, bool>> busyIndicator,
+    public static async Task AsyncAction<TType>(
+        this TType component,
+        Expression<Func<TType, bool>> busyIndicator,
         Func<Task> action)
         where TType : ComponentBase
     {
         var memberAccess = busyIndicator.Body as MemberExpression;
         var fieldInfo = memberAccess!.Member as FieldInfo;
         var propertyInfo = memberAccess.Member as PropertyInfo;
-        
+
         fieldInfo?.SetValue(component, true);
         propertyInfo?.SetValue(component, true);
         stateHasChanged.Invoke(component, Array.Empty<object>());
@@ -78,31 +80,42 @@ public static class Extensions
         }
     }
 
-    public static async Task<bool> AsyncAction<T>(this ComponentBase component, DialogService dialogService,
-        Expression<Func<T, bool>> busyIndicator,
+    public static async Task<bool> AsyncAction<TType>(
+        this TType component,
+        IDialogService dialogService,
+        Expression<Func<TType, bool>> busyIndicator,
         Func<Task> action)
+        where TType : ComponentBase
     {
-        LambdaExpression lambda = busyIndicator;
-        var memberExpression = lambda.Body is UnaryExpression expression
-            ? (MemberExpression)expression.Operand
-            : (MemberExpression)lambda.Body;
-        var propertyInfo = (PropertyInfo)memberExpression.Member;
+        var memberAccess = busyIndicator.Body as MemberExpression;
+        var fieldInfo = memberAccess!.Member as FieldInfo;
+        var propertyInfo = memberAccess.Member as PropertyInfo;
 
-        propertyInfo.SetValue(component, true);
+        fieldInfo?.SetValue(component, true);
+        propertyInfo?.SetValue(component, true);
         stateHasChanged.Invoke(component, Array.Empty<object>());
         try
         {
-            await action();
-            return true;
-        }
-        catch (Exception ex)
-        {
-            await dialogService.ShowMessageBox("Server Error", ex.Message);
-            return false;
+            while (true)
+            {
+                try
+                {
+                    await action();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    var result = await dialogService.ShowMessageBox("Server Error", ex.Message, "Retry", "Cancel");
+                    if (result == true)
+                        continue;
+                    return false;
+                }
+            }
         }
         finally
         {
-            propertyInfo.SetValue(component, false);
+            fieldInfo?.SetValue(component, false);
+            propertyInfo?.SetValue(component, false);
             stateHasChanged.Invoke(component, Array.Empty<object>());
         }
     }

@@ -41,10 +41,10 @@
 
     record EventInfo(string Game, string Id, string Title, string Location, DateOnly When, ComponentInfo[] Components)
     {
-        public EventInfo(string game, Event e) : this(game, e.EventId, e.Title ?? "Untitled", e.Location ?? "", DateOnly.FromDateTime(e.Date.LocalDateTime),
+        public EventInfo(string game, Event e) : this(game, e.EventId, e.Title ?? "Untitled", e.Location ?? "", e.Date,
             e.Components
                 .Select(c =>
-                    new ComponentInfo(c.Name ?? "Untitled", DateOnly.FromDateTime(c.Date.LocalDateTime)))
+                    new ComponentInfo(c.Name ?? "Untitled", c.Date))
                 .ToArray())
         {
         }
