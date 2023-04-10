@@ -24,7 +24,7 @@ public class LetterManager
             AccountId = accountId,
             EventId = eventId,
             TemplateId = letterTemplateId,
-            State = LetterState.Draft,
+            State = LetterState.NotStarted,
             StartedOn = DateTimeOffset.Now
         };
         await _larpContext.Letters.InsertOneAsync(letter);
@@ -35,11 +35,14 @@ public class LetterManager
     {
         var oldLetter = await Get(letter.LetterId, accountId, isAdmin: false);
 
-        if (oldLetter.State != LetterState.Draft)
+        if (oldLetter.State is not LetterState.Draft and not LetterState.NotStarted)
             throw new BadRequestException("Cannot update letter after submitted");
 
         if (letter.State == LetterState.Approved)
             throw new BadRequestException("Admin is required to approve");
+
+        if (letter.State == LetterState.NotStarted)
+            letter.State = LetterState.Draft;
 
         var update = Builders<Letter>.Update
             .Set(x => x.Fields, letter.Fields)

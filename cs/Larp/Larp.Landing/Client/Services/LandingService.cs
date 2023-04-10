@@ -177,9 +177,12 @@ public class LandingService
         DateOnly? birthDate) =>
         await _landing.AccountUpdate(fullName, location, phone, allergies, birthDate);
 
-    public async Task<Event[]> GetEvents() =>
-        await _landing.GetEvents();
+    public async Task<EventAndLetter[]> GetEvents() =>
+        await _landing.GetEvents(EventList.Upcoming);
 
+    public async Task<EventAndLetter[]> GetPastEvents() =>
+        await _landing.GetEvents(EventList.Past);
+    
     public async Task<Dictionary<string, string>> GetCharacterNames() =>
         await _landing.GetCharacterNames();
 

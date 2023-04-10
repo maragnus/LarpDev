@@ -19,6 +19,12 @@ public class EventComponent
     public DateOnly Date { get; set; }
 }
 
+public class EventAndLetters
+{
+    public Event Event { get; set; } = default!;
+    public Letter[] Letters { get; set; } = default!;
+}
+
 [PublicAPI]
 public class Event
 {
@@ -35,6 +41,7 @@ public class Event
     public string? ImportId { get; set; }
     public EventComponent[] Components { get; set; } = Array.Empty<EventComponent>();
     public string? LetterTemplateId { get; set; }
+    public bool IsLetterLocked { get; set; }
 }
 
 [PublicAPI]
@@ -52,16 +59,18 @@ public class EventAttendance : Attendance
     {
     }
 
-    public EventAttendance(Attendance attendance, Event @event)
+    public EventAttendance(Attendance attendance, Event @event, LetterState letterState)
     {
         Id = attendance.Id;
         AccountId = attendance.AccountId;
         MwFifth = attendance.MwFifth;
         EventId = attendance.EventId;
         Event = @event;
+        LetterState = letterState;
     }
 
     public Event Event { get; set; } = default!;
+    public LetterState LetterState { get; set; } = LetterState.NotStarted;
 }
 
 [PublicAPI]

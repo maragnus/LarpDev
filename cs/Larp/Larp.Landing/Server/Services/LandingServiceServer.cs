@@ -122,11 +122,30 @@ public class LandingServiceServer : ILandingService
             .Set(x => x.BirthDate, birthDate)
         );
 
-    public async Task<Event[]> GetEvents()
+    public async Task<EventAndLetter[]> GetEvents(EventList list)
     {
-        var now = DateOnly.FromDateTime(DateTime.Today.AddDays(-4));
-        var events = await _db.Events.Find(x => x.Date >= now).ToListAsync();
-        return events.ToArray();
+        var now = DateOnly.FromDateTime(DateTime.Today);
+
+        var letters = _userSession.CurrentUser == null
+            ? new Dictionary<string, Letter>()
+            : (await _db.Letters.Find(x => x.AccountId == _userSession.AccountId)
+                .Project(x => new Letter() { LetterId = x.LetterId, EventId = x.EventId, State = x.State }).ToListAsync())
+            .ToDictionary(x=>x.EventId);
+
+        var filter = list switch
+        {
+            EventList.Past => Builders<Event>.Filter.Where(x => x.Date <= now.AddDays(4) && !x.IsHidden),
+            EventList.Upcoming => Builders<Event>.Filter.Where(x => x.Date >= now.AddDays(-4) && !x.IsHidden),
+            _ => throw new ArgumentOutOfRangeException(nameof(list), list, null)
+        };
+
+        var events = await _db.Events.Find(filter).ToListAsync();
+        return events
+            .Select(x=> new EventAndLetter()
+            {
+                Event = x,
+                Letter = letters.GetValueOrDefault(x.EventId)
+            }).ToArray();
     }
 
     public async Task<Dictionary<string, string>> GetCharacterNames()
@@ -143,6 +162,12 @@ public class LandingServiceServer : ILandingService
 
     public async Task<EventAttendance[]> GetAttendance()
     {
+        var letters = (await _db.Letters.AsQueryable()
+                .Where(x => x.AccountId == _userSession.AccountId)
+                .Select(x => new { x.EventId, x.State })
+                .ToListAsync())
+            .ToDictionary(x => x.EventId, x => x.State);
+
         var attendances =
             await _db.Attendances.AsQueryable()
                 .Where(attendance => attendance.AccountId == _userSession.AccountId)
@@ -154,7 +179,10 @@ public class LandingServiceServer : ILandingService
                 .ToListAsync();
 
         return attendances
-            .Select(x => new EventAttendance(x.Attedance, x.Event))
+            .Select(x => new EventAttendance(
+                x.Attedance,
+                x.Event,
+                letters.GetValueOrDefault(x.Event.EventId, LetterState.NotStarted)))
             .ToArray();
     }
 

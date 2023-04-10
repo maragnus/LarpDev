@@ -28,7 +28,8 @@ public class ExcelImporter
     private GameState _gameState = default!;
     private DateTimeOffset _now;
 
-    public ExcelImporter(LarpContext larpContext, ILogger<ExcelImporter> logger, MwFifthCharacterManager characterManager)
+    public ExcelImporter(LarpContext larpContext, ILogger<ExcelImporter> logger,
+        MwFifthCharacterManager characterManager)
     {
         _larpContext = larpContext;
         _logger = logger;
@@ -101,6 +102,9 @@ public class ExcelImporter
                 if (!int.TryParse(eventName[0..4], out var year))
                     year = 2018;
 
+
+                var date = new DateOnly(year, 1, 1);
+
                 var type = "Game";
                 if (eventName.Contains("Work", StringComparison.InvariantCultureIgnoreCase))
                     type = "Workday";
@@ -112,17 +116,81 @@ public class ExcelImporter
                     type = "Subscription";
                 if (eventName.Contains("Trivia"))
                     type = "Contest";
-                if (eventName.Contains("Recruit") || eventName.Contains("Retirement") || eventName.Contains("Paper") || eventName.Contains("Other"))
+                if (eventName.Contains("Recruit") || eventName.Contains("Retirement") || eventName.Contains("Paper") ||
+                    eventName.Contains("Other") || eventName.Contains("Character"))
                     type = "Other";
-                
+
+                var components = new List<EventComponent>();
+                if (type == "Game")
+                {
+                    var match = Regex.Match(eventName, @"(\d+)\/(\d+)");
+                    if (match.Success)
+                    {
+                        date = new DateOnly(year,
+                            int.TryParse(match.Groups[1].Value, out var month) ? month : 1,
+                            int.TryParse(match.Groups[2].Value, out var day) ? day : 1
+                        );
+                    }
+                    else
+                    {
+                        match = Regex.Match(eventName, @"(June|July|Aug) (\d+)");
+                        var month = match.Groups[1].Value switch
+                        {
+                            "June" => 6,
+                            "July" => 7,
+                            "Aug" => 8,
+                            _ => 1
+                        };
+                        date = new DateOnly(year,
+                            month,
+                            int.TryParse(match.Groups[2].Value, out var day) ? day : 1
+                        );
+                    }
+
+                    if (eventName.Contains("Burgundar") || eventName.Contains("Keep"))
+                    {
+                        components.AddRange(new[]
+                        {
+                            new EventComponent()
+                            {
+                                Name = "Friday", Date = date
+                            },
+                            new EventComponent()
+                            {
+                                Name = "Chronicle 1", Date = date.AddDays(1)
+                            },
+                            new EventComponent()
+                            {
+                                Name = "Chronicle 2", Date = date.AddDays(1)
+                            },
+                            new EventComponent()
+                            {
+                                Name = "Chronicle 3", Date = date.AddDays(2)
+                            }
+                        });
+                    }
+                    else if (eventName.Contains("Novgorond"))
+                    {
+                        components.AddRange(new[]
+                        {
+                            new EventComponent()
+                            {
+                                Name = "Chronicle", Date = date
+                            }
+                        });
+                    }
+                }
+
                 @event = new Event()
                 {
                     EventId = ObjectId.GenerateNewId().ToString(),
-                    Date = new DateOnly(year, 1, 1),
+                    Date = date,
                     ImportId = eventName,
                     Title = eventName,
                     GameId = _gameId,
-                    EventType = "Game"
+                    EventType = type,
+                    IsHidden = type == "Subscription" || type == "Contest" || type == "Other",
+                    Components = components.ToArray()
                 };
                 events.Add(new InsertOneModel<Event>(@event));
             }

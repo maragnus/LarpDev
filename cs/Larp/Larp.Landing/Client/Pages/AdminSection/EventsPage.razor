@@ -9,15 +9,12 @@
             <MudText Typo="Typo.h6" Class="flex-grow-1">@game</MudText>
             <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" OnClick="() => AddEvent(game)">Add Event</MudButton>
         </MudStack>
-        <MudDataGrid T="EventInfo" Items="events" Dense Filterable Groupable Hover Loading="_isLoading" RowClick="RowClick">
+        <MudDataGrid T="EventInfo" Items="events" Dense Filterable Groupable Hover Loading="_isLoading" RowClick="RowClick" RowsPerPage="50">
             <PagerContent>
                 <MudDataGridPager T="EventInfo"/>
             </PagerContent>
             <ChildRowContent>
                 <MudDataGrid T="ComponentInfo" Items="context.Item.Components" Dense SortMode="SortMode.None" Loading="_isLoading">
-                    <PagerContent>
-                        <MudDataGridPager T="EventInfo"/>
-                    </PagerContent>
                     <Columns>
                         <PropertyColumn Property="x => x.When" Title="Date" Format="dddd, MMM d, yyyy"/>
                         <PropertyColumn Property="x => x.Title" Title="Title"/>
@@ -28,6 +25,8 @@
                 <HierarchyColumn T="EventInfo" ButtonDisabledFunc="@(x => x.Components.Length == 0)"/>
                 <PropertyColumn Property="x => x.When" Title="Date" Format="dddd, MMM d, yyyy"/>
                 <PropertyColumn Property="x => x.Title" Title="Title"/>
+                <PropertyColumn Property="x => x.LettersApproved" Title="PEL Approved"/>
+                <PropertyColumn Property="x => x.LettersSubmitted" Title="PEL Submitted"/>
             </Columns>
         </MudDataGrid>
     }
@@ -39,13 +38,16 @@
 
     record ComponentInfo(string Title, DateOnly When);
 
-    record EventInfo(string Game, string Id, string Title, string Location, DateOnly When, ComponentInfo[] Components)
+    record EventInfo(string Game, string Id, string Title, string Location, DateOnly When, ComponentInfo[] Components,
+        int LettersApproved, int LettersSubmitted)
     {
-        public EventInfo(string game, Event e) : this(game, e.EventId, e.Title ?? "Untitled", e.Location ?? "", e.Date,
+        public EventInfo(string game, Event e, LetterState[] letters) : this(game, e.EventId, e.Title ?? "Untitled", e.Location ?? "", e.Date,
             e.Components
                 .Select(c =>
                     new ComponentInfo(c.Name ?? "Untitled", c.Date))
-                .ToArray())
+                .ToArray(),
+            letters.Count(x => x == LetterState.Approved),
+            letters.Count(x => x == LetterState.Submitted))
         {
         }
     }
@@ -59,7 +61,10 @@
             games.TryGetValue(gameId, out var game) ? game ?? "" : "";
 
         _events = (await LandingService.Admin.GetEvents())
-            .Select(x => new EventInfo(GameName(x.GameId), x))
+            .Select(x => new EventInfo(
+                GameName(x.Event.GameId),
+                x.Event,
+                x.Letters.Select(y => y.State).ToArray()))
             .GroupBy(x => x.Game)
             .Select(x => (x.Key, x.ToArray()))
             .ToArray();

@@ -26,10 +26,14 @@
                 <MudDatePicker T="DateTime" Label="When" Required Date="@_date" DateChanged="date => _date = date ?? DateTime.Today" Variant="Variant.Outlined"/>
             </MudItem>
             <MudItem xs="6" md="3">
-                <MudSwitch T="bool" Label="Has RSVP" @bind-Checked="@_event.CanRsvp"/>
+                <MudTooltip Text="Letter will not show in the Events List, but will be displayed in Attendance List">
+                    <MudSwitch T="bool" Label="Hidden" Color="@Color.Secondary" UncheckedColor="@Color.Success"  @bind-Checked="@_event.IsHidden"/>
+                </MudTooltip>
             </MudItem>
             <MudItem xs="6" md="3">
-                <MudSwitch T="bool" Label="Hidden" @bind-Checked="@_event.IsHidden"/>
+                <MudTooltip Text="Letter cannot be created while Letter is Locked">
+                    <MudSwitch T="bool" Label="Letter Locked" Color="@Color.Secondary" UncheckedColor="@Color.Success" @bind-Checked="@_event.IsLetterLocked"/>
+                </MudTooltip>
             </MudItem>
             <MudItem xs="12" md="6">
                 <MudSelectExtended T="LetterTemplate" Clearable ItemCollection="_letterTemplates" Label="Post Event Letter Template" ToStringFunc="x => x.Title" Value="@_template" ValueChanged="UpdateTemplate" Variant="Variant.Outlined"/>
@@ -45,7 +49,7 @@
                 </PropertyColumn>
                 <TemplateColumn T="EventComponent" IsEditable="false">
                     <CellTemplate>
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveComponent(context.Item)" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveComponent(context.Item)"/>
                     </CellTemplate>
                 </TemplateColumn>
             </Columns>

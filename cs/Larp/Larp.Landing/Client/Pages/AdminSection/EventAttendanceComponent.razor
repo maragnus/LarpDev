@@ -29,7 +29,24 @@
         <PropertyColumn Property="x => x.Moonstone" IsEditable="true"/>
         <TemplateColumn CellClass="d-flex justify-end" Sortable="false" IsEditable="false">
             <CellTemplate>
-                <MudIconButton Size="Size.Medium" Color="Color.Secondary" Icon="@Icons.Material.Filled.Email" Disabled="@(context.Item.Letter == null)" OnClick="async () => await ShowLetter(context.Item)"/>
+                @switch (context.Item.LetterState)
+                {
+                    case LetterState.Submitted:
+                        <MudTooltip Text="Letter has been submitted">
+                            <MudIconButton Size="Size.Medium" Color="Color.Tertiary" Icon="@Icons.Material.Filled.Email" Disabled="@(context.Item.Letter == null)" OnClick="async () => await ShowLetter(context.Item)"/>
+                        </MudTooltip>
+                        break;
+                    case LetterState.Approved:
+                        <MudTooltip Text="Letter has been approved">
+                            <MudIconButton Size="Size.Medium" Color="Color.Success" Icon="@Icons.Material.Filled.Email" Disabled="@(context.Item.Letter == null)" OnClick="async () => await ShowLetter(context.Item)"/>
+                        </MudTooltip>
+                        break;
+                    case LetterState.Draft:
+                        <MudTooltip Text="Letter is in draft">
+                            <MudIconButton Size="Size.Medium" Color="Color.Secondary" Icon="@Icons.Material.Filled.Email" Disabled="@(context.Item.Letter == null)" OnClick="async () => await ShowLetter(context.Item)"/>
+                        </MudTooltip>
+                        break;
+                }
                 <MudIconButton Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Filled.Save" Disabled="@(!context.Item.Changed)" OnClick="async () => await AttendanceUpdate(context.Item)"/>
             </CellTemplate>
         </TemplateColumn>
@@ -59,6 +76,7 @@
         public string[] CharacterIds { get; set; } = Array.Empty<string>();
         public bool Changed { get; set; }
         public Letter? Letter { get; set; }
+        public LetterState LetterState { get; set; }
     }
 
     bool _isLoading = true;
@@ -68,27 +86,39 @@
     private bool _saveAllNeeded;
     private bool _isSaving = true;
 
+    private string? _lastEventId;
+
     protected override async Task OnParametersSetAsync()
     {
+        if (_lastEventId == Event.EventId) return;
+
         _isLoading = true;
         var letterLookup = Letters.ToDictionary(x => x.AccountId);
         var attendances = await LandingService.Admin.GetEventAttendances(Event.EventId);
-        _attendances.AddRange(attendances.Select(attendance => new Attendance()
+        _attendances.AddRange(attendances.Select(attendance =>
         {
-            Name = AccountNames.FirstOrDefault(account => account.AccountId == attendance.AccountId)?.Name ?? "No Name Set",
-            Attended = true,
-            Moonstone = attendance.MwFifth?.Moonstone ?? 0,
-            AccountId = attendance.AccountId,
-            CharacterIds = attendance.MwFifth?.CharacterIds ?? Array.Empty<string>(),
-            Letter = letterLookup.Remove(attendance.AccountId, out var letter) ? letter : null
+            var letter = letterLookup.Remove(attendance.AccountId, out var l) ? l : null;
+            return new Attendance()
+            {
+                Name = AccountNames.FirstOrDefault(account => account.AccountId == attendance.AccountId)?.Name ?? "No Name Set",
+                Attended = true,
+                Moonstone = attendance.MwFifth?.Moonstone ?? 0,
+                AccountId = attendance.AccountId,
+                CharacterIds = attendance.MwFifth?.CharacterIds ?? Array.Empty<string>(),
+                Letter = letter,
+                LetterState = letter?.State ?? LetterState.Draft,
+            };
         }));
         _attendances.AddRange(letterLookup.Values.Select(letter => new Attendance()
         {
             Name = AccountNames.FirstOrDefault(account => account.AccountId == letter.AccountId)?.Name ?? "No Name Set",
             Attended = false,
             AccountId = letter.AccountId,
-            Letter = letter
+            Letter = letter,
+            LetterState = letter.State
         }));
+
+        _lastEventId = Event.EventId;
         _isLoading = false;
         _isSaving = false;
     }
@@ -170,11 +200,11 @@
     {
         if (attendance.Letter == null)
             return;
-        
-        var template = 
-            LetterTemplate 
+
+        var template =
+            LetterTemplate
             ?? await LandingService.Admin.GetLetterTemplate(attendance.Letter.TemplateId);
-        
+
         var options = new DialogOptions()
         {
             CloseOnEscapeKey = true, CloseButton = true, Position = DialogPosition.TopCenter
@@ -184,7 +214,8 @@
             { nameof(LetterDialog.Template), template },
             { nameof(LetterDialog.Letter), attendance.Letter },
             { nameof(LetterDialog.Event), Event },
-            { nameof(LetterDialog.ReadOnly), true }
+            { nameof(LetterDialog.ReadOnly), true },
+            { nameof(LetterDialog.Admin), true }
         };
         await DialogService.ShowAsync<LetterDialog>(attendance.Name, parameters, options);
     }

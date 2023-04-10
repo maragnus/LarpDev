@@ -56,6 +56,8 @@
                             <MudSelectItem T="LetterFieldType" Value="LetterFieldType.Rating">Rating</MudSelectItem>
                             <MudSelectItem T="LetterFieldType" Value="LetterFieldType.Selection">Selection</MudSelectItem>
                             <MudSelectItem T="LetterFieldType" Value="LetterFieldType.MultipleSelection">Multiple Selection</MudSelectItem>
+                            <MudSelectItem T="LetterFieldType" Value="LetterFieldType.Component">Component</MudSelectItem>
+                            <MudSelectItem T="LetterFieldType" Value="LetterFieldType.Components">Multiple Components</MudSelectItem>
                             <MudSelectItem T="LetterFieldType" Value="LetterFieldType.Header">Header</MudSelectItem>
                         </MudSelect>
                     </EditTemplate>
@@ -146,11 +148,33 @@
         {
             CloseOnEscapeKey = true, CloseButton = true, Position = DialogPosition.TopCenter
         };
+        var now = DateOnly.FromDateTime(DateTime.Today);
         var parameters = new DialogParameters()
         {
             { nameof(LetterDialog.Template), _template },
             { nameof(LetterDialog.Letter), new Letter() { } },
-            { nameof(LetterDialog.Event), new Event() { Title = "Sample Event", Date = DateOnly.FromDateTime(DateTime.Today) } },
+            {
+                nameof(LetterDialog.Event), new Event()
+                {
+                    Title = "Sample Event",
+                    Date = now,
+                    Components = new[]
+                    {
+                        new EventComponent()
+                        {
+                            Name = "Chronicle 1 (yesterday)", Date = now.AddDays(-1), ComponentId = ""
+                        },
+                        new EventComponent()
+                        {
+                            Name = "Chronicle 2 (today)", Date = now, ComponentId = ""
+                        },
+                        new EventComponent()
+                        {
+                            Name = "Chronicle 3 (tomorrow)", Date = now.AddDays(1), ComponentId = ""
+                        },
+                    }
+                }
+            },
             { nameof(LetterDialog.ReadOnly), false }
         };
         await DialogService.ShowAsync<LetterDialog>("Letter Preview", parameters, options);
@@ -160,7 +184,7 @@
     {
         var position = Array.IndexOf(_template.Fields, field);
         if (position == 0) return;
-        
+
         var old = _template.Fields[position - 1];
         _template.Fields[position - 1] = field;
         _template.Fields[position] = old;
@@ -169,7 +193,7 @@
     private void MoveDown(LetterField field)
     {
         var position = Array.IndexOf(_template.Fields, field);
-        if (position == _template.Fields.Length-1 ) return;
+        if (position == _template.Fields.Length - 1) return;
 
         var old = _template.Fields[position + 1];
         _template.Fields[position + 1] = field;

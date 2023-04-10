@@ -3,6 +3,12 @@ using Larp.Landing.Shared.Messages;
 
 namespace Larp.Landing.Shared;
 
+public enum EventList
+{
+    Upcoming,
+    Past
+}
+
 [PublicAPI]
 [ApiRoot("/api")]
 public interface ILandingService
@@ -41,7 +47,7 @@ public interface ILandingService
     Task AccountUpdate(string? fullName, string? location, string? phone, string? allergies, DateOnly? birthDate);
 
     [ApiGet("events")]
-    Task<Event[]> GetEvents();
+    Task<EventAndLetter[]> GetEvents(EventList list);
     
     [ApiGet("larp/characters/names"), ApiAuthenticated]
     Task<Dictionary<string,string>> GetCharacterNames();

@@ -82,8 +82,8 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public Task MoveMwFifthCharacter(string characterId, string newAccountId) =>
         Post($"api/admin/mw5e/characters/{characterId}/move", new { newAccountId });
 
-    public Task<Event[]> GetEvents() =>
-        Get<Event[]>("api/events");
+    public Task<EventAndLetter[]> GetEvents(EventList list) =>
+        Get<EventAndLetter[]>($"api/events?list={list}");
 
     public Task<Dictionary<string, string>> GetCharacterNames() =>
         Get<Dictionary<string, string>>("api/larp/characters/names");
@@ -218,6 +218,6 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public Task DeleteMwFifthCharacter(string characterId) =>
         Delete($"api/admin/mw5e/characters/{characterId}");
 
-    Task<Event[]> IAdminService.GetEvents() =>
-        Get<Event[]>($"api/admin/events");
+    Task<EventAndLetters[]> IAdminService.GetEvents() =>
+        Get<EventAndLetters[]>($"api/admin/events");
 }

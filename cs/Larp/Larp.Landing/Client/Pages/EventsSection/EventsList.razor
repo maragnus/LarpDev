@@ -1,76 +1,136 @@
-@page "/events"
 @inject LandingService LandingService
 @inject NavigationManager NavigationManager
 
-<PageHeader>Upcoming Events</PageHeader>
+<MudOverlay Absolute DarkBackground Visible="_isLoading">
+    <MudProgressCircular Indeterminate/>
+</MudOverlay>
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="relative">
-    <MudOverlay Absolute DarkBackground Visible="_isLoading">
-        <MudProgressCircular Indeterminate/>
-    </MudOverlay>
-    <MudText Typo="Typo.h6" Class="mt-4 mb-4">Upcoming Events</MudText>
-    <MudDataGrid T="EventInfo" Items="_events" Filterable Groupable Hover Loading="_isLoading" GroupExpanded="true">
-        <Columns>
-            <HierarchyColumn T="EventInfo" ButtonDisabledFunc="@(x => x.Components.Length == 0)"/>
-            @* <PropertyColumn Property="x => x.Game" Title="Game" Grouping="true"/> *@
-            <PropertyColumn Property="x => x.When" Title="Date" Format="dddd, MMM d, yyyy" Groupable="false"/>
-            <PropertyColumn Property="x => x.Title" Title="Title" Groupable="false"/>
-            <PropertyColumn Property="x => x.Location" Title="Location"/>
-            <TemplateColumn T="EventInfo" Title="Post Event Letter">
-                <CellTemplate>
-                    @if (context.Item.HasLetter)
+<MudDataGrid T="EventInfo" Items="_events" Filterable Groupable Hover Loading="_isLoading" GroupExpanded="true" Dense>
+    <Columns>
+        <HierarchyColumn T="EventInfo" IconSize="Size.Small" ButtonDisabledFunc="@(x => x.Components.Length == 0)"/>
+        <TemplateColumn Groupable="false" Sortable="false" Filterable="false">
+            <CellTemplate>
+                <MudIcon Icon="@context.Item.Icon" Color="Color.Primary" Size="Size.Small"/>
+            </CellTemplate>
+        </TemplateColumn>
+        @* <PropertyColumn Property="x => x.Game" Title="Game" Grouping="true"/> *@
+        <PropertyColumn Property="x => x.When" Title="Date" Format="ddd, MMM d, yyyy" Groupable="false"/>
+        <PropertyColumn Property="x => x.Title" Title="Title" Groupable="false"/>
+        <PropertyColumn Property="x => x.Location" Title="Location"/>
+        <TemplateColumn T="EventInfo" Title="Post Event Letter" Groupable="false" Filterable="false" Sortable="false">
+            <CellTemplate>
+                @if (context.Item.HasLetter)
+                {
+                    @if (context.Item.IsLetterLocked)
                     {
-                        <MudIconButton Icon="@Icons.Material.Filled.Email" Color="Color.Warning" OnClick="() => ViewLetter(context.Item.Id)"/>
+                        <MudTooltip Text="This event has a letter but is not available yet. Please check back after the event.">
+                            <MudIconButton Icon="@Icons.Material.Filled.Email" Color="Color.Warning" Disabled/>
+                        </MudTooltip>
                     }
-                </CellTemplate>
-            </TemplateColumn>
-        </Columns>
-        <ChildRowContent>
-            <MudDataGrid T="ComponentInfo" Items="context.Item.Components" Dense SortMode="SortMode.None" Loading="_isLoading">
-                <Columns>
-                    <PropertyColumn Property="x => x.When" Title="Date" Format="dddd, MMM d, yyyy"/>
-                    <PropertyColumn Property="x => x.Title" Title="Title"/>
-                </Columns>
-            </MudDataGrid>
-        </ChildRowContent>
-    </MudDataGrid>
-</MudContainer>
+                    else
+                    {
+                        <MudTooltip Text="@context.Item.Letter.Tooltip">
+                            <MudIconButton Icon="@Icons.Material.Filled.Email" Color="@context.Item.Letter.color" OnClick="() => ViewLetter(context.Item.Id)"/>
+                        </MudTooltip>
+                    }
+                }
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <ChildRowContent>
+        <MudDataGrid T="ComponentInfo" Items="context.Item.Components" Dense SortMode="SortMode.None" Loading="_isLoading">
+            <Columns>
+                <PropertyColumn Property="x => x.When" Title="Date" Format="dddd, MMM d, yyyy"/>
+                <PropertyColumn Property="x => x.Title" Title="Title"/>
+            </Columns>
+        </MudDataGrid>
+    </ChildRowContent>
+</MudDataGrid>
 
 @code {
+
+    [Parameter]
+    public bool Past { get; set; }
+
     bool _isLoading = true;
     private EventInfo[] _events = Array.Empty<EventInfo>();
 
+    static readonly Dictionary<LetterState, (string Tooltip, Color Color)> LetterTooltip = new()
+    {
+        { LetterState.NotStarted, ("You have not started the letter for this event", Color.Warning) },
+        { LetterState.Draft, ("You have not submitted this letter yet", Color.Warning) },
+        { LetterState.Submitted, ("Your event letter has been submitted and is waiting for approval", Color.Tertiary) },
+        { LetterState.Approved, ("Your event letter has been approved", Color.Success) },
+    };
+
+    private Dictionary<string, string?> _games = default!;
+
     record ComponentInfo(string Title, DateOnly When);
 
-    record EventInfo(string Id, string Game, string Title, string Location, DateOnly When, ComponentInfo[] Components, bool HasLetter)
+    record EventInfo(
+        string Id, string Game, string Title, string Location,
+        string Icon, DateOnly When, ComponentInfo[] Components,
+        bool HasLetter, bool IsLetterLocked, (string Tooltip, Color color) Letter)
     {
-        public EventInfo(string game, Event e)
+        public EventInfo(string game, Event e, LetterState letterState)
             : this(e.EventId,
                 game,
                 e.Title ?? "Untitled",
                 e.Location ?? "",
+                GetIcon(e.EventType, e.Title),
                 e.Date,
                 e.Components
                     .Select(c =>
                         new ComponentInfo(c.Name ?? "Untitled", c.Date))
                     .ToArray(),
-                !string.IsNullOrEmpty(e.LetterTemplateId))
+                !string.IsNullOrEmpty(e.LetterTemplateId),
+                e.IsLetterLocked,
+                LetterTooltip[letterState])
         {
         }
     }
 
-    protected override async Task OnInitializedAsync()
+    static string GetIcon(string? type, string? title)
     {
-        var games = LandingService.Games
-            .ToDictionary(x => x.Value.Id, x => x.Value.Title);
+        if (type == null || title == null) return Icons.Material.Filled.Event;
+        if (type.Contains("Subscription", StringComparison.InvariantCultureIgnoreCase))
+            return Icons.Material.Filled.AttachMoney;
+        if (title.Contains("Patreon", StringComparison.InvariantCultureIgnoreCase))
+            return Icons.Material.Filled.AttachMoney;
+        if (title.Contains("Trivia", StringComparison.InvariantCultureIgnoreCase))
+            return Icons.Material.Filled.Celebration;
+        if (type.Contains("Game", StringComparison.InvariantCultureIgnoreCase))
+            return Icons.Material.Filled.SportsHandball;
+        if (type.Contains("Workday", StringComparison.InvariantCultureIgnoreCase))
+            return Icons.Material.Filled.Handyman;
+        if (type.Contains("Contest", StringComparison.InvariantCultureIgnoreCase))
+            return Icons.Material.Filled.Celebration;
+        if (type.Contains("Other", StringComparison.InvariantCultureIgnoreCase))
+            return Icons.Material.Filled.Celebration;
+        return Icons.Material.Filled.AddBox;
+    }
 
-        string GameName(string gameId) =>
-            games.TryGetValue(gameId, out var game) ? game ?? "" : "";
-
-        _events = (await LandingService.GetEvents())
-            .Select(x => new EventInfo(GameName(x.GameId), x)).ToArray();
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Past)
+            _events = (await LandingService.GetPastEvents())
+                .OrderByDescending(x => x.Event.Date)
+                .Select(x => new EventInfo(GameName(x.Event.GameId), x.Event, x.Letter?.State ?? LetterState.NotStarted)).ToArray();
+        else
+            _events = (await LandingService.GetEvents())
+                .OrderBy(x => x.Event.Date)
+                .Select(x => new EventInfo(GameName(x.Event.GameId), x.Event, x.Letter?.State ?? LetterState.NotStarted)).ToArray();
         _isLoading = false;
     }
+
+    protected override void OnInitialized()
+    {
+        _games = LandingService.Games
+            .ToDictionary(x => x.Value.Id, x => x.Value.Title);
+    }
+
+    private string GameName(string gameId) =>
+        _games.TryGetValue(gameId, out var game) ? game ?? "" : "";
 
     private void ViewLetter(string eventId)
     {

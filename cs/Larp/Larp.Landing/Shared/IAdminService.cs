@@ -66,7 +66,7 @@ public interface IAdminService
     Task MoveMwFifthCharacter(string characterId, string newAccountId);
 
     [ApiGet("events"), ApiAuthenticated(AccountRole.AdminAccess)]
-    Task<Event[]> GetEvents();
+    Task<EventAndLetters[]> GetEvents();
 
     [ApiGet("events/{eventId}"), ApiAuthenticated(AccountRole.AdminAccess)]
     Task<Event> GetEvent(string eventId);
@@ -146,4 +146,5 @@ public class Dashboard
     public int MwFifthReview { get; set; }
     public int Accounts { get; set; }
     public int VerifiedAccounts { get; set; }
+    public int ReviewLetters { get; set; }
 }

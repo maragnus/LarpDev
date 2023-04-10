@@ -314,12 +314,21 @@ public class AdminService : IAdminService
     public async Task MoveMwFifthCharacter(string characterId, string newAccountId) =>
         await _manager.Move(characterId, newAccountId);
 
-    public async Task<Event[]> GetEvents()
+    public async Task<EventAndLetters[]> GetEvents()
     {
+        var letters = (await _db.Letters.Find(x => x.State == LetterState.Approved || x.State == LetterState.Submitted)
+                .Project(x => new Letter() { EventId = x.EventId, State = x.State })
+                .ToListAsync())
+            .ToLookup(x => x.EventId);
+
         var events = await _db.Events.Find(_ => true)
             .SortByDescending(x => x.Date)
             .ToListAsync();
-        return events.ToArray();
+        return events.Select(x => new EventAndLetters
+        {
+            Event = x,
+            Letters = letters[x.EventId].ToArray()
+        }).ToArray();
     }
 
     public async Task<Event> GetEvent(string eventId)
@@ -339,6 +348,7 @@ public class AdminService : IAdminService
                 .Set(x => x.Date, @event.Date)
                 .Set(x => x.CanRsvp, @event.CanRsvp)
                 .Set(x => x.IsHidden, @event.IsHidden)
+                .Set(x => x.IsLetterLocked, @event.IsLetterLocked)
                 .Set(x => x.LetterTemplateId, @event.LetterTemplateId)
                 .Set(x => x.Components, @event.Components)
         );
@@ -456,7 +466,10 @@ public class AdminService : IAdminService
             MwFifthCharacters =
                 (int)await _db.MwFifthGame.CharacterRevisions.CountDocumentsAsync(x => x.State == CharacterState.Live),
             MwFifthReview =
-                (int)await _db.MwFifthGame.CharacterRevisions.CountDocumentsAsync(x => x.State == CharacterState.Review)
+                (int)await _db.MwFifthGame.CharacterRevisions.CountDocumentsAsync(x =>
+                    x.State == CharacterState.Review),
+            ReviewLetters =
+                (int)await _db.Letters.CountDocumentsAsync(x => x.State == LetterState.Submitted),
         };
     }
 

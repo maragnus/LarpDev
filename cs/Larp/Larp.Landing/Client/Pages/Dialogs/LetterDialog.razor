@@ -2,7 +2,7 @@
 
 <MudDialog T="string?">
     <DialogContent>
-        <EventLetter Event="Event" Letter="Letter" Template="Template" ReadOnly="ReadOnly"/>
+        <EventLetter Event="Event" Letter="Letter" Template="Template" ReadOnly="ReadOnly" Admin="Admin"/>
     </DialogContent>
     <DialogActions>
         <MudButton Color="Color.Default" Variant="Variant.Filled" OnClick="Close">Close</MudButton>
@@ -16,6 +16,9 @@
 
     [Parameter]
     public bool ReadOnly { get; set; }
+
+    [Parameter]
+    public bool Admin { get; set; }
 
     [Parameter]
     public Event Event { get; set; } = default!;

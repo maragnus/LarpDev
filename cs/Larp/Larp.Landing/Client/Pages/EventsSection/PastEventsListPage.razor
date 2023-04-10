@@ -1,0 +1,11 @@
+@page "/events/past"
+
+<PageHeader>Past Events</PageHeader>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="relative pt-4">
+    <MudStack Row Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
+        <MudText Typo="Typo.h6" Class="mt-4 mb-4">Past Events</MudText>
+        <MudButton Href="/events" Variant="Variant.Filled" Color="Color.Primary">Go To Upcoming Events</MudButton>
+    </MudStack>
+    <EventsList Past/>
+</MudContainer>

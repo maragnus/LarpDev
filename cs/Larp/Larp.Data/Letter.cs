@@ -2,9 +2,10 @@ namespace Larp.Data;
 
 public enum LetterState
 {
+    NotStarted,
     Draft,
     Submitted,
-    Approved
+    Approved,
 }
 
 public enum LetterFieldType
@@ -16,7 +17,9 @@ public enum LetterFieldType
     MultipleSelection,
     Rating,
     TextBlock,
-    Header
+    Header,
+    Component,
+    Components,
 }
 
 public enum LetterFieldConditionOperator
@@ -77,9 +80,15 @@ public class LetterField
     }
 }
 
+public class EventAndLetter
+{
+    public Event Event { get; init; } = default!;
+    public Letter? Letter { get; init; }
+}
+
 public class LettersAndTemplate
 {
-    public LetterTemplate? LetterTemplate { get; set; } = default!;
+    public LetterTemplate? LetterTemplate { get; set; }
     public Letter[] Letters { get; set; } = Array.Empty<Letter>();
     public Event Event { get; set; } = default!;
 }
@@ -105,7 +114,7 @@ public class LetterTemplate
     public LetterField[] Fields { get; set; } = Array.Empty<LetterField>();
 
     public string? Description { get; set; }
-    
+
     public bool Retired { get; set; }
 }
 

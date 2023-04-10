@@ -16,10 +16,10 @@
     <MudOverlay Absolute DarkBackground Visible="_isSaving">
         <MudProgressCircular Indeterminate/>
     </MudOverlay>
-    
-    <EventLetter Letter="_letter" Template="_template" Event="_event" ReadOnly="_isReadOnly" />
 
-    @if (_letter.State == LetterState.Draft)
+    <EventLetter Letter="_letter" Template="_template" Event="_event" ReadOnly="_isReadOnly" Admin="false"/>
+
+    @if (_letter.State is LetterState.Draft or LetterState.NotStarted)
     {
         <div class="my-4">
             <MudButtonGroup OverrideStyles="false">
@@ -31,6 +31,7 @@
 </MudContainer>
 
 @code {
+
     [Parameter]
     public string EventId { get; set; } = default!;
 
@@ -49,7 +50,7 @@
         _letter = letter.Letter;
         _template = letter.LetterTemplate;
         _event = letter.Event!;
-        _isReadOnly = _letter.State != LetterState.Draft;
+        _isReadOnly = _letter.State is LetterState.Submitted or LetterState.Approved;
         _isSaving = false;
         _isLoading = false;
     }

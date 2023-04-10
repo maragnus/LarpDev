@@ -1,6 +1,11 @@
+@inject LandingService LandingService
+
 <MudPaper Class="pa-4 mt-4">
     <MudStack Spacing="4">
-        <MudText Typo="Typo.h6">@Template.Title</MudText>
+        <MudStack Row Justify="Justify.SpaceBetween">
+            <MudText Typo="Typo.h6">@Template.Title</MudText>
+            <MudChip>@(Letter.State.ToString())</MudChip>
+        </MudStack>
         <MudText Typo="Typo.body2">@Event.Title on @Event.Date.ToString("dddd, MMMM dd, yyyy")</MudText>
         @if (!string.IsNullOrWhiteSpace(Template.Description))
         {
@@ -9,17 +14,30 @@
     </MudStack>
 </MudPaper>
 
-@if (Letter.State == LetterState.Submitted)
+@switch (Letter.State)
 {
-    <MudAlert Severity="Severity.Info" Class="pa-4 mt-4">
-        This letter has been submitted and is waiting for admin approval. You can no longer make changes.
-    </MudAlert>
-}
-else if (Letter.State == LetterState.Approved)
-{
-    <MudAlert Severity="Severity.Info" Class="pa-4 mt-4">
-        This letter has been approved! You can no longer make changes.
-    </MudAlert>
+    case LetterState.Submitted when !Admin:
+        <MudAlert Severity="@Severity.Info" Class="@(@"pa-4 mt-4")">
+            This letter has been submitted and is waiting for admin approval. You can no longer make changes.
+        </MudAlert>
+        break;
+    case LetterState.Approved when !Admin:
+        <MudAlert Severity="@Severity.Info" Class="@(@"pa-4 mt-4")">
+            This letter has been approved! You can no longer make changes.
+        </MudAlert>
+        break;
+    case LetterState.NotStarted when Admin:
+    case LetterState.Draft when Admin:
+        <MudAlert Severity="@Severity.Error" Class="@(@"pa-4 mt-4")">
+            This letter is still in <strong>draft</strong> status. The player has not submitted it.
+        </MudAlert>
+        break;
+    case LetterState.Submitted when Admin:
+        <MudAlert Severity="@Severity.Warning" Class="@(@"pa-4 mt-4")">
+            This letter is in <strong>submitted</strong> status and is waiting for your approval.<br/>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Approval" OnClick="@Approve">Approve</MudButton>
+        </MudAlert>
+        break;
 }
 
 @foreach (var field in Template.Fields)
@@ -42,7 +60,7 @@ else if (Letter.State == LetterState.Approved)
                     <MudTextField T="string?" ReadOnly="ReadOnly" Variant="Variant.Outlined" Lines="4" Value="@(GetField<string?>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
                     break;
                 case LetterFieldType.Selection:
-                    <MudSelectExtended T="string?" ReadOnly="ReadOnly" Variant="Variant.Outlined" ItemCollection="field.Options" Value="@(GetField<string>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
+                    <MudSelectExtended T="string?" ReadOnly="ReadOnly" Clearable="@(!ReadOnly)" Variant="Variant.Outlined" ItemCollection="field.Options" Value="@(GetField<string>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
                     break;
                 case LetterFieldType.MultipleSelection:
                     @if (ReadOnly)
@@ -56,13 +74,32 @@ else if (Letter.State == LetterState.Approved)
                     }
                     else
                     {
-                        <MudListExtended Dense T="string" Disabled="ReadOnly" MultiSelection ItemCollection="field.Options" SelectedValues="@(GetField<string[]>(field.Name))" SelectedValuesChanged="value => SetStrings(field.Name, value.ToArray())"/>
+                        <MudListExtended Dense T="string" MultiSelection ItemCollection="field.Options" SelectedValues="@(GetField<string[]>(field.Name))" SelectedValuesChanged="value => SetStrings(field.Name, value.ToArray())"/>
+                    }
+                    break;
+                case LetterFieldType.Component:
+                    <MudSelectExtended T="string?" ReadOnly="ReadOnly" Clearable="@(!ReadOnly)" Variant="Variant.Outlined" ItemCollection="_components" Value="@(GetField<string>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
+                    break;
+                case LetterFieldType.Components:
+                    @if (ReadOnly)
+                    {
+                        <MudChipSet MultiSelection ReadOnly>
+                            @foreach (var value in GetField<string[]>(field.Name) ?? Array.Empty<string>())
+                            {
+                                <MudChip>@value</MudChip>
+                            }
+                        </MudChipSet>
+                    }
+                    else
+                    {
+                        <MudListExtended Dense T="string" MultiSelection ItemCollection="_components" SelectedValues="@(GetField<string[]>(field.Name))" SelectedValuesChanged="value => SetStrings(field.Name, value.ToArray())"/>
                     }
                     break;
                 case LetterFieldType.YesNo:
                     <MudSwitch T="bool" ReadOnly="ReadOnly" Checked="@(GetField<bool>(field.Name))" CheckedChanged="value => SetBool(field.Name, value)" Color="Color.Success" UnCheckedColor="Color.Error"/>
                     break;
                 case LetterFieldType.Removed:
+                case LetterFieldType.Header:
                 default:
                     break;
             }
@@ -76,6 +113,9 @@ else if (Letter.State == LetterState.Approved)
     public bool ReadOnly { get; set; }
 
     [Parameter]
+    public bool Admin { get; set; }
+
+    [Parameter]
     public Event Event { get; set; } = default!;
 
     [Parameter]
@@ -84,6 +124,12 @@ else if (Letter.State == LetterState.Approved)
     [Parameter]
     public LetterTemplate Template { get; set; } = default!;
 
+    private string[] _components = Array.Empty<string>();
+
+    protected override void OnParametersSet()
+    {
+        _components = Event.Components.Select(x => x.Name ?? x.Date.ToString("dddd, MMMM d")).ToArray();
+    }
 
     private T? GetField<T>(string fieldName)
     {
@@ -135,6 +181,12 @@ else if (Letter.State == LetterState.Approved)
             Letter.Fields.Remove(fieldName);
         else
             Letter.Fields[fieldName] = string.Join(",", values);
+    }
+
+    private async Task Approve()
+    {
+        await LandingService.Admin.ApproveLetter(Letter.LetterId);
+        Letter.State = LetterState.Approved;
     }
 
 }

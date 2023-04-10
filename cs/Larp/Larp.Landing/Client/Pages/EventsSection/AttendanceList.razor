@@ -35,21 +35,31 @@
 
 
         <MudText Typo="Typo.h6">Event Attendance</MudText>
-        <MudDataGrid T="AttendanceInfo" Items="_events" Hover Filterable="true" Loading="_isLoading">
+        <MudDataGrid T="AttendanceInfo" Items="_events" Hover Filterable="true" Loading="_isLoading" Groupable Dense>
             <Columns>
                 @* <PropertyColumn Property="x => x.Game" Title="Game" Grouping="true"/> *@
-                <TemplateColumn T="AttendanceInfo">
+                <TemplateColumn T="AttendanceInfo" Groupable="false" Sortable="false" Filterable="false" >
                     <CellTemplate>
-                        <MudIcon Icon="@context.Item.Icon"/>
+                        <MudIcon Icon="@context.Item.Icon" Color="Color.Primary" Size="Size.Small"/>
                     </CellTemplate>
                 </TemplateColumn>
-                <PropertyColumn Property="x => x.When" Title="Date" Format="dddd, MMM d, yyyy" Groupable="false"/>
+                <PropertyColumn Property="x => x.When" Title="Date" Format="ddd, MMM d, yyyy" Groupable="false"/>
                 <PropertyColumn Property="x => x.EventTitle" Title="Title" Groupable="false"/>
-                <PropertyColumn Property="x => x.EventType" Title="EventType"/>
-                <PropertyColumn Property="x => x.MwFifthMoonstone" Title="Moonstone"/>
+                <PropertyColumn Property="x => x.EventType" Title="Type"/>
+                <PropertyColumn Property="x => x.MwFifthMoonstone" Title="Moonstone" Groupable="false"/>
+                <TemplateColumn T="AttendanceInfo" Sortable="false" Filterable="false" Groupable="false">
+                    <CellTemplate>
+                        @if (context.Item.HasLetter)
+                        {
+                            <MudTooltip Text="@context.Item.Letter.Tooltip">
+                                <MudIconButton Color="context.Item.Letter.Color" Icon="@Icons.Material.Filled.Email" OnClick="() => OpenLetter(context.Item.EventId)"/>
+                            </MudTooltip>
+                        }
+                    </CellTemplate>
+                </TemplateColumn>
             </Columns>
         </MudDataGrid>
-        <MudAlert Severity="Severity.Info">Is there an event missing? Please make sure you've completed your <a href="http://www.mystwood.org/post-event-letter.html" target="_blank">Post Event Letter</a> (PEL). If you still need help, please contact <a href="mailto:mystwood@mystwood.org?subject=Missing+event+attendance" target="_blank">Mystwood</a>.</MudAlert>
+        <MudAlert Severity="Severity.Info">Is there an event missing? Please make sure you've completed your Post Event Letter (PEL) from the events page. If you still need help, please contact <a href="mailto:mystwood@mystwood.org?subject=Missing+event+attendance" target="_blank">Mystwood</a>.</MudAlert>
     </MudStack>
 </MudContainer>
 
@@ -60,6 +70,14 @@
     private int _usedMoonstone;
     private int _availableMoonstone;
 
+    static readonly Dictionary<LetterState, (string Tooltip, Color Color)> LetterTooltip = new()
+    {
+        { LetterState.NotStarted, ("You have not started the letter for this event", Color.Secondary) },
+        { LetterState.Draft, ("You have not submitted this letter yet", Color.Warning) },
+        { LetterState.Submitted, ("Your event letter has been submitted and is waiting for approval", Color.Tertiary) },
+        { LetterState.Approved, ("Your event letter has been approved", Color.Success) },
+    };
+
     private class AttendanceInfo
     {
         public IEnumerable<string> MwFifthCharacters { get; init; } = Array.Empty<string>();
@@ -68,6 +86,8 @@
 
         public DateOnly When { get; init; }
 
+        public string EventId { get; init; } = default!;
+
         public string EventType { get; init; } = default!;
 
         public string EventTitle { get; init; } = default!;
@@ -75,6 +95,10 @@
         public string GameName { get; init; } = default!;
 
         public string Icon { get; init; } = default!;
+
+        public bool HasLetter { get; init; }
+
+        public (string Tooltip, Color Color) Letter { get; init; }
     }
 
 
@@ -85,12 +109,12 @@
             NavigationManager.NavigateTo("/login");
             return;
         }
-        
+
         var account = LandingService.Account!;
         _totalMoonstone = account.MwFifthMoonstone ?? 0;
         _usedMoonstone = account.MwFifthUsedMoonstone ?? 0;
         _availableMoonstone = _totalMoonstone - _usedMoonstone;
-        
+
         var games = LandingService.Games
             .ToDictionary(x => x.Value.Id, x => x.Value.Title ?? x.Value.Name);
 
@@ -109,7 +133,10 @@
                     EventType = attendance.Event.EventType ?? "No Type",
                     When = attendance.Event.Date,
                     MwFifthMoonstone = attendance.MwFifth?.Moonstone.ToString() ?? "N/A",
-                    MwFifthCharacters = characters.TryFromKeys(attendance.MwFifth?.CharacterIds)
+                    MwFifthCharacters = characters.TryFromKeys(attendance.MwFifth?.CharacterIds),
+                    HasLetter = attendance.Event.LetterTemplateId != null || attendance.LetterState != LetterState.NotStarted,
+                    Letter = LetterTooltip[attendance.LetterState],
+                    EventId = attendance.EventId
                 };
 
                 string GetIcon(string? type, string? title)
@@ -135,6 +162,11 @@
             .ToArray();
 
         _isLoading = false;
+    }
+
+    private void OpenLetter(string eventId)
+    {
+        NavigationManager.NavigateTo($"/events/{eventId}/letter");
     }
 
 }
