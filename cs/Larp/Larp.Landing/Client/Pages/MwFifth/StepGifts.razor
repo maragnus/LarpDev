@@ -17,7 +17,10 @@
             <MudStack Row="true">
                 <MudAvatar>@gift.Value</MudAvatar>
                 <div>
-                    <MudText Typo="Typo.h6">@gift.Name</MudText>
+                    <MudStack Row>
+                        <MudText Typo="Typo.h6">@gift.Name</MudText>
+                        <MudIconButton Size="Size.Small" Color="Color.Secondary" Icon="@Icons.Material.Filled.Clear" Disabled="gift.Value == 0" OnClick="() => gift.Update(0)"/>
+                    </MudStack>
                     <MudRating SelectedValue="@gift.Value" MaxValue="10" SelectedValueChanged="@gift.Update"/>
                     <MudText Typo="Typo.caption">@gift.Description</MudText>
                 </div>

@@ -68,7 +68,7 @@
         {
             _revision.UpdateMoonstone();
             _availableMoonstone = characterAndRevision.Moonstone.Available;
-            _availableMoonstoneInfo = $"You have allocated {characterAndRevision.Moonstone.Used} of your total {characterAndRevision.Moonstone.Total} Moonstone";
+            _availableMoonstoneInfo = $"You have allocated {characterAndRevision.Moonstone.Used} of your {characterAndRevision.Moonstone.Total} available Moonstone";
             _myMoonstone = _character.Moonstone;
             _totalMoonstone = _revision.GiftMoonstone + _revision.SkillMoonstone;
             _newMoonstoneCost = _totalMoonstone - _lastMoonstoneCost;
@@ -168,7 +168,7 @@
 
         if (string.IsNullOrEmpty(CharacterId))
         {
-            // If a new character, generate it and load it up
+    // If a new character, generate it and load it up
             var newCharacter = await LandingService.MwFifth.GetDraftCharacter();
             NavigationManager.NavigateTo($"/characters/mw5e/{newCharacter.Revision.RevisionId}/edit", new NavigationOptions() { ReplaceHistoryEntry = true });
             return;
@@ -252,6 +252,7 @@
             }
         }
     }
+
 }
 
 @if (_loadingState != LoadingState.Loaded)
@@ -297,7 +298,9 @@
 
                 <MudButtonGroup OverrideStyles="false">
                     <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="DeleteDraft" StartIcon="@Icons.Material.Outlined.DeleteForever">Delete draft</MudButton>
-                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="Save" Disabled="_saveState != AutoSaveState.ChangeAvailable">Save Changes</MudButton>
+                    <MudTooltip Text="Save your changes so far and keep editing">
+                        <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="Save" Disabled="_saveState != AutoSaveState.ChangeAvailable">Save Changes</MudButton>
+                    </MudTooltip>
                     @if (Admin)
                     {
                         <MudButton Variant="Variant.Filled" Color="Color.Warning" StartIcon="@Icons.Material.Outlined.Verified" OnClick="Submit">Submit</MudButton>
@@ -334,8 +337,10 @@
                 var isComplete = step.IsComplete();
                 <MudTimelineItem Color="isCurrentStep ? Color.Primary : (isComplete ? Color.Success : Color.Default)">
                     <MudButton OnClick="() => _currentStep = step">
-                        @step.Icon&nbsp;
-                        <MudText Typo="Typo.caption" Style="margin-left: 1em">@step.Title</MudText>
+                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="0">
+                            @step.Icon&nbsp;
+                            <MudText Align="Align.Left" Typo="Typo.caption" Style="margin-left: 0.5em">@step.Title</MudText>
+                        </MudStack>
                     </MudButton>
                 </MudTimelineItem>
             }

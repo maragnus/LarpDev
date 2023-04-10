@@ -78,7 +78,7 @@ public class LarpDataSeeder
     {
         var json = await GetJsonDocument(LarpResourceNamePrefix + "LarpData");
         await ImportGames(json.RootElement.GetProperty("games"));
-        await ImportEvents(json.RootElement.GetProperty("events"));
+        //await ImportEvents(json.RootElement.GetProperty("events"));
     }
 
     private async Task ImportGames(JsonElement json)

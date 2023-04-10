@@ -101,6 +101,20 @@ public class ExcelImporter
                 if (!int.TryParse(eventName[0..4], out var year))
                     year = 2018;
 
+                var type = "Game";
+                if (eventName.Contains("Work", StringComparison.InvariantCultureIgnoreCase))
+                    type = "Workday";
+                if (eventName.Contains("Setup", StringComparison.InvariantCultureIgnoreCase))
+                    type = "Workday";
+                if (eventName.Contains("Patreon"))
+                    type = "Subscription";
+                if (eventName.Contains("Nitro"))
+                    type = "Subscription";
+                if (eventName.Contains("Trivia"))
+                    type = "Contest";
+                if (eventName.Contains("Recruit") || eventName.Contains("Retirement") || eventName.Contains("Paper") || eventName.Contains("Other"))
+                    type = "Other";
+                
                 @event = new Event()
                 {
                     EventId = ObjectId.GenerateNewId().ToString(),

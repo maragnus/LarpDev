@@ -1,6 +1,7 @@
 @page "/events/attendance"
 @using Larp.Common
 @inject LandingService LandingService
+@inject NavigationManager NavigationManager
 
 <PageHeader>Event Attendance</PageHeader>
 
@@ -9,6 +10,29 @@
         <MudProgressCircular Indeterminate/>
     </MudOverlay>
     <MudStack Spacing="4" Class="mt-4">
+        <MudText Typo="Typo.h6">Mystwood 5e Moonstone</MudText>
+
+        <MudStack Row AlignItems="AlignItems.Start" Justify="Justify.Center">
+            <MudTooltip Text="The total amount of moonstone you have earned">
+                <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                    <MudAvatar Color="Color.Primary">@_totalMoonstone</MudAvatar>
+                    <MudText Align="Align.Center" Typo="Typo.caption">Total<br/>Moonstone</MudText>
+                </MudStack>
+            </MudTooltip>
+            <MudTooltip Text="The amount of moonstone you have allocated to characters">
+                <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                    <MudAvatar Color="Color.Secondary">@_usedMoonstone</MudAvatar>
+                    <MudText Align="Align.Center" Typo="Typo.caption">Used<br/>Moonstone</MudText>
+                </MudStack>
+            </MudTooltip>
+            <MudTooltip Text="The amount of moonstone you have available to spend">
+                <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                    <MudAvatar Color="Color.Tertiary">@_availableMoonstone</MudAvatar>
+                    <MudText Align="Align.Center" Typo="Typo.caption">Available<br/>Moonstone</MudText>
+                </MudStack>
+            </MudTooltip>
+        </MudStack>
+
 
         <MudText Typo="Typo.h6">Event Attendance</MudText>
         <MudDataGrid T="AttendanceInfo" Items="_events" Hover Filterable="true" Loading="_isLoading">
@@ -32,6 +56,9 @@
 @code {
     bool _isLoading = true;
     private AttendanceInfo[] _events = Array.Empty<AttendanceInfo>();
+    private int _totalMoonstone;
+    private int _usedMoonstone;
+    private int _availableMoonstone;
 
     private class AttendanceInfo
     {
@@ -53,6 +80,17 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if (!LandingService.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+        
+        var account = LandingService.Account!;
+        _totalMoonstone = account.MwFifthMoonstone ?? 0;
+        _usedMoonstone = account.MwFifthUsedMoonstone ?? 0;
+        _availableMoonstone = _totalMoonstone - _usedMoonstone;
+        
         var games = LandingService.Games
             .ToDictionary(x => x.Value.Id, x => x.Value.Title ?? x.Value.Name);
 
@@ -81,13 +119,17 @@
                         return Icons.Material.Filled.AttachMoney;
                     if (title.Contains("Patreon", StringComparison.InvariantCultureIgnoreCase))
                         return Icons.Material.Filled.AttachMoney;
+                    if (title.Contains("Trivia", StringComparison.InvariantCultureIgnoreCase))
+                        return Icons.Material.Filled.Celebration;
                     if (type.Contains("Game", StringComparison.InvariantCultureIgnoreCase))
                         return Icons.Material.Filled.SportsHandball;
                     if (type.Contains("Workday", StringComparison.InvariantCultureIgnoreCase))
                         return Icons.Material.Filled.Handyman;
                     if (type.Contains("Contest", StringComparison.InvariantCultureIgnoreCase))
                         return Icons.Material.Filled.Celebration;
-                    return Icons.Material.Filled.Event;
+                    if (type.Contains("Other", StringComparison.InvariantCultureIgnoreCase))
+                        return Icons.Material.Filled.Celebration;
+                    return Icons.Material.Filled.AddBox;
                 }
             })
             .ToArray();
