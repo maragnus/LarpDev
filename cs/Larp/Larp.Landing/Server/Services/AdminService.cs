@@ -207,7 +207,7 @@ public class AdminService : IAdminService
 
                 NextRow();
             }
-            
+
             letterSheet.Cells[1, 1, row, column].AutoFitColumns();
         }
 
@@ -376,6 +376,8 @@ public class AdminService : IAdminService
             attendance => attendance.EventId == eventId && attendance.AccountId == accountId,
             update,
             upsert);
+
+        await _manager.UpdateMoonstone(accountId);
     }
 
     public async Task<AccountName[]> GetAccountNames()

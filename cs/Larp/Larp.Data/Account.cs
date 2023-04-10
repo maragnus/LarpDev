@@ -19,7 +19,6 @@ public class AccountName
     public List<AccountEmail> Emails { get; set; } = new();
 }
 
-
 [PublicAPI]
 public class Account
 {
@@ -40,13 +39,14 @@ public class Account
     public AccountRole[] Roles { get; set; } = Array.Empty<AccountRole>();
 
     public int? ImportId { get; set; }
+    public int? MwFifthMoonstone { get; set; }
+    public int? MwFifthUsedMoonstone { get; set; }
 
     [BsonIgnore]
     public string? PreferredEmail =>
         (Emails.FirstOrDefault(x => x.IsPreferred) ?? Emails.FirstOrDefault(x => x.IsVerified))?.Email;
-    
-    [BsonIgnore]
-    public string? EmailList => string.Join(", ", Emails.Select(x => x.Email));
+
+    [BsonIgnore] public string? EmailList => string.Join(", ", Emails.Select(x => x.Email));
 
     public bool IsProfileComplete =>
         !string.IsNullOrWhiteSpace(Name)

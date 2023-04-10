@@ -43,6 +43,11 @@
                         <MudDatePicker T="DateTime" Required Date="@context.Item.When" DateChanged="date => context.Item.When = date ?? DateTime.Today" Variant="Variant.Outlined"/>
                     </EditTemplate>
                 </PropertyColumn>
+                <TemplateColumn T="EventComponent" IsEditable="false">
+                    <CellTemplate>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveComponent(context.Item)" />
+                    </CellTemplate>
+                </TemplateColumn>
             </Columns>
         </MudDataGrid>
         <div>
@@ -154,6 +159,11 @@
     private void AddComponent()
     {
         _components.Add(new EventComponent() { Name = "New Component", When = _date });
+    }
+
+    private void RemoveComponent(EventComponent contextItem)
+    {
+        _components.Remove(contextItem);
     }
 
 }

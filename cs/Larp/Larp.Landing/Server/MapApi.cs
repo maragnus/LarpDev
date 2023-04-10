@@ -1,11 +1,8 @@
-﻿using System.Net.Mime;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text.Json;
 using Larp.Landing.Server.Services;
 using Larp.Landing.Shared;
 using Larp.Landing.Shared.Messages;
-using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.FileProviders;
 
 namespace Larp.Landing.Server;

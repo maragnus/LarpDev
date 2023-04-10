@@ -104,15 +104,16 @@ public class MwFifthCharacterManager
         return new MoonstoneInfo(moonstoneTotal, moonstoneUsed);
     }
 
-    public async Task Approve(string characterId, string accountId)
+    public async Task Approve(string characterId, string adminAccountId)
     {
         var reference =
             await _mwFifth.CharacterRevisions.AsQueryable()
                 .Where(x => x.RevisionId == characterId)
                 .Select(x => new
                 {
+                    x.AccountId,
                     x.State,
-                    UniqueId = x.CharacterId,
+                    x.CharacterId,
                     x.CharacterName,
                     Moonstone = x.GiftMoonstone + x.SkillMoonstone
                 })
@@ -123,14 +124,14 @@ public class MwFifthCharacterManager
             throw new BadRequestException("Character state must be in Review");
 
         await _mwFifth.Characters
-            .UpdateOneAsync(x => x.CharacterId == reference.UniqueId,
+            .UpdateOneAsync(x => x.CharacterId == reference.CharacterId,
                 Builders<Character>.Update
                     .Set(x => x.CharacterName, reference.CharacterName)
                     .Set(x => x.UsedMoonstone, reference.Moonstone));
 
         // Mark all (hopefully only one) Live characters are Archive
         await _mwFifth.CharacterRevisions
-            .UpdateOneAsync(x => x.CharacterId == reference.UniqueId && x.State == CharacterState.Live,
+            .UpdateOneAsync(x => x.CharacterId == reference.CharacterId && x.State == CharacterState.Live,
                 Builders<CharacterRevision>.Update
                     .Set(x => x.State, CharacterState.Archived)
                     .Set(x => x.ArchivedOn, DateTime.UtcNow));
@@ -140,7 +141,9 @@ public class MwFifthCharacterManager
                 Builders<CharacterRevision>.Update
                     .Set(x => x.State, CharacterState.Live)
                     .Set(x => x.ApprovedOn, DateTime.UtcNow)
-                    .Set(x => x.ApprovedBy, accountId));
+                    .Set(x => x.ApprovedBy, adminAccountId));
+
+        await UpdateMoonstone(reference.AccountId);
     }
 
     public async Task Reject(string characterId)
@@ -320,5 +323,66 @@ public class MwFifthCharacterManager
             ?? throw new ResourceNotFoundException();
 
         return new CharacterAndRevision(character, revision, moonstone);
+    }
+
+    public async Task UpdateMoonstone(string accountId)
+    {
+        var moonstoneUsed = await _mwFifth.Characters.AsQueryable()
+            .Where(character => character.AccountId == accountId)
+            .SumAsync(character => character.UsedMoonstone);
+        var moonstoneTotal = await this._larpContext.Attendances.AsQueryable()
+            .Where(attendance => attendance.AccountId == accountId && attendance.MwFifth != null)
+            .SumAsync(attendance => attendance.MwFifth!.Moonstone ?? 0);
+        await _larpContext.Accounts.UpdateOneAsync(x => x.AccountId == accountId,
+            Builders<Account>.Update
+                .Set(x => x.MwFifthMoonstone, moonstoneTotal)
+                .Set(x => x.MwFifthUsedMoonstone, moonstoneUsed));
+    }
+    
+    public async Task UpdateMoonstone()
+    {
+        var usedMoonstone = (await _larpContext.Accounts.AsQueryable()
+                .Join(_larpContext.MwFifthGame.Characters,
+                    x => x.AccountId,
+                    x => x.AccountId,
+                    (account, character) => new { account, character })
+                .GroupBy(x => x.account.AccountId)
+                .Select(x => new
+                {
+                    AccountId = x.Key,
+                    UsedMoonstone = x.Sum(y => y.character.UsedMoonstone)
+                })
+                .ToListAsync())
+            .ToDictionary(x => x.AccountId);
+
+        var totalMoonstone = (await _larpContext.Attendances.AsQueryable()
+                .Where(x => x.MwFifth != null && x.MwFifth.Moonstone != null)
+                .Join(
+                    _larpContext.Accounts.AsQueryable(),
+                    x => x.AccountId,
+                    x => x.AccountId,
+                    (attendance, account) => new { attendance, account })
+                .GroupBy(x => x.account.AccountId)
+                .Select(x => new
+                {
+                    AccountId = x.Key,
+                    NewMoonstone = x.Sum(y => y.attendance.MwFifth!.Moonstone)
+                })
+                .ToListAsync())
+            .ToDictionary(x => x.AccountId);
+
+        var ids = usedMoonstone.Select(x => x.Key)
+            .Concat(totalMoonstone.Select(x => x.Key))
+            .ToHashSet();
+
+        var updates = ids
+            .Select(accountId => new UpdateOneModel<Account>(
+                Builders<Account>.Filter.Eq(x => x.AccountId, accountId),
+                Builders<Account>.Update
+                    .Set(x => x.MwFifthMoonstone, totalMoonstone.GetValueOrDefault(accountId)?.NewMoonstone)
+                    .Set(x => x.MwFifthUsedMoonstone, usedMoonstone.GetValueOrDefault(accountId)?.UsedMoonstone)))
+            .ToList();
+
+        await _larpContext.Accounts.BulkWriteAsync(updates);
     }
 }

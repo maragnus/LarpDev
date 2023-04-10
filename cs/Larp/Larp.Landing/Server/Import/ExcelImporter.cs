@@ -2,11 +2,11 @@ using System.Text.RegularExpressions;
 using Larp.Data;
 using Larp.Data.Mongo;
 using Larp.Data.MwFifth;
+using Larp.Landing.Server.Services;
 using Larp.Landing.Shared.MwFifth;
 using Microsoft.Extensions.Logging.Abstractions;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 using OfficeOpenXml;
 
 namespace Larp.Landing.Server.Import;
@@ -24,13 +24,15 @@ public class ExcelImporter
     private Dictionary<int, Character> _characters = default!;
     private string _gameId = default!;
     private readonly ILogger<ExcelImporter> _logger;
+    private readonly MwFifthCharacterManager _characterManager;
     private GameState _gameState = default!;
     private DateTimeOffset _now;
 
-    public ExcelImporter(LarpContext larpContext, ILogger<ExcelImporter> logger)
+    public ExcelImporter(LarpContext larpContext, ILogger<ExcelImporter> logger, MwFifthCharacterManager characterManager)
     {
         _larpContext = larpContext;
         _logger = logger;
+        _characterManager = characterManager;
     }
 
     public async Task<ExcelImportResult> Import(string fileName)
@@ -60,6 +62,7 @@ public class ExcelImporter
         await ProcessPlayers(workbook.Worksheets["Players"]);
         await ProcessCharacters(workbook.Worksheets["Characters"]);
         await ProcessEvents(workbook.Worksheets["Moonstones"]);
+        await _characterManager.UpdateMoonstone();
 
         return new ExcelImportResult();
     }
@@ -77,7 +80,8 @@ public class ExcelImporter
 
     private async Task ProcessEvents(ExcelWorksheet sheet)
     {
-        var upsert = new UpdateOptions() { IsUpsert = true };
+        var events = new List<WriteModel<Event>>();
+        var attendances = new List<WriteModel<Attendance>>();
 
         for (var column = 4; column < sheet.Columns.EndColumn; column++)
         {
@@ -99,33 +103,45 @@ public class ExcelImporter
 
                 @event = new Event()
                 {
+                    EventId = ObjectId.GenerateNewId().ToString(),
                     Date = new DateOnly(year, 1, 1),
                     ImportId = eventName,
                     Title = eventName,
                     GameId = _gameId,
                     EventType = "Game"
                 };
-                await _larpContext.Events.InsertOneAsync(@event);
+                events.Add(new InsertOneModel<Event>(@event));
             }
 
             foreach (var (playerId, moonstone) in excelEvent.Moonstone)
             {
                 if (!_players.TryGetValue(playerId, out var account)) continue;
 
-                await _larpContext.Attendances.UpdateOneAsync(
-                    x => x.AccountId == account.AccountId && x.EventId == @event.EventId,
-                    Builders<Attendance>.Update
-                        .SetOnInsert(a => a.AccountId, account.AccountId)
-                        .SetOnInsert(a => a.EventId, @event.EventId)
-                        .Set(a => a.MwFifth, new MwFifthAttendance() { Moonstone = moonstone }),
-                    upsert
-                );
+                var attendance = new ReplaceOneModel<Attendance>(
+                    Builders<Attendance>.Filter.And(
+                        Builders<Attendance>.Filter.Eq(x => x.AccountId, account.AccountId),
+                        Builders<Attendance>.Filter.Eq(x => x.EventId, @event.EventId)
+                    ), new Attendance()
+                    {
+                        // Id = ObjectId.GenerateNewId().ToString(),
+                        EventId = @event.EventId,
+                        AccountId = account.AccountId,
+                        MwFifth = new MwFifthAttendance() { Moonstone = moonstone }
+                    }) { IsUpsert = true };
+                attendances.Add(attendance);
             }
         }
+
+        if (events.Count > 0)
+            await _larpContext.Events.BulkWriteAsync(events);
+        if (attendances.Count > 0)
+            await _larpContext.Attendances.BulkWriteAsync(attendances);
     }
 
     private async Task ProcessPlayers(ExcelWorksheet sheet)
     {
+        var updates = new List<InsertOneModel<Account>>();
+
         for (var row = 2; row < sheet.Rows.EndRow; row++)
         {
             var playerId = (double?)sheet.Cells[row, 1].Value;
@@ -166,13 +182,19 @@ public class ExcelImporter
                 });
             }
 
-            await _larpContext.Accounts.InsertOneAsync(account);
+            updates.Add(new InsertOneModel<Account>(account));
             _players.Add(importId, account);
         }
+
+        if (updates.Count > 0)
+            await _larpContext.Accounts.BulkWriteAsync(updates);
     }
 
     private async Task ProcessCharacters(ExcelWorksheet sheet)
     {
+        var characters = new List<InsertOneModel<Character>>();
+        var revisions = new List<InsertOneModel<CharacterRevision>>();
+
         var playerNames = _players.Values
             .DistinctBy(x => x.Name)
             .Where(x => x.Name != null)
@@ -274,9 +296,14 @@ public class ExcelImporter
             builder.UpdateMoonstone();
 
             character.UsedMoonstone = revision.TotalMoonstone;
-            await _larpContext.MwFifthGame.Characters.InsertOneAsync(character);
-            await _larpContext.MwFifthGame.CharacterRevisions.InsertOneAsync(revision);
+            characters.Add(new InsertOneModel<Character>(character));
+            revisions.Add(new InsertOneModel<CharacterRevision>(revision));
         }
+
+        if (characters.Count > 0)
+            await _larpContext.MwFifthGame.Characters.BulkWriteAsync(characters);
+        if (revisions.Count > 0)
+            await _larpContext.MwFifthGame.CharacterRevisions.BulkWriteAsync(revisions);
     }
 
     private CharacterVantage[] TranslateVantages(string? value)
@@ -357,10 +384,10 @@ public class ExcelImporter
                     string.Equals(x.Name, name, StringComparison.InvariantCultureIgnoreCase));
                 if (skill == null)
                     throw new Exception($"Skill \"{name}\" does not exist");
-                
+
                 if (skill.Purchasable == SkillPurchasable.Once && count > 1)
                     count = 1;
-                
+
                 return new CharacterSkill()
                 {
                     Name = skill.Name,

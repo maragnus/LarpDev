@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices;
-
-namespace Larp.Data;
+﻿namespace Larp.Data;
 
 [PublicAPI]
 public enum EventRsvp
