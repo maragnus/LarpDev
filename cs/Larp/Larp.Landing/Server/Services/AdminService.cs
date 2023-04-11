@@ -154,6 +154,7 @@ public class AdminService : IAdminService
     public async Task<IFileInfo> ExportLetters(string eventId)
     {
         var letters = await _letterManager.GetByEvent(eventId);
+        var @event = letters.Events.First().Value;
         var attendance = await this.GetEventAttendances(eventId);
         var players = (await GetAccountNames()).ToDictionary(x => x.AccountId);
         ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -174,12 +175,14 @@ public class AdminService : IAdminService
             }), true, TableStyles.Light6);
         }
 
-        var letterSheet = workbook.Worksheets.Add("Letters");
-        if (letters.LetterTemplate != null)
+        foreach (var letterTemplate in @event.LetterTemplates)
         {
+            var sheet = workbook.Worksheets.Add(letterTemplate.Name);
+            var template = letters.LetterTemplates[letterTemplate.LetterTemplateId];
+            
             int row = 1, column = 1;
 
-            void Write(string? value) => letterSheet.Cells[row, column++].Value = value;
+            void Write(string? value) => sheet.Cells[row, column++].Value = value;
 
             void NextRow()
             {
@@ -187,7 +190,7 @@ public class AdminService : IAdminService
                 column = 1;
             }
 
-            var fields = letters.LetterTemplate.Fields.Select(x => x.Name).ToArray();
+            var fields = template.Fields.Select(x => x.Name).ToArray();
             Write("Player Name");
             foreach (var field in fields)
             {
@@ -196,7 +199,7 @@ public class AdminService : IAdminService
 
             NextRow();
 
-            foreach (var letter in letters.Letters)
+            foreach (var letter in letters.Letters.Values)
             {
                 var name = players.TryGetValue(letter.AccountId, out var player) ? player.Name : "No Name Set";
                 Write(name);
@@ -208,7 +211,7 @@ public class AdminService : IAdminService
                 NextRow();
             }
 
-            letterSheet.Cells[1, 1, row, column].AutoFitColumns();
+            sheet.Cells[1, 1, row, column].AutoFitColumns();
         }
 
         await package.SaveAsync();
@@ -290,7 +293,7 @@ public class AdminService : IAdminService
     public async Task<Letter[]> GetSubmittedLetters() =>
         await _letterManager.GetByState(LetterState.Submitted);
 
-    public async Task<LettersAndTemplate> GetEventLetters(string eventId) =>
+    public async Task<EventsAndLetters> GetEventLetters(string eventId) =>
         await _letterManager.GetByEvent(eventId);
 
     public async Task<Letter[]> GetTemplateLetters(string templateId) =>
@@ -346,10 +349,8 @@ public class AdminService : IAdminService
                 .Set(x => x.EventType, @event.EventType)
                 .Set(x => x.Location, @event.Location)
                 .Set(x => x.Date, @event.Date)
-                .Set(x => x.CanRsvp, @event.CanRsvp)
                 .Set(x => x.IsHidden, @event.IsHidden)
-                .Set(x => x.IsLetterLocked, @event.IsLetterLocked)
-                .Set(x => x.LetterTemplateId, @event.LetterTemplateId)
+                .Set(x => x.LetterTemplates, @event.LetterTemplates)
                 .Set(x => x.Components, @event.Components)
         );
     }

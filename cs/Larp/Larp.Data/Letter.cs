@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Larp.Data;
 
 public enum LetterState
@@ -80,10 +82,12 @@ public class LetterField
     }
 }
 
-public class EventAndLetter
+public class EventsAndLetters
 {
-    public Event Event { get; init; } = default!;
-    public Letter? Letter { get; init; }
+    public Dictionary<string, AccountName> Accounts { get; init; } = new();
+    public Dictionary<string, Event> Events { get; init; } = new();
+    public Dictionary<string, Letter> Letters { get; init; } = new();
+    public Dictionary<string, LetterTemplate> LetterTemplates { get; init; } = new();
 }
 
 public class LettersAndTemplate
@@ -120,26 +124,34 @@ public class LetterTemplate
 
 public class Letter
 {
-    [BsonId, BsonRepresentation(BsonType.ObjectId)]
+    [BsonId, BsonRepresentation(BsonType.ObjectId), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string LetterId { get; set; } = default!;
 
-    [BsonRepresentation(BsonType.ObjectId)]
+    [BsonRepresentation(BsonType.ObjectId), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string TemplateId { get; set; } = default!;
 
-    [BsonRepresentation(BsonType.ObjectId)]
+    [BsonRepresentation(BsonType.ObjectId), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string AccountId { get; set; } = default!;
 
-    [BsonRepresentation(BsonType.ObjectId)]
+    [BsonRepresentation(BsonType.ObjectId), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string EventId { get; set; } = default!;
+
+    public string Name { get; set; } = default!;
 
     public LetterState State { get; set; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public DateTimeOffset? StartedOn { get; set; }
+    
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public DateTimeOffset? SubmittedOn { get; set; }
+    
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public DateTimeOffset? ApprovedOn { get; set; }
 
-    [BsonRepresentation(BsonType.ObjectId)]
+    [BsonRepresentation(BsonType.ObjectId), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? ApprovedBy { get; set; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Dictionary<string, string> Fields { get; set; } = new();
 }

@@ -49,10 +49,12 @@
                 <PropertyColumn Property="x => x.MwFifthMoonstone" Title="Moonstone" Groupable="false"/>
                 <TemplateColumn T="AttendanceInfo" Sortable="false" Filterable="false" Groupable="false">
                     <CellTemplate>
-                        @if (context.Item.HasLetter)
+                        @foreach (var letter in context.Item.Letters)
                         {
-                            <MudTooltip Text="@context.Item.Letter.Tooltip">
-                                <MudIconButton Color="context.Item.Letter.Color" Icon="@Icons.Material.Filled.Email" OnClick="() => OpenLetter(context.Item.EventId)"/>
+                            var style = LetterTooltip[letter.State];
+                            var icon = LetterIcon[letter.Name];
+                            <MudTooltip Text="@style.Tooltip">
+                                <MudIconButton Size="Size.Small" Icon="@icon" Color="@style.Color" OnClick="() => OpenLetter(letter.EventId, letter.Name)"/>
                             </MudTooltip>
                         }
                     </CellTemplate>
@@ -69,15 +71,21 @@
     private int _totalMoonstone;
     private int _usedMoonstone;
     private int _availableMoonstone;
-
+    
     static readonly Dictionary<LetterState, (string Tooltip, Color Color)> LetterTooltip = new()
     {
-        { LetterState.NotStarted, ("You have not started the letter for this event", Color.Secondary) },
+        { LetterState.NotStarted, ("You have not started the letter for this event", Color.Warning) },
         { LetterState.Draft, ("You have not submitted this letter yet", Color.Warning) },
         { LetterState.Submitted, ("Your event letter has been submitted and is waiting for approval", Color.Tertiary) },
         { LetterState.Approved, ("Your event letter has been approved", Color.Success) },
     };
 
+    static readonly Dictionary<string, string> LetterIcon = new()
+    {
+        { "PreEvent", Icons.Material.Filled.Rsvp },
+        { "PostEvent", Icons.Material.Filled.Email },
+    };
+    
     private class AttendanceInfo
     {
         public IEnumerable<string> MwFifthCharacters { get; init; } = Array.Empty<string>();
@@ -96,9 +104,7 @@
 
         public string Icon { get; init; } = default!;
 
-        public bool HasLetter { get; init; }
-
-        public (string Tooltip, Color Color) Letter { get; init; }
+        public Letter[] Letters { get; init; } = default!;
     }
 
 
@@ -122,6 +128,15 @@
 
         var attendances = await LandingService.GetAttendance();
 
+        static IEnumerable<Letter> GetLetters(Event @event, Letter[] letters)
+        {
+            foreach (var name in @event.LetterTemplates)
+            {
+                yield return letters.FirstOrDefault(x => x.EventId == @event.EventId && x.Name == name.Name)
+                             ?? new Letter() { Name = name.Name, State = LetterState.NotStarted };
+            }
+        }
+        
         _events = attendances
             .Select(attendance =>
             {
@@ -134,8 +149,7 @@
                     When = attendance.Event.Date,
                     MwFifthMoonstone = attendance.MwFifth?.Moonstone.ToString() ?? "N/A",
                     MwFifthCharacters = characters.TryFromKeys(attendance.MwFifth?.CharacterIds),
-                    HasLetter = attendance.Event.LetterTemplateId != null || attendance.LetterState != LetterState.NotStarted,
-                    Letter = LetterTooltip[attendance.LetterState],
+                    Letters = GetLetters(attendance.Event, attendance.Letters).ToArray(),
                     EventId = attendance.EventId
                 };
 
@@ -164,9 +178,9 @@
         _isLoading = false;
     }
 
-    private void OpenLetter(string eventId)
+    private void OpenLetter(string eventId, string letterName)
     {
-        NavigationManager.NavigateTo($"/events/{eventId}/letter");
+        NavigationManager.NavigateTo($"/events/{eventId}/letter/{letterName}");
     }
 
 }

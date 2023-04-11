@@ -1,8 +1,8 @@
-@page "/events/{EventId}/letter"
+@page "/events/{EventId}/letter/{LetterName}"
 @inject LandingService LandingService
 @inject IDialogService DialogService
 
-<PageHeader>Post Event Letter</PageHeader>
+<PageHeader>Event Letter</PageHeader>
 
 @if (_isLoading)
 {
@@ -35,6 +35,9 @@
     [Parameter]
     public string EventId { get; set; } = default!;
 
+    [Parameter]
+    public string LetterName { get; set; } = default!;
+    
     bool _isLoading = true;
     bool _isSaving;
     Letter _letter = default!;
@@ -46,10 +49,10 @@
     {
         _isLoading = true;
         _isSaving = true;
-        var letter = await LandingService.GetEventLetter(EventId);
-        _letter = letter.Letter;
-        _template = letter.LetterTemplate;
-        _event = letter.Event!;
+        var letter = await LandingService.GetEventLetter(EventId, LetterName);
+        _letter = letter.Letters.Values.First();
+        _template = letter.LetterTemplates.Values.First();
+        _event = letter.Events.Values.First();
         _isReadOnly = _letter.State is LetterState.Submitted or LetterState.Approved;
         _isSaving = false;
         _isLoading = false;

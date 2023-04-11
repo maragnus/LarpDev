@@ -16,13 +16,14 @@ public class LetterManager
         _logger = logger;
     }
 
-    public async Task<Letter> Draft(string letterTemplateId, string eventId, string accountId)
+    public async Task<Letter> Draft(string letterTemplateId, string eventId, string accountId, string letterName)
     {
         var letter = new Letter
         {
             LetterId = ObjectId.GenerateNewId().ToString(),
             AccountId = accountId,
             EventId = eventId,
+            Name = letterName,
             TemplateId = letterTemplateId,
             State = LetterState.NotStarted,
             StartedOn = DateTimeOffset.Now
@@ -119,17 +120,16 @@ public class LetterManager
     public async Task<Letter[]> GetByState(LetterState state) =>
         (await _larpContext.Letters.Find(letter => letter.State == state).ToListAsync()).ToArray();
 
-    public async Task<LettersAndTemplate> GetByEvent(string eventId)
+    public async Task<Dictionary<string, AccountName>> GetAccountNames()
     {
-        var @event = await _larpContext.Events.FindOneAsync(x => x.EventId == eventId)
-                     ?? throw new ResourceNotFoundException();
-
-        return new LettersAndTemplate()
-        {
-            Event = @event,
-            LetterTemplate = @event.LetterTemplateId == null ? null : await GetTemplate(@event.LetterTemplateId!),
-            Letters = (await _larpContext.Letters.Find(letter => letter.EventId == eventId).ToListAsync()).ToArray()
-        };
+        var names = await _larpContext.Accounts.Find(_ => true)
+            .Project(account => new AccountName()
+            {
+                AccountId = account.AccountId,
+                Name = account.Name
+            })
+            .ToListAsync();
+        return names.ToDictionary(x => x.AccountId);
     }
 
     public async Task<Letter[]> GetByTemplate(string templateId) =>
@@ -144,33 +144,61 @@ public class LetterManager
                 Title = x.Title
             }).ToListAsync()).ToArray();
 
-    public async Task<LetterAndTemplate> GetEventLetter(string accountId, string eventId)
+    public async Task<EventsAndLetters> GetByEvent(string eventId)
     {
-        var accountName =
+        var @event = await _larpContext.Events.FindOneAsync(x => x.EventId == eventId)
+                     ?? throw new ResourceNotFoundException();
+        var letters = await _larpContext.Letters.Find(letter => letter.EventId == eventId).ToListAsync();
+        var templateIds = letters.Select(x => x.TemplateId).Distinct().ToList();
+        var templates = await _larpContext.LetterTemplates
+            .Find(template => templateIds.Contains(template.LetterTemplateId)).ToListAsync();
+
+        return new EventsAndLetters()
+        {
+            Accounts = await GetAccountNames(),
+            Events = { { @eventId, @event } },
+            LetterTemplates = templates.ToDictionary(x => x.LetterTemplateId),
+            Letters = letters.ToDictionary(x => x.LetterId)
+        };
+    }
+
+    public async Task<EventsAndLetters> GetEventLetter(string accountId, string eventId, string letterName)
+    {
+        var accountNameTask =
             _larpContext.Accounts
                 .Find(x => x.AccountId == accountId)
-                .Project(x => x.Name)
+                .Project(x => new AccountName() { AccountId = x.AccountId, Name = x.Name })
                 .FirstOrDefaultAsync();
-        var @event = _larpContext.Events.FindOneAsync(x => x.EventId == eventId);
-        var templateId =
+        
+        var @event =
             await _larpContext.Events
                 .Find(x => x.EventId == eventId)
-                .Project(x => x.LetterTemplateId)
-                .FirstOrDefaultAsync()
-            ?? throw new BadRequestException("Event does not have a Letter Template associated with it");
-        var template = GetTemplate(templateId);
+                .FirstOrDefaultAsync();
+        
+        var templateId =
+            @event.LetterTemplates
+                .FirstOrDefault(x => x.Name == letterName)
+            ?? throw new BadRequestException($"Event {eventId} does not have letter named {letterName}");
+
         var letter =
             await _larpContext.Letters.FindOneAsync(x =>
-                x.AccountId == accountId && x.EventId == eventId && x.TemplateId == templateId)
-            ?? await Draft(templateId, eventId, accountId);
+                x.AccountId == accountId && x.EventId == eventId && x.Name == letterName &&
+                x.Name == letterName);
 
-        return new LetterAndTemplate()
+        if (letter == null && !templateId.IsOpen)
+            throw new BadRequestException($"Event {eventId} letter named {letterName} is currently closed");
+
+        letter ??= await Draft(templateId.LetterTemplateId, eventId, accountId, templateId.Name);
+
+        var template = await GetTemplate(templateId.LetterTemplateId);
+
+        var accountName = await accountNameTask;
+        return new EventsAndLetters()
         {
-            AccountId = letter.AccountId,
-            AccountName = await accountName ?? "No Name Set",
-            Letter = letter,
-            LetterTemplate = await template,
-            Event = await @event ?? throw new ResourceNotFoundException()
+            Accounts = { { accountName.AccountId, accountName } },
+            Events = { { @event.EventId, @event } },
+            Letters = { { letter.LetterId, letter } },
+            LetterTemplates = { { template.LetterTemplateId, template } },
         };
     }
 }

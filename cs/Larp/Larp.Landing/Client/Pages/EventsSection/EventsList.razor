@@ -13,26 +13,19 @@
                 <MudIcon Icon="@context.Item.Icon" Color="Color.Primary" Size="Size.Small"/>
             </CellTemplate>
         </TemplateColumn>
-        @* <PropertyColumn Property="x => x.Game" Title="Game" Grouping="true"/> *@
+        <PropertyColumn Property="x => x.Game" Title="Game" Hidden="true"/>
         <PropertyColumn Property="x => x.When" Title="Date" Format="ddd, MMM d, yyyy" Groupable="false"/>
         <PropertyColumn Property="x => x.Title" Title="Title" Groupable="false"/>
         <PropertyColumn Property="x => x.Location" Title="Location"/>
-        <TemplateColumn T="EventInfo" Title="Post Event Letter" Groupable="false" Filterable="false" Sortable="false">
+        <TemplateColumn T="EventInfo" Title="Event Letters" Groupable="false" Filterable="false" Sortable="false">
             <CellTemplate>
-                @if (context.Item.HasLetter)
+                @foreach (var letter in context.Item.Letters)
                 {
-                    @if (context.Item.IsLetterLocked)
-                    {
-                        <MudTooltip Text="This event has a letter but is not available yet. Please check back after the event.">
-                            <MudIconButton Icon="@Icons.Material.Filled.Email" Color="Color.Warning" Disabled/>
-                        </MudTooltip>
-                    }
-                    else
-                    {
-                        <MudTooltip Text="@context.Item.Letter.Tooltip">
-                            <MudIconButton Icon="@Icons.Material.Filled.Email" Color="@context.Item.Letter.color" OnClick="() => ViewLetter(context.Item.Id)"/>
-                        </MudTooltip>
-                    }
+                    var style = LetterTooltip[letter.State];
+                    var icon = LetterIcon[letter.Name];
+                    <MudTooltip Text="@style.Tooltip">
+                       <MudIconButton Size="Size.Small" Icon="@icon" Color="@style.Color" OnClick="() => ViewLetter(context.Item.Id, letter.Name)"/> 
+                     </MudTooltip>
                 }
             </CellTemplate>
         </TemplateColumn>
@@ -63,34 +56,46 @@
         { LetterState.Approved, ("Your event letter has been approved", Color.Success) },
     };
 
+    static readonly Dictionary<string, string> LetterIcon = new()
+    {
+        { "PreEvent", Icons.Material.Filled.Rsvp },
+        { "PostEvent", Icons.Material.Filled.Email },
+    };
+
     private Dictionary<string, string?> _games = default!;
 
     record ComponentInfo(string Title, DateOnly When);
 
     record EventInfo(
         string Id, string Game, string Title, string Location,
-        string Icon, DateOnly When, ComponentInfo[] Components,
-        bool HasLetter, bool IsLetterLocked, (string Tooltip, Color color) Letter)
+        string Icon, DateOnly When, ComponentInfo[] Components, Letter[] Letters)
     {
-        public EventInfo(string game, Event e, LetterState letterState)
+        public EventInfo(string game, Event e, Letter[] letters)
             : this(e.EventId,
                 game,
                 e.Title ?? "Untitled",
                 e.Location ?? "",
-                GetIcon(e.EventType, e.Title),
+                GetEventIcon(e.EventType, e.Title),
                 e.Date,
                 e.Components
                     .Select(c =>
                         new ComponentInfo(c.Name ?? "Untitled", c.Date))
                     .ToArray(),
-                !string.IsNullOrEmpty(e.LetterTemplateId),
-                e.IsLetterLocked,
-                LetterTooltip[letterState])
+                GetLetters(e, letters).ToArray())
         {
+        }
+
+        private static IEnumerable<Letter> GetLetters(Event @event, Letter[] letters)
+        {
+            foreach (var name in @event.LetterTemplates)
+            {
+                yield return letters.FirstOrDefault(x => x.EventId == @event.EventId && x.Name == name.Name)
+                             ?? new Letter() { Name = name.Name, State = LetterState.NotStarted };
+            }
         }
     }
 
-    static string GetIcon(string? type, string? title)
+    static string GetEventIcon(string? type, string? title)
     {
         if (type == null || title == null) return Icons.Material.Filled.Event;
         if (type.Contains("Subscription", StringComparison.InvariantCultureIgnoreCase))
@@ -112,14 +117,16 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        var result = Past
+            ? await LandingService.GetPastEvents()
+            : await LandingService.GetEvents();
+
+        var events = result.Events.Values.Select(x =>
+            new EventInfo(GameName(x.GameId), x, result.Letters.Values.ToArray()));
         if (Past)
-            _events = (await LandingService.GetPastEvents())
-                .OrderByDescending(x => x.Event.Date)
-                .Select(x => new EventInfo(GameName(x.Event.GameId), x.Event, x.Letter?.State ?? LetterState.NotStarted)).ToArray();
+            _events = events.OrderByDescending(x => x.When).ToArray();
         else
-            _events = (await LandingService.GetEvents())
-                .OrderBy(x => x.Event.Date)
-                .Select(x => new EventInfo(GameName(x.Event.GameId), x.Event, x.Letter?.State ?? LetterState.NotStarted)).ToArray();
+            _events = events.OrderBy(x => x.When).ToArray();
         _isLoading = false;
     }
 
@@ -132,9 +139,9 @@
     private string GameName(string gameId) =>
         _games.TryGetValue(gameId, out var game) ? game ?? "" : "";
 
-    private void ViewLetter(string eventId)
+    private void ViewLetter(string eventId, string letterName)
     {
-        NavigationManager.NavigateTo($"/events/{eventId}/letter");
+        NavigationManager.NavigateTo($"/events/{eventId}/letter/{letterName}");
     }
 
 }

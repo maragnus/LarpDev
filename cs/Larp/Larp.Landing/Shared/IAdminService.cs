@@ -134,7 +134,7 @@ public interface IAdminService
     Task<Letter[]> GetSubmittedLetters();
     
     [ApiGet("letters/events/{eventId}"), ApiAuthenticated(AccountRole.AccountAdmin)]
-    Task<LettersAndTemplate> GetEventLetters(string eventId);
+    Task<EventsAndLetters> GetEventLetters(string eventId);
     
     [ApiGet("letters/templates/{templateId}/letters"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task<Letter[]> GetTemplateLetters(string templateId);

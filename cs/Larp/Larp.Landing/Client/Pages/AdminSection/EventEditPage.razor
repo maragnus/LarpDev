@@ -19,26 +19,57 @@
             <MudItem xs="12" md="6">
                 <MudTextField T="string?" Label="Location" @bind-Value="@_event.Location" Variant="Variant.Outlined"/>
             </MudItem>
-            <MudItem xs="12" md="6">
+            <MudItem xs="12" md="4">
                 <MudSelectExtended T="string?" Label="Event Type" Required @bind-Value="@_event.EventType" ItemCollection="_eventTypes" Variant="Variant.Outlined"/>
             </MudItem>
-            <MudItem xs="12" md="6">
+            <MudItem xs="12" md="4">
                 <MudDatePicker T="DateTime" Label="When" Required Date="@_date" DateChanged="date => _date = date ?? DateTime.Today" Variant="Variant.Outlined"/>
             </MudItem>
-            <MudItem xs="6" md="3">
+            <MudItem xs="6" md="4">
                 <MudTooltip Text="Letter will not show in the Events List, but will be displayed in Attendance List">
-                    <MudSwitch T="bool" Label="Hidden" Color="@Color.Secondary" UncheckedColor="@Color.Success"  @bind-Checked="@_event.IsHidden"/>
+                    <MudSwitch T="bool" Label="Hidden" Color="@Color.Secondary" UncheckedColor="@Color.Success" @bind-Checked="@_event.IsHidden"/>
                 </MudTooltip>
-            </MudItem>
-            <MudItem xs="6" md="3">
-                <MudTooltip Text="Letter cannot be created while Letter is Locked">
-                    <MudSwitch T="bool" Label="Letter Locked" Color="@Color.Secondary" UncheckedColor="@Color.Success" @bind-Checked="@_event.IsLetterLocked"/>
-                </MudTooltip>
-            </MudItem>
-            <MudItem xs="12" md="6">
-                <MudSelectExtended T="LetterTemplate" Clearable ItemCollection="_letterTemplates" Label="Post Event Letter Template" ToStringFunc="x => x.Title" Value="@_template" ValueChanged="UpdateTemplate" Variant="Variant.Outlined"/>
             </MudItem>
         </MudGrid>
+
+        <MudText Typo="Typo.h6">Letters</MudText>
+        <MudDataGrid T="EventLetter" Items="_letters" EditMode="DataGridEditMode.Cell" ReadOnly="false" Dense>
+            <Columns>
+                <PropertyColumn Property="x => x.Name" Title="Letter Name" IsEditable>
+                    <EditTemplate>
+                        <MudSelect T="string" @bind-Value="@context.Item.Name">
+                            <MudSelectItem T="string" Value="@("PreEvent")">Pre-event</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("PostEvent")">Post-event</MudSelectItem>
+                        </MudSelect>
+                    </EditTemplate>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.LetterTemplateId" Title="Letter Template" IsEditable>
+                    <EditTemplate>
+                        <MudSelect T="string" @bind-Value="@context.Item.LetterTemplateId">
+                            @foreach (var item in _letterTemplates)
+                            {
+                                <MudSelectItem T="string" Value="@item.Key">@item.Value.Title</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </EditTemplate>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.IsOpen" Title="Is Letter Open" IsEditable>
+                    <EditTemplate>
+                        <MudSwitch Color="Color.Success" UnCheckedColor="Color.Secondary" @bind-Checked="@context.Item.IsOpen">Is Open</MudSwitch>
+                    </EditTemplate>
+                </PropertyColumn>
+                <TemplateColumn T="EventLetter" IsEditable="false">
+                    <CellTemplate>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveLetter(context.Item)"/>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid>
+        <div>
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="AddLetter">Add Letter</MudButton>
+        </div>
+
+        <MudText Typo="Typo.h6">Components</MudText>
         <MudDataGrid T="EventComponent" Items="_components" EditMode="DataGridEditMode.Cell" ReadOnly="false" Dense>
             <Columns>
                 <PropertyColumn Property="x => x.Name" Title="Component Name" IsEditable/>
@@ -57,8 +88,9 @@
         <div>
             <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="AddComponent">Add Component</MudButton>
         </div>
+
         <MudText Typo="Typo.h6">Attendance</MudText>
-        <EventAttendanceComponent Event="@_event" LetterTemplate="@_template" Letters="@_letters" AccountNames="_accountNames"/>
+        <EventAttendanceComponent EventsAndLetters="_result"/>
     </MudStack>
 </AdminLayout>
 
@@ -84,23 +116,21 @@
     bool _isLoading = true;
     private Event _event = default!;
     private List<EventComponent> _components = new();
+    private List<EventLetter> _letters = new();
     private readonly string[] _eventTypes = { "Game", "Workday", "Subscription", "Contest", "Other" };
     private Dictionary<string, string?> _games = new();
     private DateTime _date;
-    private LetterTemplate[] _letterTemplates = Array.Empty<LetterTemplate>();
-    private LetterTemplate? _template;
-    private AccountName[] _accountNames = Array.Empty<AccountName>();
-    private Letter[] _letters = default!;
+    private Dictionary<string, LetterTemplate> _letterTemplates = default!;
+    private EventsAndLetters _result = default!;
 
     protected override async Task OnParametersSetAsync()
     {
         _isLoading = true;
         StateHasChanged();
 
-        var result = await LandingService.Admin.GetEventLetters(EventId);
-        _event = result.Event;
-        _letters = result.Letters;
-        _template = result.LetterTemplate;
+        _result = await LandingService.Admin.GetEventLetters(EventId);
+        _event = _result.Events.Values.First();
+        _letters = new List<EventLetter>(_event.LetterTemplates);
         _components = _event.Components
             .Select(x => new EventComponent { Id = x.ComponentId, Name = x.Name ?? "No Name", When = x.Date.ToDateTime(TimeOnly.MinValue) })
             .ToList();
@@ -110,8 +140,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _accountNames = await LandingService.Admin.GetAccountNames();
-        _letterTemplates = await LandingService.Admin.GetLetterTemplateNames();
+        _letterTemplates = (await LandingService.Admin.GetLetterTemplateNames())
+            .ToDictionary(x => x.LetterTemplateId);
         _games = LandingService.Games
             .ToDictionary(x => x.Value.Id, x => x.Value.Title);
     }
@@ -121,10 +151,11 @@
         await this.AsyncAction(x => x._isLoading, async () =>
         {
             _event.Date = DateOnly.FromDateTime(_date);
+            _event.LetterTemplates = _letters.DistinctBy(x => x.Name)
+                .ToArray();
             _event.Components = _components
                 .Select(x => x.ToComponent())
                 .ToArray();
-            _event.LetterTemplateId = _template?.LetterTemplateId;
             await LandingService.Admin.SaveEvent(EventId, _event);
         });
     }
@@ -137,19 +168,6 @@
             await LandingService.Admin.DeleteEvent(EventId);
             NavigationManager.NavigateTo("/admin/events");
         }
-    }
-
-    private async Task UpdateTemplate(LetterTemplate? template)
-    {
-        if (template == null)
-        {
-            _template = null;
-            _event.LetterTemplateId = null;
-            return;
-        }
-
-        _template = await LandingService.Admin.GetLetterTemplate(template.LetterTemplateId);
-        _event.LetterTemplateId = template?.LetterTemplateId;
     }
 
     private async Task DownloadLetters()
@@ -165,9 +183,20 @@
         _components.Add(new EventComponent() { Name = "New Component", When = _date });
     }
 
-    private void RemoveComponent(EventComponent contextItem)
-    {
+    private void RemoveComponent(EventComponent contextItem) =>
         _components.Remove(contextItem);
+
+    private void AddLetter()
+    {
+        _letters.Add(new EventLetter()
+        {
+            Name = "PreEvent",
+            LetterTemplateId = _letterTemplates.First().Key,
+            IsOpen = false
+        });
     }
+
+    private void RemoveLetter(EventLetter contextItem) =>
+        _letters.Remove(contextItem);
 
 }

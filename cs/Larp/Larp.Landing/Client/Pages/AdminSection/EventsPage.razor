@@ -25,8 +25,16 @@
                 <HierarchyColumn T="EventInfo" ButtonDisabledFunc="@(x => x.Components.Length == 0)"/>
                 <PropertyColumn Property="x => x.When" Title="Date" Format="dddd, MMM d, yyyy"/>
                 <PropertyColumn Property="x => x.Title" Title="Title"/>
-                <PropertyColumn Property="x => x.LettersApproved" Title="PEL Approved"/>
-                <PropertyColumn Property="x => x.LettersSubmitted" Title="PEL Submitted"/>
+                <PropertyColumn Property="x => x.LettersApproved" Title="Letters Approved"/>
+                <PropertyColumn Property="x => x.LettersSubmitted" Title="Letters Submitted"/>
+                <TemplateColumn T="EventInfo">
+                    <CellTemplate>
+                        @foreach (var letter in context.Item.Event.LetterTemplates.Select(x => x.Name))
+                        {
+                            <MudIcon Size="Size.Small" Icon="@LetterIcon.GetValueOrDefault(letter)" />
+                        }
+                    </CellTemplate>
+                </TemplateColumn>
             </Columns>
         </MudDataGrid>
     }
@@ -36,12 +44,19 @@
     bool _isLoading = true;
     private (string, EventInfo[])[] _events = Array.Empty<(string, EventInfo[])>();
 
+    static readonly Dictionary<string, string> LetterIcon = new()
+    {
+        { "PreEvent", Icons.Material.Filled.Rsvp },
+        { "PostEvent", Icons.Material.Filled.Email },
+    };
+
     record ComponentInfo(string Title, DateOnly When);
 
-    record EventInfo(string Game, string Id, string Title, string Location, DateOnly When, ComponentInfo[] Components,
-        int LettersApproved, int LettersSubmitted)
+    record EventInfo(Event Event, string Game, string Id, string Title, string Location, DateOnly When,
+        ComponentInfo[] Components, int LettersApproved, int LettersSubmitted)
     {
-        public EventInfo(string game, Event e, LetterState[] letters) : this(game, e.EventId, e.Title ?? "Untitled", e.Location ?? "", e.Date,
+        public EventInfo(string game, Event e, LetterState[] letters) : this(
+            e, game, e.EventId, e.Title ?? "Untitled", e.Location ?? "", e.Date,
             e.Components
                 .Select(c =>
                     new ComponentInfo(c.Name ?? "Untitled", c.Date))

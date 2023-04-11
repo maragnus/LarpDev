@@ -47,7 +47,7 @@ public interface ILandingService
     Task AccountUpdate(string? fullName, string? location, string? phone, string? allergies, DateOnly? birthDate);
 
     [ApiGet("events")]
-    Task<EventAndLetter[]> GetEvents(EventList list);
+    Task<EventsAndLetters> GetEvents(EventList list);
     
     [ApiGet("larp/characters/names"), ApiAuthenticated]
     Task<Dictionary<string,string>> GetCharacterNames();
@@ -56,7 +56,7 @@ public interface ILandingService
     Task<EventAttendance[]> GetAttendance();
 
     [ApiPost("letters/new"), ApiAuthenticated]
-    Task<Letter> DraftLetter(string eventId);
+    Task<Letter> DraftLetter(string eventId, string letterName);
     
     [ApiGet("letters"), ApiAuthenticated]
     Task<Letter[]> GetLetters();
@@ -67,6 +67,6 @@ public interface ILandingService
     [ApiPost("letters/{letterId}"), ApiAuthenticated]
     Task SaveLetter(string letterId, Letter letter);
 
-    [ApiGet("letters/events/{eventId}"), ApiAuthenticated]
-    Task<LetterAndTemplate> GetEventLetter(string eventId);
+    [ApiGet("letters/events/{eventId}/{letterName}"), ApiAuthenticated]
+    Task<EventsAndLetters> GetEventLetter(string eventId, string letterName);
 }

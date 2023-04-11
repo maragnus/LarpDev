@@ -177,10 +177,10 @@ public class LandingService
         DateOnly? birthDate) =>
         await _landing.AccountUpdate(fullName, location, phone, allergies, birthDate);
 
-    public async Task<EventAndLetter[]> GetEvents() =>
+    public async Task<EventsAndLetters> GetEvents() =>
         await _landing.GetEvents(EventList.Upcoming);
 
-    public async Task<EventAndLetter[]> GetPastEvents() =>
+    public async Task<EventsAndLetters> GetPastEvents() =>
         await _landing.GetEvents(EventList.Past);
     
     public async Task<Dictionary<string, string>> GetCharacterNames() =>
@@ -189,6 +189,6 @@ public class LandingService
     public async Task<EventAttendance[]> GetAttendance() =>
         await _landing.GetAttendance();
 
-    public async Task<LetterAndTemplate> GetEventLetter(string eventId) => 
-        await _landing.GetEventLetter(eventId);
+    public async Task<EventsAndLetters> GetEventLetter(string eventId, string letterName) => 
+        await _landing.GetEventLetter(eventId, letterName);
 }

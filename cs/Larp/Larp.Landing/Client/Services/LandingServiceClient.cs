@@ -82,8 +82,8 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public Task MoveMwFifthCharacter(string characterId, string newAccountId) =>
         Post($"api/admin/mw5e/characters/{characterId}/move", new { newAccountId });
 
-    public Task<EventAndLetter[]> GetEvents(EventList list) =>
-        Get<EventAndLetter[]>($"api/events?list={list}");
+    public Task<EventsAndLetters> GetEvents(EventList list) =>
+        Get<EventsAndLetters>($"api/events?list={list}");
 
     public Task<Dictionary<string, string>> GetCharacterNames() =>
         Get<Dictionary<string, string>>("api/larp/characters/names");
@@ -91,8 +91,8 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public Task<EventAttendance[]> GetAttendance() =>
         Get<EventAttendance[]>("api/events/attendance");
 
-    public Task<Letter> DraftLetter(string eventId) =>
-        Post<Letter>("api/letters/new");
+    public Task<Letter> DraftLetter(string eventId, string letterName) =>
+        Post<Letter>("api/letters/new", new { eventId, letterName });
 
     public Task<Letter[]> GetLetters() =>
         Get<Letter[]>("api/letters");
@@ -106,8 +106,8 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public async Task<Letter[]> GetSubmittedLetters() =>
         await Get<Letter[]>("api/admin/letters/submitted");
 
-    public async Task<LettersAndTemplate> GetEventLetters(string eventId) =>
-        await Get<LettersAndTemplate>($"api/admin/letters/events/{eventId}");
+    public async Task<EventsAndLetters> GetEventLetters(string eventId) =>
+        await Get<EventsAndLetters>($"api/admin/letters/events/{eventId}");
 
     public async Task<Letter[]> GetTemplateLetters(string templateId) =>
         await Get<Letter[]>($"api/admin/letters/templates/{templateId}/letters");
@@ -121,15 +121,15 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public Task SaveLetter(string letterId, Letter letter) =>
         Post($"api/letters/{letterId}", new { letter });
 
-    public Task<LetterAndTemplate> GetEventLetter(string eventId) =>
-        Get<LetterAndTemplate>($"api/letters/events/{eventId}");
+    public Task<EventsAndLetters> GetEventLetter(string eventId, string letterName) =>
+        Get<EventsAndLetters>($"api/letters/events/{eventId}/{letterName}");
 
     Task<Event> IAdminService.GetEvent(string eventId) =>
         Get<Event>($"api/admin/events/{eventId}");
 
     public Task SaveEvent(string eventId, Event @event) =>
         Post($"api/admin/events/{eventId}", new { @event });
-    
+
     public Task DeleteEvent(string eventId) =>
         Delete($"api/admin/events/{eventId}");
 

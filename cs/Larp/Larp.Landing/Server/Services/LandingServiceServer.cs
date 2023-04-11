@@ -122,15 +122,29 @@ public class LandingServiceServer : ILandingService
             .Set(x => x.BirthDate, birthDate)
         );
 
-    public async Task<EventAndLetter[]> GetEvents(EventList list)
+    private async Task<Dictionary<string, AccountName>> GetAccountNames()
+    {
+        var names = await _db.Accounts.Find(_ => true)
+            .Project(account => new AccountName()
+            {
+                AccountId = account.AccountId,
+                Name = account.Name
+            })
+            .ToListAsync();
+        return names.ToDictionary(x => x.AccountId);
+    }
+
+    public async Task<EventsAndLetters> GetEvents(EventList list)
     {
         var now = DateOnly.FromDateTime(DateTime.Today);
 
         var letters = _userSession.CurrentUser == null
             ? new Dictionary<string, Letter>()
             : (await _db.Letters.Find(x => x.AccountId == _userSession.AccountId)
-                .Project(x => new Letter() { LetterId = x.LetterId, EventId = x.EventId, State = x.State }).ToListAsync())
-            .ToDictionary(x=>x.EventId);
+                .Project(x => new Letter()
+                    { LetterId = x.LetterId, Name = x.Name, EventId = x.EventId, State = x.State })
+                .ToListAsync())
+            .ToDictionary(x => x.LetterId);
 
         var filter = list switch
         {
@@ -140,12 +154,17 @@ public class LandingServiceServer : ILandingService
         };
 
         var events = await _db.Events.Find(filter).ToListAsync();
-        return events
-            .Select(x=> new EventAndLetter()
-            {
-                Event = x,
-                Letter = letters.GetValueOrDefault(x.EventId)
-            }).ToArray();
+        var templateIds = letters.Values.Select(x => x.TemplateId).Distinct().ToList();
+        var templates = await _db.LetterTemplates
+            .Find(template => templateIds.Contains(template.LetterTemplateId)).ToListAsync();
+
+        return new EventsAndLetters()
+        {
+            Events = events.ToDictionary(x => x.EventId),
+            Accounts = await GetAccountNames(),
+            Letters = letters,
+            LetterTemplates = templates.ToDictionary(x => x.LetterTemplateId)
+        };
     }
 
     public async Task<Dictionary<string, string>> GetCharacterNames()
@@ -164,9 +183,9 @@ public class LandingServiceServer : ILandingService
     {
         var letters = (await _db.Letters.AsQueryable()
                 .Where(x => x.AccountId == _userSession.AccountId)
-                .Select(x => new { x.EventId, x.State })
+                .Select(x => new Letter() { EventId = x.EventId, Name = x.Name, State = x.State })
                 .ToListAsync())
-            .ToDictionary(x => x.EventId, x => x.State);
+            .ToLookup(x => x.EventId);
 
         var attendances =
             await _db.Attendances.AsQueryable()
@@ -182,18 +201,21 @@ public class LandingServiceServer : ILandingService
             .Select(x => new EventAttendance(
                 x.Attedance,
                 x.Event,
-                letters.GetValueOrDefault(x.Event.EventId, LetterState.NotStarted)))
+                letters[x.Event.EventId].ToArray()))
             .ToArray();
     }
 
-    public async Task<Letter> DraftLetter(string eventId)
+    public async Task<Letter> DraftLetter(string eventId, string letterName)
     {
-        var templateId =
+        var templates =
             await _db.Events.Find(x => x.EventId == eventId)
-                .Project(x => x.LetterTemplateId)
+                .Project(x => x.LetterTemplates)
                 .FirstOrDefaultAsync()
-            ?? throw new BadRequestException($"Event {eventId} does not have {nameof(Event.LetterTemplateId)}");
-        return await _letterManager.Draft(templateId, eventId, _account!.AccountId);
+            ?? throw new ResourceNotFoundException();
+        var templateId =
+            templates.FirstOrDefault(x => x.Name == letterName)?.LetterTemplateId
+            ?? throw new BadRequestException($"Event {eventId} does not have letter {letterName}");
+        return await _letterManager.Draft(templateId, eventId, _account!.AccountId, letterName);
     }
 
     public async Task<Letter[]> GetLetters() =>
@@ -208,6 +230,6 @@ public class LandingServiceServer : ILandingService
         await _letterManager.Save(letter, _account!.AccountId);
     }
 
-    public async Task<LetterAndTemplate> GetEventLetter(string eventId) =>
-        await _letterManager.GetEventLetter(_account!.AccountId, eventId);
+    public async Task<EventsAndLetters> GetEventLetter(string eventId, string letterName) =>
+        await _letterManager.GetEventLetter(_account!.AccountId, eventId, letterName);
 }
