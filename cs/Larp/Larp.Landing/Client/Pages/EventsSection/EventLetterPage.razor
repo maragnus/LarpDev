@@ -1,12 +1,12 @@
 @page "/events/{EventId}/letter/{LetterName}"
 @inject LandingService LandingService
-@inject IDialogService DialogService
+@inherits LarpPage
 
 <PageHeader>Event Letter</PageHeader>
 
-@if (_isLoading)
+@if (IsLoading)
 {
-    <MudOverlay Absolute DarkBackground Visible="_isLoading">
+    <MudOverlay Absolute DarkBackground Visible="IsLoading">
         <MudProgressCircular Indeterminate/>
     </MudOverlay>
     return;
@@ -37,30 +37,28 @@
 
     [Parameter]
     public string LetterName { get; set; } = default!;
-    
-    bool _isLoading = true;
-    bool _isSaving;
+
+    bool _isSaving = true;
     Letter _letter = default!;
     LetterTemplate _template = default!;
     bool _isReadOnly;
     Event _event = default!;
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnSafeParametersSetAsync()
     {
-        _isLoading = true;
-        _isSaving = true;
         var letter = await LandingService.GetEventLetter(EventId, LetterName);
         _letter = letter.Letters.Values.First();
         _template = letter.LetterTemplates.Values.First();
         _event = letter.Events.Values.First();
         _isReadOnly = _letter.State is LetterState.Submitted or LetterState.Approved;
         _isSaving = false;
-        _isLoading = false;
     }
 
     private async Task Save()
     {
-        await this.AsyncAction(x => x._isSaving, async () => { await LandingService.Service.SaveLetter(_letter.LetterId, _letter); });
+        _isSaving = true;
+        await SafeActionAsync(async () => { await LandingService.Service.SaveLetter(_letter.LetterId, _letter); });
+        _isSaving = false;
     }
 
     private async Task Submit()
@@ -72,12 +70,14 @@
             return;
         }
 
-        await this.AsyncAction(x => x._isSaving, async () =>
+        _isSaving = true;
+        await SafeActionAsync(async () =>
         {
             _letter.State = LetterState.Submitted;
             await LandingService.Service.SaveLetter(_letter.LetterId, _letter);
             await OnParametersSetAsync();
         });
+        _isSaving = false;
     }
 
 }

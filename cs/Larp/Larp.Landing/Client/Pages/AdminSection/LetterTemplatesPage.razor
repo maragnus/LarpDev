@@ -1,8 +1,10 @@
 @page "/admin/letters/templates"
+@inherits LarpPage
+
 @inject LandingService LandingService
 @inject NavigationManager NavigationManager
 
-<AdminLayout Title="Letter Templates" Loading="_isLoading">
+<AdminLayout Title="Letter Templates" Loading="IsLoading">
     <MudStack Spacing="4">
 
         <MudPaper Class="pa-2">
@@ -25,13 +27,11 @@
 
 @code {
 
-    private bool _isLoading = true;
     private LetterTemplate[] _templates = Array.Empty<LetterTemplate>();
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnSafeInitializedAsync()
     {
         _templates = await LandingService.Admin.GetLetterTemplateNames();
-        _isLoading = false;
     }
 
     private void Clicked(LetterTemplate template)
@@ -41,8 +41,11 @@
 
     private async Task New()
     {
-        var template = await LandingService.Admin.DraftLetterTemplate();
-        NavigationManager.NavigateTo($"/admin/letters/templates/{template.LetterTemplateId}");
+        await SafeActionAsync(async () =>
+        {
+            var template = await LandingService.Admin.DraftLetterTemplate();
+            NavigationManager.NavigateTo($"/admin/letters/templates/{template.LetterTemplateId}");
+        });
     }
 
 }

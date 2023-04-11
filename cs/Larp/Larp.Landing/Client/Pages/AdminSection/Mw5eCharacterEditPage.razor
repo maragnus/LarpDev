@@ -1,11 +1,13 @@
 @page "/admin/mw5e/characters/{CharacterId}/edit"
+@inherits LarpPage
+
 @using Larp.Landing.Client.Pages.MwFifth
 @inject LandingService LandingService
 @inject NavigationManager NavigationManager
 
 <PageHeader>Mystwood 5e Characters</PageHeader>
 
-<AdminLayout Loading="_isLoading">
+<AdminLayout Loading="IsLoading">
     <MwFifthCharacterEditor Admin CharacterId="@CharacterId" />
 </AdminLayout>
 
@@ -14,23 +16,13 @@
     [Parameter]
     public string CharacterId { get; set; } = default!;
 
-    bool _isLoading = true;
-
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnSafeParametersSetAsync()
     {
         var character = await LandingService.Admin.GetMwFifthCharacterLatest(CharacterId);
         if (character.Revision.RevisionId != CharacterId)
         {
             NavigationManager.NavigateTo($"/admin/mw5e/characters/{character.Revision}/edit", replace: true);
             await OnInitializedAsync();
-            return;
         }
-        _isLoading = false;
-    }
-
-    protected override async Task OnParametersSetAsync()
-    {
-        _isLoading = true;
-        await OnInitializedAsync();
     }
 }

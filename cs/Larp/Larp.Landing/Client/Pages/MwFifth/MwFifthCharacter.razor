@@ -1,8 +1,7 @@
 @using Larp.Landing.Shared.MwFifth
 @inject LandingService LandingService
-@inject ILogger<MwFifthCharacterEditor> Logger;
-@inject IDialogService DialogService
 @inject NavigationManager NavigationManager
+@inherits LarpPage
 
 @code {
 
@@ -15,38 +14,44 @@
     [Parameter]
     public bool FullLayout { get; set; }
 
-    private LoadingState _loadingState = LoadingState.Loading;
     private Game _game = new();
     private GameState _gameState = default!;
     private CharacterBuilder _character = default!;
     private string? _chapterEmail;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnSafeParametersSetAsync()
     {
-        _game = LandingService.MwFifth.Game;
-        _gameState = LandingService.MwFifth.GameState;
-
         var character = await LandingService.MwFifth.GetCharacter(CharacterId!);
 
         _character = new CharacterBuilder(character, _gameState, Logger);
         _chapterEmail = _character.GetHomeChapter()?.Email ?? _game.Email;
-        _loadingState = LoadingState.Loaded;
+    }
+
+    protected override void OnInitialized()
+    {
+        _game = LandingService.MwFifth.Game;
+        _gameState = LandingService.MwFifth.GameState;
     }
 
     private async Task DeleteDraft()
     {
         var result = await DialogService.ShowMessageBox("Delete Character Draft", "Are you sure you want to delete this draft? It cannot be recovered.", "Yes, Delete It", "No, Keep It");
-        if (result == true)
+        if (result != true) return;
+
+        await SafeActionAsync(async () =>
         {
             await LandingService.MwFifth.DeleteCharacter(_character.Revision.RevisionId);
             NavigationManager.NavigateTo("/characters");
-        }
+        });
     }
 
     private async Task CreateDraft()
     {
-        var newCharacter = await LandingService.MwFifth.StartDraft(CharacterId!);
-        NavigationManager.NavigateTo($"/characters/mw5e/{newCharacter.Revision.RevisionId}/edit");
+        await SafeActionAsync(async () =>
+        {
+            var newCharacter = await LandingService.MwFifth.StartDraft(CharacterId!);
+            NavigationManager.NavigateTo($"/characters/mw5e/{newCharacter.Revision.RevisionId}/edit");
+        });
     }
 
     private void PrintSheet()
@@ -58,12 +63,12 @@
 
 <StepDivider/>
 
-@if (_loadingState == LoadingState.Loading)
+@if (IsLoading)
 {
     <MudProgressLinear Indeterminate/>
     return;
 }
-else if (_loadingState != LoadingState.Loaded)
+@if (!IsInitialized)
 {
     <MudAlert Severity="Severity.Error">Character could not be loaded</MudAlert>
     return;

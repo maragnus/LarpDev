@@ -1,4 +1,5 @@
 @inject LandingService LandingService
+@inherits LarpPage
 
 <MudPaper Class="pa-4 mt-4">
     <MudStack Spacing="4">
@@ -185,8 +186,11 @@
 
     private async Task Approve()
     {
-        await LandingService.Admin.ApproveLetter(Letter.LetterId);
-        Letter.State = LetterState.Approved;
+        await SafeActionAsync(async () =>
+        {
+            await LandingService.Admin.ApproveLetter(Letter.LetterId);
+            Letter.State = LetterState.Approved;
+        });
     }
 
 }

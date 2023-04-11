@@ -133,6 +133,9 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public Task DeleteAttachment(string attachmentId) =>
         Delete($"api/admin/attachments/{attachmentId}");
 
+    public Task<StringResult> DraftEvent() =>
+        Post<StringResult>($"api/admin/events/new");
+
     public async Task<LetterTemplate> GetLetterTemplate(string templateId) =>
         await Get<LetterTemplate>($"api/admin/letters/templates/{templateId}");
 

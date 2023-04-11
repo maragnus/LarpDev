@@ -1,7 +1,8 @@
 @page "/admin/accounts/{AccountId}"
+@inherits LarpPage
+
 @using System.ComponentModel.DataAnnotations
 @inject LandingService LandingService
-@inject IDialogService DialogService
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
 
@@ -13,7 +14,7 @@
     return;
 }
 
-<AdminLayout Title="Manage Accounts" Loading="_isLoading">
+<AdminLayout Title="Manage Accounts" Loading="IsLoading">
     <MudStack Spacing="4">
         <MudPaper Class="pa-4 relative">
             <MudOverlay DarkBackground Absolute Visible="_savingProfile">
@@ -97,7 +98,7 @@
         </MudPaper>
 
         <MudPaper>
-            <MudDataGrid T="CharacterSummary" Items="_characters" RowClick="RowClick" Dense Groupable Hover Loading="_isLoading">
+            <MudDataGrid T="CharacterSummary" Items="_characters" RowClick="RowClick" Dense Groupable Hover Loading="IsLoading">
                 <Columns>
                     <TemplateColumn T="CharacterSummary" Title="Status">
                         <CellTemplate>
@@ -158,7 +159,9 @@
                                 <MudImage Src="@url" Alt="@attachment.Title" Height="150" ObjectFit="ObjectFit.Cover" Class="rounded-lg"/>
                                 <MudStack Row Justify="Justify.FlexStart">
                                     <MudStack>
-                                        <MudText Typo="Typo.caption"><strong>@attachment.Title</strong></MudText>
+                                        <MudText Typo="Typo.caption">
+                                            <strong>@attachment.Title</strong>
+                                        </MudText>
                                         <MudText Typo="Typo.caption">Uploaded by @GetName(attachment.UploadedBy) on @attachment.UploadedOn.ToString("MMM d, yyyy")</MudText>
                                     </MudStack>
                                     <MudIconButton Icon="@Icons.Material.Filled.Download" Color="Color.Primary" OnClick="async () => await Download(attachment)">Download</MudIconButton>
@@ -181,7 +184,6 @@
     private bool _savingRoles = true;
     private bool _savingEmails = true;
     private bool _changed = false;
-    private bool _isLoading = true;
     private bool _isLoadingAttachments = true;
     private Account? _account;
     private CharacterSummary[]? _characters;
@@ -194,15 +196,14 @@
         public string? EmailAddress { get; set; }
     }
 
-    private NewEmailModel _newEmailModel = new();
+    private readonly NewEmailModel _newEmailModel = new();
     private MudTextField<string?>? _newEmailField;
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnSafeParametersSetAsync()
     {
         _savingProfile = true;
         _savingRoles = true;
         _savingEmails = true;
-        _isLoading = true;
         StateHasChanged();
 
         _account = await LandingService.Admin.GetAccount(AccountId);
@@ -211,7 +212,7 @@
         _savingProfile = false;
         _savingRoles = false;
         _savingEmails = false;
-        _isLoading = false;
+        IsLoading = false; // Lie a little so the attachments can pop up later
         StateHasChanged();
 
         _attachments = await LandingService.Admin.GetAccountAttachments(AccountId);
@@ -233,24 +234,21 @@
     private async Task Save()
     {
         _savingProfile = true;
-        try
+        StateHasChanged();
+
+        await SafeActionAsync(async () =>
         {
-            StateHasChanged();
             await LandingService.Admin.UpdateAccount(AccountId, _account!.Name, _account.Location, _account.Phone, _account.BirthDate, _account.Notes);
-        }
-        finally
-        {
-            _account = await LandingService.Admin.GetAccount(AccountId);
             _changed = false;
-            _savingProfile = false;
-            StateHasChanged();
-        }
+            _account = await LandingService.Admin.GetAccount(AccountId);
+        });
+        _savingProfile = false;
     }
 
     private async Task SetRole(AccountRole role, bool hasRole)
     {
         _savingRoles = true;
-        try
+        await SafeActionAsync(async () =>
         {
             if (hasRole)
                 await LandingService.Admin.AddAccountRole(AccountId, role);
@@ -258,43 +256,32 @@
                 await LandingService.Admin.RemoveAccountRole(AccountId, role);
 
             _account = await LandingService.Admin.GetAccount(AccountId);
-        }
-        finally
-        {
-            _savingRoles = false;
-            StateHasChanged();
-        }
+        });
+        _savingRoles = false;
     }
 
     private async Task DeleteEmail(MudChip obj)
     {
         _savingEmails = true;
         StateHasChanged();
-        try
+        await SafeActionAsync(async () =>
         {
             await LandingService.Admin.RemoveAccountEmail(AccountId, (string)obj.Value);
             await OnParametersSetAsync();
-        }
-        finally
-        {
-            _savingEmails = false;
-        }
+        });
+        _savingEmails = false;
     }
 
     private async Task AddEmailSubmit()
     {
         _savingEmails = true;
         StateHasChanged();
-        try
+        await SafeActionAsync(async () =>
         {
             await LandingService.Admin.AddAccountEmail(AccountId, _newEmailModel.EmailAddress!);
-            await _newEmailField!.Clear();
             await OnParametersSetAsync();
-        }
-        finally
-        {
-            _savingEmails = false;
-        }
+        });
+        _savingEmails = false;
     }
 
     private async Task Merge()
@@ -305,12 +292,11 @@
 
         var newAccountId = (string)result.Data;
         if (newAccountId == AccountId) return;
-
-        await LandingService.Admin.MergeAccounts(AccountId, newAccountId);
-
-        NavigationManager.NavigateTo($"/admin/accounts/{newAccountId}");
-        await OnParametersSetAsync();
-        StateHasChanged();
+        await SafeActionAsync(async () =>
+        {
+            await LandingService.Admin.MergeAccounts(AccountId, newAccountId);
+            NavigationManager.NavigateTo($"/admin/accounts/{newAccountId}");
+        });
     }
 
     private void Attachments()
@@ -322,11 +308,13 @@
 
     private async Task Download(AccountAttachment attachment)
     {
-        var file = await LandingService.Service.GetAttachment(attachment.AttachmentId, attachment.FileName ?? "file");
-        var fileStream = file.CreateReadStream();
-        using var streamRef = new DotNetStreamReference(stream: fileStream);
-        await JS.InvokeVoidAsync("downloadFileFromStream", attachment.FileName ?? "file", streamRef);
+        await SafeActionAsync(async () =>
+        {
+            var file = await LandingService.Service.GetAttachment(attachment.AttachmentId, attachment.FileName ?? "file");
+            var fileStream = file.CreateReadStream();
+            using var streamRef = new DotNetStreamReference(stream: fileStream);
+            await JS.InvokeVoidAsync("downloadFileFromStream", attachment.FileName ?? "file", streamRef);
+        });
     }
-
 
 }

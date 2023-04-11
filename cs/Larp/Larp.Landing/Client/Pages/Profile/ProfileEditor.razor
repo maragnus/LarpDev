@@ -1,4 +1,5 @@
 @inject LandingService LandingService
+@inherits LarpPage
 
 <MudPaper Class="pa-4 mb-4 relative">
     <MudOverlay DarkBackground Absolute Visible="_saving">
@@ -39,7 +40,7 @@
     private bool _saving = true;
     private DateTime? _birthDate;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnSafeInitializedAsync()
     {
         var account = await LandingService.GetAccount();
         _fullName = account.Name;
@@ -60,11 +61,8 @@
     private async Task Save()
     {
         _saving = true;
-        await LandingService.AccountUpdate(_fullName, _location, _phone, _allergies, _birthDate.HasValue ? DateOnly.FromDateTime(_birthDate.Value) : null);
-        StateHasChanged();
-
+        await SafeActionAsync(async () => { await LandingService.AccountUpdate(_fullName, _location, _phone, _allergies, _birthDate.HasValue ? DateOnly.FromDateTime(_birthDate.Value) : null); });
         _saving = false;
-        StateHasChanged();
     }
 
 }

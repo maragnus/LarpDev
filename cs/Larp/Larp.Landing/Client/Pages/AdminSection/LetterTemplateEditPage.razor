@@ -1,8 +1,9 @@
 @page "/admin/letters/templates/{TemplateId}"
-@inject LandingService LandingService
-@inject IDialogService DialogService
+@inherits LarpPage
 
-<AdminLayout Title="Letter Templates" Loading="_isLoading">
+@inject LandingService LandingService
+
+<AdminLayout Title="Letter Templates" Loading="IsLoading">
     <MudStack Spacing="4" Class="relative">
         <MudOverlay DarkBackground Absolute Visible="_saving">
             <MudText Typo="Typo.h6">Loading...</MudText>
@@ -102,25 +103,22 @@
 </AdminLayout>
 
 @code {
-        private const char Delimiter = ',';
 
     [Parameter]
     public string TemplateId { get; set; } = default!;
 
-    private bool _isLoading;
     private LetterTemplate _template = default!;
     private bool _saving;
     private string[] _fieldNames = Array.Empty<string>();
 
-    protected override async Task OnParametersSetAsync()
+        private const char Delimiter = ',';
+
+    protected override async Task OnSafeParametersSetAsync()
     {
-        await this.AsyncAction(DialogService, x => x._isLoading, async () =>
-        {
-            _template = await LandingService.Admin.GetLetterTemplate(TemplateId);
-            foreach (var field in _template.Fields)
-                field.Conditional ??= new LetterFieldCondition();
-            UpdateFieldNames();
-        });
+        _template = await LandingService.Admin.GetLetterTemplate(TemplateId);
+        foreach (var field in _template.Fields)
+            field.Conditional ??= new LetterFieldCondition();
+        UpdateFieldNames();
     }
 
     private void UpdateFieldNames()
@@ -132,7 +130,9 @@
 
     private async Task Save()
     {
-        await this.AsyncAction(busy => busy._saving, async () => { await LandingService.Admin.SaveLetterTemplate(TemplateId, _template); });
+        _saving = true;
+        await SafeActionAsync(async () => { await LandingService.Admin.SaveLetterTemplate(TemplateId, _template); });
+        _saving = false;
     }
 
     private void AddField()

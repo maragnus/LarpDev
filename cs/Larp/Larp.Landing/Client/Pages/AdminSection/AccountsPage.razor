@@ -1,12 +1,13 @@
 @page "/admin/accounts"
+@inherits LarpPage
+
 @using Larp.Landing.Shared.Messages
 @inject LandingService LandingService
 @inject NavigationManager NavigationManager
-@inject IDialogService DialogService
 
 <PageHeader>Account Manager</PageHeader>
 
-<AdminLayout Title="Manage Accounts" Loading="_isLoading">
+<AdminLayout Title="Manage Accounts" Loading="IsLoading">
     <div class="pa-2 mb-4">
         <EditForm Model="_search" OnSubmit="Search">
             <MudStack Row Justify="Justify.Center" AlignItems="AlignItems.Start">
@@ -47,15 +48,13 @@
 </AdminLayout>
 
 @code {
-    private bool _isLoading = true;
     private Account[] _allAccounts = Array.Empty<Account>();
     private Account[] _accounts = Array.Empty<Account>();
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnSafeInitializedAsync()
     {
         _allAccounts = await LandingService.Admin.GetAccounts();
         _accounts = _allAccounts;
-        _isLoading = false;
     }
 
     private static bool SearchFunc(Account account, string query) =>

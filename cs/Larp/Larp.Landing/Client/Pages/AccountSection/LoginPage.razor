@@ -147,7 +147,8 @@
         var model = (ConfirmModel)context.Model;
 
         _isBusy = true;
-        await Task.Yield();
+        StateHasChanged();
+        
         try
         {
             await LandingService.LoginConfirm(model.EmailAddress!, model.Token!, model.DeviceName!);
@@ -174,7 +175,7 @@
         if (string.IsNullOrWhiteSpace(model.EmailAddress))
             return;
         _isBusy = true;
-        await Task.Yield();
+        StateHasChanged();
         try
         {
             await LandingService.Login(model.EmailAddress);

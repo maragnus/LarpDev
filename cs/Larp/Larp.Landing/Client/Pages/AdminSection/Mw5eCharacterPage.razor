@@ -1,10 +1,10 @@
 @page "/admin/mw5e/characters/{CharacterId}"
+@inherits LarpPage
+
 @using Larp.Landing.Client.Pages.MwFifth
 @using Larp.Landing.Shared.MwFifth
 @inject LandingService LandingService
-@inject ILogger<Mw5eCharacterPage> Logger
 @inject NavigationManager NavigationManager
-@inject IDialogService DialogService
 
 <PageHeader>Mystwood 5e Characters</PageHeader>
 
@@ -28,7 +28,7 @@
         <MudButton StartIcon="@Icons.Material.Filled.Undo" OnClick="Move" Variant="Variant.Filled" Color="Color.Secondary">Move</MudButton>
     </MudButtonGroup>
 
-    @if (_isLoading || _character == null)
+    @if (IsLoading || _character == null)
     {
         <MudAlert Severity="@Severity.Normal">Loading... <MudProgressLinear Indeterminate/></MudAlert>
     }
@@ -109,7 +109,7 @@
 
     <MudText Typo="Typo.h6" Class="mt-4">Character Sheet</MudText>
     <div class="mt-4 relative">
-        <MudOverlay Visible="_isLoading" DarkBackground Absolute>
+        <MudOverlay Visible="IsLoading" DarkBackground Absolute>
             <MudProgressLinear Indeterminate/>
         </MudOverlay>
         @if (_character != null)
@@ -170,28 +170,23 @@
 
     CharacterState _state;
     CharacterBuilder? _character;
-    bool _isLoading = true;
 
     private CharacterRevision[] _revisions = Array.Empty<CharacterRevision>();
-    private MoonstoneInfo _moonstone = new MoonstoneInfo();
+    private MoonstoneInfo _moonstone = new();
     private int _moonstoneUsed;
     private int _newMoonstoneCost;
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnSafeParametersSetAsync()
     {
-        _isLoading = true;
-        StateHasChanged();
         var character = await LandingService.Admin.GetMwFifthCharacter(CharacterId);
         _character = new CharacterBuilder(character, LandingService.MwFifth.GameState, Logger);
         _moonstone = character.Moonstone;
         _moonstoneUsed = character.Revision.GiftMoonstone + character.Revision.SkillMoonstone;
         _newMoonstoneCost = _moonstoneUsed - character.Character.UsedMoonstone;
         _state = character.Revision.State;
-        _isLoading = false;
-        StateHasChanged();
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnSafeInitializedAsync()
     {
         var character = await LandingService.Admin.GetMwFifthCharacter(CharacterId);
         _character = new CharacterBuilder(character, LandingService.MwFifth.GameState, Logger);
@@ -199,7 +194,6 @@
         _revisions = revisions.CharacterRevisions;
         Array.Reverse(_revisions);
         _state = character.Revision.State;
-        _isLoading = false;
     }
 
     private void GoToAccount()
@@ -227,19 +221,14 @@
 
         if (result != true) return;
 
-        _isLoading = true;
-        try
+        await LoadingActionAsync(async () =>
         {
             var characterId = _character!.Revision.RevisionId;
             await LandingService.Admin.ApproveMwFifthCharacter(characterId);
             NavigationManager.NavigateTo($"/admin/mw5e/characters/{characterId}");
             await OnInitializedAsync();
             StateHasChanged();
-        }
-        finally
-        {
-            _isLoading = false;
-        }
+        });
     }
 
     private async Task Reject()
@@ -252,20 +241,13 @@
 
         if (result != true) return;
 
-        try
+        await LoadingActionAsync(async () =>
         {
-            _isLoading = true;
-
             var characterId = _character!.Revision.RevisionId;
             await LandingService.Admin.RejectMwFifthCharacter(characterId);
             NavigationManager.NavigateTo($"/admin/mw5e/characters/{characterId}");
             await OnInitializedAsync();
-            StateHasChanged();
-        }
-        finally
-        {
-            _isLoading = false;
-        }
+        });
     }
 
     private async Task ReviseCharacter()

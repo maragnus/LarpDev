@@ -20,29 +20,4 @@
         <ProjectReference Include="..\Shared\Larp.Landing.Shared.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Content Include="..\..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
-      <Content Update="Pages\splash.webp">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-        <DependentUpon>Index.razor</DependentUpon>
-      </Content>
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Include="wwwroot\splash.webp">
-        <Link>ClientApp\src\splash.webp</Link>
-      </None>
-      <None Include="wwwroot\tree.webp">
-        <Link>ClientApp\src\tree.webp</Link>
-      </None>
-    </ItemGroup>
-
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="Icons\BookIcon.razor" />
-      <_ContentIncludedByDefault Remove="Icons\EventIcon.razor" />
-    </ItemGroup>
-
 </Project>

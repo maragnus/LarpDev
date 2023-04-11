@@ -1,10 +1,11 @@
 @page "/admin/events/{EventId}"
+@inherits LarpPage
+
 @inject LandingService LandingService
 @inject NavigationManager NavigationManager
-@inject IDialogService DialogService
 @inject IJSRuntime JS
 
-<AdminLayout Loading="_isLoading" Title="Edit Event">
+<AdminLayout Loading="IsLoading" Title="Edit Event">
     <MudStack Spacing="4">
 
         <MudButtonGroup OverrideStyles="false">
@@ -113,7 +114,6 @@
         };
     }
 
-    bool _isLoading = true;
     private Event _event = default!;
     private List<EventComponent> _components = new();
     private List<EventLetter> _letters = new();
@@ -123,11 +123,8 @@
     private Dictionary<string, LetterTemplate> _letterTemplates = default!;
     private EventsAndLetters _result = default!;
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnSafeParametersSetAsync()
     {
-        _isLoading = true;
-        StateHasChanged();
-
         _result = await LandingService.Admin.GetEventLetters(EventId);
         _event = _result.Events.Values.First();
         _letters = new List<EventLetter>(_event.LetterTemplates);
@@ -135,10 +132,9 @@
             .Select(x => new EventComponent { Id = x.ComponentId, Name = x.Name ?? "No Name", When = x.Date.ToDateTime(TimeOnly.MinValue) })
             .ToList();
         _date = _event.Date.ToDateTime(TimeOnly.MinValue);
-        _isLoading = false;
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnSafeInitializedAsync()
     {
         _letterTemplates = (await LandingService.Admin.GetLetterTemplateNames())
             .ToDictionary(x => x.LetterTemplateId);
@@ -148,7 +144,7 @@
 
     private async Task Save()
     {
-        await this.AsyncAction(x => x._isLoading, async () =>
+        await LoadingActionAsync(async () =>
         {
             _event.Date = DateOnly.FromDateTime(_date);
             _event.LetterTemplates = _letters.DistinctBy(x => x.Name)
@@ -165,17 +161,23 @@
         var result = await DialogService.ShowMessageBox("Delete event", "Are you sure you want to delete this event?", "Yes, Delete It", "No, Keep It");
         if (result == true)
         {
-            await LandingService.Admin.DeleteEvent(EventId);
-            NavigationManager.NavigateTo("/admin/events");
+            await SafeActionAsync(async () =>
+            {
+                await LandingService.Admin.DeleteEvent(EventId);
+                NavigationManager.NavigateTo("/admin/events");
+            });
         }
     }
 
     private async Task DownloadLetters()
     {
-        var file = await LandingService.Admin.ExportLetters(EventId);
-        var fileStream = file.CreateReadStream();
-        using var streamRef = new DotNetStreamReference(stream: fileStream);
-        await JS.InvokeVoidAsync("downloadFileFromStream", $"larp-landing-export-{DateTime.Now:yyyy-MM-dd}.xlsx", streamRef);
+        await SafeActionAsync(async () =>
+        {
+            var file = await LandingService.Admin.ExportLetters(EventId);
+            var fileStream = file.CreateReadStream();
+            using var streamRef = new DotNetStreamReference(stream: fileStream);
+            await JS.InvokeVoidAsync("downloadFileFromStream", $"larp-landing-export-{DateTime.Now:yyyy-MM-dd}.xlsx", streamRef);
+        });
     }
 
     private void AddComponent()

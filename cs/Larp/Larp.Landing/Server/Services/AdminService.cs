@@ -317,6 +317,22 @@ public class AdminService : IAdminService
             .DeleteOneAsync(x => x.AttachmentId == attachmentId);
     }
 
+    public async Task<StringResult> DraftEvent()
+    {
+        var id = ObjectId.GenerateNewId().ToString();
+        await _db.Events.InsertOneAsync(new Event()
+        {
+            EventId = id,
+            Title = "New Event",
+            Date = DateOnly.FromDateTime(DateTime.Today),
+            EventType = "Game",
+            GameId = await _db.Games.Find(x => x.Name == GameState.GameName).Project(x => x.Id).FirstOrDefaultAsync()
+                     ?? throw new BadRequestException("GameId could not be found"),
+            IsHidden = true
+        });
+        return StringResult.Success(id);
+    }
+
     async Task<AccountAttachment[]> IAdminService.GetAccountAttachments(string accountId) =>
         (await _db.AccountAttachments
             .Find(x => x.AccountId == accountId)

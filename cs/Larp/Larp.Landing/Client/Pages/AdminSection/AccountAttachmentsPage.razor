@@ -1,8 +1,8 @@
 @page "/admin/accounts/{AccountId}/attachments"
+@inherits LarpPage
+
 @using Larp.Landing.Shared.Messages
 @inject LandingService LandingService
-@inject IDialogService DialogService
-@inject NavigationManager NavigationManager
 @inject IJSRuntime JS
 
 <PageHeader>Account Manager</PageHeader>
@@ -65,7 +65,7 @@
         </MudPaper>
 
         <MudPaper Class="pa-4 relative" Style="min-height: 250px">
-            <MudOverlay DarkBackground Absolute Visible="_isLoading">
+            <MudOverlay DarkBackground Absolute Visible="IsLoading">
                 <MudText Typo="Typo.h6">Refreshing...</MudText>
                 <MudProgressCircular Indeterminate Size="Size.Large"/>
             </MudOverlay>
@@ -96,7 +96,6 @@
     public string AccountId { get; set; } = default!;
 
     private bool _isSaving;
-    private bool _isLoading = true;
     private Account? _account;
     private Dictionary<string, AccountName> _accountNames = default!;
 
@@ -112,13 +111,11 @@
 
     private async Task RefreshAttachments()
     {
-        await this.AsyncAction(DialogService, x => x._isLoading,
-            async () => { _attachments = await LandingService.Admin.GetAccountAttachments(AccountId); });
+        await LoadingActionAsync(async () => { _attachments = await LandingService.Admin.GetAccountAttachments(AccountId); });
     }
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnSafeParametersSetAsync()
     {
-        _isLoading = true;
         _isSaving = true;
         StateHasChanged();
 
@@ -139,8 +136,11 @@
         {
             foreach (var file in _files)
             {
-                await using var stream = file.OpenReadStream(4194304);
-                _sendResult = await LandingService.Admin.Attach(AccountId, stream, file.Name, file.ContentType);
+                await SafeActionAsync(async () =>
+                {
+                    await using var stream = file.OpenReadStream(4194304);
+                    _sendResult = await LandingService.Admin.Attach(AccountId, stream, file.Name, file.ContentType);
+                });
             }
             await Clear();
             await RefreshAttachments();
@@ -192,21 +192,27 @@
 
     private async Task UpdateTitle(AccountAttachment attachment)
     {
-        await LandingService.Admin.SaveAttachment(attachment.AttachmentId, attachment);
+        await SafeActionAsync(async () => { await LandingService.Admin.SaveAttachment(attachment.AttachmentId, attachment); });
     }
 
     private async Task Delete(AccountAttachment attachment)
     {
-        await LandingService.Admin.DeleteAttachment(attachment.AttachmentId);
-        await RefreshAttachments();
+        await SafeActionAsync(async () =>
+        {
+            await LandingService.Admin.DeleteAttachment(attachment.AttachmentId);
+            await RefreshAttachments();
+        });
     }
 
     private async Task Download(AccountAttachment attachment)
     {
-        var file = await LandingService.Service.GetAttachment(attachment.AttachmentId, attachment.FileName ?? "file");
-        var fileStream = file.CreateReadStream();
-        using var streamRef = new DotNetStreamReference(stream: fileStream);
-        await JS.InvokeVoidAsync("downloadFileFromStream", attachment.FileName ?? "file", streamRef);
+        await SafeActionAsync(async () =>
+        {
+            var file = await LandingService.Service.GetAttachment(attachment.AttachmentId, attachment.FileName ?? "file");
+            var fileStream = file.CreateReadStream();
+            using var streamRef = new DotNetStreamReference(stream: fileStream);
+            await JS.InvokeVoidAsync("downloadFileFromStream", attachment.FileName ?? "file", streamRef);
+        });
     }
 
 }

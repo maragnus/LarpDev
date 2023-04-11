@@ -1,5 +1,6 @@
 @using System.ComponentModel.DataAnnotations
 @inject LandingService LandingService
+@inherits LarpPage
 
 <MudPaper Class="pa-4 mb-4 relative">
     <MudOverlay DarkBackground Absolute Visible="_saving">
@@ -53,7 +54,7 @@
     private bool _saving = true;
     private MudTextField<string?>? _newEmailField;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnSafeInitializedAsync()
     {
         await Refresh();
         _saving = false;
@@ -62,24 +63,24 @@
 
     private async Task Refresh()
     {
-        var account = await LandingService.GetAccount();
-        _emails = account.Emails.ToArray();
+        await SafeActionAsync(async () =>
+        {
+            var account = await LandingService.GetAccount();
+            _emails = account.Emails.ToArray();
+        });
     }
 
     private async Task RunAction(Func<Task> action)
     {
         _saving = true;
         StateHasChanged();
-        try
+        await SafeActionAsync(async () =>
         {
             await action();
             await Refresh();
-        }
-        finally
-        {
-            _saving = false;
-            StateHasChanged();
-        }
+        });
+        _saving = false;
+        StateHasChanged();
     }
 
     private async Task SetPreferred(string email, bool preferred)

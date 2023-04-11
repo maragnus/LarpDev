@@ -1,4 +1,5 @@
 @page "/admin/data"
+@inherits LarpPage
 @using Larp.Landing.Shared.Messages
 @inject IJSRuntime JS
 
@@ -15,19 +16,13 @@
         if (_fileNames.Count == 0 || _file == null) return;
 
         _isSending = true;
-        try
+        var success = await SafeActionAsync(async () =>
         {
             await using var stream = _file.OpenReadStream();
             _sendResult = await LandingService.Admin.Import(stream);
-        }
-        catch (Exception ex)
-        {
-            _sendResult = StringResult.Failed("Exception communicating with server: " + ex.Message);
-        }
-        finally
-        {
-            _isSending = false;
-        }
+        },
+            (ex) => _sendResult = StringResult.Failed("Exception communicating with server" + ex.Message));
+        _isSending = false;
     }
 
     private void OnInputFileChanged(InputFileChangeEventArgs e)
@@ -69,12 +64,15 @@
 
     private async Task Export()
     {
-        var file = await LandingService.Admin.Export();
-        var fileStream = file.CreateReadStream();
-        using var streamRef = new DotNetStreamReference(stream: fileStream);
-        await JS.InvokeVoidAsync("downloadFileFromStream", $"larp-landing-export-{DateTime.Now:yyyy-MM-dd}.xlsx", streamRef);
+        await SafeActionAsync(async () =>
+        {
+            var file = await LandingService.Admin.Export();
+            var fileStream = file.CreateReadStream();
+            using var streamRef = new DotNetStreamReference(stream: fileStream);
+            await JS.InvokeVoidAsync("downloadFileFromStream", $"larp-landing-export-{DateTime.Now:yyyy-MM-dd}.xlsx", streamRef);
+        });
     }
-    
+
 }
 
 @inject LandingService LandingService
@@ -128,7 +126,7 @@
         <MudStack Spacing="4" AlignItems="AlignItems.Start">
             <MudText Typo="Typo.h6">Export Data</MudText>
 
-             @* Target="_blank" Href="/api/admin/data/export" *@
+            @* Target="_blank" Href="/api/admin/data/export" *@
             <MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Filled" OnClick="Export">Export</MudButton>
         </MudStack>
     </MudPaper>

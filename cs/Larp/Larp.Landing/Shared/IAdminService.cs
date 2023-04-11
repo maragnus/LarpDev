@@ -153,6 +153,9 @@ public interface IAdminService
 
     [ApiDelete("attachments/{attachmentId}"), ApiAuthenticated(AccountRole.AdminAccess)]
     Task DeleteAttachment(string attachmentId);
+
+    [ApiPost("events/new")]
+    Task<StringResult> DraftEvent();
 }
 
 public class Dashboard

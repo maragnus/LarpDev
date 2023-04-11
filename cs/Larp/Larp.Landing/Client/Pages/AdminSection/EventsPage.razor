@@ -1,20 +1,22 @@
 @page "/admin/events"
+@inherits LarpPage
+
 @inject LandingService LandingService
 @inject NavigationManager NavigationManager
 
-<AdminLayout Title="Events Manager" Loading="_isLoading">
+<AdminLayout Title="Events Manager">
     @foreach (var (game, events) in _events)
     {
         <MudStack Row Class="pb-4">
             <MudText Typo="Typo.h6" Class="flex-grow-1">@game</MudText>
             <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" OnClick="() => AddEvent(game)">Add Event</MudButton>
         </MudStack>
-        <MudDataGrid T="EventInfo" Items="events" Dense Filterable Groupable Hover Loading="_isLoading" RowClick="RowClick" RowsPerPage="50">
+        <MudDataGrid T="EventInfo" Items="events" Dense Filterable Groupable Hover Loading="IsLoading" RowClick="RowClick" RowsPerPage="50">
             <PagerContent>
                 <MudDataGridPager T="EventInfo"/>
             </PagerContent>
             <ChildRowContent>
-                <MudDataGrid T="ComponentInfo" Items="context.Item.Components" Dense SortMode="SortMode.None" Loading="_isLoading">
+                <MudDataGrid T="ComponentInfo" Items="context.Item.Components" Dense SortMode="SortMode.None">
                     <Columns>
                         <PropertyColumn Property="x => x.When" Title="Date" Format="dddd, MMM d, yyyy"/>
                         <PropertyColumn Property="x => x.Title" Title="Title"/>
@@ -31,7 +33,7 @@
                     <CellTemplate>
                         @foreach (var letter in context.Item.Event.LetterTemplates.Select(x => x.Name))
                         {
-                            <MudIcon Size="Size.Small" Icon="@LetterIcon.GetValueOrDefault(letter)" />
+                            <MudIcon Size="Size.Small" Icon="@LetterIcon.GetValueOrDefault(letter)"/>
                         }
                     </CellTemplate>
                 </TemplateColumn>
@@ -41,7 +43,6 @@
 </AdminLayout>
 
 @code {
-    bool _isLoading = true;
     private (string, EventInfo[])[] _events = Array.Empty<(string, EventInfo[])>();
 
     static readonly Dictionary<string, string> LetterIcon = new()
@@ -67,7 +68,7 @@
         }
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnSafeInitializedAsync()
     {
         var games = LandingService.Games
             .ToDictionary(x => x.Value.Id, x => x.Value.Title);
@@ -83,8 +84,6 @@
             .GroupBy(x => x.Game)
             .Select(x => (x.Key, x.ToArray()))
             .ToArray();
-
-        _isLoading = false;
     }
 
     private void RowClick(DataGridRowClickEventArgs<EventInfo> row)
@@ -92,9 +91,13 @@
         NavigationManager.NavigateTo($"/admin/events/{row.Item.Id}");
     }
 
-    private Task AddEvent(string game)
+    private async Task AddEvent(string _)
     {
-        return Task.CompletedTask;
+        await SafeActionAsync(async () =>
+        {
+            var @event = await LandingService.Admin.DraftEvent();
+            NavigationManager.NavigateTo($"/admin/events/{@event.Value}");
+        });
     }
 
 }

@@ -2,6 +2,7 @@
 @using Larp.Common
 @inject LandingService LandingService
 @inject NavigationManager NavigationManager
+@inherits LarpPage
 
 <PageHeader>Event Attendance</PageHeader>
 
@@ -108,8 +109,7 @@
         public Letter[] Letters { get; init; } = default!;
     }
 
-
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnSafeInitializedAsync()
     {
         if (!LandingService.IsAuthenticated)
         {

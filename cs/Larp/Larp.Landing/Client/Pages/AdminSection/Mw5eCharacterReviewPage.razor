@@ -1,4 +1,5 @@
 @page "/admin/mw5e/characters/review"
+@inherits LarpPage
 
 @using Larp.Landing.Shared
 @inject LandingService LandingService
@@ -23,7 +24,7 @@
     private bool _isLoading = true;
     private CharacterAccountSummary[] _items = Array.Empty<CharacterAccountSummary>();
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnSafeInitializedAsync()
     {
         _items = await LandingService.Admin.GetMwFifthCharacters(CharacterState.Review);
         _isLoading = false;

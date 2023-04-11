@@ -1,5 +1,6 @@
 @inject LandingService LandingService
 @inject NavigationManager NavigationManager
+@inherits LarpPage
 
 <MudOverlay Absolute DarkBackground Visible="_isLoading">
     <MudProgressCircular Indeterminate/>
@@ -116,7 +117,7 @@
         return Icons.Material.Filled.AddBox;
     }
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnSafeParametersSetAsync()
     {
         var result = Past
             ? await LandingService.GetPastEvents()

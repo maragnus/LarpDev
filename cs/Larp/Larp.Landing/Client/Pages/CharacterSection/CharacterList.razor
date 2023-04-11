@@ -2,18 +2,19 @@
 
 @inject LandingService LandingService
 @inject NavigationManager NavigationManager
+@inherits LarpPage
 
 <PageHeader>Your Characters</PageHeader>
 
 <MudContainer MaxWidth="MaxWidth.Medium">
     <MudPaper Elevation="2" Class="mt-4 relative" Style="min-height: 150px">
-        <MudOverlay Absolute DarkBackground Visible="_isLoading">
+        <MudOverlay Absolute DarkBackground Visible="IsLoading">
             <MudProgressCircular Indeterminate/>
         </MudOverlay>
 
-        @if (!_isLoading && _characters != null && _games != null)
+        @if (!IsLoading && _characters != null && _games != null)
         {
-            <MudList Clickable Style="width: 100%; margin: 0" SelectedValueChanged="href => NavigationManager.NavigateTo((string)href)">
+            <MudList T="string?" Clickable Style="width: 100%; margin: 0" SelectedValueChanged="href => NavigationManager.NavigateTo((string)href)">
                 @foreach (var game in _games)
                 {
                     var characters = _characters
@@ -87,17 +88,14 @@
 
     CharacterSummary[]? _characters;
     Game[]? _games;
-    bool _isLoading = true;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnSafeInitializedAsync()
     {
         _characters = await LandingService.GetCharacters();
         _games = LandingService.Games.Values.ToArray();
 
         if (GameName != null)
             _games = _games.Where(x => x.Name == GameName).ToArray();
-        
-        _isLoading = false;
     }
 
 }

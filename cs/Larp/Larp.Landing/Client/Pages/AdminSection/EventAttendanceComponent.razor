@@ -1,6 +1,6 @@
-@using MongoDB.Driver.Linq
+@inherits LarpPage
+
 @inject LandingService LandingService
-@inject IDialogService DialogService
 
 <MudStack Row AlignItems="AlignItems.Center">
     <MudSelectExtended
@@ -58,7 +58,7 @@
         public bool Changed { get; set; }
         public Letter[] Letters { get; set; } = Array.Empty<Letter>();
     }
-    
+
     static readonly Dictionary<LetterState, (string Tooltip, Color Color)> LetterTooltip = new()
     {
         { LetterState.NotStarted, ("You have not started the letter for this event", Color.Warning) },
@@ -66,14 +66,13 @@
         { LetterState.Submitted, ("Your event letter has been submitted and is waiting for approval", Color.Tertiary) },
         { LetterState.Approved, ("Your event letter has been approved", Color.Success) },
     };
-    
+
     static readonly Dictionary<string, string> LetterIcon = new()
     {
         { "PreEvent", Icons.Material.Filled.Rsvp },
         { "PostEvent", Icons.Material.Filled.Email },
     };
 
-    bool _isLoading = true;
     private List<EventComponent> _components = new();
     private readonly List<Attendance> _attendances = new();
     private MudSelectExtended<AccountName>? _addPlayerComponent;
@@ -84,7 +83,7 @@
     private string? _lastEventId;
     private Dictionary<string, LetterTemplate> _templates = default!;
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnSafeParametersSetAsync()
     {
         _event = EventsAndLetters.Events.Values.First();
         if (_lastEventId == _event.EventId) return;
@@ -93,8 +92,7 @@
         var names = EventsAndLetters.Accounts;
         _accountNames = names.Values.ToArray();
         _templates = EventsAndLetters.LetterTemplates;
-        
-        _isLoading = true;
+
         var letterLookup = EventsAndLetters.Letters.Values
             .GroupBy(x => x.AccountId)
             .ToDictionary(x => x.Key, x => x.ToArray());
@@ -119,7 +117,6 @@
             Letters = letter.Value
         }));
 
-        _isLoading = false;
         _isSaving = false;
     }
 
@@ -131,18 +128,15 @@
     {
         _isSaving = true;
         StateHasChanged();
-        try
+        await SafeActionAsync(async () =>
         {
             await Parallel.ForEachAsync(
                 _attendances.Where(x => x.Changed),
                 new ParallelOptions { MaxDegreeOfParallelism = 4 },
                 async (attendance, token) => { await AttendanceUpdate(attendance); });
             UpdateSaveAllNeeded();
-        }
-        finally
-        {
-            _isSaving = false;
-        }
+        });
+        _isSaving = false;
     }
 
     private void UpdateSaveAllNeeded()
@@ -152,10 +146,12 @@
 
     private async Task SaveAttendance(Attendance item)
     {
-        await LandingService.Admin.SetEventAttendance(_event.EventId, item.AccountId, item.Attended, item.Moonstone, Array.Empty<string>());
-        item.Changed = false;
+        await SafeActionAsync(async () =>
+        {
+            await LandingService.Admin.SetEventAttendance(_event.EventId, item.AccountId, item.Attended, item.Moonstone, Array.Empty<string>());
+            item.Changed = false;
+        });
     }
-
 
     private async Task AttendanceUpdate(Attendance item)
     {
@@ -174,20 +170,24 @@
             return;
         }
 
-        var item = new Attendance
+        await SafeActionAsync(async () =>
         {
-            Attended = true,
-            Moonstone = 0,
-            Name = player.Name ?? "No Name Set",
-            AccountId = player.AccountId,
-            Changed = false
-        };
-        _attendances.Add(item);
+            var item = new Attendance
+            {
+                Attended = true,
+                Moonstone = 0,
+                Name = player.Name ?? "No Name Set",
+                AccountId = player.AccountId,
+                Changed = false
+            };
 
-        await LandingService.Admin.SetEventAttendance(_event.EventId, item.AccountId, item.Attended, item.Moonstone, Array.Empty<string>());
+            await LandingService.Admin.SetEventAttendance(_event.EventId, item.AccountId, item.Attended, item.Moonstone, Array.Empty<string>());
 
-        await _addPlayerComponent!.Clear();
-        StateHasChanged();
+            _attendances.Add(item);
+
+            await _addPlayerComponent!.Clear();
+            StateHasChanged();
+        });
     }
 
     private void AttendanceUpdated(Attendance obj)

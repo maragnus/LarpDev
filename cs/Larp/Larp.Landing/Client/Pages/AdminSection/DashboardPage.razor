@@ -1,4 +1,5 @@
 @page "/admin"
+@inherits LarpPage
 @using Larp.Landing.Shared
 
 @inject LandingService LandingService
@@ -51,11 +52,12 @@
 </AdminLayout>
 
 @code {
+    
+    private Dashboard? _dashboard;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnSafeInitializedAsync()
     {
         _dashboard = await LandingService.Admin.GetDashboard();
     }
 
-    private Dashboard? _dashboard;
 }
