@@ -15,7 +15,7 @@ public class LarpContext
         ConventionRegistry.Register("IgnoreIfDefault",
             new ConventionPack { new IgnoreIfDefaultConvention(true) },
             t => true);
-        
+
         // var enumConvention = new ConventionPack() { new EnumRepresentationConvention(BsonType.String) };
         // ConventionRegistry.Register(nameof(EnumRepresentationConvention), enumConvention, _ => true);
     }
@@ -30,6 +30,7 @@ public class LarpContext
                                               "Database must be provided in options"));
 
         Accounts = database.GetCollection<Account>(nameof(Accounts));
+        AccountAttachments = database.GetCollection<AccountAttachment>(nameof(AccountAttachments));
         Attendances = database.GetCollection<Attendance>(nameof(Attendances));
         Events = database.GetCollection<Event>(nameof(Events));
         Games = database.GetCollection<Game>(nameof(Games));
@@ -40,6 +41,7 @@ public class LarpContext
         MwFifthGame = new MwFifthGameContext(database, cache);
     }
 
+    public IMongoCollection<AccountAttachment> AccountAttachments { get; set; }
     public IMongoCollection<Account> Accounts { get; }
     public IMongoCollection<Event> Events { get; }
     public IMongoCollection<Attendance> Attendances { get; }

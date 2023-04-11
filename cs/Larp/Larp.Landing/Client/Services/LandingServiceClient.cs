@@ -112,6 +112,27 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public async Task<Letter[]> GetTemplateLetters(string templateId) =>
         await Get<Letter[]>($"api/admin/letters/templates/{templateId}/letters");
 
+    public Task<AccountAttachment[]> GetAccountAttachments(string accountId) =>
+        Get<AccountAttachment[]>($"api/admin/accounts/{accountId}/attachments");
+
+    public async Task<StringResult> Attach(string accountId, Stream data, string fileName, string mediaType) =>
+        await PostFile<StringResult>($"api/admin/accounts/{accountId}/attachments/attach", data, fileName, mediaType);
+
+    public Task<IFileInfo> GetAttachment(string attachmentId, string fileName) =>
+        Download($"api/attachments/{attachmentId}/{fileName}");
+
+    public Task SaveAttachment(string attachmentId, AccountAttachment attachment) =>
+        Post($"api/admin/attachments/{attachmentId}", new { attachment });
+
+    Task<AccountAttachment> IAdminService.GetAttachment(string attachmentId) =>
+        Get<AccountAttachment>($"api/admin/attachments/{attachmentId}");
+
+    public Task<AccountAttachment> GetAttachments(string attachmentId) =>
+        Get<AccountAttachment>($"api/admin/attachments/{attachmentId}");
+
+    public Task DeleteAttachment(string attachmentId) =>
+        Delete($"api/admin/attachments/{attachmentId}");
+
     public async Task<LetterTemplate> GetLetterTemplate(string templateId) =>
         await Get<LetterTemplate>($"api/admin/letters/templates/{templateId}");
 

@@ -1,0 +1,212 @@
+@page "/admin/accounts/{AccountId}/attachments"
+@using Larp.Landing.Shared.Messages
+@inject LandingService LandingService
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+
+<PageHeader>Account Manager</PageHeader>
+
+@if (_account == null)
+{
+    <AdminLayout Title="Manage Account Attachments" Loading/>
+    return;
+}
+
+<AdminLayout Title="Manage Account Attachments">
+    <MudStack Spacing="4">
+        <MudText Typo="Typo.h6">Attachments for @_account.Name</MudText>
+
+        <MudPaper Class="pa-4 relative">
+            <MudOverlay DarkBackground Absolute Visible="_isSaving">
+                <MudText Typo="Typo.h6">Saving...</MudText>
+                <MudProgressCircular Indeterminate Size="Size.Large"/>
+            </MudOverlay>
+            <MudText Typo="Typo.h6">Attachments</MudText>
+            @if (_sendResult?.IsSuccess == true)
+            {
+                <MudAlert Severity="Severity.Info">
+                    @_sendResult.Value
+                </MudAlert>
+                <MudButton Color="Color.Warning" Variant="Variant.Filled" OnClick="Reset">Upload More</MudButton>
+            }
+            else if (_sendResult?.IsSuccess == false)
+            {
+                <MudAlert Severity="Severity.Error">
+                    Import failed: @_sendResult.ErrorMessage
+                </MudAlert>
+                <MudButton Color="Color.Warning" Variant="Variant.Filled" OnClick="Reset">Start Over</MudButton>
+            }
+            else if (_isSending)
+            {
+                <MudText>Uploading...</MudText>
+                <MudProgressLinear Indeterminate/>
+            }
+            else
+            {
+                <MudFileUpload T="IReadOnlyList<IBrowserFile>" OnFilesChanged="OnInputFileChanged" Hidden="false" Class="flex-1" InputClass="absolute mud-width-full mud-height-full overflow-hidden z-20" InputStyle="opacity:0"
+                               @ondragenter="@SetDragClass" @ondragleave="@ClearDragClass" @ondragend="@ClearDragClass">
+                    <ButtonTemplate>
+                        <MudPaper Height="150px" Outlined="true" Class="@_dragClass">
+                            <MudText Typo="Typo.body1">Drag and drop your image files here or click to select a file. Max size is 4MB</MudText>
+                            @foreach (var file in _fileNames)
+                            {
+                                <MudChip Color="Color.Dark" Text="@file"/>
+                            }
+                        </MudPaper>
+                    </ButtonTemplate>
+                </MudFileUpload>
+                <MudToolBar DisableGutters="true" Class="gap-4">
+                    <MudButton StartIcon="@Icons.Material.Filled.Upload" OnClick="UploadAttachments" Disabled="@(!_fileNames.Any())" Color="Color.Primary" Variant="Variant.Filled">Upload</MudButton>
+                    <MudButton StartIcon="@Icons.Material.Filled.Clear" OnClick="Clear" Disabled="@(!_fileNames.Any())" Color="Color.Error" Variant="Variant.Filled">Clear</MudButton>
+                </MudToolBar>
+            }
+
+        </MudPaper>
+
+        <MudPaper Class="pa-4 relative" Style="min-height: 250px">
+            <MudOverlay DarkBackground Absolute Visible="_isLoading">
+                <MudText Typo="Typo.h6">Refreshing...</MudText>
+                <MudProgressCircular Indeterminate Size="Size.Large"/>
+            </MudOverlay>
+            <MudGrid>
+                @foreach (var attachment in _attachments)
+                {
+                    var url = $"/api/attachments/{attachment.AttachmentId}/{attachment.FileName}";
+                    <MudItem sm="12" md="6" lg="4">
+                        <MudStack>
+                            <MudImage Src="@url" Alt="@attachment.Title" Height="300" ObjectFit="ObjectFit.Cover" Class="rounded-lg"/>
+                            <MudTextField T="string" Adornment="Adornment.End" AdornmentColor="Color.Primary" AdornmentIcon="@Icons.Material.Filled.Save" OnAdornmentClick="async () => await UpdateTitle(attachment)" @bind-Value="@attachment.Title"/>
+                            <MudText Typo="Typo.caption">Uploaded by @GetName(attachment.UploadedBy) on @attachment.UploadedOn.ToString("MMM d, yyyy")</MudText>
+                            <MudButtonGroup OverrideStyles="false">
+                                <MudButton StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="async () => await Delete(attachment)">Delete</MudButton>
+                                <MudButton StartIcon="@Icons.Material.Filled.Download" Color="Color.Primary" OnClick="async () => await Download(attachment)">Download</MudButton>
+                            </MudButtonGroup>
+                        </MudStack>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudPaper>
+    </MudStack>
+</AdminLayout>
+
+@code {
+
+    [Parameter]
+    public string AccountId { get; set; } = default!;
+
+    private bool _isSaving;
+    private bool _isLoading = true;
+    private Account? _account;
+    private Dictionary<string, AccountName> _accountNames = default!;
+
+    private StringResult? _sendResult;
+    private bool _isSending;
+        private const string DefaultDragClass = "relative rounded-lg border-2 border-dashed pa-4 mt-4 mud-width-full mud-height-full z-10";
+    private string _dragClass = DefaultDragClass;
+    private readonly List<IBrowserFile> _files = new();
+    private readonly List<string> _fileNames = new();
+    private AccountAttachment[] _attachments = Array.Empty<AccountAttachment>();
+
+    private string GetName(string accountId) => _accountNames.GetValueOrDefault(accountId)?.Name ?? "No Name Set";
+
+    private async Task RefreshAttachments()
+    {
+        await this.AsyncAction(DialogService, x => x._isLoading,
+            async () => { _attachments = await LandingService.Admin.GetAccountAttachments(AccountId); });
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _isLoading = true;
+        _isSaving = true;
+        StateHasChanged();
+
+        _account = await LandingService.Admin.GetAccount(AccountId);
+        _accountNames = (await LandingService.Admin.GetAccountNames()).ToDictionary(x => x.AccountId);
+        _isSaving = false;
+        StateHasChanged();
+
+        await RefreshAttachments();
+    }
+
+    private async Task UploadAttachments()
+    {
+        if (_fileNames.Count == 0 || _files.Count == 0) return;
+
+        _isSending = true;
+        try
+        {
+            foreach (var file in _files)
+            {
+                await using var stream = file.OpenReadStream(4194304);
+                _sendResult = await LandingService.Admin.Attach(AccountId, stream, file.Name, file.ContentType);
+            }
+            await Clear();
+            await RefreshAttachments();
+        }
+        catch (Exception ex)
+        {
+            _sendResult = StringResult.Failed("Exception communicating with server: " + ex.Message);
+        }
+        finally
+        {
+            _isSending = false;
+        }
+    }
+
+    private void OnInputFileChanged(InputFileChangeEventArgs e)
+    {
+        ClearDragClass();
+        var files = e.GetMultipleFiles();
+        _files.Clear();
+        _files.AddRange(files);
+        _fileNames.AddRange(files.Select(x => x.Name));
+    }
+
+    private async Task Clear()
+    {
+        _files.Clear();
+        _fileNames.Clear();
+        ClearDragClass();
+        await Task.Delay(100);
+    }
+
+    private void SetDragClass()
+    {
+        _dragClass = $"{DefaultDragClass} mud-border-primary";
+    }
+
+    private void ClearDragClass()
+    {
+        _dragClass = DefaultDragClass;
+    }
+
+    private void Reset()
+    {
+        _sendResult = null;
+        _files.Clear();
+        _fileNames.Clear();
+        StateHasChanged();
+    }
+
+    private async Task UpdateTitle(AccountAttachment attachment)
+    {
+        await LandingService.Admin.SaveAttachment(attachment.AttachmentId, attachment);
+    }
+
+    private async Task Delete(AccountAttachment attachment)
+    {
+        await LandingService.Admin.DeleteAttachment(attachment.AttachmentId);
+        await RefreshAttachments();
+    }
+
+    private async Task Download(AccountAttachment attachment)
+    {
+        var file = await LandingService.Service.GetAttachment(attachment.AttachmentId, attachment.FileName ?? "file");
+        var fileStream = file.CreateReadStream();
+        using var streamRef = new DotNetStreamReference(stream: fileStream);
+        await JS.InvokeVoidAsync("downloadFileFromStream", attachment.FileName ?? "file", streamRef);
+    }
+
+}

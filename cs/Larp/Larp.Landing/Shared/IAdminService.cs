@@ -61,7 +61,7 @@ public interface IAdminService
 
     [ApiDelete("mw5e/characters/{characterId}"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
     Task DeleteMwFifthCharacter(string characterId);
-    
+
     [ApiPost("mw5e/characters/{characterId}/move"), ApiAuthenticated(AccountRole.MwFifthGameMaster)]
     Task MoveMwFifthCharacter(string characterId, string newAccountId);
 
@@ -111,33 +111,48 @@ public interface IAdminService
 
     [ApiPost("letters/templates/{templateId}"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task SaveLetterTemplate(string templateId, LetterTemplate template);
-    
+
     [ApiGet("letters/templates"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task<LetterTemplate[]> GetLetterTemplates();
-    
+
     [ApiGet("letters/templates/names"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task<LetterTemplate[]> GetLetterTemplateNames();
-    
+
     [ApiGet("letters/templates/{templateId}"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task<LetterTemplate> GetLetterTemplate(string templateId);
-    
+
     [ApiGet("letters"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task<Letter[]> GetLetters();
-    
+
     [ApiPost("letters/{letterId}/approve"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task ApproveLetter(string letterId);
-    
+
     [ApiPost("letters/{letterId}/reject"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task RejectLetter(string letterId);
 
     [ApiGet("letters/submitted"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task<Letter[]> GetSubmittedLetters();
-    
+
     [ApiGet("letters/events/{eventId}"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task<EventsAndLetters> GetEventLetters(string eventId);
-    
+
     [ApiGet("letters/templates/{templateId}/letters"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task<Letter[]> GetTemplateLetters(string templateId);
+
+    [ApiGet("accounts/{accountId}/attachments"), ApiAuthenticated(AccountRole.AdminAccess)]
+    Task<AccountAttachment[]> GetAccountAttachments(string accountId);
+
+    [ApiPost("accounts/{accountId}/attachments/attach"), ApiAuthenticated(AccountRole.AccountAdmin)]
+    Task<StringResult> Attach(string accountId, Stream data, string fileName, string mediaType);
+
+    [ApiPost("attachments/{attachmentId}"), ApiAuthenticated(AccountRole.AdminAccess)]
+    Task SaveAttachment(string attachmentId, AccountAttachment attachment);
+
+    [ApiGet("attachments/{attachmentId}"), ApiAuthenticated(AccountRole.AdminAccess)]
+    Task<AccountAttachment> GetAttachment(string attachmentId);
+
+    [ApiDelete("attachments/{attachmentId}"), ApiAuthenticated(AccountRole.AdminAccess)]
+    Task DeleteAttachment(string attachmentId);
 }
 
 public class Dashboard

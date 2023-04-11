@@ -109,11 +109,17 @@ public static class MapApiExtensions
                 ? await httpContext.Request.ReadFormAsync()
                 : null;
 
+            var file = form?.Files.FirstOrDefault();
+
             var parameters = methodInfo.GetParameters()
                 .Select(parameter =>
                 {
                     var name = parameter.Name!;
 
+                    if (file != null && parameter.Name == "fileName")
+                        return file.FileName;
+                    if (file != null && parameter.Name == "mediaType")
+                        return file.ContentType;
                     if (parameter.ParameterType == typeof(Stream))
                         return form?.Files.FirstOrDefault()?.OpenReadStream() ?? throw new BadRequestException($"Parameter {name} only accepts one file");
                     if (httpContext.GetRouteData().Values.TryGetValue(name, out var routeValue))
@@ -137,7 +143,8 @@ public static class MapApiExtensions
                     httpContext.Response.ContentType = contentType.ContentType;
                 var fileInfo = await (Task<IFileInfo>)result;
                 await httpContext.Response.SendFileAsync(fileInfo);
-                File.Delete(fileInfo.PhysicalPath!);
+                if (!string.IsNullOrEmpty( fileInfo.PhysicalPath) && File.Exists(fileInfo.PhysicalPath))
+                    File.Delete(fileInfo.PhysicalPath!);
                 return;
             }
 

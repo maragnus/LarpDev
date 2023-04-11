@@ -179,7 +179,7 @@ public class AdminService : IAdminService
         {
             var sheet = workbook.Worksheets.Add(letterTemplate.Name);
             var template = letters.LetterTemplates[letterTemplate.LetterTemplateId];
-            
+
             int row = 1, column = 1;
 
             void Write(string? value) => sheet.Cells[row, column++].Value = value;
@@ -298,6 +298,62 @@ public class AdminService : IAdminService
 
     public async Task<Letter[]> GetTemplateLetters(string templateId) =>
         await _letterManager.GetByTemplate(templateId);
+
+    public async Task SaveAttachment(string attachmentId, AccountAttachment attachment)
+    {
+        await _db.AccountAttachments.UpdateOneAsync(x => x.AttachmentId == attachmentId,
+            Builders<AccountAttachment>.Update
+                .Set(x => x.Title, attachment.Title));
+    }
+
+    async Task<AccountAttachment> IAdminService.GetAttachment(string attachmentId) =>
+        await _db.AccountAttachments
+            .Find(x => x.AttachmentId == attachmentId).FirstOrDefaultAsync()
+        ?? throw new ResourceNotFoundException();
+
+    public async Task DeleteAttachment(string attachmentId)
+    {
+        await _db.AccountAttachments
+            .DeleteOneAsync(x => x.AttachmentId == attachmentId);
+    }
+
+    async Task<AccountAttachment[]> IAdminService.GetAccountAttachments(string accountId) =>
+        (await _db.AccountAttachments
+            .Find(x => x.AccountId == accountId)
+            .Project(x => new AccountAttachment()
+            {
+                AttachmentId = x.AttachmentId,
+                UploadedOn = x.UploadedOn,
+                UploadedBy = x.UploadedBy,
+                Title = x.Title,
+                FileName = x.FileName,
+                MediaType = x.MediaType
+            }).ToListAsync())
+        .ToArray();
+
+    public async Task<StringResult> Attach(string accountId, Stream data, string fileName, string mediaType)
+    {
+        var bytes = new byte[data.Length];
+        var _ = await data.ReadAsync(bytes);
+        var id = ObjectId.GenerateNewId().ToString();
+        await _db.AccountAttachments.InsertOneAsync(new AccountAttachment()
+        {
+            AttachmentId = id,
+            AccountId = accountId,
+            Data = bytes,
+            MediaType = mediaType,
+            FileName = fileName,
+            UploadedBy = _account.AccountId,
+            UploadedOn = DateTimeOffset.Now,
+            Title = "Untitled"
+        });
+        return StringResult.Success(id);
+    }
+
+    public Task<IFileInfo> GetAttachment(string attachmentId)
+    {
+        throw new NotImplementedException();
+    }
 
     public async Task ApproveMwFifthCharacter(string characterId) =>
         await _manager.Approve(characterId, _account.AccountId);

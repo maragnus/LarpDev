@@ -74,11 +74,14 @@ public abstract class RestClient
             throw new LandingServiceException(await response.Content.ReadAsStringAsync());
     }
 
-    protected async Task<TResult> PostFile<TResult>(string uri, Stream data, string fileName) where TResult : class
+    protected async Task<TResult> PostFile<TResult>(string uri, Stream data, string fileName, string? mediaType = null) where TResult : class
     {
+        var streamContent = new StreamContent(data);
+        if (mediaType != null)
+            streamContent.Headers.ContentType = new MediaTypeHeaderValue(mediaType);
         var content = new MultipartFormDataContent
         {
-            { new StreamContent(data), "file", fileName }
+            { streamContent, "file", fileName }
         };
 
         var response = await _httpClient.PostAsync(uri, content);

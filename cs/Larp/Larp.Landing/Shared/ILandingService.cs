@@ -1,5 +1,6 @@
 using Larp.Data;
 using Larp.Landing.Shared.Messages;
+using Microsoft.Extensions.FileProviders;
 
 namespace Larp.Landing.Shared;
 
@@ -69,4 +70,7 @@ public interface ILandingService
 
     [ApiGet("letters/events/{eventId}/{letterName}"), ApiAuthenticated]
     Task<EventsAndLetters> GetEventLetter(string eventId, string letterName);
+    
+    [ApiGet("attachments/{attachmentId}/{fileName}")]
+    Task<IFileInfo> GetAttachment(string attachmentId, string fileName);
 }

@@ -3,6 +3,7 @@
 @inject LandingService LandingService
 @inject IDialogService DialogService
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JS
 
 <PageHeader>Account Manager</PageHeader>
 
@@ -125,13 +126,50 @@
         <MudPaper Class="pa-4">
             <MudStack Spacing="4">
                 <MudText Typo="Typo.h6">Utilities</MudText>
-                <MudTooltip Text="Merge this account (emails, characters, attendance, etc) into another account and delete this account">
-                    <MudButton Color="Color.Error" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Merge" OnClick="Merge">Merge</MudButton>
-                </MudTooltip>
+                <MudStack Row>
+                    <MudTooltip Text="Merge this account (emails, characters, attendance, etc) into another account and delete this account">
+                        <MudButton Color="Color.Error" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Merge" OnClick="Merge">Merge</MudButton>
+                    </MudTooltip>
+                    <MudTooltip Text="Attach files and images to this account">
+                        <MudButton Color="Color.Tertiary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Attachment" OnClick="Attachments">Manage Attachments</MudButton>
+                    </MudTooltip>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+
+        <MudPaper Class="pa-4 relative" Style="min-height: 250px">
+            <MudOverlay DarkBackground Absolute Visible="_isLoadingAttachments">
+                <MudText Typo="Typo.h6">Refreshing...</MudText>
+                <MudProgressCircular Indeterminate Size="Size.Large"/>
+            </MudOverlay>
+            <MudStack Spacing="4">
+                <MudText Typo="Typo.h6">Attachments</MudText>
+
+                @if (_attachments.Length == 0)
+                {
+                    <MudAlert Severity="Severity.Info">This account has no attachments</MudAlert>
+                }
+                <MudGrid>
+                    @foreach (var attachment in _attachments)
+                    {
+                        var url = $"/api/attachments/{attachment.AttachmentId}/{attachment.FileName}";
+                        <MudItem sm="6" md="4" lg="3">
+                            <MudStack Spacing="1" Justify="Justify.FlexStart">
+                                <MudImage Src="@url" Alt="@attachment.Title" Height="150" ObjectFit="ObjectFit.Cover" Class="rounded-lg"/>
+                                <MudStack Row Justify="Justify.FlexStart">
+                                    <MudStack>
+                                        <MudText Typo="Typo.caption"><strong>@attachment.Title</strong></MudText>
+                                        <MudText Typo="Typo.caption">Uploaded by @GetName(attachment.UploadedBy) on @attachment.UploadedOn.ToString("MMM d, yyyy")</MudText>
+                                    </MudStack>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Download" Color="Color.Primary" OnClick="async () => await Download(attachment)">Download</MudIconButton>
+                                </MudStack>
+                            </MudStack>
+                        </MudItem>
+                    }
+                </MudGrid>
             </MudStack>
         </MudPaper>
     </MudStack>
-
 </AdminLayout>
 
 @code {
@@ -144,8 +182,11 @@
     private bool _savingEmails = true;
     private bool _changed = false;
     private bool _isLoading = true;
+    private bool _isLoadingAttachments = true;
     private Account? _account;
     private CharacterSummary[]? _characters;
+    private AccountAttachment[] _attachments = Array.Empty<AccountAttachment>();
+    private Dictionary<string, AccountName> _accountNames = default!;
 
     class NewEmailModel
     {
@@ -171,6 +212,11 @@
         _savingRoles = false;
         _savingEmails = false;
         _isLoading = false;
+        StateHasChanged();
+
+        _attachments = await LandingService.Admin.GetAccountAttachments(AccountId);
+        _accountNames = (await LandingService.Admin.GetAccountNames()).ToDictionary(x => x.AccountId);
+        _isLoadingAttachments = false;
     }
 
     private void RowClick(DataGridRowClickEventArgs<CharacterSummary> obj)
@@ -266,5 +312,21 @@
         await OnParametersSetAsync();
         StateHasChanged();
     }
+
+    private void Attachments()
+    {
+        NavigationManager.NavigateTo($"/admin/accounts/{AccountId}/attachments");
+    }
+
+    private string GetName(string accountId) => _accountNames.GetValueOrDefault(accountId)?.Name ?? "No Name Set";
+
+    private async Task Download(AccountAttachment attachment)
+    {
+        var file = await LandingService.Service.GetAttachment(attachment.AttachmentId, attachment.FileName ?? "file");
+        var fileStream = file.CreateReadStream();
+        using var streamRef = new DotNetStreamReference(stream: fileStream);
+        await JS.InvokeVoidAsync("downloadFileFromStream", attachment.FileName ?? "file", streamRef);
+    }
+
 
 }

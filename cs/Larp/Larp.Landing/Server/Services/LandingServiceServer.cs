@@ -4,6 +4,7 @@ using Larp.Data.Mongo.Services;
 using Larp.Landing.Shared;
 using Larp.Landing.Shared.Messages;
 using Larp.Notify;
+using Microsoft.Extensions.FileProviders;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
@@ -232,4 +233,37 @@ public class LandingServiceServer : ILandingService
 
     public async Task<EventsAndLetters> GetEventLetter(string eventId, string letterName) =>
         await _letterManager.GetEventLetter(_account!.AccountId, eventId, letterName);
+
+    public async Task<IFileInfo> GetAttachment(string attachmentId, string fileName)
+    {
+        var file =
+            await _db.AccountAttachments.FindOneAsync(x => x.AttachmentId == attachmentId)
+            ?? throw new ResourceNotFoundException("Attachment not found");
+
+        if (file.Data == null)
+            throw new ResourceNotFoundException("Attachment data is invalid");
+
+        return new DownloadFileInfo(new MemoryStream(file.Data!), file.FileName ?? "file", file.Data.Length);
+    }
+}
+
+public class DownloadFileInfo : IFileInfo
+{
+    private readonly MemoryStream _stream;
+
+    public DownloadFileInfo(MemoryStream stream, string name, int length)
+    {
+        Name = name;
+        Length = length;
+        _stream = stream;
+    }
+
+    public Stream CreateReadStream() => _stream;
+
+    public bool Exists => true;
+    public long Length { get; }
+    public string? PhysicalPath => null;
+    public string Name { get; }
+    public DateTimeOffset LastModified => DateTimeOffset.Now;
+    public bool IsDirectory => false;
 }
