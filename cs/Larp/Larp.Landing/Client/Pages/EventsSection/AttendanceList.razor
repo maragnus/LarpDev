@@ -54,7 +54,7 @@
                             var style = LetterTooltip[letter.State];
                             var icon = LetterIcon[letter.Name];
                             <MudTooltip Text="@style.Tooltip">
-                                <MudIconButton Size="Size.Small" Icon="@icon" Color="@style.Color" OnClick="() => OpenLetter(letter.EventId, letter.Name)"/>
+                                <MudIconButton Disabled="letter.State == LetterState.Locked" Size="Size.Small" Icon="@icon" Color="@style.Color" OnClick="() => OpenLetter(letter.EventId, letter.Name)"/>
                             </MudTooltip>
                         }
                     </CellTemplate>
@@ -78,6 +78,7 @@
         { LetterState.Draft, ("You have not submitted this letter yet", Color.Warning) },
         { LetterState.Submitted, ("Your event letter has been submitted and is waiting for approval", Color.Tertiary) },
         { LetterState.Approved, ("Your event letter has been approved", Color.Success) },
+        { LetterState.Locked, ("Letter is currently closed", Color.Success) },
     };
 
     static readonly Dictionary<string, string> LetterIcon = new()
@@ -133,7 +134,7 @@
             foreach (var name in @event.LetterTemplates)
             {
                 yield return letters.FirstOrDefault(x => x.EventId == @event.EventId && x.Name == name.Name)
-                             ?? new Letter() { Name = name.Name, State = LetterState.NotStarted };
+                             ?? new Letter() { Name = name.Name, State = name.IsOpen ? LetterState.NotStarted : LetterState.Locked };
             }
         }
         

@@ -8,6 +8,7 @@ public enum LetterState
     Draft,
     Submitted,
     Approved,
+    Locked // used internally for locked letters
 }
 
 public enum LetterFieldType

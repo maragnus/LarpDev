@@ -188,9 +188,10 @@
 
     private void AddLetter()
     {
+        var name = _letters.Any(x => x.Name == "PreEvent") ? "PostEvent" : "PreEvent";
         _letters.Add(new EventLetter()
         {
-            Name = "PreEvent",
+            Name = name,
             LetterTemplateId = _letterTemplates.First().Key,
             IsOpen = false
         });
