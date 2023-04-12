@@ -55,7 +55,7 @@
                             var style = LetterTooltip[letter.State];
                             var icon = LetterIcon[letter.Name];
                             <MudTooltip Text="@style.Tooltip">
-                                <MudIconButton Disabled="letter.State == LetterState.Locked" Size="Size.Small" Icon="@icon" Color="@style.Color" OnClick="() => OpenLetter(letter.EventId, letter.Name)"/>
+                                <MudIconButton Disabled="letter.State == LetterState.Locked" Size="Size.Small" Icon="@icon" Color="@style.Color" OnClick="() => OpenLetter(context.Item.EventId, letter.Name)"/>
                             </MudTooltip>
                         }
                     </CellTemplate>
@@ -132,6 +132,7 @@
         {
             foreach (var name in @event.LetterTemplates)
             {
+                // TODO -- if not IsOpen then change LetterState.NotStarted or LetterState.Draft to LetterState.Locked
                 yield return letters.FirstOrDefault(x => x.EventId == @event.EventId && x.Name == name.Name)
                              ?? new Letter() { Name = name.Name, State = name.IsOpen ? LetterState.NotStarted : LetterState.Locked };
             }

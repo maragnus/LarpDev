@@ -22,7 +22,7 @@
                     </MudText>
 
                     <MudTooltip Text="The preferred email is the one that staff will use to contact you">
-                        <MudSwitch T="bool" Checked="@email.IsPreferred" CheckedChanged="async (value) => await SetPreferred(email.Email, value)" Color="Color.Success"/>
+                        <MudSwitch T="bool" ThumbIcon="@Icons.Material.Filled.Star" Checked="@email.IsPreferred" CheckedChanged="async (value) => await SetPreferred(email.Email, value)" Color="Color.Success"/>
                     </MudTooltip>
                     <MudTooltip Text="Remove this email address">
                         <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.DeleteForever" Color="Color.Error" OnClick="async () => await Delete(email.Email)" Disabled="@(!_emails.Any(x => x.IsVerified && x.Email != email.Email))"/>

@@ -114,7 +114,8 @@ public class MwFifthCharacterManager
                     x.State,
                     x.CharacterId,
                     x.CharacterName,
-                    Moonstone = x.GiftMoonstone + x.SkillMoonstone
+                    x.GiftMoonstone,
+                    x.SkillMoonstone
                 })
                 .FirstOrDefaultAsync()
             ?? throw new ResourceNotFoundException();
@@ -126,7 +127,7 @@ public class MwFifthCharacterManager
             .UpdateOneAsync(x => x.CharacterId == reference.CharacterId,
                 Builders<Character>.Update
                     .Set(x => x.CharacterName, reference.CharacterName)
-                    .Set(x => x.UsedMoonstone, reference.Moonstone));
+                    .Set(x => x.UsedMoonstone, reference.GiftMoonstone + reference.SkillMoonstone));
 
         // Mark all (hopefully only one) Live characters are Archive
         await _mwFifth.CharacterRevisions
