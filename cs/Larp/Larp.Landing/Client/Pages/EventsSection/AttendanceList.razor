@@ -7,7 +7,7 @@
 <PageHeader>Event Attendance</PageHeader>
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="relative">
-    <MudOverlay Absolute DarkBackground Visible="_isLoading">
+    <MudOverlay Absolute DarkBackground Visible="IsLoading">
         <MudProgressCircular Indeterminate/>
     </MudOverlay>
     <MudStack Spacing="4" Class="mt-4">
@@ -36,7 +36,7 @@
 
 
         <MudText Typo="Typo.h6">Event Attendance</MudText>
-        <MudDataGrid T="AttendanceInfo" Items="_events" Hover Filterable="true" Loading="_isLoading" Groupable Dense>
+        <MudDataGrid T="AttendanceInfo" Items="_events" Hover Filterable="true" Loading="IsLoading" Groupable Dense>
             <Columns>
                 @* <PropertyColumn Property="x => x.Game" Title="Game" Grouping="true"/> *@
                 <TemplateColumn T="AttendanceInfo" Groupable="false" Sortable="false" Filterable="false" >
@@ -67,7 +67,6 @@
 </MudContainer>
 
 @code {
-    bool _isLoading = true;
     private AttendanceInfo[] _events = Array.Empty<AttendanceInfo>();
     private int _totalMoonstone;
     private int _usedMoonstone;
@@ -175,8 +174,6 @@
                 }
             })
             .ToArray();
-
-        _isLoading = false;
     }
 
     private void OpenLetter(string eventId, string letterName)

@@ -1,3 +1,5 @@
+@inherits LarpPage
+
 @inject LandingService LandingService
 
 <MudDialog T="string?">
@@ -32,7 +34,7 @@
     private AccountName[] _accounts = Array.Empty<AccountName>();
     private string? _accountId;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnSafeInitializedAsync()
     {
         _accounts = await LandingService.Admin.GetAccountNames();
     }

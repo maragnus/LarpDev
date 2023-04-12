@@ -2,11 +2,11 @@
 @inject NavigationManager NavigationManager
 @inherits LarpPage
 
-<MudOverlay Absolute DarkBackground Visible="_isLoading">
+<MudOverlay Absolute DarkBackground Visible="IsLoading">
     <MudProgressCircular Indeterminate/>
 </MudOverlay>
 
-<MudDataGrid T="EventInfo" Items="_events" Filterable Groupable Hover Loading="_isLoading" GroupExpanded="true" Dense>
+<MudDataGrid T="EventInfo" Items="_events" Filterable Groupable Hover Loading="IsLoading" GroupExpanded="true" Dense>
     <Columns>
         <HierarchyColumn T="EventInfo" IconSize="Size.Small" ButtonDisabledFunc="@(x => x.Components.Length == 0)"/>
         <TemplateColumn Groupable="false" Sortable="false" Filterable="false">
@@ -32,7 +32,7 @@
         </TemplateColumn>
     </Columns>
     <ChildRowContent>
-        <MudDataGrid T="ComponentInfo" Items="context.Item.Components" Dense SortMode="SortMode.None" Loading="_isLoading">
+        <MudDataGrid T="ComponentInfo" Items="context.Item.Components" Dense SortMode="SortMode.None" Loading="IsLoading">
             <Columns>
                 <PropertyColumn Property="x => x.When" Title="Date" Format="dddd, MMM d, yyyy"/>
                 <PropertyColumn Property="x => x.Title" Title="Title"/>
@@ -46,7 +46,6 @@
     [Parameter]
     public bool Past { get; set; }
 
-    bool _isLoading = true;
     private EventInfo[] _events = Array.Empty<EventInfo>();
 
     static readonly Dictionary<LetterState, (string Tooltip, Color Color)> LetterTooltip = new()
@@ -129,7 +128,6 @@
             _events = events.OrderByDescending(x => x.When).ToArray();
         else
             _events = events.OrderBy(x => x.When).ToArray();
-        _isLoading = false;
     }
 
     protected override void OnInitialized()
