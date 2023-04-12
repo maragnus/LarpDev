@@ -16,6 +16,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Larp.Common\Larp.Common.csproj" />
+      <ProjectReference Include="..\..\Larp.Data.Mongo\Larp.Data.Mongo.csproj" />
       <ProjectReference Include="..\..\Larp.Data\Larp.Data.csproj" />
     </ItemGroup>
 

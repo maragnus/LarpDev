@@ -11,6 +11,12 @@ public enum EventRsvp
     Approved, // Admin has approved user's attendance
 }
 
+public enum EventList
+{
+    Upcoming,
+    Past
+}
+
 [PublicAPI]
 public class EventComponent
 {

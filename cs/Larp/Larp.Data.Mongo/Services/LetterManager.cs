@@ -203,4 +203,17 @@ public class LetterManager
             LetterTemplates = { { template.LetterTemplateId, template } },
         };
     }
+
+    public async Task<Letter> Draft(string accountId, string eventId, string letterName)
+    {
+        var templates =
+            await _larpContext.Events.Find(x => x.EventId == eventId)
+                .Project(x => x.LetterTemplates)
+                .FirstOrDefaultAsync()
+            ?? throw new ResourceNotFoundException();
+        var templateId =
+            templates.FirstOrDefault(x => x.Name == letterName)?.LetterTemplateId
+            ?? throw new BadRequestException($"Event {eventId} does not have letter {letterName}");
+        return await Draft(templateId, eventId, accountId, letterName);
+    }
 }

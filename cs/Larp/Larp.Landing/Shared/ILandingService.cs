@@ -4,12 +4,6 @@ using Microsoft.Extensions.FileProviders;
 
 namespace Larp.Landing.Shared;
 
-public enum EventList
-{
-    Upcoming,
-    Past
-}
-
 [PublicAPI]
 [ApiRoot("/api")]
 public interface ILandingService

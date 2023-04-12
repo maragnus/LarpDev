@@ -4,6 +4,7 @@ using Larp.Data.MwFifth;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace Larp.Data.Mongo.Services;
 
@@ -19,10 +20,11 @@ public class EventManager
         _characterManager = characterManager;
         _logger = logger;
     }
-    
+
     public async Task<EventAndLetters[]> GetEvents()
     {
-        var letters = (await _larpContext.Letters.Find(x => x.State == LetterState.Approved || x.State == LetterState.Submitted)
+        var letters = (await _larpContext.Letters
+                .Find(x => x.State == LetterState.Approved || x.State == LetterState.Submitted)
                 .Project(x => new Letter() { EventId = x.EventId, State = x.State })
                 .ToListAsync())
             .ToLookup(x => x.EventId);
@@ -35,6 +37,51 @@ public class EventManager
             Event = x,
             Letters = letters[x.EventId].ToArray()
         }).ToArray();
+    }
+
+    public async Task<EventsAndLetters> GetEvents(string? accountId, EventList list)
+    {
+        var now = DateOnly.FromDateTime(DateTime.Today);
+
+        var letters = accountId == null
+            ? new Dictionary<string, Letter>()
+            : (await _larpContext.Letters.Find(x => x.AccountId == accountId)
+                .Project(x => new Letter()
+                    { LetterId = x.LetterId, Name = x.Name, EventId = x.EventId, State = x.State })
+                .ToListAsync())
+            .ToDictionary(x => x.LetterId);
+
+        var filter = list switch
+        {
+            EventList.Past => Builders<Event>.Filter.Where(x => x.Date <= now.AddDays(4) && !x.IsHidden),
+            EventList.Upcoming => Builders<Event>.Filter.Where(x => x.Date >= now.AddDays(-4) && !x.IsHidden),
+            _ => throw new ArgumentOutOfRangeException(nameof(list), list, null)
+        };
+
+        var events = await _larpContext.Events.Find(filter).ToListAsync();
+        var templateIds = letters.Values.Select(x => x.TemplateId).Distinct().ToList();
+        var templates = await _larpContext.LetterTemplates
+            .Find(template => templateIds.Contains(template.LetterTemplateId)).ToListAsync();
+
+        return new EventsAndLetters()
+        {
+            Events = events.ToDictionary(x => x.EventId),
+            Accounts = await GetAccountNames(),
+            Letters = letters,
+            LetterTemplates = templates.ToDictionary(x => x.LetterTemplateId)
+        };
+    }
+
+    private async Task<Dictionary<string, AccountName>> GetAccountNames()
+    {
+        var names = await _larpContext.Accounts.Find(_ => true)
+            .Project(account => new AccountName()
+            {
+                AccountId = account.AccountId,
+                Name = account.Name
+            })
+            .ToListAsync();
+        return names.ToDictionary(x => x.AccountId);
     }
 
     public async Task<Event> GetEvent(string eventId)
@@ -99,7 +146,7 @@ public class EventManager
             .Find(attendance => attendance.EventId == eventId)
             .ToListAsync())
         .ToArray();
-    
+
     public async Task<StringResult> DraftEvent()
     {
         var id = ObjectId.GenerateNewId().ToString();
@@ -109,10 +156,70 @@ public class EventManager
             Title = "New Event",
             Date = DateOnly.FromDateTime(DateTime.Today),
             EventType = "Game",
-            GameId = await _larpContext.Games.Find(x => x.Name == GameState.GameName).Project(x => x.Id).FirstOrDefaultAsync()
+            GameId = await _larpContext.Games.Find(x => x.Name == GameState.GameName).Project(x => x.Id)
+                         .FirstOrDefaultAsync()
                      ?? throw new BadRequestException("GameId could not be found"),
             IsHidden = true
         });
         return StringResult.Success(id);
+    }
+
+    public async Task<EventsAndLetters> GetEvents(EventList list, string? accountId)
+    {
+        var now = DateOnly.FromDateTime(DateTime.Today);
+
+        var letters = accountId == null
+            ? new Dictionary<string, Letter>()
+            : (await _larpContext.Letters.Find(x => x.AccountId == accountId)
+                .Project(x => new Letter()
+                    { LetterId = x.LetterId, Name = x.Name, EventId = x.EventId, State = x.State })
+                .ToListAsync())
+            .ToDictionary(x => x.LetterId);
+
+        var filter = list switch
+        {
+            EventList.Past => Builders<Event>.Filter.Where(x => x.Date <= now.AddDays(4) && !x.IsHidden),
+            EventList.Upcoming => Builders<Event>.Filter.Where(x => x.Date >= now.AddDays(-4) && !x.IsHidden),
+            _ => throw new ArgumentOutOfRangeException(nameof(list), list, null)
+        };
+
+        var events = await _larpContext.Events.Find(filter).ToListAsync();
+        var templateIds = letters.Values.Select(x => x.TemplateId).Distinct().ToList();
+        var templates = await _larpContext.LetterTemplates
+            .Find(template => templateIds.Contains(template.LetterTemplateId)).ToListAsync();
+
+        return new EventsAndLetters()
+        {
+            Events = events.ToDictionary(x => x.EventId),
+            Accounts = await GetAccountNames(),
+            Letters = letters,
+            LetterTemplates = templates.ToDictionary(x => x.LetterTemplateId)
+        };
+    }
+
+    public async Task<EventAttendance[]> GetAccountAttendances(string accountId)
+    {
+        var letters = (await _larpContext.Letters.AsQueryable()
+                .Where(x => x.AccountId == accountId)
+                .Select(x => new Letter() { EventId = x.EventId, Name = x.Name, State = x.State })
+                .ToListAsync())
+            .ToLookup(x => x.EventId);
+
+        var attendances =
+            await _larpContext.Attendances.AsQueryable()
+                .Where(attendance => attendance.AccountId == accountId)
+                .Join(
+                    _larpContext.Events.AsQueryable(),
+                    attendance => attendance.EventId,
+                    @event => @event.EventId,
+                    (attendance, @event) => new { Attedance = attendance, Event = @event })
+                .ToListAsync();
+
+        return attendances
+            .Select(x => new EventAttendance(
+                x.Attedance,
+                x.Event,
+                letters[x.Event.EventId].ToArray()))
+            .ToArray();
     }
 }
