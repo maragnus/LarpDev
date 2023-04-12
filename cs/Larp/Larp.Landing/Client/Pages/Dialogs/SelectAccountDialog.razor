@@ -36,7 +36,7 @@
 
     protected override async Task OnSafeInitializedAsync()
     {
-        _accounts = await LandingService.Admin.GetAccountNames();
+        _accounts = (await LandingService.Admin.GetAccountNames()).Values.ToArray();
     }
 
     void Close() => MudDialog.Close(DialogResult.Cancel());

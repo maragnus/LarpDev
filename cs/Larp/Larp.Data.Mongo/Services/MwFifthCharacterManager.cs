@@ -1,12 +1,11 @@
-using Larp.Data;
-using Larp.Data.Mongo;
+using Larp.Common.Exceptions;
 using Larp.Data.MwFifth;
+using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
-using OfficeOpenXml.Packaging.Ionic.Zip;
 
-namespace Larp.Landing.Server.Services;
+namespace Larp.Data.Mongo.Services;
 
 public class MwFifthCharacterManager
 {
@@ -293,7 +292,7 @@ public class MwFifthCharacterManager
 
         // User cannot change the state to Live
         if (character.Revision.State is not CharacterState.Draft)
-            throw new BadReadException("Character must be in draft");
+            throw new BadRequestException("Character must be in draft");
 
         await _mwFifth.CharacterRevisions.DeleteOneAsync(x => x.RevisionId == characterId);
     }
@@ -338,7 +337,7 @@ public class MwFifthCharacterManager
                 .Set(x => x.MwFifthMoonstone, moonstoneTotal)
                 .Set(x => x.MwFifthUsedMoonstone, moonstoneUsed));
     }
-    
+
     public async Task UpdateMoonstone()
     {
         var usedMoonstone = (await _larpContext.Accounts.AsQueryable()
@@ -384,5 +383,20 @@ public class MwFifthCharacterManager
             .ToList();
 
         await _larpContext.Accounts.BulkWriteAsync(updates);
+    }
+
+    public async Task<CharacterAccountSummary[]> GetState(CharacterState state)
+    {
+        var list = await _larpContext.MwFifthGame.CharacterRevisions.AsQueryable()
+            .Where(character => character.State == state)
+            .Join(_larpContext.Accounts.AsQueryable(),
+                character => character.AccountId,
+                account => account.AccountId,
+                (character, account) => new { Character = character, Account = account })
+            .ToListAsync();
+
+        return list
+            .Select(x => new CharacterAccountSummary(x.Character, x.Account))
+            .ToArray();
     }
 }

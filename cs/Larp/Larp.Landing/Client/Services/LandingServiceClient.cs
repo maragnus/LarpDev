@@ -1,7 +1,7 @@
+using Larp.Common;
 using Larp.Data;
 using Larp.Data.MwFifth;
 using Larp.Landing.Shared;
-using Larp.Landing.Shared.Messages;
 using Larp.Landing.Shared.MwFifth;
 using Microsoft.Extensions.FileProviders;
 
@@ -166,8 +166,8 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
             characterIds
         });
 
-    public Task<AccountName[]> GetAccountNames() =>
-        Get<AccountName[]>($"api/admin/accounts/names");
+    public Task<Dictionary<string, AccountName>> GetAccountNames() =>
+        Get<Dictionary<string, AccountName>>($"api/admin/accounts/names");
 
     public Task<Attendance[]> GetEventAttendances(string eventId) =>
         Get<Attendance[]>($"api/admin/events/{eventId}/attendance");

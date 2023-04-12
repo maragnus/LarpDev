@@ -1,44 +1,12 @@
 ﻿using System.Reflection;
 using System.Text.Json;
+using Larp.Common;
+using Larp.Common.Exceptions;
 using Larp.Landing.Server.Services;
 using Larp.Landing.Shared;
-using Larp.Landing.Shared.Messages;
 using Microsoft.Extensions.FileProviders;
 
 namespace Larp.Landing.Server;
-
-public class ResourceForbiddenException : Exception
-{
-    public ResourceForbiddenException() : base("User is authenticated but not privileged to access this resource")
-    {
-    }
-
-    public ResourceForbiddenException(string message) : base(message)
-    {
-    }
-}
-
-public class BadRequestException : Exception
-{
-    public BadRequestException() : base("Unexpected parameters in request")
-    {
-    }
-
-    public BadRequestException(string message) : base(message)
-    {
-    }
-}
-
-public class ResourceNotFoundException : Exception
-{
-    public ResourceNotFoundException() : base("Resource was not found")
-    {
-    }
-
-    public ResourceNotFoundException(string message) : base(message)
-    {
-    }
-}
 
 public static class MapApiExtensions
 {

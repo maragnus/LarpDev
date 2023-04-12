@@ -1,5 +1,5 @@
+using Larp.Common;
 using Larp.Data;
-using Larp.Landing.Shared.Messages;
 using Microsoft.Extensions.FileProviders;
 
 namespace Larp.Landing.Shared;
@@ -58,9 +58,6 @@ public interface ILandingService
 
     [ApiPost("letters/new"), ApiAuthenticated]
     Task<Letter> DraftLetter(string eventId, string letterName);
-    
-    [ApiGet("letters"), ApiAuthenticated]
-    Task<Letter[]> GetLetters();
     
     [ApiGet("letters/{letterId}"), ApiAuthenticated]
     Task<Letter> GetLetter(string letterId);

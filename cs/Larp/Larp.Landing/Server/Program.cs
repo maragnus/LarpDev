@@ -40,6 +40,10 @@ builder.Configuration
         builder.Configuration.GetSection(UserSessionManagerOptions.SectionName));
     services.AddScoped<LarpContext>();
     services.Configure<LarpDataOptions>(builder.Configuration.GetSection(LarpDataOptions.SectionName));
+    services.AddScoped<MwFifthCharacterManager>();
+    services.AddScoped<LetterManager>();
+    services.AddScoped<AttachmentManager>();
+    services.AddScoped<EventManager>();
 
     // Larp.Data.Seeder
     services.AddScoped<LarpDataSeeder>();
@@ -50,9 +54,8 @@ builder.Configuration
     services.AddScoped<IMwFifthService, MwFifthServiceServer>();
     services.AddScoped<IAdminService, AdminService>();
     services.AddScoped<IUserSession, UserSession>();
-    services.AddScoped<MwFifthCharacterManager>();
     services.AddScoped<ExcelImporter>();
-    services.AddScoped<LetterManager>();
+    services.AddScoped<BackupManager>();
 }
 
 var app = builder.Build();

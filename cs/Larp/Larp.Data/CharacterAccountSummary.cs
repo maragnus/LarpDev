@@ -1,7 +1,6 @@
-using Larp.Data;
 using Larp.Data.MwFifth;
 
-namespace Larp.Landing.Shared;
+namespace Larp.Data;
 
 public class CharacterAccountSummary
 {

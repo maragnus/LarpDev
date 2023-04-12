@@ -18,4 +18,8 @@
       <ProjectReference Include="..\..\Larp.Common\Larp.Common.csproj" />
       <ProjectReference Include="..\..\Larp.Data\Larp.Data.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Messages\" />
+    </ItemGroup>
 </Project>

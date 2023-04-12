@@ -216,7 +216,7 @@
         StateHasChanged();
 
         _attachments = await LandingService.Admin.GetAccountAttachments(AccountId);
-        _accountNames = (await LandingService.Admin.GetAccountNames()).ToDictionary(x => x.AccountId);
+        _accountNames = await LandingService.Admin.GetAccountNames();
         _isLoadingAttachments = false;
     }
 

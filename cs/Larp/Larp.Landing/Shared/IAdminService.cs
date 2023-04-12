@@ -1,6 +1,6 @@
+using Larp.Common;
 using Larp.Data;
 using Larp.Data.MwFifth;
-using Larp.Landing.Shared.Messages;
 using Microsoft.Extensions.FileProviders;
 
 namespace Larp.Landing.Shared;
@@ -81,7 +81,7 @@ public interface IAdminService
     Task SetEventAttendance(string eventId, string accountId, bool attended, int? moonstone, string[] characterIds);
 
     [ApiGet("accounts/names")]
-    Task<AccountName[]> GetAccountNames();
+    Task<Dictionary<string, AccountName>> GetAccountNames();
 
     [ApiGet("events/{eventId}/attendance"), ApiAuthenticated(AccountRole.AdminAccess)]
     Task<Attendance[]> GetEventAttendances(string eventId);
@@ -120,10 +120,7 @@ public interface IAdminService
 
     [ApiGet("letters/templates/{templateId}"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task<LetterTemplate> GetLetterTemplate(string templateId);
-
-    [ApiGet("letters"), ApiAuthenticated(AccountRole.AccountAdmin)]
-    Task<Letter[]> GetLetters();
-
+    
     [ApiPost("letters/{letterId}/approve"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task ApproveLetter(string letterId);
 

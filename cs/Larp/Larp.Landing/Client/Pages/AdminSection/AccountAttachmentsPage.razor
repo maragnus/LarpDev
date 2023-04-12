@@ -1,7 +1,6 @@
 @page "/admin/accounts/{AccountId}/attachments"
+@using Larp.Common
 @inherits LarpPage
-
-@using Larp.Landing.Shared.Messages
 @inject LandingService LandingService
 @inject IJSRuntime JS
 
@@ -120,7 +119,7 @@
         StateHasChanged();
 
         _account = await LandingService.Admin.GetAccount(AccountId);
-        _accountNames = (await LandingService.Admin.GetAccountNames()).ToDictionary(x => x.AccountId);
+        _accountNames = await LandingService.Admin.GetAccountNames();
         _isSaving = false;
         StateHasChanged();
 

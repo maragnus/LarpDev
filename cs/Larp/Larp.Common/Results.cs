@@ -1,4 +1,4 @@
-﻿namespace Larp.Landing.Shared.Messages;
+﻿namespace Larp.Common;
 
 public record StringResult(bool IsSuccess, string? Value, string? ErrorMessage)
 {

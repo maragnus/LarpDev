@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using Larp.Common;
+using Larp.Common.Exceptions;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -37,6 +39,7 @@ public interface IUserSessionManager
     Task AddAccountRole(string accountId, AccountRole role);
     Task RemoveAccountRole(string accountId, AccountRole role);
     Task<Account?> FindByEmail(string email);
+    Task<string> AddAdminAccount(string fullName, string emailAddress);
 }
 
 public class UserSessionManager : IUserSessionManager
@@ -357,6 +360,32 @@ public class UserSessionManager : IUserSessionManager
         return await _larpContext.Accounts
             .Find(filter)
             .FirstOrDefaultAsync();
+    }
+
+    public async Task<string> AddAdminAccount(string fullName, string emailAddress)
+    {
+        var result = await FindByEmail(emailAddress);
+        if (result != null)
+             throw new BadRequestException($"User {result.Name} exists with email {emailAddress}");
+
+        var account = new Account()
+        {
+            AccountId = ObjectId.GenerateNewId().ToString(),
+            Name = fullName,
+            Emails =
+            {
+                new AccountEmail()
+                {
+                    Email = emailAddress,
+                    NormalizedEmail = emailAddress.ToLowerInvariant(),
+                    IsPreferred = true
+                }
+            },
+            Roles = new[] { AccountRole.AdminAccess },
+            Created = DateTimeOffset.Now
+        };
+        await _larpContext.Accounts.InsertOneAsync(account);
+        return account.AccountId;
     }
 
     public async Task<UserSessionValidationResult> ValidateUserSession(string? sessionId)

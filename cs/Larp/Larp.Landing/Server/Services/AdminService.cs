@@ -1,41 +1,40 @@
+using Larp.Common;
+using Larp.Common.Exceptions;
 using Larp.Data;
 using Larp.Data.Mongo;
 using Larp.Data.Mongo.Services;
 using Larp.Data.MwFifth;
-using Larp.Landing.Server.Import;
 using Larp.Landing.Shared;
-using Larp.Landing.Shared.Messages;
 using Microsoft.Extensions.FileProviders;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
-using OfficeOpenXml;
-using OfficeOpenXml.Table;
 
 namespace Larp.Landing.Server.Services;
 
 public class AdminService : IAdminService
 {
     private readonly LarpContext _db;
-    private readonly IFileProvider _fileProvider;
-    private readonly MwFifthCharacterManager _manager;
+    private readonly MwFifthCharacterManager _characterManager;
     private readonly IUserSessionManager _userSessionManager;
-    private readonly ILogger<AdminService> _logger;
-    private readonly IServiceProvider _serviceProvider;
     private readonly LetterManager _letterManager;
     private readonly Account _account;
+    private readonly EventManager _eventManager;
+    private readonly AttachmentManager _attachmentManager;
+    private readonly BackupManager _backupManager;
 
-    public AdminService(LarpContext db, IUserSession userSession, IFileProvider fileProvider,
-        MwFifthCharacterManager manager, IUserSessionManager userSessionManager, ILogger<AdminService> logger,
-        IServiceProvider serviceProvider, LetterManager letterManager)
+    public AdminService(LarpContext db, IUserSession userSession,
+        MwFifthCharacterManager characterManager, IUserSessionManager userSessionManager,
+        LetterManager letterManager, EventManager eventManager,
+        AttachmentManager attachmentManager, BackupManager backupManager)
     {
         _db = db;
-        _fileProvider = fileProvider;
-        _manager = manager;
+        _characterManager = characterManager;
         _userSessionManager = userSessionManager;
-        _logger = logger;
-        _serviceProvider = serviceProvider;
         _letterManager = letterManager;
+        _eventManager = eventManager;
+        _attachmentManager = attachmentManager;
+        _backupManager = backupManager;
         _account = userSession.CurrentUser!;
     }
 
@@ -47,181 +46,12 @@ public class AdminService : IAdminService
         return accounts.ToArray();
     }
 
-    public async Task<StringResult> Import(Stream data)
-    {
-        try
-        {
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            var path = _fileProvider.GetFileInfo($"{Path.GetRandomFileName()}.xlsx");
-            var file = new FileInfo(path.PhysicalPath!);
-
-            await using (var fileStream = File.OpenWrite(file.FullName))
-            {
-                await data.CopyToAsync(fileStream);
-            }
-
-            var importer = _serviceProvider.GetRequiredService<ExcelImporter>();
-            await importer.Import(file.FullName);
-
-            return StringResult.Success("Import successful");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to import file");
-            return StringResult.Failed("Failed to import file due to exception: " + ex.Message);
-        }
-    }
-
-    public async Task<IFileInfo> Export()
-    {
-        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-        var path = _fileProvider.GetFileInfo($"{Path.GetRandomFileName()}.xlsx");
-
-        var file = new FileInfo(path.PhysicalPath!);
-        using var package = new ExcelPackage(file);
-
-        using var workbook = package.Workbook;
-
-        var playerSheet = workbook.Worksheets.Add("Players");
-        {
-            var players = await _db.Accounts
-                .Find(_ => true)
-                .ToListAsync();
-            playerSheet.Cells.LoadFromCollection(players.Select(p => new
-            {
-                PlayerId = p.AccountId,
-                PlayerName = p.Name,
-                p.Phone,
-                p.Emails.FirstOrDefault(x => x.IsPreferred)?.Email,
-                p.Location,
-                p.Notes,
-            }), true, TableStyles.Light6);
-        }
-
-        var characterSheet = workbook.Worksheets.Add("Characters");
-        {
-            var players = await _db.MwFifthGame.CharacterRevisions
-                .Find(x => x.State == CharacterState.Live)
-                .ToListAsync();
-            characterSheet.Cells.LoadFromCollection(players.Select(p => new
-            {
-                CharacterId = p.RevisionId,
-                p.AccountId,
-                TotalMoonstone = 0,
-                UnspentMoonstone = 0,
-                p.CharacterName,
-                p.HomeChapter,
-                p.Occupation,
-                p.Specialty,
-                OccupationalEnhancement = p.Enhancement,
-                p.Homeland,
-                p.Religion,
-                p.Courage,
-                p.Dexterity,
-                p.Empathy,
-                p.Passion,
-                p.Prowess,
-                p.Wisdom,
-                p.Level,
-                OccupationalSkills = SkillList(p.Skills.Where(x =>
-                    x.Type is SkillPurchase.Occupation or SkillPurchase.OccupationChoice)),
-                PurchasedSkills = SkillList(p.Skills.Where(x => x.Type is SkillPurchase.Purchased)),
-                PurchasedSkillMoonstone = 0,
-                FreeSkills = SkillList(p.Skills.Where(x => x.Type is SkillPurchase.Free or SkillPurchase.Bestowed)),
-                Advantages = VantageList(p.Advantages),
-                Disadvantages = VantageList(p.Disadvantages),
-                Spells = string.Join(", ", p.Spells),
-                p.Cures,
-                p.Documents,
-                p.PublicHistory,
-                p.PrivateHistory,
-                p.UnusualFeatures,
-                p.Notes
-            }), true, TableStyles.Light6);
-        }
-
-        string SkillList(IEnumerable<CharacterSkill> skills) =>
-            string.Join(", ", skills.Select(x => x.Title));
-
-        string VantageList(IEnumerable<CharacterVantage> vantages) =>
-            string.Join(", ", vantages.Select(x => x.Title));
-
-        await package.SaveAsync();
-
-        return path;
-    }
-
-    public async Task<IFileInfo> ExportLetters(string eventId)
-    {
-        var letters = await _letterManager.GetByEvent(eventId);
-        var @event = letters.Events.First().Value;
-        var attendance = await this.GetEventAttendances(eventId);
-        var players = (await GetAccountNames()).ToDictionary(x => x.AccountId);
-        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-        var path = _fileProvider.GetFileInfo($"{Path.GetRandomFileName()}.xlsx");
-
-        var file = new FileInfo(path.PhysicalPath!);
-        using var package = new ExcelPackage(file);
-
-        using var workbook = package.Workbook;
-
-        var attendanceSheet = workbook.Worksheets.Add("Attendance");
-        {
-            attendanceSheet.Cells.LoadFromCollection(attendance.Select(p => new
-            {
-                PlayerId = p.AccountId,
-                PlayerName = players.TryGetValue(p.AccountId, out var player) ? player.Name : "No Name Set",
-                Moonstone = p.MwFifth?.Moonstone
-            }), true, TableStyles.Light6);
-        }
-
-        foreach (var letterTemplate in @event.LetterTemplates)
-        {
-            var sheet = workbook.Worksheets.Add(letterTemplate.Name);
-            var template = letters.LetterTemplates[letterTemplate.LetterTemplateId];
-
-            int row = 1, column = 1;
-
-            void Write(string? value) => sheet.Cells[row, column++].Value = value;
-
-            void NextRow()
-            {
-                row++;
-                column = 1;
-            }
-
-            var fields = template.Fields.Select(x => x.Name).ToArray();
-            Write("Player Name");
-            foreach (var field in fields)
-            {
-                Write(field);
-            }
-
-            NextRow();
-
-            foreach (var letter in letters.Letters.Values)
-            {
-                var name = players.TryGetValue(letter.AccountId, out var player) ? player.Name : "No Name Set";
-                Write(name);
-                foreach (var field in fields)
-                {
-                    Write(letter.Fields.TryGetValue(field, out var value) ? value : null);
-                }
-
-                NextRow();
-            }
-
-            sheet.Cells[1, 1, row, column].AutoFitColumns();
-        }
-
-        await package.SaveAsync();
-
-        return path;
-    }
+    public Task<IFileInfo> ExportLetters(string eventId) =>
+        _backupManager.ExportLetters(eventId);
 
     async Task IAdminService.MergeAccounts(string fromAccountId, string toAccountId)
     {
-        await _manager.MoveAll(fromAccountId, toAccountId);
+        await _characterManager.MoveAll(fromAccountId, toAccountId);
         var attendances = await _db.Attendances
             .Find(attendance => attendance.AccountId == fromAccountId).ToListAsync();
 
@@ -279,11 +109,6 @@ public class AdminService : IAdminService
     public async Task<LetterTemplate> GetLetterTemplate(string templateId) =>
         await _letterManager.GetTemplate(templateId);
 
-    public Task<Letter[]> GetLetters()
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task ApproveLetter(string letterId) =>
         await _letterManager.Approve(letterId, _account.AccountId);
 
@@ -299,171 +124,67 @@ public class AdminService : IAdminService
     public async Task<Letter[]> GetTemplateLetters(string templateId) =>
         await _letterManager.GetByTemplate(templateId);
 
-    public async Task SaveAttachment(string attachmentId, AccountAttachment attachment)
-    {
-        await _db.AccountAttachments.UpdateOneAsync(x => x.AttachmentId == attachmentId,
-            Builders<AccountAttachment>.Update
-                .Set(x => x.Title, attachment.Title));
-    }
+    public async Task SaveAttachment(string attachmentId, AccountAttachment attachment) =>
+        await _attachmentManager.SaveAttachment(attachmentId, attachment);
 
     async Task<AccountAttachment> IAdminService.GetAttachment(string attachmentId) =>
-        await _db.AccountAttachments
-            .Find(x => x.AttachmentId == attachmentId).FirstOrDefaultAsync()
-        ?? throw new ResourceNotFoundException();
+        await _attachmentManager.GetAttachment(attachmentId);
 
-    public async Task DeleteAttachment(string attachmentId)
-    {
-        await _db.AccountAttachments
-            .DeleteOneAsync(x => x.AttachmentId == attachmentId);
-    }
-
-    public async Task<StringResult> DraftEvent()
-    {
-        var id = ObjectId.GenerateNewId().ToString();
-        await _db.Events.InsertOneAsync(new Event()
-        {
-            EventId = id,
-            Title = "New Event",
-            Date = DateOnly.FromDateTime(DateTime.Today),
-            EventType = "Game",
-            GameId = await _db.Games.Find(x => x.Name == GameState.GameName).Project(x => x.Id).FirstOrDefaultAsync()
-                     ?? throw new BadRequestException("GameId could not be found"),
-            IsHidden = true
-        });
-        return StringResult.Success(id);
-    }
+    public async Task DeleteAttachment(string attachmentId) =>
+        await _attachmentManager.DeleteAttachment(attachmentId);
 
     async Task<AccountAttachment[]> IAdminService.GetAccountAttachments(string accountId) =>
-        (await _db.AccountAttachments
-            .Find(x => x.AccountId == accountId)
-            .Project(x => new AccountAttachment()
-            {
-                AttachmentId = x.AttachmentId,
-                UploadedOn = x.UploadedOn,
-                UploadedBy = x.UploadedBy,
-                Title = x.Title,
-                FileName = x.FileName,
-                MediaType = x.MediaType
-            }).ToListAsync())
-        .ToArray();
+        await _attachmentManager.GetAccountAttachments(accountId);
 
-    public async Task<StringResult> Attach(string accountId, Stream data, string fileName, string mediaType)
-    {
-        var bytes = new byte[data.Length];
-        var _ = await data.ReadAsync(bytes);
-        var id = ObjectId.GenerateNewId().ToString();
-        await _db.AccountAttachments.InsertOneAsync(new AccountAttachment()
-        {
-            AttachmentId = id,
-            AccountId = accountId,
-            Data = bytes,
-            MediaType = mediaType,
-            FileName = fileName,
-            UploadedBy = _account.AccountId,
-            UploadedOn = DateTimeOffset.Now,
-            Title = "Untitled"
-        });
-        return StringResult.Success(id);
-    }
-
-    public Task<IFileInfo> GetAttachment(string attachmentId)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<StringResult> Attach(string accountId, Stream data, string fileName, string mediaType) =>
+        await _attachmentManager.Attach(accountId, data, fileName, mediaType, _account.AccountId);
 
     public async Task ApproveMwFifthCharacter(string characterId) =>
-        await _manager.Approve(characterId, _account.AccountId);
+        await _characterManager.Approve(characterId, _account.AccountId);
 
     public async Task RejectMwFifthCharacter(string characterId) =>
-        await _manager.Reject(characterId);
+        await _characterManager.Reject(characterId);
 
     public async Task<CharacterAndRevision> ReviseMwFifthCharacter(string characterId) =>
-        await _manager.GetDraft(characterId, _account, true);
+        await _characterManager.GetDraft(characterId, _account, true);
 
     public async Task SaveMwFifthCharacter(CharacterRevision revision) =>
-        await _manager.Save(revision, _account, true);
+        await _characterManager.Save(revision, _account, true);
 
     public async Task DeleteMwFifthCharacter(string characterId) =>
-        await _manager.Delete(characterId, _account, true);
+        await _characterManager.Delete(characterId, _account, true);
 
     public async Task MoveMwFifthCharacter(string characterId, string newAccountId) =>
-        await _manager.Move(characterId, newAccountId);
+        await _characterManager.Move(characterId, newAccountId);
 
-    public async Task<EventAndLetters[]> GetEvents()
-    {
-        var letters = (await _db.Letters.Find(x => x.State == LetterState.Approved || x.State == LetterState.Submitted)
-                .Project(x => new Letter() { EventId = x.EventId, State = x.State })
-                .ToListAsync())
-            .ToLookup(x => x.EventId);
+    public async Task<StringResult> DraftEvent() => await _eventManager.DraftEvent();
 
-        var events = await _db.Events.Find(_ => true)
-            .SortByDescending(x => x.Date)
-            .ToListAsync();
-        return events.Select(x => new EventAndLetters
-        {
-            Event = x,
-            Letters = letters[x.EventId].ToArray()
-        }).ToArray();
-    }
+    public async Task<EventAndLetters[]> GetEvents() =>
+        await _eventManager.GetEvents();
 
-    public async Task<Event> GetEvent(string eventId)
-    {
-        return await _db.Events.FindOneAsync(x => x.EventId == eventId)
-               ?? throw new ResourceNotFoundException();
-    }
+    public async Task<Event> GetEvent(string eventId) =>
+        await _eventManager.GetEvent(eventId);
 
-    public async Task SaveEvent(string eventId, Event @event)
-    {
-        await _db.Events.UpdateOneAsync(x => x.EventId == eventId,
-            Builders<Event>.Update
-                .Set(x => x.GameId, @event.GameId)
-                .Set(x => x.Title, @event.Title)
-                .Set(x => x.EventType, @event.EventType)
-                .Set(x => x.Location, @event.Location)
-                .Set(x => x.Date, @event.Date)
-                .Set(x => x.IsHidden, @event.IsHidden)
-                .Set(x => x.LetterTemplates, @event.LetterTemplates)
-                .Set(x => x.Components, @event.Components)
-        );
-    }
+    public async Task SaveEvent(string eventId, Event @event) =>
+        await _eventManager.SaveEvent(eventId, @event);
 
-    public async Task DeleteEvent(string eventId)
-    {
-        var attendees = await _db.Attendances.CountDocumentsAsync(x => x.EventId == eventId);
-        if (attendees > 0)
-            throw new BadRequestException($"Cannot delete event, it has {attendees} attendees");
-        await _db.Events.DeleteOneAsync(x => x.EventId == eventId);
-    }
+    public async Task DeleteEvent(string eventId) =>
+        await _eventManager.DeleteEvent(eventId);
 
     public async Task SetEventAttendance(string eventId, string accountId, bool attended, int? moonstone,
-        string[] characterIds)
-    {
-        if (!attended)
-        {
-            await _db.Attendances.DeleteOneAsync(x => x.EventId == eventId && x.AccountId == accountId);
-            return;
-        }
+        string[] characterIds) =>
+        await _eventManager.SetEventAttendance(eventId, accountId, attended, moonstone, characterIds);
 
-        var update = Builders<Attendance>.Update
-            .Set(x => x.EventId, eventId)
-            .Set(x => x.AccountId, accountId)
-            .Set(x => x.MwFifth,
-                new MwFifthAttendance
-                {
-                    Moonstone = moonstone,
-                    CharacterIds = characterIds
-                });
-        var upsert = new UpdateOptions() { IsUpsert = true };
+    public async Task<Attendance[]> GetEventAttendances(string eventId) =>
+        await _eventManager.GetEventAttendances(eventId);
 
-        await _db.Attendances.UpdateOneAsync(
-            attendance => attendance.EventId == eventId && attendance.AccountId == accountId,
-            update,
-            upsert);
+    public Task<StringResult> Import(Stream data) =>
+        _backupManager.Import(data);
 
-        await _manager.UpdateMoonstone(accountId);
-    }
+    public Task<IFileInfo> Export() =>
+        _backupManager.Export();
 
-    public async Task<AccountName[]> GetAccountNames()
+    public async Task<Dictionary<string, AccountName>> GetAccountNames()
     {
         var names = await _db.Accounts.Find(_ => true)
             .Project(account => new AccountName()
@@ -473,58 +194,17 @@ public class AdminService : IAdminService
                 Emails = account.Emails
             })
             .ToListAsync();
-        return names.ToArray();
+        return names.ToDictionary(x => x.AccountId);
     }
 
-    public async Task<Attendance[]> GetEventAttendances(string eventId) =>
-        (await _db.Attendances
-            .Find(attendance => attendance.EventId == eventId)
-            .ToListAsync())
-        .ToArray();
+    public async Task<StringResult> AddAdminAccount(string fullName, string emailAddress) =>
+        StringResult.Success(await _userSessionManager.AddAdminAccount(fullName, emailAddress));
 
-    public async Task<StringResult> AddAdminAccount(string fullName, string emailAddress)
-    {
-        var result = await _userSessionManager.FindByEmail(emailAddress);
-        if (result != null)
-            return StringResult.Failed($"User {result.Name} exists with email {emailAddress}");
-
-        var account = new Account()
-        {
-            AccountId = ObjectId.GenerateNewId().ToString(),
-            Name = fullName,
-            Emails =
-            {
-                new AccountEmail()
-                {
-                    Email = emailAddress,
-                    NormalizedEmail = emailAddress.ToLowerInvariant(),
-                    IsPreferred = true
-                }
-            },
-            Roles = new[] { AccountRole.AdminAccess },
-            Created = DateTimeOffset.Now
-        };
-        await _db.Accounts.InsertOneAsync(account);
-        return StringResult.Success(account.AccountId);
-    }
-
-    public async Task<CharacterAccountSummary[]> GetMwFifthCharacters(CharacterState state)
-    {
-        var list = await _db.MwFifthGame.CharacterRevisions.AsQueryable()
-            .Where(character => character.State == state)
-            .Join(_db.Accounts.AsQueryable(),
-                character => character.AccountId,
-                account => account.AccountId,
-                (character, account) => new { Character = character, Account = account })
-            .ToListAsync();
-
-        return list
-            .Select(x => new CharacterAccountSummary(x.Character, x.Account))
-            .ToArray();
-    }
+    public async Task<CharacterAccountSummary[]> GetMwFifthCharacters(CharacterState state) =>
+        await _characterManager.GetState(state);
 
     public async Task<CharacterAndRevision> GetMwFifthCharacter(string characterId) =>
-        await _manager.GetRevision(characterId, _account, true)
+        await _characterManager.GetRevision(characterId, _account, true)
         ?? throw new ResourceNotFoundException();
 
     public async Task<Dashboard> GetDashboard()
@@ -586,8 +266,8 @@ public class AdminService : IAdminService
     }
 
     public async Task<CharacterAndRevision> GetMwFifthCharacterLatest(string characterId) =>
-        await _manager.GetLatest(characterId, _account, true);
+        await _characterManager.GetLatest(characterId, _account, true);
 
     public async Task<CharacterAndRevisions> GetMwFifthCharacterRevisions(string characterId) =>
-        await _manager.GetRevisions(characterId, _account, true);
+        await _characterManager.GetRevisions(characterId, _account, true);
 }
