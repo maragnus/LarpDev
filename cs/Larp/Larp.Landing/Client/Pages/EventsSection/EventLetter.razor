@@ -43,6 +43,7 @@
 
 @foreach (var field in Template.Fields)
 {
+    if (field.Type == LetterFieldType.Removed) continue;
     if (!field.ShowField(Letter.Fields)) continue;
     <MudPaper Class="pa-4 mt-4">
         <MudStack Spacing="0">
