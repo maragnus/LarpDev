@@ -1,5 +1,5 @@
 ﻿@page "/"
-
+@inject LandingService LandingService
 <PageHeader>LARP Landing</PageHeader>
 
 <div class="background"></div>
@@ -14,7 +14,12 @@
 
     <MudPaper Elevation="2" Style="background-color: rgba(255, 255, 255, 0.25); margin: 4em 0; padding: 2em">
         <MudText Typo="Typo.body1" Align="Align.Center" Style="color: #fff" Class="links">
-            Check the menu to <a href="/login">sign in</a>, access your <a href="/characters">characters</a>, check <a href="/events">upcoming events</a>, or <a href="/clarify">clarify</a> game terminology!<br/>
+            Check the menu to 
+            @if (!LandingService.IsAuthenticated)
+            {
+                <span><a href="/login">sign in</a>, </span>
+            }
+            access your <a href="/characters">characters</a>, check <a href="/events">upcoming events</a>, fill out <a href="/events/past">post event letter</a>, or <a href="/clarify">clarify</a> game terminology!<br/>
         </MudText>
     </MudPaper>
 
