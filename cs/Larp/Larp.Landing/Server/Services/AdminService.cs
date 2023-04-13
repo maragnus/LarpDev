@@ -222,6 +222,7 @@ public class AdminService : IAdminService
             var characters = accountCharacters[letter.AccountId].ToList();
             var attendee = new PlayerAttendee
             {
+                AccountId = account?.AccountId,
                 Name = account?.Name ?? "No Name Set",
                 Age = account?.Age?.ToString(),
                 Notes = account?.Notes,
@@ -231,6 +232,8 @@ public class AdminService : IAdminService
                     let revision = accountRevisions[character.CharacterId]
                     select new CharacterAttendee()
                     {
+                        CharacterId = character.CharacterId,
+                        RevisionId = revision.RevisionId,
                         Name = character.CharacterName ?? "No Name Set",
                         HomeChapter = revision.HomeChapter,
                         Notes = character.PreregistrationNotes,

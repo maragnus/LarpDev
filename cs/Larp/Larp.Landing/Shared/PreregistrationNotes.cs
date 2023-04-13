@@ -5,8 +5,9 @@ namespace Larp.Landing.Shared;
 
 public class PlayerAttendee
 {
+    public string? AccountId { get; set; } = default!;
     public string Name { get; set; } = default!;
-    public string? Age { get; set; } = default!;
+    public string? Age { get; set; }
     public CharacterAttendee[] Characters { get; set; } = Array.Empty<CharacterAttendee>();
     public string? Notes { get; set; }
     public Letter? PreEventLetter { get; set; }
@@ -14,6 +15,8 @@ public class PlayerAttendee
 
 public class CharacterAttendee
 {
+    public string? CharacterId { get; set; }
+    public string? RevisionId { get; set; }
     public string Name { get; set; } = default!;
     public string HomeChapter { get; set; } = default!;
     public string? Notes { get; set; }
