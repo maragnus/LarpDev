@@ -1,0 +1,17 @@
+@media print {
+    @page {
+        size: letter landscape;
+        margin: 0.25in;
+
+        @bottom-center {
+            content: counter(page);
+        }
+    }
+
+    .every-page {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+    }
+}

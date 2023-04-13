@@ -2,6 +2,8 @@ using Larp.Common;
 
 namespace Larp.Data.MwFifth;
 
+public record NameRank(string Name, int Rank);
+
 public enum AgeGroup
 {
     /// <summary>Ages 10-13</summary>
@@ -131,6 +133,8 @@ public class Character
 
     public DateTimeOffset CreatedOn { get; set; }
 
+    public CharacterState State { get; set; }
+
     public int Moonstone { get; set; }
 
     public int UsedMoonstone { get; set; }
@@ -140,6 +144,10 @@ public class Character
     public int? ImportId { get; set; }
 
     public int? ImportedMoonstone { get; set; }
+
+    public string? PreregistrationNotes { get; set; }
+
+    public string? PreregistrationRevisionNotes { get; set; }
 }
 
 [PublicAPI]
@@ -199,6 +207,7 @@ public class CharacterRevision
     public string? Cures { get; set; }
     public string? Documents { get; set; }
     public string? Notes { get; set; }
+    public string? PreregistrationNotes { get; set; }
 
     public bool UnlockedAllSpells { get; set; }
     public bool NoHistory { get; set; }
@@ -275,5 +284,13 @@ public class CharacterRevision
         }
 
         return result;
+    }
+
+    public NameRank[] ConsolidatedSkills()
+    {
+        return Skills
+            .GroupBy(x => x.Name)
+            .Select(x => new NameRank(x.Key, x.Sum(x => x.Rank)))
+            .ToArray();
     }
 }

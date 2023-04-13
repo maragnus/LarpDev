@@ -1,0 +1,218 @@
+@page "/admin/events/{eventId}/preregistration"
+@using Larp.Landing.Shared
+@inject LandingService LandingService
+
+<PageHeader Print>Preregistration</PageHeader>
+
+@if (_notes == null)
+{
+    <MudText Typo="Typo.h6">Loading...</MudText>
+    <MudProgressLinear Indeterminate/>
+    return;
+}
+
+<link href="/css/landscape.css" rel="stylesheet"/>
+
+<MudAlert Class="no-print ma-4" Severity="Severity.Info">Turn on "Background Graphics" in your print dialog. Also, make sure you select Landscape orientation.</MudAlert>
+
+<MudStack Row Class="every-page" Justify="Justify.SpaceBetween">
+    <div>
+        <MudText Typo="Typo.h6">@_notes.Event.Title</MudText>
+        <MudText Typo="Typo.caption">@_notes.Event.Location</MudText>
+    </div>
+    @if (_notes.Event.Components.Length == 0)
+    {
+        <MudText>
+            <strong>@_notes.Event.Date.ToString("MMMM d, yyyy")</strong>
+        </MudText>
+    }
+    else
+    {
+        <MudText>
+            <strong>@_notes.Event.Components.Min(x => x.Date).ToString("dddd, MMMM d, yyyy")</strong> to
+            <strong>@_notes.Event.Components.Max(x => x.Date).ToString("dddd, MMMM d, yyyy")</strong>
+        </MudText>
+    }
+</MudStack>
+
+@if (!string.IsNullOrWhiteSpace(_notes.Event.Notes))
+{
+    <MudText Class="my-4" Typo="Typo.body2">@_notes.Event.Notes</MudText>
+}
+
+<table style="width:100%">
+    <thead>
+    <tr>
+        <th>&nbsp;</th>
+        <th>Player (Age)</th>
+        <th>Character</th>
+        <th>Home</th>
+        <th colspan="2">Event</th>
+        <th>PC</th>
+        <th>NPC</th>
+        <th>Plot</th>
+        <th>Crown</th>
+        <th>N&amp;R</th>
+        <th>Roles</th>
+        <th>Supplies Notes</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var player in _notes.Attendees.OrderBy(x => x.Name))
+    {
+        var fields = player.PreEventLetter?.Fields ?? new Dictionary<string, string>();
+
+        string[] GetList(string name) => (fields!.GetValueOrDefault(name) ?? "")
+            .Split(',')
+            .Select(x => x.Trim())
+            .Where(x => !string.IsNullOrEmpty(x))
+            .ToArray();
+
+        bool GetBool(string name) => fields!.GetValueOrDefault(name) == "true";
+
+        var waiver = GetBool("waiver") ? "" : "Waiver";
+        var patreon = GetBool("patreon") ? " (P)" : "";
+        var discount = GetBool("discount");
+        var characters = GetList("characters").ToHashSet();
+        if (characters.Count == 0)
+            characters = player.Characters.Select(x => x.Name).ToHashSet();
+
+        var costCount =
+            (from component in _notes.Event.Components
+                join attending in GetList("pcing") on component.Name equals attending
+                where !component.Free
+                select true).Count();
+        var cost = costCount == 0 ? 0
+            : _notes.Event.EventCost + _notes.Event.ChronicleCost * (costCount - 1);
+        if (discount) cost -= 5 * costCount;
+
+        var pcingList =
+            from component in _notes.Event.Components
+            join attending in GetList("pcing") on component.Name equals attending
+            select component.ComponentId;
+        var pcing = string.Join("", pcingList);
+        var npcingList =
+            from component in _notes.Event.Components
+            join attending in GetList("npcing") on component.Name equals attending
+            select component.ComponentId;
+        var npcing = string.Join("", npcingList);
+
+        const string skillPathfinding = "Pathfinding";
+        const string skillNewsAndRumors = "News & Rumors";
+        const string skillInfoGathering = "Information Gathering";
+        const string skillCosmopolitanConnections = "Cosmopolitan Connections";
+        const string skillResearch = "Research";
+        const string skillIncome = "Income";
+        const string skillProduction = "Production";
+        const string skillWitchblood = "Witchblood";
+        const string skillButcher = "Butcher";
+        const string skillScavenging = "Scavenging";
+        const string skillImprovedScavenging = "Improved Scavenging";
+        const string skillUnwashed = "Unwashed";
+        const string skillInstruction = "Instruction";
+        const string skillImprovedInstruction = "Improved Instruction";
+
+        var sheets = player.Characters
+            .Where(x => characters.Contains(x.Name))
+            .OrderBy(x => x.Name)
+            .Select((attendee, i) => (i, attendee))
+            .ToList();
+
+        if (sheets.Count == 0)
+        {
+            sheets.Add((0, new CharacterAttendee
+            {
+              Name  = "No Character",
+                HomeChapter = "N/A"
+            }));
+        }
+
+        foreach (var (index, character) in sheets)
+        {
+            var skills = character.Skills.Select(x => x.Name)
+                .Concat(character.Advantages.Select(x => x.Name))
+                .Concat(character.Disadvantages.Select(x => x.Name)).ToHashSet();
+            T? SkilledIn<T>(string skillName, T result, T? defaultValue = default) => skills.Contains(skillName) ? result : defaultValue;
+            string CommaList(params string[] items) => string.Join(", ", items.Where(x => !string.IsNullOrEmpty(x)));
+
+            var crown = skills.Contains(skillIncome) ? (int?)character.Skills.First(x => x.Name == skillIncome).Rank : null;
+            var isNr = SkilledIn(skillNewsAndRumors, "N&R");
+            var production = character.Skills.Where(x => x.Name.StartsWith(skillProduction))
+                .Select(x => x.Name[(skillProduction.Length + 2)..^1])
+                .ToArray();
+            var salvage = SkilledIn(skillButcher, 6) + SkilledIn(skillScavenging, 3) + SkilledIn(skillImprovedScavenging, 3);
+            var salvageTags = salvage == 0 ? "" : $"{salvage} Salvage";
+            var instruction = SkilledIn(skillInstruction, 3) + SkilledIn(skillImprovedInstruction, 3);
+            var instructionTags = instruction == 0 ? "" : $"{instruction} Instruction";
+
+            <tr>
+                @if (index == 0)
+                {
+                    <td class="center">
+                        <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked"/>
+                    </td>
+                    <td class="nowrap">@player.Name @(string.IsNullOrEmpty(player.Age) ? "": $"({@player.Age})")</td>
+                }
+                else
+                {
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                }
+                <td>@character.Name</td>
+                <td class="nowrap">@character.HomeChapter</td>
+                @if (index == 0)
+                {
+                    <td class="left-half right" style="padding: 0">
+                        <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked"/>
+                    </td>
+                    <td class="right-half nowrap">$@cost @patreon</td>
+                }
+                else
+                {
+                    <td class="left-half">&nbsp;</td>
+                    <td class="right-half">&nbsp;</td>
+                }
+                <td class="center">@pcing</td>
+                <td class="center">@npcing</td>
+                <td class="nowrap center">
+                    @SkilledIn(skillInfoGathering, "IG")
+                    @SkilledIn(skillPathfinding, "PF")
+                    @SkilledIn(skillResearch, "R")
+                </td>
+                <td class="nowrap center">@crown</td>
+                <td class="nowrap center">@isNr</td>
+                <td class="nowrap center">
+                    @SkilledIn(skillCosmopolitanConnections, "CC")
+                    @SkilledIn(skillWitchblood, "WB")
+                    @SkilledIn(skillUnwashed, "UW")
+                </td>
+                <td>
+                    @CommaList(waiver, string.Join(", ", production), salvageTags, instructionTags)
+                    @character.Notes
+                </td>
+                <td class="no-print">
+                    <MudChipSet ReadOnly>
+                        @foreach (var skill in skills)
+                        {
+                            <MudChip Size="Size.Small">@skill</MudChip>
+                        }
+                    </MudChipSet>
+                </td>
+            </tr>
+        }
+    }
+    </tbody>
+</table>
+
+@code {
+    private PreregistrationNotes? _notes;
+
+    [Parameter]
+    public string EventId { get; set; } = default!;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _notes = await LandingService.Admin.GetEventNotes(EventId);
+    }
+
+}

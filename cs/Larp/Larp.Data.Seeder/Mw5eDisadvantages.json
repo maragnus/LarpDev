@@ -270,7 +270,8 @@
     "name": "Unwashed",
     "rank": 1,
     "physical": false,
-    "description": "You are prone to getting sick. At the beginning of each Event, you must roll to discover what Affliction you will suffer from for the duration of the Event. Once In Game, look in the Book of Woe for the full description of this affliction. "
+    "description": "You are prone to getting sick. At the beginning of each Event, you must roll to discover what Affliction you will suffer from for the duration of the Event. Once In Game, look in the Book of Woe for the full description of this affliction.",
+    "preregistrationNote": "Roll"
   },
   {
     "title": "Vulnerability: Air 1",

@@ -23,6 +23,8 @@ public enum LetterFieldType
     Header,
     Component,
     Components,
+    Character,
+    Characters
 }
 
 public enum LetterFieldConditionOperator

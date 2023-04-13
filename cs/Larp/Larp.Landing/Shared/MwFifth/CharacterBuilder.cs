@@ -47,8 +47,24 @@ public class CharacterBuilder
     public Spell[] OccupationalSpells { get; private set; } = Array.Empty<Spell>();
 
     [DependsOn(nameof(PopulateOccupationalDependencies), nameof(Occupation), nameof(NoOccupation), nameof(Enhancement))]
-    public CharacterSkill[] OccupationalSkills { get; private set; } = Array.Empty<CharacterSkill>();
+    public CharacterSkill[] OccupationalSkills
+    {
+        get => Revision.Skills
+            .Where(x => x.Type == SkillPurchase.Occupation)
+            .ToArray();
 
+        set
+        {
+            Revision.Skills = Revision.Skills
+                .Where(x => x.Type != SkillPurchase.Occupation)
+                .Concat(value)
+                .ToArray();
+            DependencyManager.Update(this, nameof(OccupationalChosenSkills));
+            StateChanged?.Invoke();
+        }
+    }
+    
+    
     [DependsOn(nameof(PopulateOccupationalDependencies), nameof(Occupation), nameof(NoOccupation), nameof(Enhancement))]
     public SkillChoice[] OccupationalSkillsChoices { get; private set; } = Array.Empty<SkillChoice>();
 
@@ -203,7 +219,7 @@ public class CharacterBuilder
             StateChanged?.Invoke();
         }
     }
-
+    
     public int GiftMoonstone => Revision.GiftMoonstone;
 
     public int SkillMoonstone => Revision.SkillMoonstone;

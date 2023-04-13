@@ -127,13 +127,13 @@ public class LandingServiceServer : ILandingService
 
     public async Task<Dictionary<string, string>> GetCharacterNames()
     {
-        var characters = await _db.MwFifthGame.Characters
-            .Find(character => character.AccountId == _userSession.AccountId)
-            .Project(character => new { UniqueId = character.CharacterId, character.CharacterName })
+        var characters = await _db.MwFifthGame.CharacterRevisions
+            .Find(character => character.AccountId == _userSession.AccountId && character.State == CharacterState.Live)
+            .Project(character => new { character.CharacterId, character.CharacterName })
             .ToListAsync();
         return characters
             .ToDictionary(
-                x => x.UniqueId,
+                x => x.CharacterId,
                 x => x.CharacterName ?? "No Name Set");
     }
 

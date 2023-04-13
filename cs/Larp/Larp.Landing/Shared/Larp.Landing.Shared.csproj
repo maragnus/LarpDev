@@ -19,8 +19,4 @@
       <ProjectReference Include="..\..\Larp.Data.Mongo\Larp.Data.Mongo.csproj" />
       <ProjectReference Include="..\..\Larp.Data\Larp.Data.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Messages\" />
-    </ItemGroup>
 </Project>

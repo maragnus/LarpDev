@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Larp.Common;
 using Larp.Data;
 using Larp.Data.Mongo;
@@ -148,15 +149,19 @@ public class BackupManager
         var letterManager = _serviceProvider.GetRequiredService<LetterManager>();
         var eventManager = _serviceProvider.GetRequiredService<EventManager>();
         var fileProvider = _serviceProvider.GetRequiredService<IFileProvider>();
-
         
-        var letters = await letterManager.GetByEvent(eventId);
-        var @event = letters.Events.First().Value;
+        var info = await letterManager.GetByEvent(eventId);
+        var @event = info.Events.First().Value;
         var attendance = await eventManager.GetEventAttendances(eventId);
-        var players = await GetAccountNames();
+        var accountNames = await GetAccountNames();
         ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
         var path = fileProvider.GetFileInfo($"{Path.GetRandomFileName()}.xlsx");
 
+        var playerList = @attendance.Select(x => x.AccountId).Distinct().ToList();
+        var accounts = await _larpContext.Accounts.Find(x => playerList.Contains(x.AccountId)).ToListAsync();
+        var characters = await _larpContext.MwFifthGame.CharacterRevisions.Find(x => playerList.Contains(x.AccountId))
+            .ToListAsync();
+        
         var file = new FileInfo(path.PhysicalPath!);
         using var package = new ExcelPackage(file);
 
@@ -167,15 +172,16 @@ public class BackupManager
             attendanceSheet.Cells.LoadFromCollection(attendance.Select(p => new
             {
                 PlayerId = p.AccountId,
-                PlayerName = players.TryGetValue(p.AccountId, out var player) ? player.Name : "No Name Set",
+                PlayerName = accountNames.TryGetValue(p.AccountId, out var player) ? player.Name : "No Name Set",
                 Moonstone = p.MwFifth?.Moonstone
             }), true, TableStyles.Light6);
         }
-
-        foreach (var letterTemplate in @event.LetterTemplates)
+        
+        foreach (var letters in info.Letters.GroupBy(x=>x.Value.TemplateId, x=>x.Value))
         {
-            var sheet = workbook.Worksheets.Add(letterTemplate.Name);
-            var template = letters.LetterTemplates[letterTemplate.LetterTemplateId];
+            var template = info.LetterTemplates[letters.Key];
+
+            var sheet = workbook.Worksheets.Add(template.Name);
 
             int row = 1, column = 1;
 
@@ -196,9 +202,9 @@ public class BackupManager
 
             NextRow();
 
-            foreach (var letter in letters.Letters.Values)
+            foreach (var letter in letters)
             {
-                var name = players.TryGetValue(letter.AccountId, out var player) ? player.Name : "No Name Set";
+                var name = accountNames.TryGetValue(letter.AccountId, out var player) ? player.Name : "No Name Set";
                 Write(name);
                 foreach (var field in fields)
                 {

@@ -120,13 +120,24 @@ public class ExcelImporter
                     eventName.Contains("Other") || eventName.Contains("Character"))
                     type = "Other";
 
+                @event = new Event()
+                {
+                    EventId = ObjectId.GenerateNewId().ToString(),
+                    Date = date,
+                    ImportId = eventName,
+                    Title = eventName,
+                    GameId = _gameId,
+                    EventType = type,
+                    IsHidden = type is "Subscription" or "Contest" or "Other",
+                };
+
                 var components = new List<EventComponent>();
                 if (type == "Game")
                 {
                     var match = Regex.Match(eventName, @"(\d+)\/(\d+)");
                     if (match.Success)
                     {
-                        date = new DateOnly(year,
+                        @event.Date = date = new DateOnly(year,
                             int.TryParse(match.Groups[1].Value, out var month) ? month : 1,
                             int.TryParse(match.Groups[2].Value, out var day) ? day : 1
                         );
@@ -141,7 +152,7 @@ public class ExcelImporter
                             "Aug" => 8,
                             _ => 1
                         };
-                        date = new DateOnly(year,
+                        @event.Date = date = new DateOnly(year,
                             month,
                             int.TryParse(match.Groups[2].Value, out var day) ? day : 1
                         );
@@ -149,49 +160,48 @@ public class ExcelImporter
 
                     if (eventName.Contains("Burgundar") || eventName.Contains("Keep"))
                     {
+                        @event.EventCost = 20;
+                        @event.ChronicleCost = 15;
                         components.AddRange(new[]
                         {
                             new EventComponent()
                             {
-                                Name = "Friday", Date = date
+                                Name = "Friday", Date = date, ComponentId = "F", Free = true
                             },
                             new EventComponent()
                             {
-                                Name = "Chronicle 1", Date = date.AddDays(1)
+                                Name = "Chronicle 1", Date = date.AddDays(1), ComponentId = "1"
                             },
                             new EventComponent()
                             {
-                                Name = "Chronicle 2", Date = date.AddDays(1)
+                                Name = "Chronicle 2", Date = date.AddDays(1), ComponentId = "2"
                             },
                             new EventComponent()
                             {
-                                Name = "Chronicle 3", Date = date.AddDays(2)
+                                Name = "Chronicle 3", Date = date.AddDays(2), ComponentId = "3"
                             }
                         });
                     }
                     else if (eventName.Contains("Novgorond"))
                     {
+                        @event.EventCost = 20;
+                        @event.ChronicleCost = 20;
                         components.AddRange(new[]
                         {
                             new EventComponent()
                             {
-                                Name = "Chronicle", Date = date
+                                Name = "First Half", Date = date, ComponentId = "1",
+                            },
+                            new EventComponent()
+                            {
+                                Name = "Second Half", Date = date, ComponentId = "2"
                             }
                         });
                     }
                 }
 
-                @event = new Event()
-                {
-                    EventId = ObjectId.GenerateNewId().ToString(),
-                    Date = date,
-                    ImportId = eventName,
-                    Title = eventName,
-                    GameId = _gameId,
-                    EventType = type,
-                    IsHidden = type == "Subscription" || type == "Contest" || type == "Other",
-                    Components = components.ToArray()
-                };
+                @event.Components = components.ToArray();
+
                 events.Add(new InsertOneModel<Event>(@event));
             }
 
@@ -311,7 +321,8 @@ public class ExcelImporter
                 AccountId = account!.AccountId,
                 CharacterName = characterName,
                 CreatedOn = _now,
-                ImportedMoonstone = ToInt(sheet.Cells[row, 2].Value)
+                ImportedMoonstone = ToInt(sheet.Cells[row, 2].Value),
+                State = CharacterState.Live
             };
 
             var homeChapter = TranslateHomeChapter((string)sheet.Cells[row, 6].Value);
@@ -376,6 +387,8 @@ public class ExcelImporter
                 PurchasedSkills = skills
             };
             builder.UpdateMoonstone();
+
+            character.PreregistrationRevisionNotes = revision.PreregistrationNotes;
 
             character.UsedMoonstone = revision.TotalMoonstone;
             characters.Add(new InsertOneModel<Character>(character));

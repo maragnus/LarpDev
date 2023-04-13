@@ -42,6 +42,7 @@ public class Account
     public int? ImportId { get; set; }
     public int? MwFifthMoonstone { get; set; }
     public int? MwFifthUsedMoonstone { get; set; }
+    public string? MwFifthPreregistrationNotes { get; set; }
 
     [BsonIgnore]
     public string? PreferredEmail =>

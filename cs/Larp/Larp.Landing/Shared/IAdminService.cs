@@ -120,7 +120,7 @@ public interface IAdminService
 
     [ApiGet("letters/templates/{templateId}"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task<LetterTemplate> GetLetterTemplate(string templateId);
-    
+
     [ApiPost("letters/{letterId}/approve"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task ApproveLetter(string letterId);
 
@@ -153,6 +153,15 @@ public interface IAdminService
 
     [ApiPost("events/new")]
     Task<StringResult> DraftEvent();
+
+    [ApiPost("mw5e/characters/{characterId}/notes"), ApiAuthenticated(AccountRole.AdminAccess)]
+    Task SetMwFifthCharacterNotes(string characterId, string? notes);
+
+    [ApiPost("accounts/{accountId}/notes"), ApiAuthenticated(AccountRole.AdminAccess)]
+    Task SetAccountNotes(string accountId, string? notes);
+
+    [ApiGet("events/{eventId}/notes"), ApiAuthenticated(AccountRole.AdminAccess)]
+    Task<PreregistrationNotes> GetEventNotes(string eventId);
 }
 
 public class Dashboard

@@ -28,20 +28,26 @@
         <MudButton StartIcon="@Icons.Material.Filled.Undo" OnClick="Move" Variant="Variant.Filled" Color="Color.Secondary">Move</MudButton>
     </MudButtonGroup>
 
-    @if (IsLoading || _character == null)
+    @if (IsLoading || _characterBuilder == null)
     {
         <MudAlert Severity="@Severity.Normal">Loading... <MudProgressLinear Indeterminate/></MudAlert>
     }
     else
     {
-        <MudAlert Severity="@Statuses[_character!.Revision.State].Severity">
-            @Statuses[_character.Revision.State].Description
+        <MudAlert Severity="@Statuses[_characterBuilder!.Revision.State].Severity">
+            @Statuses[_characterBuilder.Revision.State].Description
         </MudAlert>
     }
+    
+    <MudText Typo="Typo.h6" Class="my-4">Notes</MudText>
+    <MudPaper Class="pa-4">
+        <MudTextField T="string?" Variant="Variant.Outlined" Lines="2" Label="Preregistration Notes" @bind-Value="@_character.PreregistrationNotes" 
+                      Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Save" AdornmentColor="Color.Success" OnAdornmentClick="SaveNotes" />
+    </MudPaper>
 
     @if (_revisions.Length > 0)
     {
-        <MudText Typo="Typo.h6" Class="mt-4">Revisions</MudText>
+        <MudText Typo="Typo.h6" Class="my-4">Revisions</MudText>
 
         <div class="relative">
             <MudDataGrid T="CharacterRevision" Items="_revisions" Hover Dense ReadOnly SortMode="SortMode.None">
@@ -112,7 +118,7 @@
         <MudOverlay Visible="IsLoading" DarkBackground Absolute>
             <MudProgressLinear Indeterminate/>
         </MudOverlay>
-        @if (_character != null)
+        @if (_characterBuilder != null)
         {
             <MudStack Row AlignItems="AlignItems.Start" Class="my-4">
                 <MudTooltip Text="Total Moonstone the player has earned">
@@ -147,7 +153,7 @@
                     </MudAlert>
                 }
             </MudStack>
-            <CharacterSheet Character="_character" Admin/>
+            <CharacterSheet Character="_characterBuilder" Admin/>
         }
     </div>
 </AdminLayout>
@@ -169,7 +175,8 @@
     public string CharacterId { get; set; } = default!;
 
     CharacterState _state;
-    CharacterBuilder? _character;
+    Character _character = new Character();
+    CharacterBuilder? _characterBuilder;
 
     private CharacterRevision[] _revisions = Array.Empty<CharacterRevision>();
     private MoonstoneInfo _moonstone = new();
@@ -179,7 +186,8 @@
     protected override async Task OnSafeParametersSetAsync()
     {
         var character = await LandingService.Admin.GetMwFifthCharacter(CharacterId);
-        _character = new CharacterBuilder(character, LandingService.MwFifth.GameState, Logger);
+        _character = character.Character;
+        _characterBuilder = new CharacterBuilder(character, LandingService.MwFifth.GameState, Logger);
         _moonstone = character.Moonstone;
         _moonstoneUsed = character.Revision.GiftMoonstone + character.Revision.SkillMoonstone;
         _newMoonstoneCost = _moonstoneUsed - character.Character.UsedMoonstone;
@@ -189,7 +197,7 @@
     protected override async Task OnSafeInitializedAsync()
     {
         var character = await LandingService.Admin.GetMwFifthCharacter(CharacterId);
-        _character = new CharacterBuilder(character, LandingService.MwFifth.GameState, Logger);
+        _characterBuilder = new CharacterBuilder(character, LandingService.MwFifth.GameState, Logger);
         var revisions = await LandingService.Admin.GetMwFifthCharacterRevisions(CharacterId);
         _revisions = revisions.CharacterRevisions;
         Array.Reverse(_revisions);
@@ -198,7 +206,7 @@
 
     private void GoToAccount()
     {
-        NavigationManager.NavigateTo($"/admin/accounts/{_character?.Revision.AccountId}");
+        NavigationManager.NavigateTo($"/admin/accounts/{_characterBuilder?.Revision.AccountId}");
     }
 
     private void EditCharacter()
@@ -223,7 +231,7 @@
 
         await LoadingActionAsync(async () =>
         {
-            var characterId = _character!.Revision.RevisionId;
+            var characterId = _characterBuilder!.Revision.RevisionId;
             await LandingService.Admin.ApproveMwFifthCharacter(characterId);
             NavigationManager.NavigateTo($"/admin/mw5e/characters/{characterId}");
             await OnInitializedAsync();
@@ -243,7 +251,7 @@
 
         await LoadingActionAsync(async () =>
         {
-            var characterId = _character!.Revision.RevisionId;
+            var characterId = _characterBuilder!.Revision.RevisionId;
             await LandingService.Admin.RejectMwFifthCharacter(characterId);
             NavigationManager.NavigateTo($"/admin/mw5e/characters/{characterId}");
             await OnInitializedAsync();
@@ -263,12 +271,20 @@
         if (result.Canceled) return;
 
         var newAccountId = (string)result.Data;
-        if (newAccountId == _character!.Character.AccountId) return;
+        if (newAccountId == _characterBuilder!.Character.AccountId) return;
 
-        await LandingService.Admin.MoveMwFifthCharacter(_character.Character.CharacterId, newAccountId);
+        await LandingService.Admin.MoveMwFifthCharacter(_characterBuilder.Character.CharacterId, newAccountId);
 
         await OnParametersSetAsync();
         StateHasChanged();
+    }
+
+    private async Task SaveNotes()
+    {
+        await SafeActionAsync(async () =>
+        {
+            await LandingService.Admin.SetMwFifthCharacterNotes(_character.CharacterId, _character.PreregistrationNotes);
+        });
     }
 
 }

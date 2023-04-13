@@ -288,27 +288,31 @@
         "name": "Witchblood",
         "rank": 1,
         "physical": true,
-        "description": "Each Event at check in, you may roll on a chart that gives you small, random magical powers. Beware though, many are not beneficial. See Appendix 4, Witchblood, on page 145 for the chart."
+        "description": "Each Event at check in, you may roll on a chart that gives you small, random magical powers. Beware though, many are not beneficial. See Appendix 4, Witchblood, on page 145 for the chart.",
+        "preregistrationNote": "Roll"
     },
     {
         "title": "Witchblood 2",
         "name": "Witchblood",
         "rank": 2,
         "physical": true,
-        "description": "Each Event at check in, you may roll on a chart that gives you small, random magical powers. Beware though, many are not beneficial. See Appendix 4, Witchblood, on page 145 for the chart."
+        "description": "Each Event at check in, you may roll on a chart that gives you small, random magical powers. Beware though, many are not beneficial. See Appendix 4, Witchblood, on page 145 for the chart.",
+        "preregistrationNote": "Roll"
     },
     {
         "title": "Witchblood 3",
         "name": "Witchblood",
         "rank": 3,
         "physical": true,
-        "description": "Each Event at check in, you may roll on a chart that gives you small, random magical powers. Beware though, many are not beneficial. See Appendix 4, Witchblood, on page 145 for the chart."
+        "description": "Each Event at check in, you may roll on a chart that gives you small, random magical powers. Beware though, many are not beneficial. See Appendix 4, Witchblood, on page 145 for the chart.",
+        "preregistrationNote": "Roll"
     },
     {
         "title": "Witchblood 4",
         "name": "Witchblood",
         "rank": 4,
         "physical": true,
-        "description": "Each Event at check in, you may roll on a chart that gives you small, random magical powers. Beware though, many are not beneficial. See Appendix 4, Witchblood, on page 145 for the chart."
+        "description": "Each Event at check in, you may roll on a chart that gives you small, random magical powers. Beware though, many are not beneficial. See Appendix 4, Witchblood, on page 145 for the chart.",
+        "preregistrationNote": "Roll"
     }
 ]

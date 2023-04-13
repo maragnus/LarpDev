@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Larp.Data.MwFifth;
 
 [PublicAPI]
@@ -54,7 +56,7 @@ public class GiftPropertyValue
 
     public string Name { get; set; } = default!;
     public string Value { get; set; } = default!;
-    
+
     public void Deconstruct(out string name, out string value)
     {
         name = Name;
@@ -93,12 +95,24 @@ public class SkillDefinition
 {
     public string Name { get; set; } = default!;
     public string Title { get; set; } = default!;
+
     public SkillClass Class { get; set; }
+
     public SkillPurchasable Purchasable { get; set; }
+
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public int? RanksPerPurchase { get; set; }
+
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public int? CostPerPurchase { get; set; }
+
     public string[] Iterations { get; set; } = Array.Empty<string>();
+
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string Description { get; set; } = default!;
+
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public string? PreregistrationNote { get; set; }
 }
 
 [PublicAPI]
@@ -162,8 +176,15 @@ public class Vantage
     public string Name { get; set; } = default!;
     public string Title { get; set; } = default!;
     public int Rank { get; set; }
+
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool Physical { get; set; }
+
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? Description { get; set; }
+
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public string? PreregistrationNote { get; set; }
 
     // ReSharper disable once NonReadonlyMemberInGetHashCode
     public override int GetHashCode() => Title.GetHashCode();

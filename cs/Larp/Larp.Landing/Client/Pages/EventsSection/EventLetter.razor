@@ -96,6 +96,24 @@
                         <MudListExtended Dense T="string" MultiSelection ItemCollection="_components" SelectedValues="@(GetField<string[]>(field.Name))" SelectedValuesChanged="value => SetStrings(field.Name, value.ToArray())"/>
                     }
                     break;
+                case LetterFieldType.Character:
+                    <MudSelectExtended T="string?" ReadOnly="ReadOnly" Clearable="@(!ReadOnly)" Variant="Variant.Outlined" ItemCollection="_characters" Value="@(GetField<string>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
+                    break;
+                case LetterFieldType.Characters:
+                    @if (ReadOnly)
+                    {
+                        <MudChipSet MultiSelection ReadOnly>
+                            @foreach (var value in GetField<string[]>(field.Name) ?? Array.Empty<string>())
+                            {
+                                <MudChip>@value</MudChip>
+                            }
+                        </MudChipSet>
+                    }
+                    else
+                    {
+                        <MudListExtended Dense T="string" MultiSelection ItemCollection="_characters" SelectedValues="@(GetField<string[]>(field.Name))" SelectedValuesChanged="value => SetStrings(field.Name, value.ToArray())"/>
+                    }
+                    break;
                 case LetterFieldType.YesNo:
                     <MudSwitch T="bool" ReadOnly="ReadOnly" Checked="@(GetField<bool>(field.Name))" CheckedChanged="value => SetBool(field.Name, value)" Color="Color.Success" UnCheckedColor="Color.Error"/>
                     break;
@@ -126,6 +144,15 @@
     public LetterTemplate Template { get; set; } = default!;
 
     private string[] _components = Array.Empty<string>();
+    private string[] _characters = Array.Empty<string>();
+
+    record Character(string Id, string Name);
+
+    protected override async Task OnSafeParametersSetAsync()
+    {
+        var characters = await LandingService.GetCharacterNames();
+        _characters = characters.Values.Select(x=>x ?? "No Name Set").ToArray();
+    }
 
     protected override void OnParametersSet()
     {

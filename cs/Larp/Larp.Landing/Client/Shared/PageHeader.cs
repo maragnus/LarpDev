@@ -12,6 +12,9 @@ public sealed class PageHeader : ComponentBase
     /// </summary>
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
+    
+    [Parameter]
+    public bool Print { get; set; }
 
     [CascadingParameter]
     public PageInfo? PageInfo { get; set; }
@@ -23,5 +26,6 @@ public sealed class PageHeader : ComponentBase
             return;
 
         PageInfo.HeaderText = ChildContent;
+        PageInfo.Print = Print;
     }
 }

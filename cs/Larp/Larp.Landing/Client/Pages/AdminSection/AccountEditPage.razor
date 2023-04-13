@@ -138,6 +138,12 @@
             </MudStack>
         </MudPaper>
 
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" Class="mb-4">Notes</MudText>
+            <MudTextField T="string?" Variant="Variant.Outlined" Lines="2" Label="Preregistration Notes" @bind-Value="@_account.MwFifthPreregistrationNotes" 
+                          Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Save" AdornmentColor="Color.Success" OnAdornmentClick="SaveNotes" />
+        </MudPaper>
+        
         <MudPaper Class="pa-4 relative" Style="min-height: 250px">
             <MudOverlay DarkBackground Absolute Visible="_isLoadingAttachments">
                 <MudText Typo="Typo.h6">Refreshing...</MudText>
@@ -314,6 +320,14 @@
             var fileStream = file.CreateReadStream();
             using var streamRef = new DotNetStreamReference(stream: fileStream);
             await JS.InvokeVoidAsync("downloadFileFromStream", attachment.FileName ?? "file", streamRef);
+        });
+    }
+
+    private async Task SaveNotes()
+    {
+        await SafeActionAsync(async () =>
+        {
+            await LandingService.Admin.SetAccountNotes(AccountId, _account!.MwFifthPreregistrationNotes);
         });
     }
 

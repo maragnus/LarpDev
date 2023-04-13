@@ -128,7 +128,8 @@
     "title": "Butcher",
     "class": "Major",
     "purchasable": "Once",
-    "costPerPurchase": 15
+    "costPerPurchase": 15,
+    "preregistrationNote": "Roll"
   },
   {
     "name": "Buy/Sell",
@@ -171,7 +172,8 @@
     "title": "Cosmopolitan Connections",
     "class": "Standard",
     "purchasable": "Unavailable",
-    "costPerPurchase": 10
+    "costPerPurchase": 10,
+    "preregistrationNote": "Roll"
   },
   {
     "name": "Cure Affliction",
@@ -399,7 +401,8 @@
     "title": "Instruction",
     "class": "Standard",
     "purchasable": "Once",
-    "costPerPurchase": 10
+    "costPerPurchase": 10,
+    "preregistrationNote": "Skill Tokens"
   },
   {
     "name": "Iron Will",
@@ -486,7 +489,8 @@
     "title": "News & Rumors",
     "class": "Minor",
     "purchasable": "Once",
-    "costPerPurchase": 5
+    "costPerPurchase": 5,
+    "preregistrationNote": "Rumors"
   },
   {
     "name": "Occupational Spells",
@@ -526,79 +530,92 @@
     "name": "Production (Cloth)",
     "title": "Production X (Cloth)",
     "class": "Unavailable",
-    "purchasable": "Unavailable"
+    "purchasable": "Unavailable",
+    "preregistrationNote": "Production"
   },
   {
     "name": "Production (Food)",
     "title": "Production X (Food)",
     "class": "Unavailable",
-    "purchasable": "Unavailable"
+    "purchasable": "Unavailable",
+    "preregistrationNote": "Production"
   },
   {
     "name": "Production (Metal)",
     "title": "Production X (Metal)",
     "class": "Unavailable",
-    "purchasable": "Unavailable"
+    "purchasable": "Unavailable",
+    "preregistrationNote": "Production"
   },
   {
     "name": "Production (Parchment)",
     "title": "Production X (Parchment)",
     "class": "Unavailable",
-    "purchasable": "Unavailable"
+    "purchasable": "Unavailable",
+    "preregistrationNote": "Production"
   },
   {
     "name": "Production (Wood)",
     "title": "Production X (Wood)",
     "class": "Unavailable",
-    "purchasable": "Unavailable"
+    "purchasable": "Unavailable",
+    "preregistrationNote": "Production"
   },
   {
     "name": "Production (Air)",
     "title": "Production X (Air)",
     "class": "Unavailable",
-    "purchasable": "Unavailable"
+    "purchasable": "Unavailable",
+    "preregistrationNote": "Production"
   },
   {
     "name": "Production (Earth)",
     "title": "Production X (Earth)",
     "class": "Unavailable",
-    "purchasable": "Unavailable"
+    "purchasable": "Unavailable",
+    "preregistrationNote": "Production"
   },
   {
     "name": "Production (Fire)",
     "title": "Production X (Fire)",
     "class": "Unavailable",
-    "purchasable": "Unavailable"
+    "purchasable": "Unavailable",
+    "preregistrationNote": "Production"
   },
   {
     "name": "Production (Water)",
     "title": "Production X (Water)",
     "class": "Unavailable",
-    "purchasable": "Unavailable"
+    "purchasable": "Unavailable",
+    "preregistrationNote": "Production"
   },
   {
     "name": "Production (Chaos)",
     "title": "Production X (Chaos)",
     "class": "Unavailable",
-    "purchasable": "Unavailable"
+    "purchasable": "Unavailable",
+    "preregistrationNote": "Production"
   },
   {
     "name": "Production (Death)",
     "title": "Production X (Death)",
     "class": "Unavailable",
-    "purchasable": "Unavailable"
+    "purchasable": "Unavailable",
+    "preregistrationNote": "Production"
   },
   {
     "name": "Production (Life)",
     "title": "Production X (Life)",
     "class": "Unavailable",
-    "purchasable": "Unavailable"
+    "purchasable": "Unavailable",
+    "preregistrationNote": "Production"
   },
   {
     "name": "Production (Time)",
     "title": "Production X (Time)",
     "class": "Unavailable",
-    "purchasable": "Unavailable"
+    "purchasable": "Unavailable",
+    "preregistrationNote": "Production"
   },
   {
     "name": "Quick Learner",
@@ -638,7 +655,8 @@
     "title": "Scavenging",
     "class": "Standard",
     "purchasable": "Once",
-    "costPerPurchase": 10
+    "costPerPurchase": 10,
+    "preregistrationNote": "Salvage tags"
   },
   {
     "name": "Scribe",

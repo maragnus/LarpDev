@@ -6,6 +6,7 @@ using Larp.Data.Mongo.Services;
 using Larp.Data.MwFifth;
 using Larp.Landing.Shared;
 using Microsoft.Extensions.FileProviders;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Larp.Landing.Server.Services;
@@ -156,6 +157,94 @@ public class AdminService : IAdminService
         await _characterManager.Move(characterId, newAccountId);
 
     public async Task<StringResult> DraftEvent() => await _eventManager.DraftEvent();
+
+    public async Task SetMwFifthCharacterNotes(string characterId, string? notes) =>
+        await _characterManager.SetNotes(characterId, notes);
+
+    public async Task SetAccountNotes(string accountId, string? notes)
+    {
+        var update = Builders<Account>.Update
+            .Set(x => x.MwFifthPreregistrationNotes, notes);
+        await _db.Accounts.UpdateOneAsync(x => x.AccountId == accountId, update);
+    }
+
+    public async Task<PreregistrationNotes> GetEventNotes(string eventId)
+    {
+        var info = await _letterManager.GetByEvent(eventId);
+        var ev = info.Events.Values.FirstOrDefault()
+                 ?? throw new ResourceNotFoundException();
+
+        var attendance = (await _db.Attendances.Find(x => x.EventId == eventId).ToListAsync());
+        var accountIds = info.Letters.Select(x => x.Value.AccountId)
+            .Concat(attendance.Select(x => x.AccountId))
+            .Distinct().ToList();
+        var accounts = (await _db.Accounts
+                .Find(x => accountIds.Contains(x.AccountId))
+                .ToListAsync())
+            .ToDictionary(x => x.AccountId);
+        var accountCharacters = (await _db.MwFifthGame.Characters
+                .Find(x => x.State == CharacterState.Live && accountIds.Contains(x.AccountId))
+                .ToListAsync())
+            .ToLookup(x => x.AccountId);
+        var accountRevisions = (await _db.MwFifthGame.CharacterRevisions
+                .Find(x => x.State == CharacterState.Live && accountIds.Contains(x.AccountId))
+                .ToListAsync())
+            .ToDictionary(x => x.CharacterId);
+
+        foreach (var attendee in attendance)
+        {
+            if (info.Letters.Any(x => x.Value.AccountId == attendee.AccountId)) continue;
+
+            var id = ObjectId.GenerateNewId().ToString();
+            info.Letters.Add(id, new Letter
+            {
+                LetterId = id,
+                AccountId = attendee.AccountId,
+                State = LetterState.Approved,
+                Name = "PreEvent",
+                TemplateId = ev.LetterTemplates.FirstOrDefault(x => x.Name == "PreEvent")?.LetterTemplateId ?? "",
+                Fields =
+                {
+                    { "pcing", string.Join(",", ev.Components.Select(x => x.Name)) },
+                    { "waiver", "true" }
+                }
+            });
+        }
+        
+        var attendees = new List<PlayerAttendee>();
+        foreach (var (_, letter) in info.Letters)
+        {
+            var account = accounts.GetValueOrDefault(letter.AccountId);
+            var characters = accountCharacters[letter.AccountId].ToList();
+            var attendee = new PlayerAttendee
+            {
+                Name = account?.Name ?? "No Name Set",
+                Age = account?.Age?.ToString(),
+                Notes = account?.Notes,
+                PreEventLetter = letter,
+                Characters = (
+                    from character in characters
+                    let revision = accountRevisions[character.CharacterId]
+                    select new CharacterAttendee()
+                    {
+                        Name = character.CharacterName ?? "No Name Set",
+                        HomeChapter = revision.HomeChapter,
+                        Notes = character.PreregistrationNotes,
+                        GeneratedNotes = revision.PreregistrationNotes,
+                        Skills = revision.ConsolidatedSkills(),
+                        Advantages = revision.Advantages.Select(x => new NameRank(x.Name, x.Rank)).ToArray(),
+                        Disadvantages = revision.Disadvantages.Select(x => new NameRank(x.Name, x.Rank)).ToArray()
+                    }).ToArray()
+            };
+            attendees.Add(attendee);
+        }
+
+        return new PreregistrationNotes()
+        {
+            Event = ev,
+            Attendees = attendees.ToArray()
+        };
+    }
 
     public async Task<EventAndLetters[]> GetEvents() =>
         await _eventManager.GetEvents();

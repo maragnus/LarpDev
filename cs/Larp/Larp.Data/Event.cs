@@ -23,6 +23,7 @@ public class EventComponent
     public string ComponentId { get; set; } = default!;
     public string? Name { get; set; }
     public DateOnly Date { get; set; }
+    public bool Free { get; set; }
 }
 
 public class EventAndLetters
@@ -53,6 +54,9 @@ public class Event
     public string? ImportId { get; set; }
     public EventComponent[] Components { get; set; } = Array.Empty<EventComponent>();
     public EventLetter[] LetterTemplates { get; set; } = Array.Empty<EventLetter>();
+    public string? Notes { get; set; }
+    public int EventCost { get; set; }
+    public int ChronicleCost { get; set; }
 }
 
 [PublicAPI]

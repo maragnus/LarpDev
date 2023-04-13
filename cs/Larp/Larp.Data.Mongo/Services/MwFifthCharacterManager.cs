@@ -24,9 +24,16 @@ public class MwFifthCharacterManager
         await _mwFifth.CharacterRevisions
             .FindOneAsync(x => x.CharacterId == uniqueId && x.State == CharacterState.Live);
 
-    private async Task<Character> GetCharacter(string characterId) =>
-        await _mwFifth.Characters.FindOneAsync(x => x.CharacterId == characterId)
-        ?? throw new ResourceNotFoundException();
+    private async Task<Character> GetCharacter(string characterId, bool isAdmin)
+    {
+        var projection = isAdmin
+            ? Builders<Character>.Projection.As<Character>()
+            : Builders<Character>.Projection.Exclude(x => x.PreregistrationNotes);
+
+        return await _mwFifth.Characters.Find(x => x.CharacterId == characterId)
+                .Project(projection).FirstOrDefaultAsync()
+            ?? throw new ResourceNotFoundException();
+    }
 
     public async Task Move(string characterId, string newAccountId)
     {
@@ -61,7 +68,7 @@ public class MwFifthCharacterManager
                 .FirstOrDefaultAsync()
             ?? throw new ResourceNotFoundException();
 
-        var character = await GetCharacter(reference.UniqueId);
+        var character = await GetCharacter(reference.UniqueId, isAdmin);
 
         // If not admin, fail
         if (!isAdmin && account.AccountId == reference.AccountId)
@@ -115,7 +122,8 @@ public class MwFifthCharacterManager
                     x.CharacterId,
                     x.CharacterName,
                     x.GiftMoonstone,
-                    x.SkillMoonstone
+                    x.SkillMoonstone,
+                    x.PreregistrationNotes
                 })
                 .FirstOrDefaultAsync()
             ?? throw new ResourceNotFoundException();
@@ -126,8 +134,10 @@ public class MwFifthCharacterManager
         await _mwFifth.Characters
             .UpdateOneAsync(x => x.CharacterId == reference.CharacterId,
                 Builders<Character>.Update
+                    .Set(x=>x.State, CharacterState.Live)
                     .Set(x => x.CharacterName, reference.CharacterName)
-                    .Set(x => x.UsedMoonstone, reference.GiftMoonstone + reference.SkillMoonstone));
+                    .Set(x => x.UsedMoonstone, reference.GiftMoonstone + reference.SkillMoonstone)
+                    .Set(x=>x.PreregistrationRevisionNotes, reference.PreregistrationNotes));
 
         // Mark all (hopefully only one) Live characters are Archive
         await _mwFifth.CharacterRevisions
@@ -170,7 +180,7 @@ public class MwFifthCharacterManager
         var revision = await _mwFifth.CharacterRevisions.FindOneAsync(x => x.RevisionId == revisionId)
                        ?? throw new ResourceNotFoundException();
 
-        var character = await GetCharacter(revision.CharacterId);
+        var character = await GetCharacter(revision.CharacterId, isAdmin);
         var moonstone = await GetAvailableMoonstone(character.AccountId);
 
         if (!isAdmin && character.AccountId != account.AccountId)
@@ -193,7 +203,7 @@ public class MwFifthCharacterManager
 
         var moonstone = await GetAvailableMoonstone(reference.AccountId);
 
-        var character = await GetCharacter(reference.UniqueId);
+        var character = await GetCharacter(reference.UniqueId, isAdmin);
 
         var revisions = await _mwFifth.CharacterRevisions
             .Find(x => x.CharacterId == reference.UniqueId && x.State != CharacterState.Archived)
@@ -263,11 +273,12 @@ public class MwFifthCharacterManager
     public async Task<CharacterAndRevision> GetNew(Account account)
     {
         var now = DateTime.UtcNow;
-        var character = new Character()
+        var character = new Character
         {
             CharacterId = ObjectId.GenerateNewId().ToString(),
             AccountId = account.AccountId,
             CreatedOn = now,
+            State = CharacterState.Draft
         };
 
         var revision = new CharacterRevision
@@ -315,7 +326,7 @@ public class MwFifthCharacterManager
             .Find(x => x.CharacterId == reference.UniqueId && x.State != CharacterState.Archived)
             .ToListAsync();
 
-        var character = await GetCharacter(reference.UniqueId);
+        var character = await GetCharacter(reference.UniqueId, isAdmin);
 
         var revision =
             revisions.FirstOrDefault(x => x.State is CharacterState.Draft or CharacterState.Review)
@@ -399,5 +410,14 @@ public class MwFifthCharacterManager
         return list
             .Select(x => new CharacterAccountSummary(x.Character, x.Account))
             .ToArray();
+    }
+
+    public async Task SetNotes(string characterId, string? notes)
+    {
+        var result = await _larpContext.MwFifthGame.Characters.UpdateOneAsync(
+            x => x.CharacterId == characterId,
+            Builders<Character>.Update.Set(x => x.PreregistrationNotes, notes));
+        if (result.ModifiedCount == 0)
+            throw new ResourceNotFoundException($"Character {characterId} does not exist");
     }
 }

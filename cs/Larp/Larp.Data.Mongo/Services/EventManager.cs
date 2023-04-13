@@ -102,6 +102,9 @@ public class EventManager
                 .Set(x => x.IsHidden, @event.IsHidden)
                 .Set(x => x.LetterTemplates, @event.LetterTemplates)
                 .Set(x => x.Components, @event.Components)
+                .Set(x => x.Notes, @event.Notes)
+                .Set(x => x.EventCost, @event.EventCost)
+                .Set(x => x.ChronicleCost, @event.ChronicleCost)
         );
     }
 
@@ -183,7 +186,8 @@ public class EventManager
             _ => throw new ArgumentOutOfRangeException(nameof(list), list, null)
         };
 
-        var events = await _larpContext.Events.Find(filter).ToListAsync();
+        var eventProjection = Builders<Event>.Projection.Exclude(x => x.Notes);
+        var events = await _larpContext.Events.Find(filter).Project<Event>(eventProjection).ToListAsync();
         var templateIds = letters.Values.Select(x => x.TemplateId).Distinct().ToList();
         var templates = await _larpContext.LetterTemplates
             .Find(template => templateIds.Contains(template.LetterTemplateId)).ToListAsync();
@@ -215,6 +219,9 @@ public class EventManager
                     (attendance, @event) => new { Attedance = attendance, Event = @event })
                 .ToListAsync();
 
+        // Clear admin-only info
+        attendances.ForEach(x => x.Event.Notes = default);
+        
         return attendances
             .Select(x => new EventAttendance(
                 x.Attedance,

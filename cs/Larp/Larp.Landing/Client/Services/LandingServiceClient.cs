@@ -136,6 +136,15 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public Task<StringResult> DraftEvent() =>
         Post<StringResult>($"api/admin/events/new");
 
+    public Task SetMwFifthCharacterNotes(string characterId, string? notes) =>
+        Post($"api/admin/mw5e/characters/{characterId}/notes", new { notes });
+  
+    public Task SetAccountNotes(string accountId, string? notes) =>
+        Post($"api/admin/accounts/{accountId}/notes", new { notes });
+
+    public Task<PreregistrationNotes> GetEventNotes(string eventId) =>
+        Get<PreregistrationNotes>($"api/admin/events/{eventId}/notes");
+
     public async Task<LetterTemplate> GetLetterTemplate(string templateId) =>
         await Get<LetterTemplate>($"api/admin/letters/templates/{templateId}");
 

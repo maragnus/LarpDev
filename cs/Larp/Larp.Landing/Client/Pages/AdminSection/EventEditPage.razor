@@ -31,6 +31,15 @@
                     <MudSwitch T="bool" Label="Hidden" Color="@Color.Secondary" UncheckedColor="@Color.Success" @bind-Checked="@_event.IsHidden"/>
                 </MudTooltip>
             </MudItem>
+            <MudItem xs="12">
+                <MudTextField T="string?" Label="Preregistration Notes" @bind-Value="@_event.Notes" Variant="Variant.Outlined"/>
+            </MudItem>
+            <MudItem xs="6">
+                <MudTextField T="int" Label="First Chronicle Cost" @bind-Value="@_event.EventCost" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AttachMoney" Variant="Variant.Outlined"/>
+            </MudItem>
+            <MudItem xs="6">
+                <MudTextField T="int" Label="Additional Chronicle Cost" @bind-Value="@_event.ChronicleCost" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AttachMoney" Variant="Variant.Outlined"/>
+            </MudItem>
         </MudGrid>
 
         <MudText Typo="Typo.h6">Letters</MudText>
@@ -73,10 +82,16 @@
         <MudText Typo="Typo.h6">Components</MudText>
         <MudDataGrid T="EventComponent" Items="_components" EditMode="DataGridEditMode.Cell" ReadOnly="false" Dense>
             <Columns>
+                <PropertyColumn Property="x => x.Id" Title="Preregistration ID" IsEditable/>
                 <PropertyColumn Property="x => x.Name" Title="Component Name" IsEditable/>
                 <PropertyColumn Property="x => x.When" Title="When" Format="dddd, MMM d, yyyy" IsEditable>
                     <EditTemplate>
                         <MudDatePicker T="DateTime" Required Date="@context.Item.When" DateChanged="date => context.Item.When = date ?? DateTime.Today" Variant="Variant.Outlined"/>
+                    </EditTemplate>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.IsFree" Title="Free" IsEditable>
+                    <EditTemplate>
+                        <MudSwitch T="bool" Required Color="Color.Success" UnCheckedColor="Color.Warning" @bind-Checked="@context.Item.IsFree"/>
                     </EditTemplate>
                 </PropertyColumn>
                 <TemplateColumn T="EventComponent" IsEditable="false">
@@ -87,7 +102,11 @@
             </Columns>
         </MudDataGrid>
         <div>
-            <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="AddComponent">Add Component</MudButton>
+            <MudButtonGroup OverrideStyles="false">
+                <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="AddComponent">Add Component</MudButton>
+                <MudButton Color="Color.Tertiary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="AddComponentF123">Add F123</MudButton>
+                <MudButton Color="Color.Tertiary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="AddComponent1">Add Chronicle 1</MudButton>
+            </MudButtonGroup>
         </div>
 
         <MudText Typo="Typo.h6">Attendance</MudText>
@@ -105,12 +124,14 @@
         public string Id { get; set; } = default!;
         public string Name { get; set; } = default!;
         public DateTime When { get; set; }
+        public bool IsFree { get; set; }
 
         public Larp.Data.EventComponent ToComponent() => new()
         {
             ComponentId = Id,
             Date = DateOnly.FromDateTime(When),
             Name = Name,
+            Free = IsFree
         };
     }
 
@@ -127,11 +148,17 @@
     {
         _result = await LandingService.Admin.GetEventLetters(EventId);
         _event = _result.Events.Values.First();
+        _date = _event.Date.ToDateTime(TimeOnly.MinValue);
         _letters = new List<EventLetter>(_event.LetterTemplates);
         _components = _event.Components
-            .Select(x => new EventComponent { Id = x.ComponentId, Name = x.Name ?? "No Name", When = x.Date.ToDateTime(TimeOnly.MinValue) })
+            .Select(x => new EventComponent
+            {
+                Id = x.ComponentId,
+                Name = x.Name ?? "No Name",
+                When = x.Date.ToDateTime(TimeOnly.MinValue),
+                IsFree = x.Free
+            })
             .ToList();
-        _date = _event.Date.ToDateTime(TimeOnly.MinValue);
     }
 
     protected override async Task OnSafeInitializedAsync()
@@ -182,7 +209,21 @@
 
     private void AddComponent()
     {
-        _components.Add(new EventComponent() { Name = "New Component", When = _date });
+        _components.Add(new EventComponent() { Id = "C", Name = "New Component", When = _date });
+    }
+
+    private void AddComponentF123()
+    {
+        _components.Add(new EventComponent() { Id = "F", Name = "Friday", When = _date, IsFree = true });
+        _components.Add(new EventComponent() { Id = "1", Name = "Chronicle 1", When = _date.AddDays(1) });
+        _components.Add(new EventComponent() { Id = "2", Name = "Chronicle 2", When = _date.AddDays(1) });
+        _components.Add(new EventComponent() { Id = "3", Name = "Chronicle 3", When = _date.AddDays(2) });
+    }
+
+    private void AddComponent1()
+    {
+        _components.Add(new EventComponent() { Id = "1", Name = "First Half", When = _date });
+        _components.Add(new EventComponent() { Id = "2", Name = "Second Half", When = _date });
     }
 
     private void RemoveComponent(EventComponent contextItem) =>

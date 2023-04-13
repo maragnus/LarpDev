@@ -1,0 +1,51 @@
+table {
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+th {
+    vertical-align: bottom;
+    padding-top: 3em !important;
+}
+
+tr:nth-child(even) {
+    background: #eee;
+}
+
+td {
+    vertical-align: top;
+}
+
+td, th {
+    padding: 0.025in 0.05in;
+    min-width: fit-content;
+}
+
+tbody td {
+    border: 1pt solid gray;
+}
+
+.no-border {
+    border: none;
+    padding: 0;
+}
+
+.right {
+    text-align: right;
+}
+
+.center {
+    text-align: center;
+}
+
+.left-half {
+    border-right: none;
+}
+
+.right-half {
+    border-left: none;
+}
+
+.nowrap {
+    white-space: nowrap;
+}
