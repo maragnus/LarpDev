@@ -57,6 +57,7 @@ public class Event
     public string? Notes { get; set; }
     public int EventCost { get; set; }
     public int ChronicleCost { get; set; }
+    public string? Chapter { get; set; }
 }
 
 [PublicAPI]

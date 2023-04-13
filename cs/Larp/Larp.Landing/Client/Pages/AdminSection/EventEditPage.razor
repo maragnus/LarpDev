@@ -12,6 +12,7 @@
             <MudButton Color="Color.Success" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" OnClick="Save">Save</MudButton>
             <MudButton Color="Color.Error" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" OnClick="Delete">Delete</MudButton>
             <MudButton Color="Color.Default" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Download" OnClick="DownloadLetters">Download</MudButton>
+            <MudButton Color="Color.Default" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Print" OnClick="Preregistration">Preregistration</MudButton>
         </MudButtonGroup>
         <MudGrid>
             <MudItem xs="12" md="6">
@@ -105,7 +106,7 @@
             <MudButtonGroup OverrideStyles="false">
                 <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="AddComponent">Add Component</MudButton>
                 <MudButton Color="Color.Tertiary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="AddComponentF123">Add F123</MudButton>
-                <MudButton Color="Color.Tertiary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="AddComponent1">Add Chronicle 1</MudButton>
+                <MudButton Color="Color.Tertiary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="AddComponent">Add Halves</MudButton>
             </MudButtonGroup>
         </div>
 
@@ -242,5 +243,10 @@
 
     private void RemoveLetter(EventLetter contextItem) =>
         _letters.Remove(contextItem);
+
+    private void Preregistration()
+    {
+        NavigationManager.NavigateTo($"/admin/events/{EventId}/preregistration");
+    }
 
 }

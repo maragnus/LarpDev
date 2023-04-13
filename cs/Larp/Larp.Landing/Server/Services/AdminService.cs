@@ -174,6 +174,10 @@ public class AdminService : IAdminService
         var ev = info.Events.Values.FirstOrDefault()
                  ?? throw new ResourceNotFoundException();
 
+        var gameState = await _db.MwFifthGame.GetGameState();
+        ev.Chapter ??= gameState.HomeChapters.FirstOrDefault(x =>
+            ev.Title!.Contains(x.Name, StringComparison.InvariantCultureIgnoreCase))?.Name;
+
         var attendance = (await _db.Attendances.Find(x => x.EventId == eventId).ToListAsync());
         var accountIds = info.Letters.Select(x => x.Value.AccountId)
             .Concat(attendance.Select(x => x.AccountId))

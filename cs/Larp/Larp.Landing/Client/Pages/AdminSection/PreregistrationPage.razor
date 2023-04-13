@@ -1,6 +1,8 @@
 @page "/admin/events/{eventId}/preregistration"
 @using Larp.Landing.Shared
+@using System.Globalization
 @inject LandingService LandingService
+@inject IJSRuntime JS
 
 <PageHeader Print>Preregistration</PageHeader>
 
@@ -13,7 +15,14 @@
 
 <link href="/css/landscape.css" rel="stylesheet"/>
 
-<MudAlert Class="no-print ma-4" Severity="Severity.Info">Turn on "Background Graphics" in your print dialog. Also, make sure you select Landscape orientation.</MudAlert>
+<div class="no-print">
+    <MudStack Row Class="ma-4">
+        <MudAlert Severity="Severity.Info">Turn on "Background Graphics" in your print dialog. Also, make sure you select Landscape orientation.</MudAlert>
+        <div>
+            <MudButton StartIcon="@Icons.Material.Filled.Print" OnClick="Print" Color="Color.Error">Print</MudButton>
+        </div>
+    </MudStack>
+</div>
 
 <MudStack Row Class="every-page" Justify="Justify.SpaceBetween">
     <div>
@@ -40,13 +49,11 @@
     <MudText Class="my-4" Typo="Typo.body2">@_notes.Event.Notes</MudText>
 }
 
-<table style="width:100%">
+<table style="width:100%; font-size: 10pt">
     <thead>
     <tr>
-        <th>&nbsp;</th>
-        <th>Player (Age)</th>
+        <th colspan="2">Player (Age)</th>
         <th>Character</th>
-        <th>Home</th>
         <th colspan="2">Event</th>
         <th>PC</th>
         <th>NPC</th>
@@ -54,7 +61,7 @@
         <th>Crown</th>
         <th>N&amp;R</th>
         <th>Roles</th>
-        <th>Supplies Notes</th>
+        <th>Supplies / Notes</th>
     </tr>
     </thead>
     <tbody>
@@ -70,16 +77,16 @@
 
         bool GetBool(string name) => fields!.GetValueOrDefault(name) == "true";
 
-        var waiver = GetBool("waiver") ? "" : "Waiver";
-        var patreon = GetBool("patreon") ? " (P)" : "";
-        var discount = GetBool("discount");
+        var waiver = GetBool(FieldWaiver) ? "" : "Waiver";
+        var patreon = GetBool(FieldPatreon) ? " (P)" : "";
+        var discount = GetBool(FieldDiscount);
         var characters = GetList("characters").ToHashSet();
         if (characters.Count == 0)
             characters = player.Characters.Select(x => x.Name).ToHashSet();
 
         var costCount =
             (from component in _notes.Event.Components
-                join attending in GetList("pcing") on component.Name equals attending
+                join attending in GetList(FieldPcing) on component.Name equals attending
                 where !component.Free
                 select true).Count();
         var cost = costCount == 0 ? 0
@@ -88,29 +95,14 @@
 
         var pcingList =
             from component in _notes.Event.Components
-            join attending in GetList("pcing") on component.Name equals attending
+            join attending in GetList(FieldPcing) on component.Name equals attending
             select component.ComponentId;
         var pcing = string.Join("", pcingList);
         var npcingList =
             from component in _notes.Event.Components
-            join attending in GetList("npcing") on component.Name equals attending
+            join attending in GetList(FieldNpcing) on component.Name equals attending
             select component.ComponentId;
         var npcing = string.Join("", npcingList);
-
-        const string skillPathfinding = "Pathfinding";
-        const string skillNewsAndRumors = "News & Rumors";
-        const string skillInfoGathering = "Information Gathering";
-        const string skillCosmopolitanConnections = "Cosmopolitan Connections";
-        const string skillResearch = "Research";
-        const string skillIncome = "Income";
-        const string skillProduction = "Production";
-        const string skillWitchblood = "Witchblood";
-        const string skillButcher = "Butcher";
-        const string skillScavenging = "Scavenging";
-        const string skillImprovedScavenging = "Improved Scavenging";
-        const string skillUnwashed = "Unwashed";
-        const string skillInstruction = "Instruction";
-        const string skillImprovedInstruction = "Improved Instruction";
 
         var sheets = player.Characters
             .Where(x => characters.Contains(x.Name))
@@ -122,44 +114,53 @@
         {
             sheets.Add((0, new CharacterAttendee
             {
-              Name  = "No Character",
-                HomeChapter = "N/A"
+                Name = "No Character",
+                HomeChapter = ""
             }));
         }
 
         foreach (var (index, character) in sheets)
         {
+            var isHome = character.HomeChapter == _notes.Event.Chapter;
+
             var skills = character.Skills.Select(x => x.Name)
                 .Concat(character.Advantages.Select(x => x.Name))
                 .Concat(character.Disadvantages.Select(x => x.Name)).ToHashSet();
-            T? SkilledIn<T>(string skillName, T result, T? defaultValue = default) => skills.Contains(skillName) ? result : defaultValue;
-            string CommaList(params string[] items) => string.Join(", ", items.Where(x => !string.IsNullOrEmpty(x)));
+            T? SkilledIn<T>(bool show, string skillName, T result, T? defaultValue = default) => show ? (skills.Contains(skillName) ? result : defaultValue) : defaultValue;
+            string CommaList(params string?[] items) => string.Join(", ", items.Where(x => !string.IsNullOrEmpty(x)));
 
-            var crown = skills.Contains(skillIncome) ? (int?)character.Skills.First(x => x.Name == skillIncome).Rank : null;
-            var isNr = SkilledIn(skillNewsAndRumors, "N&R");
-            var production = character.Skills.Where(x => x.Name.StartsWith(skillProduction))
-                .Select(x => x.Name[(skillProduction.Length + 2)..^1])
-                .ToArray();
-            var salvage = SkilledIn(skillButcher, 6) + SkilledIn(skillScavenging, 3) + SkilledIn(skillImprovedScavenging, 3);
+            var crown = skills.Contains(SkillIncome) ? (int?)character.Skills.First(x => x.Name == SkillIncome).Rank : null;
+            var isNr = SkilledIn(isHome, SkillNewsAndRumors, "N&R");
+            var production = isHome ? character.Skills.Where(x => x.Name.StartsWith(SkillProduction))
+                .Select(x => x.Name[(SkillProduction.Length + 2)..^1])
+                .ToArray() : Array.Empty<string>();
+            var salvage = SkilledIn(isHome, SkillButcher, 6) + SkilledIn(isHome, SkillScavenging, 3) + SkilledIn(isHome, SkillImprovedScavenging, 3);
             var salvageTags = salvage == 0 ? "" : $"{salvage} Salvage";
-            var instruction = SkilledIn(skillInstruction, 3) + SkilledIn(skillImprovedInstruction, 3);
+            var instruction = SkilledIn(isHome, SkillInstruction, 3) + SkilledIn(isHome, SkillImprovedInstruction, 3);
             var instructionTags = instruction == 0 ? "" : $"{instruction} Instruction";
+            var home = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(character.HomeChapter);
+            var visitor = isHome ? null : "Visitor";
 
-            <tr>
+            <tr style="page-break-inside: avoid">
                 @if (index == 0)
                 {
-                    <td class="center">
+                    <td class="left-half" style="padding: 0">
                         <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked"/>
                     </td>
-                    <td class="nowrap">@player.Name @(string.IsNullOrEmpty(player.Age) ? "": $"({@player.Age})")</td>
+                    <td class="right-half nowrap">@player.Name @(string.IsNullOrEmpty(player.Age) ? "" : $"({@player.Age})")</td>
                 }
                 else
                 {
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
+                    <td class="left-half" style="padding: 0">
+                        <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked" Color="Color.Transparent"/>
+                    </td>
+                    <td class="right-half">&nbsp;</td>
                 }
-                <td>@character.Name</td>
-                <td class="nowrap">@character.HomeChapter</td>
+                <td style="margin-right: 0">
+                    <MudTooltip Text="@($"{character.Name} from {home}")">
+                        <div style="white-space: nowrap; overflow-x: hidden; text-overflow: ellipsis; width: 1.5in">@character.Name</div>
+                    </MudTooltip>
+                </td>
                 @if (index == 0)
                 {
                     <td class="left-half right" style="padding: 0">
@@ -169,26 +170,32 @@
                 }
                 else
                 {
-                    <td class="left-half">&nbsp;</td>
+                    <td class="left-half right" style="padding: 0">
+                        <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked" Color="Color.Transparent"/>
+                    </td>
                     <td class="right-half">&nbsp;</td>
                 }
                 <td class="center">@pcing</td>
                 <td class="center">@npcing</td>
                 <td class="nowrap center">
-                    @SkilledIn(skillInfoGathering, "IG")
-                    @SkilledIn(skillPathfinding, "PF")
-                    @SkilledIn(skillResearch, "R")
+
+                    @CommaList(
+                        SkilledIn(isHome, SkillInfoGathering, "IG"),
+                        SkilledIn(isHome, SkillPathfinding, "PF"),
+                        SkilledIn(isHome, SkillResearch, "R")
+                    )
                 </td>
                 <td class="nowrap center">@crown</td>
-                <td class="nowrap center">@isNr</td>
                 <td class="nowrap center">
-                    @SkilledIn(skillCosmopolitanConnections, "CC")
-                    @SkilledIn(skillWitchblood, "WB")
-                    @SkilledIn(skillUnwashed, "UW")
+                    @isNr
+                </td>
+                <td class="nowrap center">
+                    @SkilledIn(isHome, SkillCosmopolitanConnections, "CC")
+                    @SkilledIn(true, SkillWitchblood, "WB")
+                    @SkilledIn(true, SkillUnwashed, "UW")
                 </td>
                 <td>
-                    @CommaList(waiver, string.Join(", ", production), salvageTags, instructionTags)
-                    @character.Notes
+                    @CommaList(waiver, string.Join(", ", production), salvageTags, instructionTags, visitor, character.Notes)
                 </td>
                 <td class="no-print">
                     <MudChipSet ReadOnly>
@@ -200,6 +207,29 @@
                 </td>
             </tr>
         }
+    }
+    <tr style="page-break-before: always; height: 0"></tr>
+    @foreach (var index in Enumerable.Range(0, 28))
+    {
+        <tr style="page-break-inside: avoid">
+            <td class="left-half" style="padding: 0; vertical-align: middle">
+                <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked"/>
+            </td>
+            <td class="right-half nowrap">&nbsp;</td>
+            <td>
+                <div style="height: 3.25em;">&nbsp;</div>
+            </td>
+            <td class="left-half" style="padding: 0; vertical-align: middle">
+                <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked"/>
+            </td>
+            <td class="right-half nowrap">&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td colspan="5">&nbsp;</td>
+            <td class="no-print">
+                Write-in
+            </td>
+        </tr>
     }
     </tbody>
 </table>
@@ -213,6 +243,31 @@
     protected override async Task OnParametersSetAsync()
     {
         _notes = await LandingService.Admin.GetEventNotes(EventId);
+    }
+
+        const string SkillPathfinding = "Pathfinding";
+        const string SkillNewsAndRumors = "News & Rumors";
+        const string SkillInfoGathering = "Information Gathering";
+        const string SkillCosmopolitanConnections = "Cosmopolitan Connections";
+        const string SkillResearch = "Research";
+        const string SkillIncome = "Income";
+        const string SkillProduction = "Production";
+        const string SkillWitchblood = "Witchblood";
+        const string SkillButcher = "Butcher";
+        const string SkillScavenging = "Scavenging";
+        const string SkillImprovedScavenging = "Improved Scavenging";
+        const string SkillUnwashed = "Unwashed";
+        const string SkillInstruction = "Instruction";
+        const string SkillImprovedInstruction = "Improved Instruction";
+        const string FieldWaiver = "waiver";
+        const string FieldPatreon = "patreon";
+        const string FieldDiscount = "waiver";
+        const string FieldPcing = "pcing";
+        const string FieldNpcing = "npcing";
+
+    private async Task Print()
+    {
+        await JS.InvokeVoidAsync("printPage");
     }
 
 }
