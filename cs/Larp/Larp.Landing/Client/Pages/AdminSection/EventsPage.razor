@@ -31,9 +31,9 @@
                 <PropertyColumn Property="x => x.LettersSubmitted" Title="Letters Submitted"/>
                 <TemplateColumn T="EventInfo">
                     <CellTemplate>
-                        @foreach (var letter in context.Item.Event.LetterTemplates.Select(x => x.Name))
+                        @foreach (var letter in context.Item.Event.LetterTemplates)
                         {
-                            <MudIcon Size="Size.Small" Icon="@LetterIcon.GetValueOrDefault(letter)"/>
+                            <MudIcon Size="Size.Small" Color="@(letter.IsOpen ? Color.Primary : Color.Dark)" Icon="@LetterIcon.GetValueOrDefault(letter.Name)"/>
                         }
                     </CellTemplate>
                 </TemplateColumn>

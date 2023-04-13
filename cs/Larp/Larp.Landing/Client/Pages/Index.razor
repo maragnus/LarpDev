@@ -1,6 +1,6 @@
 ﻿@page "/"
 @inject LandingService LandingService
-<PageHeader>LARP Landing</PageHeader>
+<PageHeader>@LandingService.ServiceName</PageHeader>
 
 <div class="background"></div>
 <div class="buffer"></div>
@@ -39,8 +39,8 @@
 
     <MudText Typo="Typo.body2" Align="Align.Center" Style="color: #ccc;">Revision <Revision/></MudText>
     <MudStack Row Spacing="4">
-        <MudTooltip Text="LARP Landing is open source developed by Josh Brown. Please feel free to participate in its development.">
-            <MudButton Style="white-space: nowrap" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.GitHub" Variant="Variant.Filled" Href="https://github.com/maragnus/LarpDev">LARP Landing</MudButton>
+        <MudTooltip Text="@($"{LandingService.ServiceName} is open source developed by Josh Brown. Please feel free to participate in its development.")">
+            <MudButton Style="white-space: nowrap" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.GitHub" Variant="Variant.Filled" Href="https://github.com/maragnus/LarpDev">@LandingService.ServiceName</MudButton>
         </MudTooltip>
         <MudButton Style="white-space: nowrap"  Color="Color.Secondary" StartIcon="@Icons.Custom.Brands.GitHub" Variant="Variant.Filled" Href="https://github.com/maragnus/LarpDev/issues/new">Report an issue</MudButton>
         <MudButton Style="white-space: nowrap"  Color="Color.Tertiary" StartIcon="@Icons.Custom.Brands.MicrosoftVisualStudio" Variant="Variant.Filled" Href="https://dotnet.microsoft.com/en-us/apps/aspnet/web-apps/blazor">Made with Blazor</MudButton>

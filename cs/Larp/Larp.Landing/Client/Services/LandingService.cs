@@ -16,6 +16,8 @@ public enum AutoSaveState
 
 public class LandingService
 {
+    public const string ServiceName = "Mystwood Landing";
+
     private readonly ILandingService _landing;
     private readonly IAdminService _adminService;
     private readonly DataCacheService _dataCache;

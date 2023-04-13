@@ -20,7 +20,7 @@
 
 @code {
     [UsedImplicitly]
-    private PageInfo _pageInfo = new() { HeaderText = @<span>LARP Landing</span> };
+    private PageInfo _pageInfo = new() { HeaderText = @<span>@LandingService.ServiceName</span> };
     private LoadingState _loadingState = LoadingState.Loading;
     
     protected override async Task OnInitializedAsync()
