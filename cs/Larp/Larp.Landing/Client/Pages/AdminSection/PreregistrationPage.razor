@@ -1,6 +1,7 @@
 @page "/admin/events/{eventId}/preregistration"
 @using Larp.Landing.Shared
 @using System.Globalization
+@using System.Text.Json
 @inject LandingService LandingService
 @inject IJSRuntime JS
 
@@ -142,7 +143,7 @@
             var home = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(character.HomeChapter);
             var visitor = isHome ? null : "Visitor";
             var playerName = $"{@player.Name} {(string.IsNullOrEmpty(player.Age) ? "" : $"({@player.Age})")}";
-            var isPlot = skills.Contains(FieldPlot);
+            var isPlot = GetBool(FieldPlot);
             
             <tr style="page-break-inside: avoid">
                 @if (index == 0)
@@ -201,7 +202,7 @@
                         SkilledIn(isPlot && isHome, SkillInfoGathering, "IG"),
                         SkilledIn(isPlot && isHome, SkillPathfinding, "PF"),
                         SkilledIn(isPlot && isHome, SkillResearch, "R")
-                    )
+                        )
                 </td>
                 <td class="nowrap center">@crown</td>
                 <td class="nowrap center">
