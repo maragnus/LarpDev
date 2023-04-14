@@ -6,6 +6,14 @@ html, body {
     .no-print { display: none !important; }
 }
 
+@media screen {
+    .display-margin {
+        margin-left: 1em;
+        margin-right: 1em;
+    }
+    .print-only { display: none !important; }
+}
+
 h1:focus {
     outline: none;
 }

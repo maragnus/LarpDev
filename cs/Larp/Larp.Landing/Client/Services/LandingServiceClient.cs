@@ -218,8 +218,8 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
         Get<CharacterSummary[]>($"api/admin/accounts/{accountId}/characters");
 
     public Task UpdateAccount(string accountId, string? name, string? location,
-        string? phone, DateOnly? birthDate, string? notes) =>
-        Post($"api/admin/accounts/{accountId}", new { name, location, phone, birthDate, notes });
+        string? phone, DateOnly? birthDate, string? notes, int? discount) =>
+        Post($"api/admin/accounts/{accountId}", new { name, location, phone, birthDate, notes, discount });
 
     public Task AddAccountRole(string accountId, AccountRole role) =>
         Post($"api/admin/accounts/{accountId}/roles/{role}");

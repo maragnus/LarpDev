@@ -6,6 +6,7 @@ using Larp.Data.MwFifth;
 using Larp.Landing.Server.Import;
 using Microsoft.Extensions.FileProviders;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using OfficeOpenXml;
 using OfficeOpenXml.Table;
 
@@ -23,7 +24,7 @@ public class BackupManager
         _logger = logger;
         _larpContext = larpContext;
     }
-    
+
     public async Task<StringResult> Import(Stream data)
     {
         var fileProvider = _serviceProvider.GetRequiredService<IFileProvider>();
@@ -62,12 +63,14 @@ public class BackupManager
 
         using var workbook = package.Workbook;
 
+        var players = (await _larpContext.Accounts
+                .Find(_ => true)
+                .ToListAsync())
+            .ToDictionary(x => x.AccountId);
+
         var playerSheet = workbook.Worksheets.Add("Players");
         {
-            var players = await _larpContext.Accounts
-                .Find(_ => true)
-                .ToListAsync();
-            playerSheet.Cells.LoadFromCollection(players.Select(p => new
+            playerSheet.Cells.LoadFromCollection(players.Values.Select(p => new
             {
                 PlayerId = p.AccountId,
                 PlayerName = p.Name,
@@ -75,49 +78,106 @@ public class BackupManager
                 p.Emails.FirstOrDefault(x => x.IsPreferred)?.Email,
                 p.Location,
                 p.Notes,
+                PreregistrationNotes = p.MwFifthPreregistrationNotes,
+                TotalMoonstone = p.MwFifthMoonstone,
+                UsedMoonstone = p.MwFifthMoonstone,
+                UnspentMoonstone = p.MwFifthMoonstone - p.MwFifthUsedMoonstone,
             }), true, TableStyles.Light6);
         }
 
         var characterSheet = workbook.Worksheets.Add("Characters");
         {
-            var players = await _larpContext.MwFifthGame.CharacterRevisions
+            var characters = await _larpContext.MwFifthGame.CharacterRevisions
                 .Find(x => x.State == CharacterState.Live)
                 .ToListAsync();
-            characterSheet.Cells.LoadFromCollection(players.Select(p => new
+            characterSheet.Cells.LoadFromCollection(characters.Select(character =>
             {
-                CharacterId = p.RevisionId,
-                p.AccountId,
-                TotalMoonstone = 0,
-                UnspentMoonstone = 0,
-                p.CharacterName,
-                p.HomeChapter,
-                p.Occupation,
-                p.Specialty,
-                OccupationalEnhancement = p.Enhancement,
-                p.Homeland,
-                p.Religion,
-                p.Courage,
-                p.Dexterity,
-                p.Empathy,
-                p.Passion,
-                p.Prowess,
-                p.Wisdom,
-                p.Level,
-                OccupationalSkills = SkillList(p.Skills.Where(x =>
-                    x.Type is SkillPurchase.Occupation or SkillPurchase.OccupationChoice)),
-                PurchasedSkills = SkillList(p.Skills.Where(x => x.Type is SkillPurchase.Purchased)),
-                PurchasedSkillMoonstone = 0,
-                FreeSkills = SkillList(p.Skills.Where(x => x.Type is SkillPurchase.Free or SkillPurchase.Bestowed)),
-                Advantages = VantageList(p.Advantages),
-                Disadvantages = VantageList(p.Disadvantages),
-                Spells = string.Join(", ", p.Spells),
-                p.Cures,
-                p.Documents,
-                p.PublicHistory,
-                p.PrivateHistory,
-                p.UnusualFeatures,
-                p.Notes
+                var account = players[character.AccountId];
+
+                return new
+                {
+                    CharacterId = character.RevisionId,
+                    PlayerId = character.AccountId,
+                    PlayerTotalMoonstone = account.MwFifthMoonstone,
+                    PlayerUnspentMoonstone = account.MwFifthMoonstone - account.MwFifthUsedMoonstone,
+                    character.CharacterName,
+                    PlayerName = account.Name ?? "No Name Set",
+                    character.HomeChapter,
+                    character.Occupation,
+                    character.Specialty,
+                    OccupationalEnhancement = character.Enhancement,
+                    character.Homeland,
+                    character.Religion,
+                    character.Courage,
+                    character.Dexterity,
+                    character.Empathy,
+                    character.Passion,
+                    character.Prowess,
+                    character.Wisdom,
+                    character.GiftMoonstone,
+                    OccupationalSkills = SkillList(character.Skills.Where(x =>
+                        x.Type is SkillPurchase.Occupation or SkillPurchase.OccupationChoice)),
+                    PurchasedSkills = SkillList(character.Skills.Where(x => x.Type is SkillPurchase.Purchased)),
+                    character.SkillMoonstone,
+                    SkillCount = character.Skills.Where(x => x.Type is SkillPurchase.Purchased)
+                        .Sum(x => Math.Min(1, x.Purchases ?? 1)),
+                    FreeSkills =
+                        SkillList(character.Skills.Where(x => x.Type is SkillPurchase.Free or SkillPurchase.Bestowed)),
+                    Advantages = VantageList(character.Advantages),
+                    Disadvantages = VantageList(character.Disadvantages),
+                    Spells = string.Join(", ", character.Spells),
+                    character.Cures,
+                    character.Documents,
+                    character.PublicHistory,
+                    character.PrivateHistory,
+                    character.UnusualFeatures,
+                    CharacterNotes = character.Notes,
+                    PlayerNotes = account.Notes,
+                    CharacterPreregistrationNotes = character.PreregistrationNotes,
+                    PlayerPreregistrationNotes = account.MwFifthPreregistrationNotes,
+                };
             }), true, TableStyles.Light6);
+        }
+
+        var moonstonesSheet = workbook.Worksheets.Add("Moonstones");
+        {
+            var events = await _larpContext.Events.Find(_ => true).ToListAsync();
+            var attendances = (await _larpContext.Attendances.AsQueryable()
+                    .GroupBy(x => x.EventId)
+                    .ToListAsync())
+                .ToDictionary(x => x.Key, x => x.ToArray());
+
+            moonstonesSheet.Cells[1, 1].Value = "ID";
+            moonstonesSheet.Cells[1, 2].Value = "Player";
+            moonstonesSheet.Cells[1, 3].Value = "Total MS";
+
+            var row = 2;
+            foreach (var player in players.Values)
+            {
+                player.ImportId = row;
+                moonstonesSheet.Cells[row, 1].Value = player.AccountId;
+                moonstonesSheet.Cells[row, 2].Value = player.Name ?? "No Name Set";
+                moonstonesSheet.Cells[row, 3].Value = player.MwFifthMoonstone;
+                row++;
+            }
+
+            var column = 4;
+            foreach (var @event in events)
+            {
+                moonstonesSheet.Cells[1, column].Value = @event.Title;
+                foreach (var attendance in attendances.GetValueOrDefault(@event.EventId) ?? Array.Empty<Attendance>())
+                {
+                    var player = players[attendance.AccountId];
+                    moonstonesSheet.Cells[player.ImportId ?? 0, column].Value = @attendance.MwFifth?.Moonstone;
+                }
+
+                column++;
+            }
+
+            moonstonesSheet.Cells[1, 1, row - 1, 1].Style.Font.Bold = true;
+            moonstonesSheet.Cells[1, 1, 1, column - 1].Style.Font.Bold = true;
+            moonstonesSheet.Cells[1, 1, 1, column - 1].Style.TextRotation = 90;
+            moonstonesSheet.Columns[1, column - 1].AutoFit();
         }
 
         string SkillList(IEnumerable<CharacterSkill> skills) =>
@@ -130,7 +190,7 @@ public class BackupManager
 
         return path;
     }
-    
+
     async Task<Dictionary<string, AccountName>> GetAccountNames()
     {
         var names = await _larpContext.Accounts.Find(_ => true)
@@ -148,7 +208,7 @@ public class BackupManager
         var letterManager = _serviceProvider.GetRequiredService<LetterManager>();
         var eventManager = _serviceProvider.GetRequiredService<EventManager>();
         var fileProvider = _serviceProvider.GetRequiredService<IFileProvider>();
-        
+
         var info = await letterManager.GetByEvent(eventId);
         var @event = info.Events.First().Value;
         var attendance = await eventManager.GetEventAttendances(eventId);
@@ -160,7 +220,7 @@ public class BackupManager
         var accounts = await _larpContext.Accounts.Find(x => playerList.Contains(x.AccountId)).ToListAsync();
         var characters = await _larpContext.MwFifthGame.CharacterRevisions.Find(x => playerList.Contains(x.AccountId))
             .ToListAsync();
-        
+
         var file = new FileInfo(path.PhysicalPath!);
         using var package = new ExcelPackage(file);
 
@@ -175,8 +235,8 @@ public class BackupManager
                 Moonstone = p.MwFifth?.Moonstone
             }), true, TableStyles.Light6);
         }
-        
-        foreach (var letters in info.Letters.GroupBy(x=>x.Value.TemplateId, x=>x.Value))
+
+        foreach (var letters in info.Letters.GroupBy(x => x.Value.TemplateId, x => x.Value))
         {
             var template = info.LetterTemplates[letters.Key];
 
@@ -220,5 +280,4 @@ public class BackupManager
 
         return path;
     }
-
 }

@@ -38,8 +38,11 @@
                 <MudItem xs="4" sm="2">
                     <MudField T="int?" Label="Age" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Calculate">@_account.Age</MudField>
                 </MudItem>
-                <MudItem xs="12">
+                <MudItem xs="12" sm="8">
                     <MudTextField T="string?" Label="Allergies & Disabilities" InputType="InputType.Text" Value="_account.Notes" ValueChanged="(value) => Set(() => _account.Notes = value)"/>
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <MudTextField T="int?" Label="Event Discount" InputType="InputType.Number" Value="_account.DiscountPercent" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Percent" ValueChanged="(value) => Set(() => _account.DiscountPercent = value)"/>
                 </MudItem>
                 <MudItem xs="12">
                     <MudButton StartIcon="@Icons.Material.Filled.Save" Disabled="!_changed" OnClick="Save" Color="Color.Primary" Variant="Variant.Outlined">Save Changes</MudButton>
@@ -244,7 +247,7 @@
 
         await SafeActionAsync(async () =>
         {
-            await LandingService.Admin.UpdateAccount(AccountId, _account!.Name, _account.Location, _account.Phone, _account.BirthDate, _account.Notes);
+            await LandingService.Admin.UpdateAccount(AccountId, _account!.Name, _account.Location, _account.Phone, _account.BirthDate, _account.Notes, _account.DiscountPercent);
             _changed = false;
             _account = await LandingService.Admin.GetAccount(AccountId);
         });

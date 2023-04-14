@@ -44,6 +44,8 @@ public class Account
     public int? MwFifthUsedMoonstone { get; set; }
     public string? MwFifthPreregistrationNotes { get; set; }
 
+    public int? DiscountPercent { get; set; }
+    
     [BsonIgnore]
     public string? PreferredEmail =>
         (Emails.FirstOrDefault(x => x.IsPreferred) ?? Emails.FirstOrDefault(x => x.IsVerified))?.Email;

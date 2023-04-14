@@ -23,7 +23,7 @@ public interface IAdminService
 
     [ApiPost("accounts/{accountId}"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task UpdateAccount(string accountId, string? name, string? location, string? phone, DateOnly? birthDate,
-        string? notes);
+        string? notes, int? discount);
 
     [ApiPost("accounts/{accountId}/roles/{role}"), ApiAuthenticated(AccountRole.AccountAdmin)]
     Task AddAccountRole(string accountId, AccountRole role);

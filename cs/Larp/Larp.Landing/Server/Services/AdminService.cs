@@ -71,7 +71,8 @@ public class AdminService : IAdminService
             toAccount.Location ?? fromAccount.Location,
             toAccount.Phone ?? fromAccount.Phone,
             toAccount.BirthDate ?? fromAccount.BirthDate,
-            $"{fromAccount.Notes ?? ""} {toAccount.Notes ?? ""}".Trim()
+            $"{fromAccount.Notes ?? ""} {toAccount.Notes ?? ""}".Trim(),
+            toAccount.DiscountPercent ?? fromAccount.DiscountPercent
         );
 
         await _db.Accounts.DeleteOneAsync(account => account.AccountId == fromAccountId);
@@ -227,6 +228,7 @@ public class AdminService : IAdminService
                 Age = account?.Age?.ToString(),
                 Notes = account?.Notes,
                 PreEventLetter = letter,
+                DiscountPercentage = account?.DiscountPercent,
                 Characters = (
                     from character in characters
                     let revision = accountRevisions[character.CharacterId]
@@ -347,14 +349,15 @@ public class AdminService : IAdminService
     }
 
     public async Task UpdateAccount(string accountId, string? name, string? location, string? phone,
-        DateOnly? birthDate, string? notes)
+        DateOnly? birthDate, string? notes, int? discount)
     {
         var update = Builders<Account>.Update
             .Set(x => x.Name, name)
             .Set(x => x.Location, location)
             .Set(x => x.Phone, phone)
             .Set(x => x.Notes, notes)
-            .Set(x => x.BirthDate, birthDate);
+            .Set(x => x.BirthDate, birthDate)
+            .Set(x=>x.DiscountPercent, discount);
 
         await _db.Accounts.UpdateOneAsync(x => x.AccountId == accountId, update);
     }

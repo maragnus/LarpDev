@@ -327,7 +327,8 @@ public class ExcelImporter
 
             var homeChapter = TranslateHomeChapter((string)sheet.Cells[row, 6].Value);
             var religion = TranslateReligion((string)sheet.Cells[row, 10].Value);
-            var skills = TranslateSkills((string?)sheet.Cells[row, 20].Value);
+            var skills = TranslateSkills((string?)sheet.Cells[row, 20].Value, SkillPurchase.Purchased);
+            var freeSkills = TranslateSkills((string?)sheet.Cells[row, 23].Value, SkillPurchase.Free);
             var advantages = TranslateVantages((string)sheet.Cells[row, 24].Value);
             var disadvantages = TranslateVantages((string)sheet.Cells[row, 25].Value);
             var spells = TranslateList((string)sheet.Cells[row, 26].Value);
@@ -384,7 +385,8 @@ public class ExcelImporter
                 Occupation = occupation,
                 Enhancement = enhancement,
                 OccupationalChosenSkills = occupationSkills.Concat(enhancementSkills).ToArray(),
-                PurchasedSkills = skills
+                PurchasedSkills = skills,
+                FreeSkills = freeSkills
             };
             builder.UpdateMoonstone();
 
@@ -449,7 +451,7 @@ public class ExcelImporter
             .ToArray();
     }
 
-    private CharacterSkill[] TranslateSkills(string? value)
+    private CharacterSkill[] TranslateSkills(string? value, SkillPurchase purchase)
     {
         if (value == null) return Array.Empty<CharacterSkill>();
 
@@ -469,9 +471,7 @@ public class ExcelImporter
                 else
                 {
                     match = Regex.Match(item, @"^(.*) \d", RegexOptions.Compiled);
-                    if (!match.Success)
-                        throw new Exception($"Skill \"{item}\" is not properly formatted");
-                    name = match.Groups[1].Value;
+                    name = match.Success ? match.Groups[1].Value : item;
                     count = 1;
                 }
 
@@ -488,7 +488,7 @@ public class ExcelImporter
                     Name = skill.Name,
                     Purchases = count,
                     Rank = (skill.RanksPerPurchase ?? 0) * count,
-                    Type = SkillPurchase.Purchased
+                    Type = purchase
                 };
             })
             .Where(x => !string.IsNullOrWhiteSpace(x.Name))

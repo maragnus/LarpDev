@@ -1,7 +1,6 @@
 @page "/admin/events/{eventId}/preregistration"
 @using Larp.Landing.Shared
 @using System.Globalization
-@using System.Text.Json
 @inject LandingService LandingService
 @inject IJSRuntime JS
 
@@ -9,8 +8,10 @@
 
 @if (_notes == null)
 {
-    <MudText Typo="Typo.h6">Loading...</MudText>
-    <MudProgressLinear Indeterminate/>
+    <MudStack Spacing="4" Class="ma-4">
+        <MudText Typo="Typo.h6">Loading...</MudText>
+        <MudProgressLinear Indeterminate/>
+    </MudStack>
     return;
 }
 
@@ -26,6 +27,8 @@
         <MudSwitch T="bool" @bind-Checked="_showSkills">Debug Mode</MudSwitch>
     </MudStack>
 </div>
+
+<div class="display-margin">
 
 <MudStack Row Class="every-page" Justify="Justify.SpaceBetween">
     <div>
@@ -53,211 +56,213 @@
 }
 
 <table style="width:100%; font-size: 10pt">
-    <thead>
-    <tr>
-        <th colspan="2">Player (Age)</th>
-        <th>Character</th>
-        <th colspan="2">Event</th>
-        <th>PC</th>
-        <th>NPC</th>
-        <th>Plot</th>
-        <th>Crown</th>
-        <th>N&amp;R</th>
-        <th>Roles</th>
-        <th>Supplies / Notes</th>
-    </tr>
-    </thead>
-    <tbody>
-    @foreach (var player in _notes.Attendees.OrderBy(x => x.Name))
-    {
-        var fields = player.PreEventLetter?.Fields ?? new Dictionary<string, string>();
+<thead>
+<tr>
+    <th colspan="2">Player (Age)</th>
+    <th>Character</th>
+    <th colspan="2">Event</th>
+    <th>PC</th>
+    <th>NPC</th>
+    <th>Plot</th>
+    <th>Crown</th>
+    <th>N&amp;R</th>
+    <th>Roles</th>
+    <th>Supplies / Notes</th>
+</tr>
+</thead>
+<tbody>
+@foreach (var player in _notes.Attendees.OrderBy(x => x.Name))
+{
+    var fields = player.PreEventLetter?.Fields ?? new Dictionary<string, string>();
 
-        string[] GetList(string name) => (fields!.GetValueOrDefault(name) ?? "")
-            .Split(',')
-            .Select(x => x.Trim())
-            .Where(x => !string.IsNullOrEmpty(x))
-            .ToArray();
+    string[] GetList(string name) => (fields!.GetValueOrDefault(name) ?? "")
+        .Split(',')
+        .Select(x => x.Trim())
+        .Where(x => !string.IsNullOrEmpty(x))
+        .ToArray();
 
-        bool GetBool(string name) => string.Equals(fields!.GetValueOrDefault(name), "True", StringComparison.InvariantCultureIgnoreCase);
+    bool GetBool(string name) => string.Equals(fields!.GetValueOrDefault(name), "True", StringComparison.InvariantCultureIgnoreCase);
 
-        var waiver = GetBool(FieldWaiver) ? "" : "Waiver";
-        var patreon = GetBool(FieldPatreon) ? " (P)" : "";
-        var discount = GetBool(FieldDiscount);
-        var characters = GetList("characters").ToHashSet();
-        if (characters.Count == 0)
-            characters = player.Characters.Select(x => x.Name).ToHashSet();
+    var waiver = GetBool(FieldWaiver) ? "" : "Waiver";
+    var patreon = GetBool(FieldPatreon) ? " (P)" : "";
+    var familyDiscount = GetBool(FieldDiscount);
+    var characters = GetList("characters").ToHashSet();
+    if (characters.Count == 0)
+        characters = player.Characters.Select(x => x.Name).ToHashSet();
 
-        var costCount =
-            (from component in _notes.Event.Components
-                join attending in GetList(FieldPcing) on component.Name equals attending
-                where !component.Free
-                select true).Count();
-        var cost = costCount == 0 ? 0
-            : _notes.Event.EventCost + _notes.Event.ChronicleCost * (costCount - 1);
-        if (discount) cost -= 5 * costCount;
-
-        var pcingList =
-            from component in _notes.Event.Components
+    var costCount =
+        (from component in _notes.Event.Components
             join attending in GetList(FieldPcing) on component.Name equals attending
-            select component.ComponentId;
-        var pcing = string.Join("", pcingList);
-        var npcingList =
-            from component in _notes.Event.Components
-            join attending in GetList(FieldNpcing) on component.Name equals attending
-            select component.ComponentId;
-        var npcing = string.Join("", npcingList);
+            where !component.Free
+            select true).Count();
+    var cost = costCount == 0 ? 0
+        : _notes.Event.EventCost + _notes.Event.ChronicleCost * (costCount - 1);
+    if (familyDiscount) cost -= 5 * costCount;
+    if (player.DiscountPercentage.HasValue) cost = (int)Math.Floor((double)cost * (1 - ((double)player.DiscountPercentage.Value / 100d)));
 
-        var sheets = player.Characters
-            .Where(x => characters.Contains(x.Name))
-            .OrderBy(x => x.Name)
-            .Select((attendee, i) => (i, attendee))
-            .ToList();
+    var pcingList =
+        from component in _notes.Event.Components
+        join attending in GetList(FieldPcing) on component.Name equals attending
+        select component.ComponentId;
+    var pcing = string.Join("", pcingList);
+    var npcingList =
+        from component in _notes.Event.Components
+        join attending in GetList(FieldNpcing) on component.Name equals attending
+        select component.ComponentId;
+    var npcing = string.Join("", npcingList);
 
-        if (sheets.Count == 0)
-        {
-            sheets.Add((0, new CharacterAttendee
-            {
-                Name = "No Character",
-                HomeChapter = ""
-            }));
-        }
+    var sheets = player.Characters
+        .Where(x => characters.Contains(x.Name))
+        .OrderBy(x => x.Name)
+        .Select((attendee, i) => (i, attendee))
+        .ToList();
 
-        foreach (var (index, character) in sheets)
-        {
-            var isHome = character.HomeChapter == _notes.Event.Chapter;
-            var skills = character.Skills.Select(x => x.Name)
-                .Concat(character.Advantages.Select(x => x.Name))
-                .Concat(character.Disadvantages.Select(x => x.Name)).ToHashSet();
-            T? SkilledIn<T>(bool show, string skillName, T result, T? defaultValue = default) => show ? (skills.Contains(skillName) ? result : defaultValue) : defaultValue;
-            string CommaList(params string?[] items) => string.Join(", ", items.Where(x => !string.IsNullOrEmpty(x)));
-
-            var crown = skills.Contains(SkillIncome) ? (int?)character.Skills.First(x => x.Name == SkillIncome).Rank : null;
-            var isNr = SkilledIn(isHome, SkillNewsAndRumors, "N&R");
-            var production = isHome ? character.Skills.Where(x => x.Name.StartsWith(SkillProduction))
-                .Select(x => x.Name[(SkillProduction.Length + 2)..^1])
-                .ToArray() : Array.Empty<string>();
-            var salvage = SkilledIn(isHome, SkillButcher, 6) + SkilledIn(isHome, SkillScavenging, 3) + SkilledIn(isHome, SkillImprovedScavenging, 3);
-            var salvageTags = salvage == 0 ? "" : $"{salvage} Salvage";
-            var instruction = SkilledIn(isHome, SkillInstruction, 3) + SkilledIn(isHome, SkillImprovedInstruction, 3);
-            var instructionTags = instruction == 0 ? "" : $"{instruction} Instruction";
-            var home = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(character.HomeChapter);
-            var visitor = isHome ? null : "Visitor";
-            var playerName = $"{@player.Name} {(string.IsNullOrEmpty(player.Age) ? "" : $"({@player.Age})")}";
-            var isPlot = GetBool(FieldPlot);
-            
-            <tr style="page-break-inside: avoid">
-                @if (index == 0)
-                {
-                    <td class="left-half" style="padding: 0">
-                        <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked"/>
-                    </td>
-                    <td class="right-half nowrap">
-                        @if (_showSkills && player.AccountId != null)
-                        {
-                            <MudLink Href="@($"/admin/accounts/{player.AccountId}")" Target="_blank">@playerName</MudLink>   
-                        }
-                        else
-                        {
-                            @playerName
-                        }
-                    </td>
-                }
-                else
-                {
-                    <td class="left-half" style="padding: 0">
-                        <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked" Color="Color.Transparent"/>
-                    </td>
-                    <td class="right-half">&nbsp;</td>
-                }
-                <td style="margin-right: 0">
-                    <MudTooltip Text="@($"{character.Name} from {home}")">
-                        @if (_showSkills && character.RevisionId != null)
-                        {
-                            <MudLink Href="@($"/admin/mw5e/characters/{character.RevisionId}")" Target="_blank">@character.Name</MudLink>   
-                        }
-                        else
-                        {
-                            <div style="white-space: nowrap; overflow-x: hidden; text-overflow: ellipsis; width: 1.5in">@character.Name</div>
-                        }
-                    </MudTooltip>
-                </td>
-                @if (index == 0)
-                {
-                    <td class="left-half right" style="padding: 0">
-                        <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked"/>
-                    </td>
-                    <td class="right-half nowrap">$@cost @patreon</td>
-                }
-                else
-                {
-                    <td class="left-half right" style="padding: 0">
-                        <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked" Color="Color.Transparent"/>
-                    </td>
-                    <td class="right-half">&nbsp;</td>
-                }
-                <td class="center">@pcing</td>
-                <td class="center">@npcing</td>
-                <td class="nowrap center">
-                    @CommaList(
-                        SkilledIn(isPlot && isHome, SkillInfoGathering, "IG"),
-                        SkilledIn(isPlot && isHome, SkillPathfinding, "PF"),
-                        SkilledIn(isPlot && isHome, SkillResearch, "R")
-                        )
-                </td>
-                <td class="nowrap center">@crown</td>
-                <td class="nowrap center">
-                    @isNr
-                </td>
-                <td class="nowrap center">
-                    @SkilledIn(isHome, SkillCosmopolitanConnections, "CC")
-                    @SkilledIn(true, SkillWitchblood, "WB")
-                    @SkilledIn(true, SkillUnwashed, "UW")
-                </td>
-                <td>
-                    @CommaList(waiver, string.Join(", ", production), salvageTags, instructionTags, visitor, character.Notes)
-                </td>
-                @if (_showSkills)
-                {
-                    <td class="no-print">
-                        <MudChipSet ReadOnly>
-                            @foreach (var skill in skills)
-                            {
-                                <MudChip Size="Size.Small">@skill</MudChip>
-                            }
-                        </MudChipSet>
-                    </td>
-                }
-            </tr>
-        }
-    }
-    <tr style="page-break-before: always; height: 0"></tr>
-    @foreach (var index in Enumerable.Range(0, 28))
+    if (sheets.Count == 0)
     {
+        sheets.Add((0, new CharacterAttendee
+        {
+            Name = "No Character",
+            HomeChapter = ""
+        }));
+    }
+
+    foreach (var (index, character) in sheets)
+    {
+        var isHome = character.HomeChapter == _notes.Event.Chapter;
+        var skills = character.Skills.Select(x => x.Name)
+            .Concat(character.Advantages.Select(x => x.Name))
+            .Concat(character.Disadvantages.Select(x => x.Name)).ToHashSet();
+        T? SkilledIn<T>(bool show, string skillName, T result, T? defaultValue = default) => show ? (skills.Contains(skillName) ? result : defaultValue) : defaultValue;
+        string CommaList(params string?[] items) => string.Join(", ", items.Where(x => !string.IsNullOrEmpty(x)));
+
+        var crown = skills.Contains(SkillIncome) ? (int?)character.Skills.First(x => x.Name == SkillIncome).Rank : null;
+        var isNr = SkilledIn(isHome, SkillNewsAndRumors, "N&R");
+        var production = isHome ? character.Skills.Where(x => x.Name.StartsWith(SkillProduction))
+            .Select(x => x.Name[(SkillProduction.Length + 2)..^1])
+            .ToArray() : Array.Empty<string>();
+        var salvage = SkilledIn(isHome, SkillButcher, 6) + SkilledIn(isHome, SkillScavenging, 3) + SkilledIn(isHome, SkillImprovedScavenging, 3);
+        var salvageTags = salvage == 0 ? "" : $"{salvage} Salvage";
+        var instruction = SkilledIn(isHome, SkillInstruction, 3) + SkilledIn(isHome, SkillImprovedInstruction, 3);
+        var instructionTags = instruction == 0 ? "" : $"{instruction} Instruction";
+        var home = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(character.HomeChapter);
+        var visitor = isHome ? null : "Visitor";
+        var playerName = $"{@player.Name} {(string.IsNullOrEmpty(player.Age) ? "" : $"({@player.Age})")}";
+        var isPlot = GetBool(FieldPlot);
+
         <tr style="page-break-inside: avoid">
-            <td class="left-half" style="padding: 0; vertical-align: middle">
-                <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked"/>
+            @if (index == 0)
+            {
+                <td class="left-half" style="padding: 0">
+                    <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked"/>
+                </td>
+                <td class="right-half nowrap">
+                    @if (_showSkills && player.AccountId != null)
+                    {
+                        <MudLink Href="@($"/admin/accounts/{player.AccountId}")" Target="_blank">@playerName</MudLink>
+                    }
+                    else
+                    {
+                        @playerName
+                    }
+                </td>
+            }
+            else
+            {
+                <td class="left-half" style="padding: 0">
+                    <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked" Color="Color.Transparent"/>
+                </td>
+                <td class="right-half">&nbsp;</td>
+            }
+            <td style="margin-right: 0">
+                <MudTooltip Text="@($"{character.Name} from {home}")">
+                    @if (_showSkills && character.RevisionId != null)
+                    {
+                        <MudLink Href="@($"/admin/mw5e/characters/{character.RevisionId}")" Target="_blank">@character.Name</MudLink>
+                    }
+                    else
+                    {
+                        <div style="white-space: nowrap; overflow-x: hidden; text-overflow: ellipsis; width: 1.5in">@character.Name</div>
+                    }
+                </MudTooltip>
             </td>
-            <td class="right-half nowrap">&nbsp;</td>
+            @if (index == 0)
+            {
+                <td class="left-half right" style="padding: 0">
+                    <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked"/>
+                </td>
+                <td class="right-half nowrap">$@cost @patreon</td>
+            }
+            else
+            {
+                <td class="left-half right" style="padding: 0">
+                    <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked" Color="Color.Transparent"/>
+                </td>
+                <td class="right-half">&nbsp;</td>
+            }
+            <td class="center">@pcing</td>
+            <td class="center">@npcing</td>
+            <td class="nowrap center">
+                @CommaList(
+                    SkilledIn(isPlot && isHome, SkillInfoGathering, "IG"),
+                    SkilledIn(isPlot && isHome, SkillPathfinding, "PF"),
+                    SkilledIn(isPlot && isHome, SkillResearch, "R")
+                    )
+            </td>
+            <td class="nowrap center">@crown</td>
+            <td class="nowrap center">
+                @isNr
+            </td>
+            <td class="nowrap center">
+                @SkilledIn(isHome, SkillCosmopolitanConnections, "CC")
+                @SkilledIn(true, SkillWitchblood, "WB")
+                @SkilledIn(true, SkillUnwashed, "UW")
+            </td>
             <td>
-                <div style="height: 3.25em;">&nbsp;</div>
+                @CommaList(waiver, string.Join(", ", production), salvageTags, instructionTags, visitor, character.Notes)
             </td>
-            <td class="left-half" style="padding: 0; vertical-align: middle">
-                <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked"/>
-            </td>
-            <td class="right-half nowrap">&nbsp;</td>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-            <td colspan="5">&nbsp;</td>
             @if (_showSkills)
             {
                 <td class="no-print">
-                    Write-in
+                    <MudChipSet ReadOnly>
+                        @foreach (var skill in skills)
+                        {
+                            <MudChip Size="Size.Small">@skill</MudChip>
+                        }
+                    </MudChipSet>
                 </td>
             }
         </tr>
     }
-    </tbody>
+}
+<tr style="page-break-before: always; height: 0"></tr>
+@foreach (var _ in Enumerable.Range(0, 28))
+{
+    <tr style="page-break-inside: avoid" class="print-only">
+        <td class="left-half" style="padding: 0; vertical-align: middle">
+            <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked"/>
+        </td>
+        <td class="right-half nowrap">&nbsp;</td>
+        <td>
+            <div style="height: 3.25em;">&nbsp;</div>
+        </td>
+        <td class="left-half" style="padding: 0; vertical-align: middle">
+            <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked"/>
+        </td>
+        <td class="right-half nowrap">&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td colspan="5">&nbsp;</td>
+        @if (_showSkills)
+        {
+            <td class="no-print">
+                Write-in
+            </td>
+        }
+    </tr>
+}
+</tbody>
 </table>
+</div>
 
 @code {
     private PreregistrationNotes? _notes;

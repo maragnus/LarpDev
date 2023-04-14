@@ -11,6 +11,7 @@ public class PlayerAttendee
     public CharacterAttendee[] Characters { get; set; } = Array.Empty<CharacterAttendee>();
     public string? Notes { get; set; }
     public Letter? PreEventLetter { get; set; }
+    public int? DiscountPercentage { get; set; }
 }
 
 public class CharacterAttendee
