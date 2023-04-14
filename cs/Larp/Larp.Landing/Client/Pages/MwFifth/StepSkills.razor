@@ -47,7 +47,7 @@
     @foreach (var skill in _skills.Where(x => x.IsPurchased))
     {
         <MudItem xs="6">
-            <MudPaper Style="padding: 0.5em">
+            <MudPaper Class="pa-4">
                 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                     <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
                         <MudAvatar Size="Size.Medium">@skill.Purchase.Purchases</MudAvatar>

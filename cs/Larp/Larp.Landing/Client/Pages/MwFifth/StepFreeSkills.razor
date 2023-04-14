@@ -4,7 +4,7 @@
 
 <MudText Typo="Typo.h6">Free skills</MudText>
 <MudText Typo="Typo.body2">
-    These skills are added free at no moonstone cost.
+    These skills are added free at no moonstone cost. If you selected one or more <strong>Talent</strong> Advantages, you should make your skill selections here.
 </MudText>
 
 <StepDivider/>
@@ -31,7 +31,7 @@
     @foreach (var skill in _skills.Where(x => x.IsPurchased))
     {
         <MudItem xs="6">
-            <MudPaper Style="padding: 0.5em">
+            <MudPaper Class="pa-4">
                 <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
                     <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
                         <MudAvatar Size="Size.Medium">@skill.Purchase.Purchases</MudAvatar>
@@ -137,7 +137,7 @@
     {
         _skills = Character.GameState.Skills.Select(
             definition => new SkillItem(definition,
-                Character.PurchasedSkills.FirstOrDefault(x => x.Name == definition.Name)
+                Character.FreeSkills.FirstOrDefault(x => x.Name == definition.Name)
                 ?? new CharacterSkill() { Name = definition.Name, Purchases = 0, Rank = 0, Type = SkillPurchase.Free }))
             .ToArray();
 

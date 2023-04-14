@@ -249,22 +249,22 @@
         "description": "Once per Day, you may take up a defensive position (a roughly 10 foot area) and resolve to hold it to the last. As long as you do not leave your post, your current and maximum Hit Points are increased by 8. This stacks with any armor you might be wearing. You may not use this ability in duels of any sort."
     },
     {
-        "title": "Talent 1",
-        "name": "Talent",
+        "title": "Talent: Minor 1",
+        "name": "Talent: Minor",
         "rank": 1,
         "physical": false,
         "description": "You gain one Minor skill. You have a skill or knack that does not depend on your Occupation. You must be able to explain how you came by this talent."
     },
     {
-        "title": "Talent 2",
-        "name": "Talent",
+        "title": "Talent: Standard 2",
+        "name": "Talent: Standard",
         "rank": 2,
         "physical": false,
         "description": "You gain one Standard skill. You have a skill or knack that does not depend on your Occupation. You must be able to explain how you came by this talent."
     },
     {
-        "title": "Talent 3",
-        "name": "Talent",
+        "title": "Talent: Major 3",
+        "name": "Talent: Major",
         "rank": 3,
         "physical": false,
         "description": "You gain one Major skill. You have a skill or knack that does not depend on your Occupation. You must be able to explain how you came by this talent."
