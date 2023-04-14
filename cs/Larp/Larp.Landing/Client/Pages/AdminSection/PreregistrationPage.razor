@@ -142,6 +142,7 @@
             var home = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(character.HomeChapter);
             var visitor = isHome ? null : "Visitor";
             var playerName = $"{@player.Name} {(string.IsNullOrEmpty(player.Age) ? "" : $"({@player.Age})")}";
+            var isPlot = skills.Contains(FieldPlot);
             
             <tr style="page-break-inside: avoid">
                 @if (index == 0)
@@ -196,11 +197,10 @@
                 <td class="center">@pcing</td>
                 <td class="center">@npcing</td>
                 <td class="nowrap center">
-
                     @CommaList(
-                        SkilledIn(isHome, SkillInfoGathering, "IG"),
-                        SkilledIn(isHome, SkillPathfinding, "PF"),
-                        SkilledIn(isHome, SkillResearch, "R")
+                        SkilledIn(isPlot && isHome, SkillInfoGathering, "IG"),
+                        SkilledIn(isPlot && isHome, SkillPathfinding, "PF"),
+                        SkilledIn(isPlot && isHome, SkillResearch, "R")
                     )
                 </td>
                 <td class="nowrap center">@crown</td>
@@ -289,6 +289,7 @@
         const string FieldDiscount = "discount";
         const string FieldPcing = "pcing";
         const string FieldNpcing = "npcing";
+        const string FieldPlot = "plot";
 
     private async Task Print()
     {
