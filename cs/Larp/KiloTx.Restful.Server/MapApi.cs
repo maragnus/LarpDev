@@ -1,15 +1,25 @@
 ﻿using System.Reflection;
 using System.Text.Json;
-using Larp.Common;
-using Larp.Common.Exceptions;
-using Larp.Landing.Server.Services;
-using Larp.Landing.Shared;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
 
-namespace Larp.Landing.Server;
+namespace KiloTx.Restful.Server;
 
 public static class MapApiExtensions
 {
+    private static JsonSerializerOptions JsonOptions { get; } = new()
+    {
+        Converters = { new JsonStringEnumConverter() },
+        WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase  
+    };
+    
+    
     public static void MapApi<TInterface>(this WebApplication app)
         where TInterface : class
     {
@@ -36,33 +46,32 @@ public static class MapApiExtensions
             logger.LogInformation("Map {Method} {Uri} for {Type}", api.HttpMethod, uri, typeof(TInterface).Name);
 
             app.MapMethods(uri, new[] { api.HttpMethod.Method },
-                async (HttpContext httpContext, TInterface obj, IUserSession session) =>
-                    await HandleRequest(httpContext, methodInfo, obj, logger, session, authRequired, contentType));
+                async (HttpContext httpContext, TInterface obj) =>
+                    await HandleRequest(httpContext, methodInfo, obj, logger, authRequired, contentType));
         }
     }
 
     static async Task HandleRequest<TInterface>(HttpContext httpContext, MethodInfo methodInfo, TInterface obj,
-        ILogger logger, IUserSession userSession, ApiAuthenticatedAttribute? authRequired,
+        ILogger logger, ApiAuthenticatedAttribute? authRequired,
         ApiContentTypeAttribute? contentType)
     {
-        // await Task.Delay(TimeSpan.FromSeconds(1));
         if (authRequired != null)
         {
-            if (!userSession.IsAuthenticated)
+            if (!httpContext.User.Identity?.IsAuthenticated != true)
             {
                 // 401 Unauthorized is the status code to return when the client provides no credentials or invalid credentials.
                 httpContext.Response.StatusCode = 401;
                 await httpContext.Response.WriteAsJsonAsync(Result.Failed("Must be logged in to access this section"),
-                    LarpJson.Options);
+                    JsonOptions);
                 return;
             }
 
-            if (!userSession.HasAnyRole(authRequired.Roles))
+            if (!authRequired.Roles.Any(role => httpContext.User.IsInRole(role)))
             {
                 // 401 Unauthorized is the status code to return when the client provides no credentials or invalid credentials.
                 httpContext.Response.StatusCode = 401;
                 await httpContext.Response.WriteAsJsonAsync(Result.Failed("You do not have the required role"),
-                    LarpJson.Options);
+                    JsonOptions);
                 return;
             }
         }
@@ -70,7 +79,7 @@ public static class MapApiExtensions
         try
         {
             var body = httpContext.Request.HasJsonContentType()
-                ? await JsonSerializer.DeserializeAsync<JsonDocument>(httpContext.Request.Body, LarpJson.Options)
+                ? await JsonSerializer.DeserializeAsync<JsonDocument>(httpContext.Request.Body, JsonOptions)
                 : null;
 
             var form = httpContext.Request.HasFormContentType
@@ -95,7 +104,7 @@ public static class MapApiExtensions
                     if (httpContext.Request.Query.TryGetValue(name, out var value))
                         return Coerce(value.FirstOrDefault(), parameter.ParameterType);
                     if (body?.RootElement.TryGetProperty(name, out var property) == true)
-                        return property.Deserialize(parameter.ParameterType, LarpJson.Options);
+                        return property.Deserialize(parameter.ParameterType, JsonOptions);
                     if (form?.TryGetValue(name, out value) == true)
                         return Coerce(value.FirstOrDefault(), parameter.ParameterType);
                     
@@ -123,7 +132,7 @@ public static class MapApiExtensions
             }
 
             var response = await result;
-            await httpContext.Response.WriteAsJsonAsync((object)response, LarpJson.Options);
+            await httpContext.Response.WriteAsJsonAsync((object)response, JsonOptions);
         }
         catch (BadRequestException ex)
         {

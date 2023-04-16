@@ -1,10 +1,4 @@
-using Larp.Common;
-using Larp.Common.Exceptions;
-using Larp.Data;
-using Larp.Data.Mongo;
-using Larp.Data.Mongo.Services;
 using Larp.Data.MwFifth;
-using Larp.Landing.Shared;
 using Microsoft.Extensions.FileProviders;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -157,7 +151,7 @@ public class AdminService : IAdminService
     public async Task MoveMwFifthCharacter(string characterId, string newAccountId) =>
         await _characterManager.Move(characterId, newAccountId);
 
-    public async Task<StringResult> DraftEvent() => await _eventManager.DraftEvent();
+    public async Task<Event> DraftEvent() => await _eventManager.DraftEvent();
 
     public async Task SetMwFifthCharacterNotes(string characterId, string? notes) =>
         await _characterManager.SetNotes(characterId, notes);
@@ -237,7 +231,7 @@ public class AdminService : IAdminService
                         CharacterId = character.CharacterId,
                         RevisionId = revision.RevisionId,
                         Name = character.CharacterName ?? "No Name Set",
-                        HomeChapter = revision.HomeChapter,
+                        HomeChapter = revision.HomeChapter ?? "Homeless",
                         Notes = character.PreregistrationNotes,
                         GeneratedNotes = revision.PreregistrationNotes,
                         Skills = revision.ConsolidatedSkills(),

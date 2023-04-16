@@ -1,7 +1,4 @@
-﻿using Larp.Data;
-using Larp.Data.Mongo.Services;
-
-namespace Larp.Landing.Server.Services;
+﻿namespace Larp.Landing.Server.Services;
 
 public interface IUserSession
 {

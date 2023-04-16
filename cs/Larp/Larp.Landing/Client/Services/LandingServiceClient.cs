@@ -1,4 +1,4 @@
-using Larp.Common;
+using KiloTx.Restful;
 using Larp.Data;
 using Larp.Data.MwFifth;
 using Larp.Landing.Shared;
@@ -133,8 +133,8 @@ public class LandingServiceClient : RestClient, ILandingService, IMwFifthService
     public Task DeleteAttachment(string attachmentId) =>
         Delete($"api/admin/attachments/{attachmentId}");
 
-    public Task<StringResult> DraftEvent() =>
-        Post<StringResult>($"api/admin/events/new");
+    public Task<Event> DraftEvent() =>
+        Post<Event>($"api/admin/events/new");
 
     public Task SetMwFifthCharacterNotes(string characterId, string? notes) =>
         Post($"api/admin/mw5e/characters/{characterId}/notes", new { notes });

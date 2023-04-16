@@ -25,6 +25,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Larp.Landing.Shared", "Larp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Larp.Data.Mongo", "Larp.Data.Mongo\Larp.Data.Mongo.csproj", "{B862D9E8-C480-4E63-8E6A-A968683A884C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KiloTx.Restful.Server", "KiloTx.Restful.Server\KiloTx.Restful.Server.csproj", "{96744F7E-29C3-4CC3-B98A-C52DA105E8B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KiloTx.Restful", "KiloTx.Restful\KiloTx.Restful.csproj", "{DAC9E6C6-530B-41CA-A55A-09071B7068FD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KiloTx.Restful.ClientGenerator", "KiloTx.Restful.ClientGenerator\KiloTx.Restful.ClientGenerator.csproj", "{5533CDAC-5FF2-4D39-B03C-E33F4CD9333B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Larp.Landing.Client.RestApi", "Larp.Landing\Larp.Landing.Client.RestApi\Larp.Landing.Client.RestApi.csproj", "{769A2220-5CF8-4C45-8681-DE283AEC69E9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +83,22 @@ Global
 		{B862D9E8-C480-4E63-8E6A-A968683A884C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B862D9E8-C480-4E63-8E6A-A968683A884C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B862D9E8-C480-4E63-8E6A-A968683A884C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96744F7E-29C3-4CC3-B98A-C52DA105E8B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96744F7E-29C3-4CC3-B98A-C52DA105E8B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96744F7E-29C3-4CC3-B98A-C52DA105E8B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96744F7E-29C3-4CC3-B98A-C52DA105E8B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAC9E6C6-530B-41CA-A55A-09071B7068FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAC9E6C6-530B-41CA-A55A-09071B7068FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAC9E6C6-530B-41CA-A55A-09071B7068FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAC9E6C6-530B-41CA-A55A-09071B7068FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5533CDAC-5FF2-4D39-B03C-E33F4CD9333B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5533CDAC-5FF2-4D39-B03C-E33F4CD9333B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5533CDAC-5FF2-4D39-B03C-E33F4CD9333B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5533CDAC-5FF2-4D39-B03C-E33F4CD9333B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{769A2220-5CF8-4C45-8681-DE283AEC69E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{769A2220-5CF8-4C45-8681-DE283AEC69E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{769A2220-5CF8-4C45-8681-DE283AEC69E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{769A2220-5CF8-4C45-8681-DE283AEC69E9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

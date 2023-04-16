@@ -1,4 +1,4 @@
-namespace Larp.Common.Exceptions;
+namespace KiloTx.Restful;
 
 public class BadRequestException : Exception
 {

@@ -1,13 +1,11 @@
-using Larp.Data;
-
-namespace Larp.Landing.Shared;
+namespace KiloTx.Restful;
 
 [AttributeUsage(AttributeTargets.Method)]
 public class ApiAuthenticatedAttribute : Attribute
 {
-    public AccountRole[] Roles { get; }
+    public string[] Roles { get; }
 
-    public ApiAuthenticatedAttribute(params AccountRole[] roles)
+    public ApiAuthenticatedAttribute(params string[] roles)
     {
         Roles = roles;
     }

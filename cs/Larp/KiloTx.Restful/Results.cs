@@ -1,4 +1,4 @@
-﻿namespace Larp.Common;
+﻿namespace KiloTx.Restful;
 
 public record StringResult(bool IsSuccess, string? Value, string? ErrorMessage)
 {

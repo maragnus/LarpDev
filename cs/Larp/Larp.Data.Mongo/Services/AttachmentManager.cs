@@ -1,9 +1,3 @@
-using Larp.Common;
-using Larp.Common.Exceptions;
-using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
-using MongoDB.Driver;
-
 namespace Larp.Data.Mongo.Services;
 
 public class AttachmentManager
@@ -11,12 +5,12 @@ public class AttachmentManager
     private readonly LarpContext _larpContext;
     private readonly ILogger<AttachmentManager> _logger;
 
-    public AttachmentManager(LarpContext larpContext,  ILogger<AttachmentManager> logger)
+    public AttachmentManager(LarpContext larpContext, ILogger<AttachmentManager> logger)
     {
         _larpContext = larpContext;
         _logger = logger;
     }
-    
+
     public async Task SaveAttachment(string attachmentId, AccountAttachment attachment)
     {
         await _larpContext.AccountAttachments.UpdateOneAsync(x => x.AttachmentId == attachmentId,
@@ -34,7 +28,7 @@ public class AttachmentManager
         await _larpContext.AccountAttachments
             .DeleteOneAsync(x => x.AttachmentId == attachmentId);
     }
-    
+
     public async Task<AccountAttachment[]> GetAccountAttachments(string accountId) =>
         (await _larpContext.AccountAttachments
             .Find(x => x.AccountId == accountId)
@@ -49,7 +43,8 @@ public class AttachmentManager
             }).ToListAsync())
         .ToArray();
 
-    public async Task<StringResult> Attach(string accountId, Stream data, string fileName, string mediaType, string uploaderAccountId)
+    public async Task<StringResult> Attach(string accountId, Stream data, string fileName, string mediaType,
+        string uploaderAccountId)
     {
         var bytes = new byte[data.Length];
         var _ = await data.ReadAsync(bytes);
@@ -67,5 +62,4 @@ public class AttachmentManager
         });
         return StringResult.Success(id);
     }
-
 }

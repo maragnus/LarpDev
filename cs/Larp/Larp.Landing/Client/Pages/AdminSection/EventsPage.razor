@@ -96,7 +96,7 @@
         await SafeActionAsync(async () =>
         {
             var @event = await LandingService.Admin.DraftEvent();
-            NavigationManager.NavigateTo($"/admin/events/{@event.Value}");
+            NavigationManager.NavigateTo($"/admin/events/{@event.EventId}");
         });
     }
 
