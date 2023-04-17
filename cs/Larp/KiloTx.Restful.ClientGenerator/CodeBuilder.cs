@@ -9,7 +9,7 @@ internal class CodeBuilder
 {
     private readonly StringBuilder _stringBuilder = new();
     private int _indent;
-    
+
     public static implicit operator SourceText(CodeBuilder codeBuilder) =>
         SourceText.From(codeBuilder._stringBuilder.ToString(), Encoding.UTF8);
 
@@ -66,5 +66,7 @@ internal class CodeBuilder
 
     public CodeBuilder OpenBlock() => AppendLine("{").IncreaseIndent();
 
-    public CodeBuilder CloseBlock() => DecreaseIndent().AppendLine("}");
+    public CodeBuilder CloseBlock(string? suffix = null) => suffix == null
+        ? DecreaseIndent().AppendLine("}")
+        : DecreaseIndent().AppendLine($"}}{suffix}");
 }

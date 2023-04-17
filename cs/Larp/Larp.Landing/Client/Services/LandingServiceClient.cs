@@ -7,9 +7,9 @@ using Microsoft.Extensions.FileProviders;
 
 namespace Larp.Landing.Client.Services;
 
-public class LandingServiceClient : RestClient, ILandingService, IMwFifthService, IAdminService
+public class LandingServiceClientLegacy : RestClient, ILandingService, IMwFifthService, IAdminService
 {
-    public LandingServiceClient(HttpClient httpClient, ILogger<LandingServiceClient> logger)
+    public LandingServiceClientLegacy(HttpClient httpClient, ILogger<LandingServiceClientLegacy> logger)
         : base(httpClient, logger)
     {
     }

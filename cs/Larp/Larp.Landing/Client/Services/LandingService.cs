@@ -1,4 +1,5 @@
 using Blazored.LocalStorage;
+using KiloTx.Restful;
 using Larp.Data;
 using Larp.Landing.Shared;
 using Larp.Landing.Shared.MwFifth;
@@ -23,7 +24,7 @@ public class LandingService
     private readonly DataCacheService _dataCache;
     private readonly ILogger<LandingService> _logger;
     private readonly ILocalStorageService _localStorage;
-    private readonly LandingServiceClient _client;
+    private readonly LandingServiceClientLegacy _client;
 
     private const int GameStateUpdateFrequencyHours = 4;
     private const string SessionIdKey = "SessionId";
@@ -34,7 +35,7 @@ public class LandingService
         DataCacheService dataCache,
         ILogger<LandingService> logger,
         ILocalStorageService localStorage,
-        LandingServiceClient client)
+        LandingServiceClientLegacy client)
     {
         _landing = landing;
         _adminService = adminService;
@@ -161,9 +162,18 @@ public class LandingService
 
     public async Task<Account> GetAccount()
     {
-        Account = await _landing.GetAccount();
-        AuthenticatedChanged?.Invoke(this, EventArgs.Empty);
-        return Account;
+        try
+        {
+            Account = await _landing.GetAccount();
+            AuthenticatedChanged?.Invoke(this, EventArgs.Empty);
+            return Account;
+        }
+        catch (BadRequestException)
+        {
+            Account = null;
+            AuthenticatedChanged?.Invoke(this, EventArgs.Empty);
+            return new Account();
+        }
     }
 
     public async Task AccountEmailAdd(string email) =>

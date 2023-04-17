@@ -1,4 +1,6 @@
 ﻿using System.Collections.Immutable;
+using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
@@ -8,6 +10,15 @@ namespace KiloTx.Restful.ClientGenerator;
 [Generator(LanguageNames.CSharp)]
 public class RestfulSourceGenerator : IIncrementalGenerator
 {
+    private static readonly Dictionary<string, string> _httpMethods = new()
+    {
+        { "KiloTx.Restful.ApiGetAttribute", "HttpMethod.Get" },
+        { "KiloTx.Restful.ApiPostAttribute", "HttpMethod.Post" },
+        { "KiloTx.Restful.ApiDeleteAttribute", "HttpMethod.Delete" },
+        { "KiloTx.Restful.ApiPutAttribute", "HttpMethod.Put" },
+        { "KiloTx.Restful.ApiPatchAttribute", "HttpMethod.Patch" }
+    };
+
     private static bool IsRestfullImplementation(SyntaxNode syntaxNode, CancellationToken cancellationToken)
     {
         if (syntaxNode is not AttributeSyntax attribute)
@@ -86,10 +97,11 @@ public class RestfulSourceGenerator : IIncrementalGenerator
     private static SourceText GenerateSourceCode(ITypeSymbol type)
     {
         var interfaces = GetInterfaces(type);
+
         var implements = string.Join(", ",
             interfaces.Select(x => x.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
 
-        var usings = new HashSet<string>() { "System.Text.Json", "System.Net.Http.Json" };
+        var usings = new HashSet<string>() { "System.Text.Json", "System.Net.Http.Json", "KiloTx.Restful" };
         usings.AddRange(interfaces.Select(interfaceType => interfaceType.ContainingNamespace.ToDisplayString()));
 
         var source = new CodeBuilder();
@@ -98,71 +110,179 @@ public class RestfulSourceGenerator : IIncrementalGenerator
         source.AppendLine();
         source.AppendLine($"partial class {type.Name} : {implements}");
         source.OpenBlock();
-        
+
         source.AppendLine("private HttpClient _httpClient;");
         source.AppendLine();
-        source.AppendLine($"protected {type.Name}(HttpClient httpClient)");
+        source.AppendLine($"public {type.Name}(HttpClient httpClient)");
         source.OpenBlock();
         source.AppendLine("_httpClient = httpClient;");
         source.CloseBlock();
         source.AppendLine();
 
+        source.AppendLine("private static readonly JsonSerializerOptions JsonOptions = new()")
+            .OpenBlock()
+            .AppendLine("Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() },")
+            .AppendLine("WriteIndented = true,")
+            .AppendLine("PropertyNamingPolicy = JsonNamingPolicy.CamelCase")
+            .CloseBlock(";");
+        source.AppendLine();
+
+        var argBuilder = new StringBuilder();
+
         foreach (var implementType in interfaces)
         {
+            // Get the root uri
+            var apiRootAttribute = implementType.GetAttributes()
+                .FirstOrDefault(x => x.AttributeClass!.Name == nameof(ApiRootAttribute));
+            if (apiRootAttribute == null) continue;
+            var apiRoot = ((string)apiRootAttribute.ConstructorArguments.First().Value!).TrimEnd('/');
+
             var members = implementType.GetMembers()
                 .Select(x => x as IMethodSymbol).Where(x => x != null);
             foreach (var member in members)
             {
-                if (member == null) continue;
+                if (member == null || member.IsStatic || member.MethodKind != MethodKind.Ordinary) continue;
 
                 try
                 {
-                    // using Return types
+                    // using for Return types
                     usings.AddRange(GetUsings(member.ReturnType));
 
+                    // Extract response type
                     var taskType = member.ReturnType as INamedTypeSymbol ??
-                                   throw new InvalidOperationException($"Method {member.Name} must have a Task return type");
-                    // if (taskType.ToDisplayString() != "System.Threading.Task")
-                    //     throw new InvalidOperationException($"Method {member.Name} returns {taskType.ToDisplayString()} but must be async Task<>");
+                                   throw new InvalidOperationException(
+                                       $"Method {member.Name} must have a Task return type");
+                    // TODO -- expect Task
                     var returnType = taskType.IsGenericType ? taskType.TypeArguments.Single() : null;
-                    
+
+                    // using for method Parameters
                     foreach (var argument in member.Parameters)
                     {
                         usings.AddRange(GetUsings(argument.Type));
                     }
 
+                    // Aggregate any ApiPathAttribute
+                    var apiPaths =
+                        from attribute in member.GetAttributes()
+                        let attributeName = attribute?.AttributeClass?.ToDisplayString() ?? ""
+                        where _httpMethods.ContainsKey(attributeName)
+                        select new
+                        {
+                            Method = _httpMethods.GetValueOrDefault(attributeName),
+                            Path = attribute.ConstructorArguments.Single().Value as string
+                        };
+
+                    // Get first ApiPathAttribute
+                    var apiPath =
+                        apiPaths.FirstOrDefault()
+                        ?? throw new InvalidOperationException($"Method {member.Name} must have ApiRouteAttribute");
+
+                    // DEBUG -- Show the attribute
+                    // source.AppendLines(member.GetAttributes().Select(x =>
+                    //     $"// [{x.AttributeClass.ToDisplayString()}](\"{x.ConstructorArguments.First().Value}\")"));
+
+                    // List the method arguments
                     var arguments = string.Join(", ", member.Parameters
                         .Select(x => x.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
-                    
-                    var argumentsNames = string.Join(", ", member.Parameters
-                        .Select(x => x.ToDisplayParts(SymbolDisplayFormat.MinimallyQualifiedFormat).Last()));
 
-                    source.AppendLine($@"async {member.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)} {implementType.Name}.{member.Name}({arguments})");
+                    // OUTPUT - Method declaration
+                    source.AppendLine(
+                        $@"async {member.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)} {implementType.Name}.{member.Name}({arguments})");
                     source.OpenBlock();
 
-                    var url = "/api/blah";
-                    var data = @", new StringContent("""")";
-                    
-                    // GET uses query string
-                    // POST uses json
-                    
-                    if (argumentsNames.Length > 0)
+                    // Aggregate the argument names
+                    var contentArgs = member.Parameters
+                        .Select(x => x.ToDisplayParts(SymbolDisplayFormat.MinimallyQualifiedFormat).Last().ToString())
+                        .ToHashSet();
+
+                    // Strip out the path arguments from argument names
+                    var url = apiPath.Path;
+                    if (!url.StartsWith('/'))
+                        url = $"{apiRoot}/{url}";
+                    var urlArgs = Regex.Matches(url, @"(\{(\w+)\??(:[^}]*)?\})", RegexOptions.Compiled)
+                        .Select(match => match.Groups[2].Value)
+                        .ToList();
+                    contentArgs.RemoveRange(urlArgs);
+
+                    var hasBody = apiPath.Method != "HttpMethod.Get";
+                    var hasData = contentArgs.Count > 0;
+                    var fileParameter = member.Parameters.FirstOrDefault(parameter => parameter.Type.Name == "Stream");
+
+                    if (fileParameter != null)
                     {
-                        source.AppendLine($"var httpContent = new {{ {argumentsNames} }};");
-                        data = ", JsonContent.Create(httpContent)";
+                        var parameterName = fileParameter.ToDisplayParts(SymbolDisplayFormat.MinimallyQualifiedFormat)
+                            .Last().ToString();
+
+                        var hasMediaType = member.Parameters.Any(parameter => parameter.Name == "mediaType");
+                        var hasFileName = member.Parameters.Any(parameter => parameter.Name == "fileName");
+
+                        if (hasMediaType)
+                        {
+                            source.AppendLine($"var httpStreamContent = new StreamContent({parameterName}) "
+                                              + "{ Headers = { ContentType = new MediaTypeHeaderValue(mediaType) }};");
+                            usings.Add("System.Net.Http.Headers");
+                        }
+                        else
+                        {
+                            source.AppendLine($"var httpStreamContent = new StreamContent({parameterName});");
+                        }
+
+                        source.AppendLine(
+                                @$"var httpMessage = new HttpRequestMessage({apiPath.Method}, $""{url}"")")
+                            .AppendLine("{").IncreaseIndent()
+                            .AppendLine(
+                                $@"Content = new MultipartFormDataContent {{ {{ httpStreamContent, ""file"", {(hasFileName ? "fileName" : @"""unnamed""")} }} }}")
+                            .DecreaseIndent().AppendLine("};");
                     }
-                    
-                    if (returnType != null)
+                    else if (hasData)
                     {
-                        source
-                            .AppendLine(@$"var response = await _httpClient.PostAsync(""{url}""{data});")
-                            .AppendLine(@"await using var stream = await response.Content.ReadAsStreamAsync();")
-                            .AppendLine(@$"return await JsonSerializer.DeserializeAsync<{returnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}>(stream) ?? throw new BadRequestException();");
+                        if (!hasBody)
+                        {
+                            argBuilder.Clear();
+                            argBuilder.Append(url).Append("?");
+                            foreach (var arg in contentArgs)
+                            {
+                                argBuilder.Append($"{arg}={{Uri.EscapeDataString({arg}.ToString())}}&");
+                            }
+                            argBuilder.Remove(argBuilder.Length - 1, 1);
+
+                            source.AppendLine($@"var messageUrl = $""{argBuilder}"";");
+                            source.AppendLine(
+                                @$"var httpMessage = new HttpRequestMessage({apiPath.Method}, messageUrl);");
+                        }
+                        else
+                        {
+                            source.AppendLine(
+                                @$"var httpMessage = new HttpRequestMessage({apiPath.Method}, $""{url}"");");
+                            var argumentsNames = string.Join(", ", contentArgs);
+                            source.AppendLine($"var httpContent = new {{ {argumentsNames} }};");
+                            if (hasBody)
+                                source.AppendLine("httpMessage.Content = JsonContent.Create(httpContent);");
+                        }
                     }
                     else
                     {
-                        source.AppendLine(@$"await _httpClient.PostAsync(""{url}""{data});");
+                        source.AppendLine(@$"var httpMessage = new HttpRequestMessage({apiPath.Method}, $""{url}"");");
+                        if (hasBody)
+                            source.AppendLine(@"httpMessage.Content = new StringContent("""");");
                     }
+
+                    if (returnType != null)
+                    {
+                        var returnTypeName = returnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+                        source
+                            .AppendLine(@$"var httpResponse = await _httpClient.SendAsync(httpMessage);")
+                            .AppendLine(
+                                @"await using var httpResponseStream = await httpResponse.Content.ReadAsStreamAsync();")
+                            .AppendLine(
+                                @$"return await JsonSerializer.DeserializeAsync<{returnTypeName}>(httpResponseStream, JsonOptions)")
+                            .IncreaseIndent().AppendLine(@$"?? throw new BadRequestException(""Unable to deserialize to {returnTypeName}"");").DecreaseIndent();
+                    }
+                    else
+                    {
+                        source.AppendLine(@$"await _httpClient.SendAsync(httpMessage);");
+                    }
+
                     source.CloseBlock();
                 }
                 catch (Exception ex)
@@ -174,8 +294,9 @@ public class RestfulSourceGenerator : IIncrementalGenerator
 
         source.CloseBlock();
 
-        source.PrependLine();
-        source.PrependLines(usings.Order().Select(namespaceName => $"using {namespaceName};"));
+        source.PrependLines(usings.Order()
+            .Where(namespaceName => !namespaceName.Contains("global namespace"))
+            .Select(namespaceName => $"using {namespaceName};"));
         source.PrependLine();
         source.PrependLine("#nullable enable");
 

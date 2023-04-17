@@ -6,15 +6,12 @@
         <Nullable>enable</Nullable>
         <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
         <CompilerGeneratedFilesOutputPath>Implementations</CompilerGeneratedFilesOutputPath>
+        <RootNamespace>Larp.Landing.Client.RestApi</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\KiloTx.Restful.ClientGenerator\KiloTx.Restful.ClientGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
         <ProjectReference Include="..\Shared\Larp.Landing.Shared.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Implementations\KiloTx.Restful.ClientGenerator\KiloTx.Restful.ClientGenerator.RestfulSourceGenerator\" />
     </ItemGroup>
 
 </Project>
