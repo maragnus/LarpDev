@@ -160,7 +160,7 @@
         "name": "Dexterity",
         "title": "Dexterity",
         "properties": [
-            "Special Attacks per Renew",
+            "Dexterity Special Attacks per Renew",
             "Assassinate per Day"
         ],
         "ranks": [
@@ -321,7 +321,7 @@
         "name": "Empathy",
         "title": "Empathy",
         "properties": [
-            "Special Attacks per Renew"
+            "Empathy Special Attacks per Renew"
         ],
         "ranks": [
             {
@@ -608,7 +608,7 @@
         "name": "Prowess",
         "title": "Prowess",
         "properties": [
-            "Special Attacks per Renew",
+            "Prowess Special Attacks per Renew",
             "Deathstrikes per Day"
         ],
         "ranks": [
