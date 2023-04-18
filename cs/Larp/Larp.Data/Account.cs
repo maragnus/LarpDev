@@ -51,6 +51,8 @@ public class Account
 
     public int? DiscountPercent { get; set; }
     
+    public int AttachmentCount { get; set; }
+    
     [BsonIgnore]
     public string? PreferredEmail =>
         (Emails.FirstOrDefault(x => x.IsPreferred) ?? Emails.FirstOrDefault(x => x.IsVerified))?.Email;

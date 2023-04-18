@@ -67,7 +67,6 @@ public class LandingService
             async revision => await MwFifth.GetGameState(revision));
     }
 
-    
     private void LocalStorageOnChanged(object? sender, ChangedEventArgs e)
     {
         if (e.Key == SessionIdKey)
@@ -83,10 +82,11 @@ public class LandingService
 
     public async Task Refresh()
     {
+        _logger.LogInformation("Refresh");
         var sessionId = await _localStorage.GetItemAsStringAsync(SessionIdKey);
         SetSessionId(sessionId);
         _logger.LogInformation("Refresh starting...");
-        Account = await GetAccount();
+        await GetAccount();
         await GetGames();
         await GetMwFifthGameState();
         _logger.LogInformation("Refresh complete");
@@ -170,17 +170,25 @@ public class LandingService
 
     public async Task<Account> GetAccount()
     {
+        _logger.LogInformation("GetAccount");
         try
         {
             Account = await Service.GetAccount();
             AuthenticatedChanged?.Invoke(this, EventArgs.Empty);
             return Account;
         }
-        catch (BadRequestException)
+        catch (BadRequestException ex)
         {
+            _logger.LogError(ex, "GetAccount failed");
             Account = null;
+            SetSessionId(null);
             AuthenticatedChanged?.Invoke(this, EventArgs.Empty);
             return new Account();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "GetAccount failed");
+            throw;
         }
     }
 }

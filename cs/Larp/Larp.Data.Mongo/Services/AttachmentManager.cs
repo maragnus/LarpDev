@@ -1,6 +1,3 @@
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using Larp.Common;
 
 namespace Larp.Data.Mongo.Services;
@@ -69,9 +66,9 @@ public class AttachmentManager
             UploadedOn = DateTimeOffset.Now,
             Title = "Untitled"
         };
-        
+
         try
-        { 
+        {
             await GenerateThumbnail(attachment);
         }
         catch (Exception ex)
@@ -80,13 +77,18 @@ public class AttachmentManager
         }
 
         await _larpContext.AccountAttachments.InsertOneAsync(attachment);
+        var attachmentCount = await _larpContext.AccountAttachments
+            .CountDocumentsAsync(x => x.AccountId == accountId);
+        await _larpContext.Accounts.UpdateOneAsync(
+            account => account.AccountId == accountId,
+            Builders<Account>.Update.Set(account => account.AttachmentCount, attachmentCount));
         return StringResult.Success(id);
     }
 
     private async Task GenerateThumbnail(AccountAttachment attachment)
     {
         if (attachment.Data == null) return;
-        
+
         var image = await _imageModifier.GenerateWebp(attachment.Data);
         if (image.Data.Length < attachment.Data.Length)
         {
@@ -97,7 +99,7 @@ public class AttachmentManager
 
         var thumbnail = await _imageModifier.GenerateWebpThumbnail(512, 512, attachment.Data);
         attachment.ThumbnailData = thumbnail.Data;
-        attachment.ThumbnailMediaType = thumbnail.ContentType;;
+        attachment.ThumbnailMediaType = thumbnail.ContentType;
         attachment.ThumbnailFileName = Path.ChangeExtension(attachment.FileName, "thumbnail.webp");
     }
 }

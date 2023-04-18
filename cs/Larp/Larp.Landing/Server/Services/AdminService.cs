@@ -44,7 +44,23 @@ public class AdminService : IAdminService
 
     async Task IAdminService.MergeAccounts(string fromAccountId, string toAccountId)
     {
+        await _db.Sessions.UpdateManyAsync(x => x.AccountId == fromAccountId,
+            Builders<Session>.Update.Set(x => x.AccountId, toAccountId));
+
+        await _db.AccountAttachments.UpdateManyAsync(x => x.AccountId == fromAccountId,
+            Builders<AccountAttachment>.Update.Set(x => x.AccountId, toAccountId));
+
+        await _db.AccountAttachments.UpdateManyAsync(x => x.UploadedBy == fromAccountId,
+            Builders<AccountAttachment>.Update.Set(x => x.UploadedBy, toAccountId));
+
+        await _db.Letters.UpdateManyAsync(x => x.AccountId == fromAccountId,
+            Builders<Letter>.Update.Set(x => x.AccountId, toAccountId));
+        
+        await _db.Letters.UpdateManyAsync(x => x.ApprovedBy == fromAccountId,
+            Builders<Letter>.Update.Set(x => x.ApprovedBy, toAccountId));
+
         await _characterManager.MoveAll(fromAccountId, toAccountId);
+        
         var attendances = await _db.Attendances
             .Find(attendance => attendance.AccountId == fromAccountId).ToListAsync();
 

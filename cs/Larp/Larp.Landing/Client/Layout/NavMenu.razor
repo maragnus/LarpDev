@@ -32,8 +32,7 @@
     protected override async Task OnInitializedAsync()
     {
         await LandingServiceUpkeep.StartAsync(default);
-        await LandingService.ValidateSession();
-        var account = await LandingService.GetAccount();
+        var account = LandingService.Account;
         _roles = account?.Roles?.ToHashSet() ?? new HashSet<AccountRole>();
     }
 

@@ -24,7 +24,7 @@ public interface ILandingService
     [ApiGet("larp/characters"), ApiAuthenticated]
     Task<CharacterSummary[]> GetCharacters();
 
-    [ApiGet("account")]
+    [ApiGet("account"), ApiAuthenticated]
     Task<Account> GetAccount();
 
     [ApiPost("account/email")]

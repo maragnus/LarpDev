@@ -44,10 +44,12 @@ public class MwFifthCharacterManager
 
     public async Task MoveAll(string oldAccountId, string newAccountId)
     {
-        var characterResult = await _mwFifth.Characters.UpdateOneAsync(x => x.AccountId == oldAccountId,
+        var characterResult = await _mwFifth.Characters.UpdateManyAsync(x => x.AccountId == oldAccountId,
             Builders<Character>.Update.Set(x => x.AccountId, newAccountId));
         var revisionResult = await _mwFifth.CharacterRevisions.UpdateManyAsync(x => x.AccountId == oldAccountId,
             Builders<CharacterRevision>.Update.Set(x => x.AccountId, newAccountId));
+        await _mwFifth.CharacterRevisions.UpdateManyAsync(x => x.ApprovedBy == oldAccountId,
+            Builders<CharacterRevision>.Update.Set(x => x.ApprovedBy, newAccountId));
 
         _logger.LogInformation(
             "Moved Characters from Account {FromAccountId} to Account {ToAccountId}: {CharacterCount} characters, {RevisionCount} revisions",

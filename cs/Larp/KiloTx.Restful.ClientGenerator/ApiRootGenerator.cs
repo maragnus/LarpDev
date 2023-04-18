@@ -343,6 +343,7 @@ public class RestfulSourceGenerator : IIncrementalGenerator
                     {
                         source
                             .AppendLine(@$"var httpResponse = await {httpClient}.SendAsync(httpMessage);")
+                            .AppendLine("httpResponse.EnsureSuccessStatusCode();")
                             .AppendLine("var httpResponseBytes = await httpResponse.Content.ReadAsByteArrayAsync();")
                             .AppendLine("var httpResponseStream = new MemoryStream(httpResponseBytes);")
                             .AppendLine(
@@ -352,6 +353,7 @@ public class RestfulSourceGenerator : IIncrementalGenerator
                     {
                         source
                             .AppendLine(@$"var httpResponse = await {httpClient}.SendAsync(httpMessage);")
+                            .AppendLine("httpResponse.EnsureSuccessStatusCode();")
                             .AppendLine(
                                 @"await using var httpResponseStream = await httpResponse.Content.ReadAsStreamAsync();")
                             .AppendLine(
@@ -363,7 +365,8 @@ public class RestfulSourceGenerator : IIncrementalGenerator
                     }
                     else
                     {
-                        source.AppendLine(@$"await {httpClient}.SendAsync(httpMessage);");
+                        source.AppendLine(@$"var httpResponse = await {httpClient}.SendAsync(httpMessage);")
+                            .AppendLine("httpResponse.EnsureSuccessStatusCode();");
                     }
 
                     source.CloseBlock();

@@ -22,15 +22,17 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
     // Larp.Landing.Client
     services.AddSingleton<DataCacheService>();
     services.AddSingleton<LandingService>();
+#if DEBUG
     services.AddSingleton<LandingServiceUpkeep>();
+#endif
 
     // Larp.Landing.Client.RestClient
-    services.AddSingleton<HttpClientFactory>(_ => 
+    services.AddSingleton<HttpClientFactory>(_ =>
         new HttpClientFactory(builder.HostEnvironment.BaseAddress));
     services.AddSingleton<ILandingService, LandingServiceClient>();
     services.AddSingleton<IMwFifthService, MwFifthServiceClient>();
     services.AddSingleton<IAdminService, AdminServiceClient>();
-    
+
     // MudBlazor
     services.AddMudServices();
     services.AddMudExtensions();
