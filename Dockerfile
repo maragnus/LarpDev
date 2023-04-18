@@ -19,6 +19,9 @@ RUN npm install -g pnpm
 WORKDIR /src
 RUN mkdir -p cs/Larp
 COPY ["cs/Larp/Larp.sln", "cs/Larp/Larp.sln"]
+COPY ["cs/Larp/KiloTx.Restful/KiloTx.Restful.csproj", "cs/Larp/KiloTx.Restful/KiloTx.Restful.csproj"]
+COPY ["cs/Larp/KiloTx.Restful.ClientGenerator/KiloTx.Restful.ClientGenerator.csproj", "cs/Larp/KiloTx.Restful.ClientGenerator/KiloTx.Restful.ClientGenerator.csproj"]
+COPY ["cs/Larp/KiloTx.Restful.Server/KiloTx.Restful.Server.csproj", "cs/Larp/KiloTx.Restful.Server/KiloTx.Restful.Server.csproj"]
 COPY ["cs/Larp/Larp.Common/Larp.Common.csproj", "cs/Larp/Larp.Common/Larp.Common.csproj"]
 COPY ["cs/Larp/Larp.Data/Larp.Data.csproj", "cs/Larp/Larp.Data/Larp.Data.csproj"]
 COPY ["cs/Larp/Larp.Data.Mongo/Larp.Data.Mongo.csproj", "cs/Larp/Larp.Data.Mongo/Larp.Data.Mongo.csproj"]
@@ -30,6 +33,7 @@ COPY ["cs/Larp/Larp.Test.Common/Larp.Test.Common.csproj", "cs/Larp/Larp.Test.Com
 COPY ["cs/Larp/Larp.Landing/Shared/Larp.Landing.Shared.csproj", "cs/Larp/Larp.Landing/Shared/Larp.Landing.Shared.csproj"]
 COPY ["cs/Larp/Larp.Landing/Server/Larp.Landing.Server.csproj", "cs/Larp/Larp.Landing/Server/Larp.Landing.Server.csproj"]
 COPY ["cs/Larp/Larp.Landing/Client/Larp.Landing.Client.csproj", "cs/Larp/Larp.Landing/Client/Larp.Landing.Client.csproj"]
+COPY ["cs/Larp/Larp.Landing/Client.RestClient/Larp.Landing.Client.RestClient.csproj", "cs/Larp/Larp.Landing/Client.RestClient/Larp.Landing.Client.RestClient.csproj"]
 RUN dotnet restore "cs/Larp/Larp.sln"
 
 # Perform build
