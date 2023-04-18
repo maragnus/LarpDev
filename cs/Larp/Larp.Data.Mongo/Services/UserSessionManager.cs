@@ -1,11 +1,6 @@
-﻿using Larp.Common.Exceptions;
-using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Internal;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using MongoDB.Bson;
-using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 
 namespace Larp.Data.Mongo.Services;
 
@@ -350,7 +345,7 @@ public class UserSessionManager : IUserSessionManager
             x.Set(a => a.Roles, roles.ToArray()));
     }
 
-    public async Task<Account> FindByEmail(string email)
+    public async Task<Account?> FindByEmail(string email)
     {
         var normalizedEmail = email.ToLowerInvariant();
         var filter = Builders<Account>.Filter

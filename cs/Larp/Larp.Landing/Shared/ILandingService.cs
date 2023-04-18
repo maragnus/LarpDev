@@ -1,5 +1,3 @@
-using Larp.Common;
-using Larp.Data;
 using Microsoft.Extensions.FileProviders;
 
 namespace Larp.Landing.Shared;
@@ -26,7 +24,7 @@ public interface ILandingService
     [ApiGet("larp/characters"), ApiAuthenticated]
     Task<CharacterSummary[]> GetCharacters();
 
-    [ApiGet("account")]
+    [ApiGet("account"), ApiAuthenticated]
     Task<Account> GetAccount();
 
     [ApiPost("account/email")]
@@ -64,4 +62,7 @@ public interface ILandingService
     
     [ApiGet("attachments/{attachmentId}/{fileName}")]
     Task<IFileInfo> GetAttachment(string attachmentId, string fileName);
+    
+    [ApiGet("attachments/thumbnails/{attachmentId}/{fileName}")]
+    Task<IFileInfo> GetAttachmentThumbnail(string attachmentId, string fileName);
 }

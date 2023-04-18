@@ -157,12 +157,12 @@
 
     protected override async Task OnSafeInitializedAsync()
     {
-        _game = LandingService.MwFifth.Game;
-        _gameState = LandingService.MwFifth.GameState;
+        _game = LandingService.MwFifthGame;
+        _gameState = LandingService.MwFifthGameState;
 
         if (string.IsNullOrEmpty(CharacterId)) // If a new character, generate it and load it up
         {
-            var newCharacter = await LandingService.MwFifth.GetDraftCharacter();
+            var newCharacter = await LandingService.MwFifth.GetNewCharacter();
             NavigationManager.NavigateTo($"/characters/mw5e/{newCharacter.Revision.RevisionId}/edit", new NavigationOptions() { ReplaceHistoryEntry = true });
         }
     }
@@ -182,7 +182,7 @@
             if (Admin)
                 await LandingService.Admin.SaveMwFifthCharacter(_revision.Revision);
             else
-                await LandingService.MwFifth.Save(_revision.Revision);
+                await LandingService.MwFifth.SaveCharacter(_revision.Revision);
             CharacterId = _revision.Revision.RevisionId;
         });
 
@@ -241,7 +241,7 @@
                 }
                 else
                 {
-                    await LandingService.MwFifth.Save(_revision.Revision);
+                    await LandingService.MwFifth.SaveCharacter(_revision.Revision);
                     NavigationManager.NavigateTo($"/characters/mw5e/{CharacterId}", new NavigationOptions() { ReplaceHistoryEntry = true });
                 }
             });

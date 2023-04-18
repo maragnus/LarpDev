@@ -124,9 +124,9 @@
         var games = LandingService.Games
             .ToDictionary(x => x.Value.Id, x => x.Value.Title ?? x.Value.Name);
 
-        var characters = await LandingService.GetCharacterNames();
+        var characters = await LandingService.Service.GetCharacterNames();
 
-        var attendances = await LandingService.GetAttendance();
+        var attendances = await LandingService.Service.GetAttendance();
 
         static IEnumerable<Letter> GetLetters(Event @event, Letter[] letters)
         {

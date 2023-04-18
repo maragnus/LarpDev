@@ -187,7 +187,7 @@
     {
         var character = await LandingService.Admin.GetMwFifthCharacter(CharacterId);
         _character = character.Character;
-        _characterBuilder = new CharacterBuilder(character, LandingService.MwFifth.GameState, Logger);
+        _characterBuilder = new CharacterBuilder(character, LandingService.MwFifthGameState, Logger);
         _moonstone = character.Moonstone;
         _moonstoneUsed = character.Revision.GiftMoonstone + character.Revision.SkillMoonstone;
         _newMoonstoneCost = _moonstoneUsed - character.Character.UsedMoonstone;
@@ -197,7 +197,7 @@
     protected override async Task OnSafeInitializedAsync()
     {
         var character = await LandingService.Admin.GetMwFifthCharacter(CharacterId);
-        _characterBuilder = new CharacterBuilder(character, LandingService.MwFifth.GameState, Logger);
+        _characterBuilder = new CharacterBuilder(character, LandingService.MwFifthGameState, Logger);
         var revisions = await LandingService.Admin.GetMwFifthCharacterRevisions(CharacterId);
         _revisions = revisions.CharacterRevisions;
         Array.Reverse(_revisions);

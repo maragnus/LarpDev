@@ -1,10 +1,4 @@
-using Larp.Common;
-using Larp.Common.Exceptions;
 using Larp.Data.MwFifth;
-using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
-using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 
 namespace Larp.Data.Mongo.Services;
 
@@ -150,10 +144,10 @@ public class EventManager
             .ToListAsync())
         .ToArray();
 
-    public async Task<StringResult> DraftEvent()
+    public async Task<Event> DraftEvent()
     {
         var id = ObjectId.GenerateNewId().ToString();
-        await _larpContext.Events.InsertOneAsync(new Event()
+        var e = new Event()
         {
             EventId = id,
             Title = "New Event",
@@ -163,8 +157,9 @@ public class EventManager
                          .FirstOrDefaultAsync()
                      ?? throw new BadRequestException("GameId could not be found"),
             IsHidden = true
-        });
-        return StringResult.Success(id);
+        };
+        await _larpContext.Events.InsertOneAsync(e);
+        return e;
     }
 
     public async Task<EventsAndLetters> GetEvents(EventList list, string? accountId)

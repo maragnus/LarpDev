@@ -9,21 +9,16 @@
 
     <ItemGroup>
         <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
-        <PackageReference Include="CodeBeam.MudBlazor.Extensions" Version="6.4.5" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.0" PrivateAssets="all" />
-        <PackageReference Include="MudBlazor" Version="6.2.0" />
+        <PackageReference Include="CodeBeam.MudBlazor.Extensions" Version="6.4.9" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.5" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.5" PrivateAssets="all" />
+        <PackageReference Include="MudBlazor" Version="6.2.2" />
         <PackageReference Include="PSC.Blazor.Components.BrowserDetect" Version="1.0.11" />
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Client.RestClient\Larp.Landing.Client.RestClient.csproj" />
         <ProjectReference Include="..\Shared\Larp.Landing.Shared.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Update="Layout\NavMenu.razer.css">
-        <DependentUpon>NavMenu.razor</DependentUpon>
-      </None>
     </ItemGroup>
 
 </Project>

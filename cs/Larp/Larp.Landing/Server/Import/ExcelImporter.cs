@@ -1,7 +1,4 @@
 using System.Text.RegularExpressions;
-using Larp.Data;
-using Larp.Data.Mongo;
-using Larp.Data.Mongo.Services;
 using Larp.Data.MwFifth;
 using Larp.Landing.Shared.MwFifth;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -506,7 +503,7 @@ public class ExcelImporter
         if (value.Contains("justice", StringComparison.InvariantCultureIgnoreCase))
             return "justice";
         if (value.Contains("all", StringComparison.InvariantCultureIgnoreCase))
-            return "wild";
+            return "all";
         if (value.Contains("chaos", StringComparison.InvariantCultureIgnoreCase))
             return "chaos";
         if (value.Contains("old", StringComparison.InvariantCultureIgnoreCase))

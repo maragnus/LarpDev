@@ -1,5 +1,8 @@
 using Blazored.LocalStorage;
+using KiloTx.Restful;
 using Larp.Data;
+using Larp.Data.MwFifth;
+using Larp.Landing.Client.RestClient;
 using Larp.Landing.Shared;
 using Larp.Landing.Shared.MwFifth;
 using PSC.Blazor.Components.BrowserDetect;
@@ -16,47 +19,53 @@ public enum AutoSaveState
 
 public class LandingService
 {
-    public const string ServiceName = "Mystwood Landing";
+    public const string ServiceName = "Mystwood Tavern";
 
-    private readonly ILandingService _landing;
-    private readonly IAdminService _adminService;
     private readonly DataCacheService _dataCache;
     private readonly ILogger<LandingService> _logger;
     private readonly ILocalStorageService _localStorage;
-    private readonly LandingServiceClient _client;
+    private readonly HttpClientFactory _httpClientFactory;
 
     private const int GameStateUpdateFrequencyHours = 4;
     private const string SessionIdKey = "SessionId";
 
     public LandingService(ILandingService landing,
-        IAdminService adminService,
+        IAdminService admin,
         IMwFifthService mwFifth,
         DataCacheService dataCache,
         ILogger<LandingService> logger,
         ILocalStorageService localStorage,
-        LandingServiceClient client)
+        HttpClientFactory httpClientFactory)
     {
-        _landing = landing;
-        _adminService = adminService;
+        Service = landing;
+        Admin = admin;
+        MwFifth = mwFifth;
         _dataCache = dataCache;
         _logger = logger;
         _localStorage = localStorage;
         _localStorage.Changed += LocalStorageOnChanged;
-        _client = client;
-        MwFifth = new MwFifthService(this, mwFifth, dataCache);
+        _httpClientFactory = httpClientFactory;
     }
 
     public IReadOnlyDictionary<string, Game> Games { get; private set; } = default!;
-    public MwFifthService MwFifth { get; }
-    public string? SessionId { get; private set; }
+    public IAdminService Admin { get; }
+    public ILandingService Service { get; }
+    public IMwFifthService MwFifth { get; }
     public bool IsAuthenticated { get; private set; }
     public event EventHandler? AuthenticatedChanged;
-    public async Task<CharacterSummary[]> GetCharacters() => await _landing.GetCharacters();
-    public BrowserInfo? BrowserInfo { get; set; }
-    public string? LocationName { get; set; }
-    public Account? Account { get; set; }
-    public IAdminService Admin => _adminService;
-    public ILandingService Service => _landing;
+    public async Task<CharacterSummary[]> GetCharacters() => await Service.GetCharacters();
+    public BrowserInfo? BrowserInfo { get; private set; }
+    public string? LocationName { get; private set; }
+    public Account? Account { get; private set; }
+
+    public Game MwFifthGame => Games[GameState.GameName];
+    public GameState MwFifthGameState { get; private set; } = default!;
+    
+    private async Task GetMwFifthGameState()
+    {
+        MwFifthGameState = await _dataCache.CacheGameState<GameState>(GameState.GameName,
+            async revision => await MwFifth.GetGameState(revision));
+    }
 
     private void LocalStorageOnChanged(object? sender, ChangedEventArgs e)
     {
@@ -66,20 +75,20 @@ public class LandingService
 
     private void SetSessionId(string? sessionId)
     {
-        _client.SetSessionId(sessionId);
-        SessionId = sessionId;
+        _httpClientFactory.SetAuthenticationToken(sessionId);
         IsAuthenticated = !string.IsNullOrEmpty(sessionId);
         AuthenticatedChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public async Task Refresh()
     {
+        _logger.LogInformation("Refresh");
         var sessionId = await _localStorage.GetItemAsStringAsync(SessionIdKey);
         SetSessionId(sessionId);
         _logger.LogInformation("Refresh starting...");
-        Account = await GetAccount();
+        await GetAccount();
         await GetGames();
-        await MwFifth.Refresh();
+        await GetMwFifthGameState();
         _logger.LogInformation("Refresh complete");
     }
 
@@ -88,19 +97,19 @@ public class LandingService
         Games = await _dataCache
             .CacheItem(nameof(Games), TimeSpan.FromHours(GameStateUpdateFrequencyHours), async () =>
             {
-                var games = await _landing.GetGames();
+                var games = await Service.GetGames();
                 return games.ToDictionary(x => x.Name);
             });
     }
 
     public async Task Login(string email)
     {
-        await _landing.Login(email, LocationName ?? "unknown");
+        await Service.Login(email, LocationName ?? "unknown");
     }
 
     public async Task LoginConfirm(string email, string token, string deviceName)
     {
-        var sessionId = await _landing.Confirm(email, token, deviceName);
+        var sessionId = await Service.Confirm(email, token, deviceName);
         if (!sessionId.IsSuccess)
             throw new Exception(sessionId.ErrorMessage);
         await _localStorage.SetItemAsStringAsync(SessionIdKey, sessionId.Value ?? "");
@@ -111,7 +120,7 @@ public class LandingService
     {
         try
         {
-            await _landing.Logout();
+            await Service.Logout();
             await _localStorage.RemoveItemAsync(SessionIdKey);
             SetSessionId(null);
             return true;
@@ -143,7 +152,7 @@ public class LandingService
 
         try
         {
-            var result = await _landing.Validate();
+            var result = await Service.Validate();
             if (!result.IsSuccess)
                 SetSessionId(null);
         }
@@ -161,36 +170,25 @@ public class LandingService
 
     public async Task<Account> GetAccount()
     {
-        Account = await _landing.GetAccount();
-        AuthenticatedChanged?.Invoke(this, EventArgs.Empty);
-        return Account;
+        _logger.LogInformation("GetAccount");
+        try
+        {
+            Account = await Service.GetAccount();
+            AuthenticatedChanged?.Invoke(this, EventArgs.Empty);
+            return Account;
+        }
+        catch (BadRequestException ex)
+        {
+            _logger.LogError(ex, "GetAccount failed");
+            Account = null;
+            SetSessionId(null);
+            AuthenticatedChanged?.Invoke(this, EventArgs.Empty);
+            return new Account();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "GetAccount failed");
+            throw;
+        }
     }
-
-    public async Task AccountEmailAdd(string email) =>
-        await _landing.AccountEmailAdd(email);
-
-    public async Task AccountEmailRemove(string email) =>
-        await _landing.AccountEmailRemove(email);
-
-    public async Task AccountEmailPreferred(string email) =>
-        await _landing.AccountEmailPreferred(email);
-
-    public async Task AccountUpdate(string? fullName, string? location, string? phone, string? allergies,
-        DateOnly? birthDate) =>
-        await _landing.AccountUpdate(fullName, location, phone, allergies, birthDate);
-
-    public async Task<EventsAndLetters> GetEvents() =>
-        await _landing.GetEvents(EventList.Upcoming);
-
-    public async Task<EventsAndLetters> GetPastEvents() =>
-        await _landing.GetEvents(EventList.Past);
-    
-    public async Task<Dictionary<string, string>> GetCharacterNames() =>
-        await _landing.GetCharacterNames();
-
-    public async Task<EventAttendance[]> GetAttendance() =>
-        await _landing.GetAttendance();
-
-    public async Task<EventsAndLetters> GetEventLetter(string eventId, string letterName) => 
-        await _landing.GetEventLetter(eventId, letterName);
 }

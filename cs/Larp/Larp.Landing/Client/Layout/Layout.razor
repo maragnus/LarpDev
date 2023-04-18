@@ -2,15 +2,9 @@
 @inject LandingService LandingService
 <CascadingValue Value="@_pageInfo">
     <NavMenu/>
-    @if (_loadingState == LoadingState.Loading)
+    @if (!_isLoaded)
     {
-        <MudProgressLinear Indeterminate />
-    }
-    else if (_loadingState == LoadingState.Failed)
-    {
-        <MudAlert Severity="Severity.Error">
-            Unable to access server, please refresh and try again. 
-        </MudAlert>
+        <MudProgressCircular Size="Size.Large" Indeterminate />
     }
     else
     {
@@ -21,19 +15,17 @@
 @code {
     [UsedImplicitly]
     private PageInfo _pageInfo = new() { HeaderText = @<span>@LandingService.ServiceName</span> };
-    private LoadingState _loadingState = LoadingState.Loading;
+    private bool _isLoaded;
     
     protected override async Task OnInitializedAsync()
     {
         try
         {
             await LandingService.Refresh();
-            _loadingState = LoadingState.Loaded;
         }
-        catch
+        finally
         {
-            _loadingState = LoadingState.Failed;
-
+            _isLoaded = true;
         }
     }
 }

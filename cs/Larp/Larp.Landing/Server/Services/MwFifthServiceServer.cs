@@ -1,7 +1,4 @@
-﻿using Larp.Data;
-using Larp.Data.Mongo;
-using Larp.Data.Mongo.Services;
-using Larp.Data.MwFifth;
+﻿using Larp.Data.MwFifth;
 using Larp.Landing.Shared.MwFifth;
 
 namespace Larp.Landing.Server.Services;
@@ -16,7 +13,7 @@ public class MwFifthServiceServer : IMwFifthService
     {
         _manager = manager;
         _mwFifth = larpContext.MwFifthGame;
-        _account = userSession.CurrentUser!;
+        _account = userSession.Account!;
     }
 
     public async Task<GameState> GetGameState(string lastRevision)

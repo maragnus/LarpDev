@@ -46,7 +46,7 @@
 
     protected override async Task OnSafeParametersSetAsync()
     {
-        var letter = await LandingService.GetEventLetter(EventId, LetterName);
+        var letter = await LandingService.Service.GetEventLetter(EventId, LetterName);
         _letter = letter.Letters.Values.First();
         _template = letter.LetterTemplates.Values.First();
         _event = letter.Events.Values.First();
