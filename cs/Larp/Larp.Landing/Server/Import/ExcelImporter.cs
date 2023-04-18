@@ -503,7 +503,7 @@ public class ExcelImporter
         if (value.Contains("justice", StringComparison.InvariantCultureIgnoreCase))
             return "justice";
         if (value.Contains("all", StringComparison.InvariantCultureIgnoreCase))
-            return "wild";
+            return "all";
         if (value.Contains("chaos", StringComparison.InvariantCultureIgnoreCase))
             return "chaos";
         if (value.Contains("old", StringComparison.InvariantCultureIgnoreCase))
