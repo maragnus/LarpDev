@@ -26,8 +26,8 @@ public class MwFifthGameContext
 
     public async ValueTask<GameState> GetGameState()
     {
-        if (_cache.TryGetValue(GameStateCacheName, out GameState gameState))
-            return gameState;
+        if (_cache.TryGetValue(GameStateCacheName, out GameState? gameState))
+            return gameState!;
 
         var bson = await _gameStates.
             Find(x => x["Name"] == GameState.GameName)

@@ -298,8 +298,8 @@ public class UserSessionManager : IUserSessionManager
 
     public async Task<Account> GetUserAccount(string accountId)
     {
-        if (_cache.TryGetValue(accountId, out Account account))
-            return account;
+        if (_cache.TryGetValue(accountId, out Account? account))
+            return account!;
 
         account = await _larpContext.Accounts.FindOneAsync(x => x.AccountId == accountId)
                   ?? throw new Exception("Account not found");
@@ -392,7 +392,7 @@ public class UserSessionManager : IUserSessionManager
         if (string.IsNullOrWhiteSpace(sessionId))
             return new UserSessionValidationResult(UserSessionValidationResultStatusCode.Invalid);
 
-        if (!_cache.TryGetValue(sessionId, out Session session))
+        if (!_cache.TryGetValue(sessionId, out Session? session))
         {
             session =
                 await _larpContext.Sessions.Find(x => x.SessionId == sessionId).FirstOrDefaultAsync();
