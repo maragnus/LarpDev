@@ -86,12 +86,12 @@
     private async Task SetPreferred(string email, bool preferred)
     {
         if (!preferred) return;
-        await RunAction(async () => await LandingService.AccountEmailPreferred(email));
+        await RunAction(async () => await LandingService.Service.AccountEmailPreferred(email));
     }
 
     private async Task Delete(string email)
     {
-        await RunAction(async () => await LandingService.AccountEmailRemove(email));
+        await RunAction(async () => await LandingService.Service.AccountEmailRemove(email));
     }
 
     private async Task AddEmailSubmit(EditContext context)
@@ -99,7 +99,7 @@
         var model = (NewEmailModel)context.Model;
         if (string.IsNullOrWhiteSpace(model.EmailAddress)) return;
 
-        await RunAction(async () => await LandingService.AccountEmailAdd(model.EmailAddress.Trim()));
+        await RunAction(async () => await LandingService.Service.AccountEmailAdd(model.EmailAddress.Trim()));
         await _newEmailField!.Clear();
     }
 

@@ -9,14 +9,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="EPPlus" Version="6.2.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.0" />
+        <PackageReference Include="EPPlus" Version="6.2.2" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.5" />
+        <PackageReference Include="SkiaSharp" Version="2.88.3" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\Larp.Data.Mongo\Larp.Data.Mongo.csproj" />
         <ProjectReference Include="..\..\Larp.Data.Seeder\Larp.Data.Seeder.csproj" />
         <ProjectReference Include="..\..\Larp.Data\Larp.Data.csproj" />
+        <ProjectReference Include="..\..\KiloTx.Restful.Server\KiloTx.Restful.Server.csproj" />
         <ProjectReference Include="..\..\Larp.Notify\Larp.Notify.csproj" />
         <ProjectReference Include="..\Client\Larp.Landing.Client.csproj" />
         <ProjectReference Include="..\Shared\Larp.Landing.Shared.csproj" />

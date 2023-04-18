@@ -1,5 +1,4 @@
 @page "/admin/accounts/{AccountId}/attachments"
-@using Larp.Common
 @inherits LarpPage
 @inject LandingService LandingService
 @inject IJSRuntime JS
@@ -71,10 +70,13 @@
             <MudGrid>
                 @foreach (var attachment in _attachments)
                 {
-                    var url = $"/api/attachments/{attachment.AttachmentId}/{attachment.FileName}";
+                    var url = $"/api/attachments/thumbnails/{attachment.AttachmentId}/{attachment.ThumbnailFileName}";
+                    var fullUrl = $"/api/attachments/{attachment.AttachmentId}/{attachment.FileName}";
                     <MudItem sm="12" md="6" lg="4">
                         <MudStack>
-                            <MudImage Src="@url" Alt="@attachment.Title" Height="300" ObjectFit="ObjectFit.Cover" Class="rounded-lg"/>
+                            <a href="@fullUrl" target="_blank">
+                                <MudImage Src="@url" Alt="@attachment.Title" Height="300" ObjectFit="ObjectFit.Cover" Class="rounded-lg"/>
+                            </a>
                             <MudTextField T="string" Adornment="Adornment.End" AdornmentColor="Color.Primary" AdornmentIcon="@Icons.Material.Filled.Save" OnAdornmentClick="async () => await UpdateTitle(attachment)" @bind-Value="@attachment.Title"/>
                             <MudText Typo="Typo.caption">Uploaded by @GetName(attachment.UploadedBy) on @attachment.UploadedOn.ToString("MMM d, yyyy")</MudText>
                             <MudButtonGroup OverrideStyles="false">

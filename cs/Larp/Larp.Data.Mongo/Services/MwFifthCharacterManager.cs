@@ -1,9 +1,4 @@
-using Larp.Common.Exceptions;
 using Larp.Data.MwFifth;
-using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
-using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 
 namespace Larp.Data.Mongo.Services;
 
@@ -53,6 +48,8 @@ public class MwFifthCharacterManager
             Builders<Character>.Update.Set(x => x.AccountId, newAccountId));
         var revisionResult = await _mwFifth.CharacterRevisions.UpdateManyAsync(x => x.AccountId == oldAccountId,
             Builders<CharacterRevision>.Update.Set(x => x.AccountId, newAccountId));
+        await _mwFifth.CharacterRevisions.UpdateManyAsync(x => x.ApprovedBy == oldAccountId,
+            Builders<CharacterRevision>.Update.Set(x => x.ApprovedBy, newAccountId));
 
         _logger.LogInformation(
             "Moved Characters from Account {FromAccountId} to Account {ToAccountId}: {CharacterCount} characters, {RevisionCount} revisions",

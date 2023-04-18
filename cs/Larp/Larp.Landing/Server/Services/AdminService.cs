@@ -1,10 +1,4 @@
-using Larp.Common;
-using Larp.Common.Exceptions;
-using Larp.Data;
-using Larp.Data.Mongo;
-using Larp.Data.Mongo.Services;
 using Larp.Data.MwFifth;
-using Larp.Landing.Shared;
 using Microsoft.Extensions.FileProviders;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -34,7 +28,7 @@ public class AdminService : IAdminService
         _eventManager = eventManager;
         _attachmentManager = attachmentManager;
         _backupManager = backupManager;
-        _account = userSession.CurrentUser!;
+        _account = userSession.Account!;
     }
 
     public async Task<Account[]> GetAccounts()
@@ -50,7 +44,23 @@ public class AdminService : IAdminService
 
     async Task IAdminService.MergeAccounts(string fromAccountId, string toAccountId)
     {
+        await _db.Sessions.UpdateManyAsync(x => x.AccountId == fromAccountId,
+            Builders<Session>.Update.Set(x => x.AccountId, toAccountId));
+
+        await _db.AccountAttachments.UpdateManyAsync(x => x.AccountId == fromAccountId,
+            Builders<AccountAttachment>.Update.Set(x => x.AccountId, toAccountId));
+
+        await _db.AccountAttachments.UpdateManyAsync(x => x.UploadedBy == fromAccountId,
+            Builders<AccountAttachment>.Update.Set(x => x.UploadedBy, toAccountId));
+
+        await _db.Letters.UpdateManyAsync(x => x.AccountId == fromAccountId,
+            Builders<Letter>.Update.Set(x => x.AccountId, toAccountId));
+        
+        await _db.Letters.UpdateManyAsync(x => x.ApprovedBy == fromAccountId,
+            Builders<Letter>.Update.Set(x => x.ApprovedBy, toAccountId));
+
         await _characterManager.MoveAll(fromAccountId, toAccountId);
+        
         var attendances = await _db.Attendances
             .Find(attendance => attendance.AccountId == fromAccountId).ToListAsync();
 
@@ -157,7 +167,7 @@ public class AdminService : IAdminService
     public async Task MoveMwFifthCharacter(string characterId, string newAccountId) =>
         await _characterManager.Move(characterId, newAccountId);
 
-    public async Task<StringResult> DraftEvent() => await _eventManager.DraftEvent();
+    public async Task<Event> DraftEvent() => await _eventManager.DraftEvent();
 
     public async Task SetMwFifthCharacterNotes(string characterId, string? notes) =>
         await _characterManager.SetNotes(characterId, notes);
@@ -237,7 +247,7 @@ public class AdminService : IAdminService
                         CharacterId = character.CharacterId,
                         RevisionId = revision.RevisionId,
                         Name = character.CharacterName ?? "No Name Set",
-                        HomeChapter = revision.HomeChapter,
+                        HomeChapter = revision.HomeChapter ?? "Homeless",
                         Notes = character.PreregistrationNotes,
                         GeneratedNotes = revision.PreregistrationNotes,
                         Skills = revision.ConsolidatedSkills(),

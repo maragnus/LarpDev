@@ -1,12 +1,4 @@
-﻿@inject LandingService LandingService
-
-@code {
-    protected override async Task OnInitializedAsync()
-    {
-        await LandingService.Refresh();
-    }
-}
-<MudThemeProvider/>
+﻿<MudThemeProvider/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 

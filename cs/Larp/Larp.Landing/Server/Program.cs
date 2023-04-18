@@ -1,15 +1,13 @@
+using Larp.Common;
 using Larp.Common.LifeCycle;
-using Larp.Data.Mongo;
-using Larp.Data.Mongo.Services;
 using Larp.Data.Seeder;
-using Larp.Landing.Server;
 using Larp.Landing.Server.Import;
 using Larp.Landing.Server.Services;
-using Larp.Landing.Shared;
 using Larp.Landing.Shared.MwFifth;
 using Larp.Notify;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Internal;
+using ISystemClock = Microsoft.Extensions.Internal.ISystemClock;
+using SystemClock = Microsoft.Extensions.Internal.SystemClock;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +16,6 @@ builder.Configuration
     .AddUserSecrets<Program>();
 
 {
-    // Add services to the container.
     var services = builder.Services;
 
     services.AddSingleton<ISystemClock, SystemClock>();
@@ -27,7 +24,7 @@ builder.Configuration
     services.AddRazorPages();
     services.AddHttpContextAccessor();
     services.AddSingleton<IFileProvider>(_ => new PhysicalFileProvider(Path.GetTempPath()));
-
+    
     // Larp.Notify
     services.AddScoped<INotifyService, NotifyService>();
     services.Configure<NotifyServiceOptions>(
@@ -56,6 +53,9 @@ builder.Configuration
     services.AddScoped<IUserSession, UserSession>();
     services.AddScoped<ExcelImporter>();
     services.AddScoped<BackupManager>();
+    services.AddSingleton<IImageModifier, ImageModifier>();
+    services.AddResponseCompression();
+    services.AddAuthenticationCore(options => options.AddScheme<LarpAuthenticationHandler>("Default", null));
 }
 
 var app = builder.Build();
@@ -83,9 +83,10 @@ app.UseHttpsRedirection();
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
-app.UseMiddleware<UserSessionMiddleware>();
-
 app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapApi<ILandingService>();
 app.MapApi<IMwFifthService>();

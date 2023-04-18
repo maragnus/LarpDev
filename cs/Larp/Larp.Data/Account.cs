@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using Larp.Common;
+﻿using Larp.Common;
 
 namespace Larp.Data;
 
@@ -8,6 +7,12 @@ public enum AccountRole
     AdminAccess,
     AccountAdmin,
     MwFifthGameMaster
+}
+
+public static class AccountRoles {
+    public const string AdminAccess = nameof(AccountRole.AdminAccess);
+    public const string AccountAdmin = nameof(AccountRole.AccountAdmin);
+    public const string MwFifthGameMaster = nameof(AccountRole.MwFifthGameMaster);
 }
 
 [PublicAPI]
@@ -46,6 +51,8 @@ public class Account
 
     public int? DiscountPercent { get; set; }
     
+    public int AttachmentCount { get; set; }
+    
     [BsonIgnore]
     public string? PreferredEmail =>
         (Emails.FirstOrDefault(x => x.IsPreferred) ?? Emails.FirstOrDefault(x => x.IsVerified))?.Email;
@@ -65,26 +72,4 @@ public class AccountEmail
     public string NormalizedEmail { get; set; } = default!;
     public bool IsVerified { get; set; }
     public bool IsPreferred { get; set; }
-}
-
-public class AccountAttachment
-{
-    [BsonId, BsonRepresentation(BsonType.ObjectId)]
-    public string AttachmentId { get; set; } = default!;
-    
-    [BsonRepresentation(BsonType.ObjectId)]
-    public string AccountId { get; set; } = default!;
-    
-    [BsonRepresentation(BsonType.ObjectId)]
-    public string UploadedBy { get; set; } = default!;
-
-    public DateTimeOffset UploadedOn { get; set; }
-    
-    public string Title { get; set; } = default!;
-    
-    public string? MediaType { get; set; }
-    
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public byte[]? Data { get; set; }
-    public string? FileName { get; set; }
 }

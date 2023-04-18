@@ -1,11 +1,4 @@
-using Larp.Common.Exceptions;
-using Larp.Data;
-using Larp.Data.Mongo;
-using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
-using MongoDB.Driver;
-
-namespace Larp.Landing.Server.Services;
+namespace Larp.Data.Mongo.Services;
 
 public class LetterManager
 {
