@@ -1,3 +1,4 @@
+using Larp.Common;
 using Larp.Common.LifeCycle;
 using Larp.Data.Seeder;
 using Larp.Landing.Server.Import;
@@ -52,6 +53,7 @@ builder.Configuration
     services.AddScoped<IUserSession, UserSession>();
     services.AddScoped<ExcelImporter>();
     services.AddScoped<BackupManager>();
+    services.AddSingleton<IImageModifier, ImageModifier>();
     services.AddResponseCompression();
     services.AddAuthenticationCore(options => options.AddScheme<LarpAuthenticationHandler>("Default", null));
 }

@@ -7,6 +7,11 @@ public class HttpClientFactory : IHttpClientFactory
 {
     private readonly HttpClient _httpClient;
 
+    public HttpClientFactory(string baseUri)
+    {
+        _httpClient = new HttpClient { BaseAddress = new Uri(baseUri) };
+    }
+    
     public HttpClientFactory(HttpClient httpClient)
     {
         _httpClient = httpClient;

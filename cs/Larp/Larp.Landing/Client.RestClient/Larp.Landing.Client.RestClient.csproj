@@ -6,7 +6,6 @@
         <Nullable>enable</Nullable>
         <EmitCompilerGeneratedFiles>false</EmitCompilerGeneratedFiles>
         <CompilerGeneratedFilesOutputPath>Implementations</CompilerGeneratedFilesOutputPath>
-        <RootNamespace>Larp.Landing.Client.RestApi</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

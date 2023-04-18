@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using Larp.Common;
+﻿using Larp.Common;
 
 namespace Larp.Data;
 
@@ -71,26 +70,4 @@ public class AccountEmail
     public string NormalizedEmail { get; set; } = default!;
     public bool IsVerified { get; set; }
     public bool IsPreferred { get; set; }
-}
-
-public class AccountAttachment
-{
-    [BsonId, BsonRepresentation(BsonType.ObjectId)]
-    public string AttachmentId { get; set; } = default!;
-    
-    [BsonRepresentation(BsonType.ObjectId)]
-    public string AccountId { get; set; } = default!;
-    
-    [BsonRepresentation(BsonType.ObjectId)]
-    public string UploadedBy { get; set; } = default!;
-
-    public DateTimeOffset UploadedOn { get; set; }
-    
-    public string Title { get; set; } = default!;
-    
-    public string? MediaType { get; set; }
-    
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public byte[]? Data { get; set; }
-    public string? FileName { get; set; }
 }

@@ -118,16 +118,15 @@
 
     protected override async Task OnSafeParametersSetAsync()
     {
-        var result = Past
-            ? await LandingService.GetPastEvents()
-            : await LandingService.GetEvents();
+        var result = await LandingService.Service
+            .GetEvents(Past ? EventList.Past : EventList.Upcoming);
 
         var events = result.Events.Values.Select(x =>
             new EventInfo(GameName(x.GameId), x, result.Letters.Values.ToArray()));
-        if (Past)
-            _events = events.OrderByDescending(x => x.When).ToArray();
-        else
-            _events = events.OrderBy(x => x.When).ToArray();
+
+        _events = Past
+            ? events.OrderByDescending(x => x.When).ToArray()
+            : events.OrderBy(x => x.When).ToArray();
     }
 
     protected override void OnInitialized()

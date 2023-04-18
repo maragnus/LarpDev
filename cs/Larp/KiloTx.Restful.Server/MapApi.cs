@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -67,11 +66,11 @@ public static class MapApiExtensions
                 return;
             }
 
-            if (!authRequired.Roles.Any(role => httpContext.User.IsInRole(role)))
+            if (authRequired.Roles.Length > 0 && !authRequired.Roles.Any(role => httpContext.User.IsInRole(role)))
             {
                 // 401 Unauthorized is the status code to return when the client provides no credentials or invalid credentials.
                 httpContext.Response.StatusCode = 401;
-                await httpContext.Response.WriteAsJsonAsync(Result.Failed("You do not have the required role"),
+                await httpContext.Response.WriteAsJsonAsync(Result.Failed($"You do not have the required role of {string.Join(" or ", authRequired.Roles)}"),
                     JsonOptions);
                 return;
             }

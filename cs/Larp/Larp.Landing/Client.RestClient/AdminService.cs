@@ -8,8 +8,3 @@ namespace Larp.Landing.Client.RestClient;
 public partial class AdminServiceClient
 {
 }
-
-[RestfulImplementation<ILandingService, HttpClientFactory>, MeansImplicitUse]
-public partial class LandingServiceClient
-{
-}

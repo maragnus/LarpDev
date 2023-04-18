@@ -5,68 +5,67 @@ using Microsoft.CodeAnalysis.Text;
 namespace KiloTx.Restful.ClientGenerator;
 
 [PublicAPI]
-internal class CodeBuilder
+internal class SourceCodeBuilder
 {
     private readonly StringBuilder _stringBuilder = new();
     private int _indent;
 
-    public static implicit operator SourceText(CodeBuilder codeBuilder) =>
-        SourceText.From(codeBuilder._stringBuilder.ToString(), Encoding.UTF8);
+    public static implicit operator SourceText(SourceCodeBuilder sourceCodeBuilder) =>
+        SourceText.From(sourceCodeBuilder._stringBuilder.ToString(), Encoding.UTF8);
 
-    public CodeBuilder IncreaseIndent()
+    public SourceCodeBuilder IncreaseIndent()
     {
         _indent++;
         return this;
     }
 
-    public CodeBuilder DecreaseIndent()
+    public SourceCodeBuilder DecreaseIndent()
     {
         _indent--;
         return this;
     }
 
-    public CodeBuilder AppendLine()
+    public SourceCodeBuilder AppendLine()
     {
         _stringBuilder.AppendLine();
         return this;
     }
 
-    public CodeBuilder AppendLine(string line)
+    public SourceCodeBuilder AppendLine(string line)
     {
         _stringBuilder.AppendLine(new string('\t', _indent) + line);
         return this;
     }
 
-    public CodeBuilder PrependLine(string line)
+    public SourceCodeBuilder PrependLine(string line)
     {
-        _stringBuilder.Insert(0, Environment.NewLine).Insert(0, line);
+        _stringBuilder.Insert(0, "\n").Insert(0, line);
         return this;
     }
 
-    public CodeBuilder PrependLine()
+    public SourceCodeBuilder PrependLine()
     {
-        _stringBuilder.Insert(0, Environment.NewLine);
+        _stringBuilder.Insert(0, "\n");
         return this;
     }
 
-
-    public CodeBuilder AppendLines(IEnumerable<string> lines)
-    {
-        foreach (var line in lines)
-            AppendLine(line.TrimEnd('\r'));
-        return this;
-    }
-
-    public CodeBuilder PrependLines(IEnumerable<string> lines)
+    public SourceCodeBuilder AppendLines(IEnumerable<string> lines)
     {
         foreach (var line in lines)
-            PrependLine(line.TrimEnd('\r'));
+            AppendLine(line);
         return this;
     }
 
-    public CodeBuilder OpenBlock() => AppendLine("{").IncreaseIndent();
+    public SourceCodeBuilder PrependLines(IEnumerable<string> lines)
+    {
+        foreach (var line in lines)
+            PrependLine(line);
+        return this;
+    }
 
-    public CodeBuilder CloseBlock(string? suffix = null) => suffix == null
+    public SourceCodeBuilder OpenBlock() => AppendLine("{").IncreaseIndent();
+
+    public SourceCodeBuilder CloseBlock(string? suffix = null) => suffix == null
         ? DecreaseIndent().AppendLine("}")
         : DecreaseIndent().AppendLine($"}}{suffix}");
 }

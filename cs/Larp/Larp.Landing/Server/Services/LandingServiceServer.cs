@@ -29,7 +29,7 @@ public class LandingServiceServer : ILandingService
     public async Task<Result> Login(string email, string deviceName)
     {
         var token = await _userSessionManager.GenerateToken(email, deviceName);
-        await _notifyService.SendEmailAsync(email, "LARP Landing", @$"Your sign in code for LARP Landing is {token}");
+        await _notifyService.SendEmailAsync(email, "Mystwood Tavern", @$"Your sign in code for Mystwood Tavern is {token}");
         return Result.Success;
     }
 
@@ -155,13 +155,39 @@ public class LandingServiceServer : ILandingService
     public async Task<IFileInfo> GetAttachment(string attachmentId, string fileName)
     {
         var file =
-            await _db.AccountAttachments.FindOneAsync(x => x.AttachmentId == attachmentId)
+            await _db.AccountAttachments.Find(x => x.AttachmentId == attachmentId)
+                .Project(x=> new AccountAttachment()
+                {
+                    Data = x.Data,
+                    FileName = x.FileName,
+                    MediaType = x.MediaType
+                })
+                .FirstOrDefaultAsync()
             ?? throw new ResourceNotFoundException("Attachment not found");
 
         if (file.Data == null)
             throw new ResourceNotFoundException("Attachment data is invalid");
 
-        return new DownloadFileInfo(new MemoryStream(file.Data!), file.FileName ?? "file", file.Data.Length);
+        return new DownloadFileInfo(new MemoryStream(file.Data), file.FileName ?? "file", file.Data.Length);
+    }
+    
+    public async Task<IFileInfo> GetAttachmentThumbnail(string attachmentId, string fileName)
+    {
+        var file =
+            await _db.AccountAttachments.Find(x => x.AttachmentId == attachmentId)
+                .Project(x=> new AccountAttachment()
+                {
+                    ThumbnailData = x.ThumbnailData,
+                    ThumbnailFileName = x.ThumbnailFileName,
+                    ThumbnailMediaType = x.ThumbnailMediaType
+                })
+                .FirstOrDefaultAsync()
+            ?? throw new ResourceNotFoundException("Attachment not found");
+
+        if (file.ThumbnailData == null)
+            throw new ResourceNotFoundException("Attachment thumbnail data is invalid");
+
+        return new DownloadFileInfo(new MemoryStream(file.ThumbnailData), file.ThumbnailFileName ?? "file", file.ThumbnailData.Length);
     }
 }
 

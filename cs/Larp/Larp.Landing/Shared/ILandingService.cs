@@ -62,4 +62,7 @@ public interface ILandingService
     
     [ApiGet("attachments/{attachmentId}/{fileName}")]
     Task<IFileInfo> GetAttachment(string attachmentId, string fileName);
+    
+    [ApiGet("attachments/thumbnails/{attachmentId}/{fileName}")]
+    Task<IFileInfo> GetAttachmentThumbnail(string attachmentId, string fileName);
 }

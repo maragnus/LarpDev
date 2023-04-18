@@ -19,20 +19,19 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
     services.AddBlazoredLocalStorageAsSingleton();
 
-    services.AddSingleton(_ => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-    
     // Larp.Landing.Client
     services.AddSingleton<DataCacheService>();
     services.AddSingleton<LandingService>();
-    services.AddSingleton<LandingServiceClientLegacy>();
     services.AddSingleton<LandingServiceUpkeep>();
 
     // Larp.Landing.Client.RestClient
-    services.AddSingleton<HttpClientFactory>();
+    services.AddSingleton<HttpClientFactory>(_ => 
+        new HttpClientFactory(builder.HostEnvironment.BaseAddress));
     services.AddSingleton<ILandingService, LandingServiceClient>();
     services.AddSingleton<IMwFifthService, MwFifthServiceClient>();
     services.AddSingleton<IAdminService, AdminServiceClient>();
     
+    // MudBlazor
     services.AddMudServices();
     services.AddMudExtensions();
 }

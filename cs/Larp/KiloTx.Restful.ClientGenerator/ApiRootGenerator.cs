@@ -8,6 +8,40 @@ using Microsoft.CodeAnalysis.Text;
 namespace KiloTx.Restful.ClientGenerator;
 
 [Generator(LanguageNames.CSharp)]
+public class FileDownloadSourceGenerator : ISourceGenerator
+{
+    public void Initialize(GeneratorInitializationContext context)
+    {
+    }
+
+    public void Execute(GeneratorExecutionContext context)
+    {
+        var source = new SourceCodeBuilder()
+            .AppendLine("namespace KiloTx.Restful;")
+            .AppendLine()
+            .AppendLine("internal class DownloadFileInfo : Microsoft.Extensions.FileProviders.IFileInfo")
+            .OpenBlock()
+            .AppendLine("private readonly MemoryStream _stream;")
+            .AppendLine("public DownloadFileInfo(MemoryStream stream, string name, int length)")
+            .OpenBlock()
+            .AppendLine("Name = name;")
+            .AppendLine("Length = length;")
+            .AppendLine("_stream = stream;")
+            .CloseBlock()
+            .AppendLine("public Stream CreateReadStream() => _stream;")
+            .AppendLine("public bool Exists => true;")
+            .AppendLine("public long Length { get; }")
+            .AppendLine("public string? PhysicalPath => null;")
+            .AppendLine("public string Name { get; }")
+            .AppendLine("public DateTimeOffset LastModified => DateTimeOffset.Now;")
+            .AppendLine("public bool IsDirectory => false;")
+            .CloseBlock();
+
+        context.AddSource("DownloadFileInfo.g.cs", source);
+    }
+}
+
+[Generator(LanguageNames.CSharp)]
 public class RestfulSourceGenerator : IIncrementalGenerator
 {
     private static readonly Dictionary<string, string> _httpMethods = new()
@@ -98,7 +132,7 @@ public class RestfulSourceGenerator : IIncrementalGenerator
         value.Length == 0
             ? value
             : char.ToLowerInvariant(value[0]) + value[1..];
-    
+
     private static SourceText GenerateSourceCode(ITypeSymbol type)
     {
         var interfaces = GetInterfaces(type);
@@ -107,24 +141,26 @@ public class RestfulSourceGenerator : IIncrementalGenerator
             interfaces.Select(x => x.Interface.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
 
         var usings = new HashSet<string>() { "System.Text.Json", "System.Net.Http.Json", "KiloTx.Restful" };
-        usings.AddRange(interfaces.Select(interfaceType => interfaceType.Interface.ContainingNamespace.ToDisplayString()));
-        usings.AddRange(interfaces.Select(interfaceType => interfaceType.HttpClientFactory.ContainingNamespace.ToDisplayString()));
+        usings.AddRange(
+            interfaces.Select(interfaceType => interfaceType.Interface.ContainingNamespace.ToDisplayString()));
+        usings.AddRange(interfaces.Select(interfaceType =>
+            interfaceType.HttpClientFactory.ContainingNamespace.ToDisplayString()));
 
         var factoryTypes = interfaces
             .Select(factoryType => factoryType.HttpClientFactory)
             .DistinctBy(x => x.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat))
             .Order()
             .Select(symbol => (
-                Symbol: symbol, 
-                QualifiedName: symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), 
-                TypeName: symbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat), 
+                Symbol: symbol,
+                QualifiedName: symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                TypeName: symbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
                 ArgName: ToCamelCase(symbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)),
                 FieldName: $"_{ToCamelCase(symbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat))}"))
             .ToList();
         var factoryTypesArg = string.Join(", ", factoryTypes
             .Select(factoryType => $"{factoryType.TypeName} {factoryType.ArgName}"));
 
-        var source = new CodeBuilder();
+        var source = new SourceCodeBuilder();
         source.AppendLine();
         source.AppendLine($"namespace {type.ContainingNamespace};");
         source.AppendLine();
@@ -134,13 +170,14 @@ public class RestfulSourceGenerator : IIncrementalGenerator
         foreach (var factoryType in factoryTypes)
             source.AppendLine($"private {factoryType.TypeName} {factoryType.FieldName};");
         source.AppendLine();
-        
+
         source.AppendLine($"public {type.Name}({factoryTypesArg})");
         source.OpenBlock();
         foreach (var factoryType in factoryTypes)
         {
             source.AppendLine($"{factoryType.FieldName} = {factoryType.ArgName};");
         }
+
         source.CloseBlock();
         source.AppendLine();
 
@@ -162,11 +199,13 @@ public class RestfulSourceGenerator : IIncrementalGenerator
             if (apiRootAttribute == null) continue;
             var apiRoot = ((string)apiRootAttribute.ConstructorArguments.First().Value!).TrimEnd('/');
 
-            var httpClient = factoryTypes.Single(x => 
-                x.QualifiedName == implementType.HttpClientFactory.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat))
+            var httpClient = factoryTypes.Single(x =>
+                    x.QualifiedName ==
+                    implementType.HttpClientFactory.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat))
                 .FieldName;
-            httpClient = $"{httpClient}.CreateHttpClient(typeof({implementType.Interface.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}))";
-            
+            httpClient =
+                $"{httpClient}.CreateHttpClient(typeof({implementType.Interface.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}))";
+
             var members = implementType.Interface.GetMembers()
                 .Select(x => x as IMethodSymbol).Where(x => x != null);
             foreach (var member in members)
@@ -184,6 +223,7 @@ public class RestfulSourceGenerator : IIncrementalGenerator
                                        $"Method {member.Name} must have a Task return type");
                     // TODO -- expect Task
                     var returnType = taskType.IsGenericType ? taskType.TypeArguments.Single() : null;
+                    var returnTypeName = returnType?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
 
                     // using for method Parameters
                     foreach (var argument in member.Parameters)
@@ -237,6 +277,7 @@ public class RestfulSourceGenerator : IIncrementalGenerator
                     var hasBody = apiPath.Method != "HttpMethod.Get";
                     var hasData = contentArgs.Count > 0;
                     var fileParameter = member.Parameters.FirstOrDefault(parameter => parameter.Type.Name == "Stream");
+                    var hasFileReturn = returnTypeName == "IFileInfo";
 
                     if (fileParameter != null)
                     {
@@ -274,6 +315,7 @@ public class RestfulSourceGenerator : IIncrementalGenerator
                             {
                                 argBuilder.Append($"{arg}={{Uri.EscapeDataString({arg}.ToString())}}&");
                             }
+
                             argBuilder.Remove(argBuilder.Length - 1, 1);
 
                             source.AppendLine($@"var messageUrl = $""{argBuilder}"";");
@@ -297,16 +339,27 @@ public class RestfulSourceGenerator : IIncrementalGenerator
                             source.AppendLine(@"httpMessage.Content = new StringContent("""");");
                     }
 
-                    if (returnType != null)
+                    if (hasFileReturn)
                     {
-                        var returnTypeName = returnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+                        source
+                            .AppendLine(@$"var httpResponse = await {httpClient}.SendAsync(httpMessage);")
+                            .AppendLine("var httpResponseBytes = await httpResponse.Content.ReadAsByteArrayAsync();")
+                            .AppendLine("var httpResponseStream = new MemoryStream(httpResponseBytes);")
+                            .AppendLine(
+                                @"return new DownloadFileInfo(httpResponseStream, ""download"", httpResponseBytes.Length);");
+                    }
+                    else if (returnType != null)
+                    {
                         source
                             .AppendLine(@$"var httpResponse = await {httpClient}.SendAsync(httpMessage);")
                             .AppendLine(
                                 @"await using var httpResponseStream = await httpResponse.Content.ReadAsStreamAsync();")
                             .AppendLine(
                                 @$"return await JsonSerializer.DeserializeAsync<{returnTypeName}>(httpResponseStream, JsonOptions)")
-                            .IncreaseIndent().AppendLine(@$"?? throw new BadRequestException(""Unable to deserialize to {returnTypeName}"");").DecreaseIndent();
+                            .IncreaseIndent()
+                            .AppendLine(
+                                @$"?? throw new BadRequestException(""Unable to deserialize to {returnTypeName}"");")
+                            .DecreaseIndent();
                     }
                     else
                     {
@@ -346,7 +399,7 @@ public class RestfulSourceGenerator : IIncrementalGenerator
     }
 
     private record InterfaceAttribute(ITypeSymbol Interface, ITypeSymbol HttpClientFactory);
-    
+
     private static ImmutableArray<InterfaceAttribute> GetInterfaces(ISymbol type)
     {
         return type.GetAttributes()
