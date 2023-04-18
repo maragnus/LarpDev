@@ -4,7 +4,7 @@ using Larp.Landing.Shared.MwFifth;
 
 namespace Larp.Landing.Client.RestClient;
 
-[RestfulImplementation<IMwFifthService>, MeansImplicitUse]
+[RestfulImplementation<IMwFifthService, HttpClientFactory>, MeansImplicitUse]
 public partial class MwFifthServiceClient
 {
 }

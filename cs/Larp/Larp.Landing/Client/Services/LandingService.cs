@@ -1,6 +1,7 @@
 using Blazored.LocalStorage;
 using KiloTx.Restful;
 using Larp.Data;
+using Larp.Landing.Client.RestClient;
 using Larp.Landing.Shared;
 using Larp.Landing.Shared.MwFifth;
 using PSC.Blazor.Components.BrowserDetect;
@@ -25,6 +26,7 @@ public class LandingService
     private readonly ILogger<LandingService> _logger;
     private readonly ILocalStorageService _localStorage;
     private readonly LandingServiceClientLegacy _client;
+    private readonly HttpClientFactory _httpClientFactory;
 
     private const int GameStateUpdateFrequencyHours = 4;
     private const string SessionIdKey = "SessionId";
@@ -35,7 +37,8 @@ public class LandingService
         DataCacheService dataCache,
         ILogger<LandingService> logger,
         ILocalStorageService localStorage,
-        LandingServiceClientLegacy client)
+        LandingServiceClientLegacy client,
+        HttpClientFactory httpClientFactory)
     {
         _landing = landing;
         _adminService = adminService;
@@ -44,6 +47,7 @@ public class LandingService
         _localStorage = localStorage;
         _localStorage.Changed += LocalStorageOnChanged;
         _client = client;
+        _httpClientFactory = httpClientFactory;
         MwFifth = new MwFifthService(this, mwFifth, dataCache);
     }
 
@@ -67,6 +71,7 @@ public class LandingService
 
     private void SetSessionId(string? sessionId)
     {
+        _httpClientFactory.SetAuthenticationToken(sessionId);
         _client.SetSessionId(sessionId);
         SessionId = sessionId;
         IsAuthenticated = !string.IsNullOrEmpty(sessionId);

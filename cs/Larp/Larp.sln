@@ -31,7 +31,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KiloTx.Restful", "KiloTx.Re
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KiloTx.Restful.ClientGenerator", "KiloTx.Restful.ClientGenerator\KiloTx.Restful.ClientGenerator.csproj", "{5533CDAC-5FF2-4D39-B03C-E33F4CD9333B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Larp.Landing.Client.RestClient", "Larp.Landing\Larp.Landing.Client.RestClient\Larp.Landing.Client.RestClient.csproj", "{769A2220-5CF8-4C45-8681-DE283AEC69E9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Larp.Landing.Client.RestClient", "Larp.Landing\Client.RestClient\Larp.Landing.Client.RestClient.csproj", "{769A2220-5CF8-4C45-8681-DE283AEC69E9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

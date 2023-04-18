@@ -28,7 +28,7 @@ public class AdminService : IAdminService
         _eventManager = eventManager;
         _attachmentManager = attachmentManager;
         _backupManager = backupManager;
-        _account = userSession.CurrentUser!;
+        _account = userSession.Account!;
     }
 
     public async Task<Account[]> GetAccounts()

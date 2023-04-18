@@ -95,7 +95,7 @@ public class LandingServiceServer : ILandingService
     }
 
     public Task<Account> GetAccount() =>
-        Task.FromResult(_userSession.CurrentUser!);
+        Task.FromResult(_userSession.Account!);
 
     public async Task AccountEmailAdd(string email) =>
         await _userSessionManager.AddEmailAddress(_userSession.AccountId!, email);

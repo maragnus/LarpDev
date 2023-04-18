@@ -17,7 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Larp.Landing.Client.RestClient\Larp.Landing.Client.RestClient.csproj" />
+        <ProjectReference Include="..\Client.RestClient\Larp.Landing.Client.RestClient.csproj" />
         <ProjectReference Include="..\Shared\Larp.Landing.Shared.csproj" />
     </ItemGroup>
 

@@ -94,15 +94,35 @@ public class RestfulSourceGenerator : IIncrementalGenerator
         }
     }
 
+    private static string ToCamelCase(string value) =>
+        value.Length == 0
+            ? value
+            : char.ToLowerInvariant(value[0]) + value[1..];
+    
     private static SourceText GenerateSourceCode(ITypeSymbol type)
     {
         var interfaces = GetInterfaces(type);
 
         var implements = string.Join(", ",
-            interfaces.Select(x => x.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
+            interfaces.Select(x => x.Interface.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
 
         var usings = new HashSet<string>() { "System.Text.Json", "System.Net.Http.Json", "KiloTx.Restful" };
-        usings.AddRange(interfaces.Select(interfaceType => interfaceType.ContainingNamespace.ToDisplayString()));
+        usings.AddRange(interfaces.Select(interfaceType => interfaceType.Interface.ContainingNamespace.ToDisplayString()));
+        usings.AddRange(interfaces.Select(interfaceType => interfaceType.HttpClientFactory.ContainingNamespace.ToDisplayString()));
+
+        var factoryTypes = interfaces
+            .Select(factoryType => factoryType.HttpClientFactory)
+            .DistinctBy(x => x.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat))
+            .Order()
+            .Select(symbol => (
+                Symbol: symbol, 
+                QualifiedName: symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), 
+                TypeName: symbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat), 
+                ArgName: ToCamelCase(symbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)),
+                FieldName: $"_{ToCamelCase(symbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat))}"))
+            .ToList();
+        var factoryTypesArg = string.Join(", ", factoryTypes
+            .Select(factoryType => $"{factoryType.TypeName} {factoryType.ArgName}"));
 
         var source = new CodeBuilder();
         source.AppendLine();
@@ -111,11 +131,16 @@ public class RestfulSourceGenerator : IIncrementalGenerator
         source.AppendLine($"partial class {type.Name} : {implements}");
         source.OpenBlock();
 
-        source.AppendLine("private HttpClient _httpClient;");
+        foreach (var factoryType in factoryTypes)
+            source.AppendLine($"private {factoryType.TypeName} {factoryType.FieldName};");
         source.AppendLine();
-        source.AppendLine($"public {type.Name}(HttpClient httpClient)");
+        
+        source.AppendLine($"public {type.Name}({factoryTypesArg})");
         source.OpenBlock();
-        source.AppendLine("_httpClient = httpClient;");
+        foreach (var factoryType in factoryTypes)
+        {
+            source.AppendLine($"{factoryType.FieldName} = {factoryType.ArgName};");
+        }
         source.CloseBlock();
         source.AppendLine();
 
@@ -132,12 +157,17 @@ public class RestfulSourceGenerator : IIncrementalGenerator
         foreach (var implementType in interfaces)
         {
             // Get the root uri
-            var apiRootAttribute = implementType.GetAttributes()
+            var apiRootAttribute = implementType.Interface.GetAttributes()
                 .FirstOrDefault(x => x.AttributeClass!.Name == nameof(ApiRootAttribute));
             if (apiRootAttribute == null) continue;
             var apiRoot = ((string)apiRootAttribute.ConstructorArguments.First().Value!).TrimEnd('/');
 
-            var members = implementType.GetMembers()
+            var httpClient = factoryTypes.Single(x => 
+                x.QualifiedName == implementType.HttpClientFactory.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat))
+                .FieldName;
+            httpClient = $"{httpClient}.CreateHttpClient(typeof({implementType.Interface.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}))";
+            
+            var members = implementType.Interface.GetMembers()
                 .Select(x => x as IMethodSymbol).Where(x => x != null);
             foreach (var member in members)
             {
@@ -187,7 +217,7 @@ public class RestfulSourceGenerator : IIncrementalGenerator
 
                     // OUTPUT - Method declaration
                     source.AppendLine(
-                        $@"async {member.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)} {implementType.Name}.{member.Name}({arguments})");
+                        $@"async {member.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)} {implementType.Interface.Name}.{member.Name}({arguments})");
                     source.OpenBlock();
 
                     // Aggregate the argument names
@@ -271,7 +301,7 @@ public class RestfulSourceGenerator : IIncrementalGenerator
                     {
                         var returnTypeName = returnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
                         source
-                            .AppendLine(@$"var httpResponse = await _httpClient.SendAsync(httpMessage);")
+                            .AppendLine(@$"var httpResponse = await {httpClient}.SendAsync(httpMessage);")
                             .AppendLine(
                                 @"await using var httpResponseStream = await httpResponse.Content.ReadAsStreamAsync();")
                             .AppendLine(
@@ -280,7 +310,7 @@ public class RestfulSourceGenerator : IIncrementalGenerator
                     }
                     else
                     {
-                        source.AppendLine(@$"await _httpClient.SendAsync(httpMessage);");
+                        source.AppendLine(@$"await {httpClient}.SendAsync(httpMessage);");
                     }
 
                     source.CloseBlock();
@@ -315,11 +345,13 @@ public class RestfulSourceGenerator : IIncrementalGenerator
             yield return namespaceName;
     }
 
-    private static ImmutableArray<ITypeSymbol> GetInterfaces(ISymbol type)
+    private record InterfaceAttribute(ITypeSymbol Interface, ITypeSymbol HttpClientFactory);
+    
+    private static ImmutableArray<InterfaceAttribute> GetInterfaces(ISymbol type)
     {
         return type.GetAttributes()
             .Where(x => x.AttributeClass?.Name == nameof(RestfulImplementationAttribute))
-            .Select(x => x.AttributeClass!.TypeArguments.Single())
+            .Select(x => new InterfaceAttribute(x.AttributeClass!.TypeArguments[0], x.AttributeClass!.TypeArguments[1]))
             .ToImmutableArray();
     }
 }

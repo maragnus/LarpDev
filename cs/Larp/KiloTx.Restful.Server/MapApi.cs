@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -57,7 +58,7 @@ public static class MapApiExtensions
     {
         if (authRequired != null)
         {
-            if (!httpContext.User.Identity?.IsAuthenticated != true)
+            if (httpContext.User.Identity?.IsAuthenticated != true)
             {
                 // 401 Unauthorized is the status code to return when the client provides no credentials or invalid credentials.
                 httpContext.Response.StatusCode = 401;

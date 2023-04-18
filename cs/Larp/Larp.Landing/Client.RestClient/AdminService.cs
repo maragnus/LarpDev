@@ -4,12 +4,12 @@ using Larp.Landing.Shared;
 
 namespace Larp.Landing.Client.RestClient;
 
-[RestfulImplementation<IAdminService>, MeansImplicitUse]
+[RestfulImplementation<IAdminService, HttpClientFactory>, MeansImplicitUse]
 public partial class AdminServiceClient
 {
 }
 
-[RestfulImplementation<ILandingService>, MeansImplicitUse]
+[RestfulImplementation<ILandingService, HttpClientFactory>, MeansImplicitUse]
 public partial class LandingServiceClient
 {
 }

@@ -20,17 +20,15 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
     services.AddBlazoredLocalStorageAsSingleton();
 
     services.AddSingleton(_ => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-
+    
     // Larp.Landing.Client
     services.AddSingleton<DataCacheService>();
     services.AddSingleton<LandingService>();
     services.AddSingleton<LandingServiceClientLegacy>();
     services.AddSingleton<LandingServiceUpkeep>();
-    // services.AddSingleton<ILandingService>(provider => provider.GetRequiredService<LandingServiceClient>());
-    // services.AddSingleton<IMwFifthService>(provider => provider.GetRequiredService<LandingServiceClient>());
-    // services.AddSingleton<IAdminService>(provider => provider.GetRequiredService<LandingServiceClient>());
 
     // Larp.Landing.Client.RestClient
+    services.AddSingleton<HttpClientFactory>();
     services.AddSingleton<ILandingService, LandingServiceClient>();
     services.AddSingleton<IMwFifthService, MwFifthServiceClient>();
     services.AddSingleton<IAdminService, AdminServiceClient>();

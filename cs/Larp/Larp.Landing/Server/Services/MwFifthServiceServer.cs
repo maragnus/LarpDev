@@ -13,7 +13,7 @@ public class MwFifthServiceServer : IMwFifthService
     {
         _manager = manager;
         _mwFifth = larpContext.MwFifthGame;
-        _account = userSession.CurrentUser!;
+        _account = userSession.Account!;
     }
 
     public async Task<GameState> GetGameState(string lastRevision)
