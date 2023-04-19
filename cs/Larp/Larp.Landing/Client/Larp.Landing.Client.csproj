@@ -5,7 +5,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-        <NoWarn>8669 8602 5</NoWarn>
+        <NoWarn>8669,8602,BL0005</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>

@@ -62,7 +62,7 @@
                     <MudTextField T="string?" ReadOnly="ReadOnly" Variant="Variant.Outlined" Lines="4" Value="@(GetField<string?>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
                     break;
                 case LetterFieldType.Selection:
-                    <MudSelectExtended T="string?" ReadOnly="ReadOnly" Clearable="@(!ReadOnly)" Variant="Variant.Outlined" ItemCollection="(ICollection<string>)field.Options" Value="@(GetField<string>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
+                    <MudSelectExtended T="string?" ReadOnly="ReadOnly" Clearable="@(!ReadOnly)" Variant="Variant.Outlined" ItemCollection="(ICollection<string?>)field.Options" Value="@(GetField<string>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
                     break;
                 case LetterFieldType.MultipleSelection:
                     @if (ReadOnly)
