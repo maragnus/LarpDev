@@ -1,3 +1,4 @@
+using System.Net;
 using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
@@ -7,6 +8,7 @@ namespace Larp.Landing.Client.Pages;
 public class LarpPage : ComponentBase
 {
     [Inject] protected IDialogService DialogService { get; set; } = default!;
+    [Inject] protected NavigationManager NavigationManager { get; set; } = default!;
     [Inject] protected ILogger<LarpPage> Logger { get; set; } = default!;
 
     protected bool IsLoading { get; set; } = true;
@@ -163,9 +165,20 @@ public class LarpPage : ComponentBase
         {
             Logger.LogError(ex, $"Exception during {nameof(SafeActionAsync)}: {{Message}}", ex.Message);
 
-            if (httpRequestException.StatusCode == null)
-                return await DialogService.ShowMessageBox("Server Error", "There was an issue contacting the server. Check your internet connection and try again.", "Retry", "Cancel");
-            return await DialogService.ShowMessageBox("Server Error", ex.Message, "Retry", "Cancel");
+            switch (httpRequestException.StatusCode)
+            {
+                case HttpStatusCode.Unauthorized:
+                    await DialogService.ShowMessageBox("Not Logged In", "You must be logged in to access this area", "Login");
+                    NavigationManager.NavigateTo("/login");
+                    return false;
+                case HttpStatusCode.Forbidden: 
+                    await DialogService.ShowMessageBox("Admin Role Needed", "You do not have access to this area", "Ok");
+                    return false;
+                case null:
+                    return await DialogService.ShowMessageBox("Server Error", "There was an issue contacting the server. Check your internet connection and try again.", "Retry", "Cancel");
+                default:
+                    return await DialogService.ShowMessageBox("Server Error", ex.Message, "Retry", "Cancel");
+            }
         }
 
         Logger.LogError(ex, "Exception during {MethodName}: {Message}", methodName, ex.Message);
