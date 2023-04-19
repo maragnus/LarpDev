@@ -30,7 +30,7 @@ public class LarpAuthenticationHandler : IAuthenticationHandler
         
         var session = await _userSessionManager.ValidateUserSession(_token);
         var isAuthenticated = session.StatusCode == UserSessionValidationResultStatusCode.Authenticated;
-        _userSession.Initialize(session);
+        _userSession.Initialize(_token, session);
         
         if (!isAuthenticated || session.Account == null)
             return AuthenticateResult.NoResult();

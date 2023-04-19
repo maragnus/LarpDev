@@ -1,3 +1,4 @@
+using System.Net;
 using Blazored.LocalStorage;
 using KiloTx.Restful;
 using Larp.Data;
@@ -86,9 +87,10 @@ public class LandingService
         var sessionId = await _localStorage.GetItemAsStringAsync(SessionIdKey);
         SetSessionId(sessionId);
         _logger.LogInformation("Refresh starting...");
-        await GetAccount();
-        await GetGames();
-        await GetMwFifthGameState();
+        await Task.WhenAll(
+            GetGames(),
+            GetMwFifthGameState(),
+            GetAccount());
         _logger.LogInformation("Refresh complete");
     }
 
@@ -116,14 +118,13 @@ public class LandingService
         SetSessionId(sessionId.Value);
     }
 
-    public async Task<bool> Logout(bool force)
+    public async Task Logout(bool force)
     {
         try
         {
             await Service.Logout();
             await _localStorage.RemoveItemAsync(SessionIdKey);
             SetSessionId(null);
-            return true;
         }
         catch (Exception ex)
         {
@@ -133,7 +134,6 @@ public class LandingService
 
             await _localStorage.RemoveItemAsync(SessionIdKey);
             SetSessionId(null);
-            return false;
         }
     }
 
@@ -176,6 +176,13 @@ public class LandingService
             Account = await Service.GetAccount();
             AuthenticatedChanged?.Invoke(this, EventArgs.Empty);
             return Account;
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            Account = null;
+            SetSessionId(null);
+            AuthenticatedChanged?.Invoke(this, EventArgs.Empty);
+            return new Account();
         }
         catch (BadRequestException ex)
         {

@@ -4,11 +4,8 @@ public interface IUserSession
 {
     Account? Account { get; }
     string? SessionId { get; }
-    bool IsAuthenticated { get; }
     string? AccountId { get; }
-    bool HasAnyRole(AccountRole[] anyOfRoles);
-    bool HasRole(AccountRole role);
-    void Initialize(UserSessionValidationResult session);
+    void Initialize(string token, UserSessionValidationResult session);
 }
 
 public class UserSession : IUserSession
@@ -22,8 +19,9 @@ public class UserSession : IUserSession
     public bool HasRole(AccountRole role) => 
         Account?.Roles.Contains(role) ?? false;
 
-    public void Initialize(UserSessionValidationResult session)
+    public void Initialize(string token, UserSessionValidationResult session)
     {
+        SessionId = token;
         IsAuthenticated = session.StatusCode == UserSessionValidationResultStatusCode.Authenticated;
         AccountId = session.Account?.AccountId;
         Account = session.Account;

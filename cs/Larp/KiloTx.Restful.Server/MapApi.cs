@@ -68,8 +68,8 @@ public static class MapApiExtensions
 
             if (authRequired.Roles.Length > 0 && !authRequired.Roles.Any(role => httpContext.User.IsInRole(role)))
             {
-                // 401 Unauthorized is the status code to return when the client provides no credentials or invalid credentials.
-                httpContext.Response.StatusCode = 401;
+                // 403 Forbidden is the status code to return when a client has valid credentials but not enough privileges to perform an action on a resource.
+                httpContext.Response.StatusCode = 403;
                 await httpContext.Response.WriteAsJsonAsync(Result.Failed($"You do not have the required role of {string.Join(" or ", authRequired.Roles)}"),
                     JsonOptions);
                 return;
@@ -150,7 +150,7 @@ public static class MapApiExtensions
         catch (ResourceForbiddenException ex)
         {
             // 403 Forbidden is the status code to return when a client has valid credentials but not enough privileges to perform an action on a resource.
-            logger.LogWarning(ex, "Access to resource is forbidden:  {Uri}", httpContext.Request.Path);
+            logger.LogWarning(ex, "Access to resource is forbidden: {Uri}", httpContext.Request.Path);
             httpContext.Response.StatusCode = 403;
             await httpContext.Response.WriteAsync(ex.ToString());
         }

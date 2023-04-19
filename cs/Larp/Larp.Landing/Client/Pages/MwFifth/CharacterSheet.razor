@@ -230,7 +230,7 @@
     </MudItem>
     @foreach (var spell in _spells)
     {
-        <MudItem xs="@(Print ? 4 : FullLayout ? 4 : 6)" sm="@(Print ? 4 : FullLayout ? 3 : 4)">
+        <MudItem xs="@(Print ? 4 : 12)" sm="@(Print ? 4 : FullLayout ? 3 : 4)">
             <div class="spell-container">
                 <div class="spell-name">@spell.Name</div>
                 <div>@spell.Effect</div>
