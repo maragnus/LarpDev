@@ -321,7 +321,7 @@
         "name": "Empathy",
         "title": "Empathy",
         "properties": [
-            "Empathy Special Attacks per Renew"
+            "Healing Hand per Renew"
         ],
         "ranks": [
             {
