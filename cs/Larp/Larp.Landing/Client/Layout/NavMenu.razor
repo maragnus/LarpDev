@@ -1,7 +1,6 @@
 ﻿@implements IAsyncDisposable
 @inject NavigationManager NavigationManager
 @inject LandingService LandingService
-@inject LandingServiceUpkeep LandingServiceUpkeep
 
 @code {
 
@@ -10,37 +9,33 @@
 
     private IDisposable? _navChange;
     private bool _isDrawerOpen;
-    private bool _isPrint;
     private string _accountName = "Guest";
     private HashSet<AccountRole> _roles = new();
 
-    protected override void OnInitialized()
+    protected override void OnParametersSet()
     {
-        _isPrint = NavigationManager.IsPrintPage();
-        _navChange = NavigationManager.RegisterLocationChangingHandler(context =>
+        _navChange = NavigationManager.RegisterLocationChangingHandler(_ =>
         {
-            _isPrint = context.TargetLocation.EndsWith("/print");
             _isDrawerOpen = false;
             StateHasChanged();
             return ValueTask.CompletedTask;
         });
-
-        LandingServiceOnAuthenticatedChanged(LandingService, EventArgs.Empty);
-        LandingService.AuthenticatedChanged += LandingServiceOnAuthenticatedChanged;
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LandingServiceUpkeep.StartAsync(default);
+        
         var account = LandingService.Account;
         _roles = account?.Roles?.ToHashSet() ?? new HashSet<AccountRole>();
     }
 
-    public async ValueTask DisposeAsync()
+    protected override void OnInitialized()
     {
-        await LandingServiceUpkeep.StopAsync(default);
+        LandingServiceOnAuthenticatedChanged(LandingService, EventArgs.Empty);
+        LandingService.AuthenticatedChanged += LandingServiceOnAuthenticatedChanged;
+    }
+
+    public ValueTask DisposeAsync()
+    {
         LandingService.AuthenticatedChanged -= LandingServiceOnAuthenticatedChanged;
         _navChange?.Dispose();
+        return ValueTask.CompletedTask;
     }
 
     private void LandingServiceOnAuthenticatedChanged(object? sender, EventArgs e)

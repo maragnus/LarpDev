@@ -22,9 +22,6 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
     // Larp.Landing.Client
     services.AddSingleton<DataCacheService>();
     services.AddSingleton<LandingService>();
-#if DEBUG
-    services.AddSingleton<LandingServiceUpkeep>();
-#endif
 
     // Larp.Landing.Client.RestClient
     services.AddSingleton<HttpClientFactory>(_ =>
