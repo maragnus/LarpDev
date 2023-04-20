@@ -118,9 +118,10 @@ public class LetterManager
     public async Task<Dictionary<string, AccountName>> GetAccountNames()
     {
         var names = await _larpContext.Accounts.Find(_ => true)
-            .Project(account => new AccountName()
+            .Project(account => new AccountName
             {
                 AccountId = account.AccountId,
+                State = account.State,
                 Name = account.Name
             })
             .ToListAsync();
@@ -162,7 +163,12 @@ public class LetterManager
         var accountNameTask =
             _larpContext.Accounts
                 .Find(x => x.AccountId == accountId)
-                .Project(x => new AccountName() { AccountId = x.AccountId, Name = x.Name })
+                .Project(x => new AccountName
+                {
+                    AccountId = x.AccountId, 
+                    State = x.State,
+                    Name = x.Name
+                })
                 .FirstOrDefaultAsync();
         
         var @event =

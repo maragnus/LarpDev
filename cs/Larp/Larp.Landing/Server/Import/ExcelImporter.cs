@@ -249,9 +249,10 @@ public class ExcelImporter
                 ? (DateOnly?)DateOnly.FromDateTime(DateTime.FromOADate(dobDate))
                 : null;
 
-            var account = new Account()
+            var account = new Account
             {
                 AccountId = ObjectId.GenerateNewId().ToString(),
+                State = AccountState.Active,
                 ImportId = importId,
                 Created = _now,
                 Name = name,
