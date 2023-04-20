@@ -373,9 +373,10 @@ public class AdminService : IAdminService
     public async Task<Dictionary<string, AccountName>> GetAccountNames()
     {
         var names = await _db.Accounts.Find(_ => true)
-            .Project(account => new AccountName()
+            .Project(account => new AccountName
             {
                 AccountId = account.AccountId,
+                State = account.State,
                 Name = account.Name,
                 Emails = account.Emails
             })

@@ -23,6 +23,7 @@ public class AccountName
 
     public string? Name { get; set; }
     public List<AccountEmail> Emails { get; set; } = new();
+    public AccountState State { get; set; }
 }
 
 public enum AccountState

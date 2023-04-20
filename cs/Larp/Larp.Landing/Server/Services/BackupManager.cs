@@ -191,9 +191,10 @@ public class BackupManager
     async Task<Dictionary<string, AccountName>> GetAccountNames()
     {
         var names = await _larpContext.Accounts.Find(_ => true)
-            .Project(account => new AccountName()
+            .Project(account => new AccountName
             {
                 AccountId = account.AccountId,
+                State = account.State,
                 Name = account.Name
             })
             .ToListAsync();

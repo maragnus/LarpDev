@@ -65,10 +65,19 @@ public class UserSessionManager : IUserSessionManager
 
         _logger.LogInformation("Creating new account for {Email} on {DeviceId}", email, deviceId);
 
+        var isSuperAdmin = await _larpContext.Accounts.CountDocumentsAsync(_ => true) == 0;
+        if (isSuperAdmin)
+            _logger.LogWarning("First user is a Super Admin");
+
         var account = new Account
         {
             AccountId = ObjectId.GenerateNewId().ToString(),
+            State = AccountState.Active,
             Created = DateTimeOffset.Now,
+            IsSuperAdmin = isSuperAdmin, // Super Admin regains their credentials each time they log in
+            Roles = isSuperAdmin
+                ? new[] { AccountRole.AccountAdmin, AccountRole.AdminAccess, AccountRole.MwFifthGameMaster }
+                : Array.Empty<AccountRole>(),
             Emails =
             {
                 new AccountEmail()
@@ -125,7 +134,8 @@ public class UserSessionManager : IUserSessionManager
         var accountId = await GetAccountIdFromEmail(email);
 
         var session =
-            await _larpContext.Sessions.Find(x => x.Token == token.ToUpperInvariant() && x.AccountId == accountId).FirstOrDefaultAsync()
+            await _larpContext.Sessions.Find(x => x.Token == token.ToUpperInvariant() && x.AccountId == accountId)
+                .FirstOrDefaultAsync()
             ?? throw new UserSessionException($"Token {token} for {email} was not found ({deviceName})");
 
         _logger.LogInformation("User {Email} has signed in on {DeviceId}", email, deviceName);
@@ -360,11 +370,12 @@ public class UserSessionManager : IUserSessionManager
     {
         var result = await FindByEmail(emailAddress);
         if (result != null)
-             throw new BadRequestException($"User {result.Name} exists with email {emailAddress}");
+            throw new BadRequestException($"User {result.Name} exists with email {emailAddress}");
 
-        var account = new Account()
+        var account = new Account
         {
             AccountId = ObjectId.GenerateNewId().ToString(),
+            State = AccountState.Active,
             Name = fullName,
             Emails =
             {

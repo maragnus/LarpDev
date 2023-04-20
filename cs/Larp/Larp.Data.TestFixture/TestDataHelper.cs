@@ -14,9 +14,10 @@ public class TestDataHelper
 
     public async Task<string> AddAccount(string name, string email, DateTimeOffset created)
     {
-        var account = new Account()
+        var account = new Account
         {
             AccountId = ObjectId.GenerateNewId().ToString(),
+            State = AccountState.Active,
             Name = name,
             Emails = { new AccountEmail()
             {
