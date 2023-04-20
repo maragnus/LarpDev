@@ -45,7 +45,7 @@ public class LarpDataTestFixture : IDisposable
 
         var seederLogger = NullLogger<LarpDataSeeder>.Instance;
         var seeder = new LarpDataSeeder(result.Context, seederLogger, clock);
-        await seeder.Seed();
+        await seeder.SeedIfNeeded();
 
         return result;
     }

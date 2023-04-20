@@ -1,4 +1,5 @@
 using Larp.Data.MwFifth;
+using Larp.Data.Seeder;
 using Larp.Landing.Server.Import;
 using Microsoft.Extensions.FileProviders;
 using MongoDB.Driver;
@@ -275,5 +276,11 @@ public class BackupManager
         await package.SaveAsync();
 
         return path;
+    }
+
+    public async Task Reseed()
+    {
+        var seeder = _serviceProvider.GetRequiredService<LarpDataSeeder>();
+        await seeder.Reseed();
     }
 }

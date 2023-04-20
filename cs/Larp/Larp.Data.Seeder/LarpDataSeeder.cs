@@ -41,7 +41,7 @@ public class LarpDataSeeder
         _clock = clock;
     }
 
-    public async Task Seed()
+    public async Task SeedIfNeeded()
     {
         var gameCount = await _larpContext.Games.CountDocumentsAsync(FilterDefinition<Game>.Empty);
 
@@ -51,6 +51,21 @@ public class LarpDataSeeder
             return;
         }
 
+        await Seed();
+    }
+
+    public async Task Reseed()
+    {
+        _logger.LogInformation("Removing larp data from database");
+
+        await _larpContext.Games.DeleteManyAsync(_ => true);
+        await _larpContext.GameStates.DeleteManyAsync(_ => true);
+        
+        await Seed();
+    }
+    
+    private async Task Seed()
+    {
         _logger.LogInformation("Seeding larp data into database");
 
         var gameState = new GameState
@@ -59,8 +74,6 @@ public class LarpDataSeeder
             LastUpdated = _clock.UtcNow.ToString("O"),
             Revision = Guid.NewGuid().ToString("N")
         };
-
-        await ImportCommonData();
 
         await ImportData(gameState, () => gameState.Advantages);
         await ImportData(gameState, () => gameState.Disadvantages);
@@ -72,6 +85,8 @@ public class LarpDataSeeder
         await ImportData(gameState, () => gameState.Spells);
 
         await _larpContext.MwFifthGame.SetGameState(gameState);
+        
+        await ImportCommonData();
     }
 
     private async Task ImportCommonData()

@@ -42,7 +42,7 @@ public class AdminService : IAdminService
             .ToListAsync();
         return accounts.ToArray();
     }
-
+    
     public Task<IFileInfo> ExportLetters(string eventId) =>
         _backupManager.ExportLetters(eventId);
 
@@ -332,6 +332,11 @@ public class AdminService : IAdminService
             sb.Append(log.ToJson());
             return sb.ToString();
         }).ToArray();
+    }
+
+    public async Task ReseedData()
+    {
+        await _backupManager.Reseed();
     }
 
     public async Task<EventAndLetters[]> GetEvents() =>

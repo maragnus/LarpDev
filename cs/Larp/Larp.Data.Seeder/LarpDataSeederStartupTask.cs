@@ -13,6 +13,6 @@ public sealed class LarpDataSeederStartupTask : IStartupTask
     
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        await _dataSeeder.Seed();
+        await _dataSeeder.SeedIfNeeded();
     }
 }

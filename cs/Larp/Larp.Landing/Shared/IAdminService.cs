@@ -173,6 +173,9 @@ public interface IAdminService
 
     [ApiGet("log"), ApiAuthenticated(AccountRoles.AccountAdmin)]
     Task<string[]> GetLog();
+
+    [ApiPost("data/reseed"), ApiAuthenticated(AccountRoles.AccountAdmin)]
+    Task ReseedData();
 }
 
 public class Dashboard

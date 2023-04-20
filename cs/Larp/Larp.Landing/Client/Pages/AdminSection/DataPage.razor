@@ -72,6 +72,14 @@
         });
     }
 
+    private async Task Reseed()
+    {
+        await SafeActionAsync(async () =>
+        {
+            await LandingService.Admin.ReseedData();
+        });
+    }
+
 }
 
 @inject LandingService LandingService
@@ -124,9 +132,14 @@
     <MudPaper Class="mb-4 pa-4">
         <MudStack Spacing="4" AlignItems="AlignItems.Start">
             <MudText Typo="Typo.h6">Export Data</MudText>
-
-            @* Target="_blank" Href="/api/admin/data/export" *@
             <MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Filled" OnClick="Export">Export</MudButton>
+        </MudStack>
+    </MudPaper>
+    
+    <MudPaper Class="mb-4 pa-4">
+        <MudStack Spacing="4" AlignItems="AlignItems.Start">
+            <MudText Typo="Typo.h6">Reseed Game Data</MudText>
+            <MudButton StartIcon="@Icons.Material.Filled.GeneratingTokens" Variant="Variant.Filled" OnClick="Reseed">Reseed Data</MudButton>
         </MudStack>
     </MudPaper>
 
