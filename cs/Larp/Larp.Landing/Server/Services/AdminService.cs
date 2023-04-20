@@ -1,3 +1,5 @@
+using System.Text;
+using System.Text.Json.Nodes;
 using Larp.Data.MwFifth;
 using Microsoft.Extensions.FileProviders;
 using MongoDB.Bson;
@@ -15,6 +17,7 @@ public class AdminService : IAdminService
     private readonly EventManager _eventManager;
     private readonly AttachmentManager _attachmentManager;
     private readonly BackupManager _backupManager;
+    private readonly string? _sessionId;
 
     public AdminService(LarpContext db, IUserSession userSession,
         MwFifthCharacterManager characterManager, IUserSessionManager userSessionManager,
@@ -29,12 +32,13 @@ public class AdminService : IAdminService
         _attachmentManager = attachmentManager;
         _backupManager = backupManager;
         _account = userSession.Account!;
+        _sessionId = userSession.SessionId;
     }
 
-    public async Task<Account[]> GetAccounts()
+    public async Task<Account[]> GetAccounts(AccountState accountState)
     {
         var accounts = await _db.Accounts
-            .Find(_ => true)
+            .Find(account => account.State == accountState)
             .ToListAsync();
         return accounts.ToArray();
     }
@@ -44,6 +48,8 @@ public class AdminService : IAdminService
 
     async Task IAdminService.MergeAccounts(string fromAccountId, string toAccountId)
     {
+        await Log(new AccountMergeLogEvent{ FromAccountId = fromAccountId, ToAccountId = toAccountId});
+        
         await _db.Sessions.UpdateManyAsync(x => x.AccountId == fromAccountId,
             Builders<Session>.Update.Set(x => x.AccountId, toAccountId));
 
@@ -85,7 +91,7 @@ public class AdminService : IAdminService
             toAccount.DiscountPercent ?? fromAccount.DiscountPercent
         );
 
-        await _db.Accounts.DeleteOneAsync(account => account.AccountId == fromAccountId);
+        await ArchiveAccount(fromAccountId);
 
         foreach (var email in fromAccount.Emails)
             await _userSessionManager.AddEmailAddress(toAccountId, email.Email);
@@ -265,17 +271,86 @@ public class AdminService : IAdminService
         };
     }
 
+    public async Task UninviteAccount(string accountId)
+    {
+        await Log(new AccountStateLogEvent { AccountId = accountId, AccountState = AccountState.Uninvited });
+        await _userSessionManager.UpdateUserAccount(accountId, x => x
+            .Set(account => account.State, AccountState.Uninvited)
+            );
+    }
+
+    public async Task ArchiveAccount(string accountId)
+    {
+        await Log(new AccountStateLogEvent { AccountId = accountId, AccountState = AccountState.Archived });
+        await _userSessionManager.UpdateUserAccount(accountId, x => x
+            .Set(account => account.State, AccountState.Archived)
+            .Set(account => account.Emails, new List<AccountEmail>())
+        );
+    }
+
+    public async Task RestoreAccount(string accountId)
+    {
+        await Log(new AccountStateLogEvent { AccountId = accountId, AccountState = AccountState.Active });
+        await _userSessionManager.UpdateUserAccount(accountId, x => x
+            .Set(account => account.State, AccountState.Active)
+        );
+    }
+
+    public async Task<string[]> GetLog()
+    {
+        var names = await GetAccountNames();
+        var logEntries = await _db.EventLog.Find(_ => true).ToListAsync();
+        var sb = new StringBuilder();
+        return logEntries.Select(log =>
+        {
+            sb.Clear()
+                .Append("[")
+                .Append(DateTimeOffset.Parse(log[nameof(LogEvent.ActedOn)].AsString).ToString("MMM d, yyyy h:mm tt"))
+                .Append("] ")
+                .Append(log[nameof(LogEvent.Type)].AsString)
+                .Append(" (")
+                .Append(names.GetValueOrDefault(log[nameof(LogEvent.ActorAccountId)].AsObjectId.ToString())?.Name ??
+                        "Unknown Account")
+                .Append(") ");
+            
+            log.Remove("_id");
+            log.Remove(nameof(LogEvent.LogEventId));
+            log.Remove(nameof(LogEvent.ActorAccountId));
+            log.Remove(nameof(LogEvent.ActorSessionId));
+            log.Remove(nameof(LogEvent.ActedOn));
+            log.Remove(nameof(LogEvent.Type));
+            foreach (var element in log.Elements.ToList())
+            {
+                if (element.Name.EndsWith("AccountId") && element.Value.IsObjectId)
+                {
+                    var account = names.GetValueOrDefault(element.Value.AsObjectId.ToString());
+                    if (account == null) log[element.Name] = "Invalid Account";
+                    else log[element.Name] = account.Name ?? "No Name Set";
+                }
+            }
+
+            sb.Append(log.ToJson());
+            return sb.ToString();
+        }).ToArray();
+    }
+
     public async Task<EventAndLetters[]> GetEvents() =>
         await _eventManager.GetEvents();
 
     public async Task<Event> GetEvent(string eventId) =>
         await _eventManager.GetEvent(eventId);
 
-    public async Task SaveEvent(string eventId, Event @event) =>
+    public async Task SaveEvent(string eventId, Event @event)
+    {
+        await Log(new EventChangeLogEvent { EventId = eventId, Summary = "Update" });
         await _eventManager.SaveEvent(eventId, @event);
+    }
 
-    public async Task DeleteEvent(string eventId) =>
+    public async Task DeleteEvent(string eventId)
+    {
+        await Log(new EventChangeLogEvent { EventId = eventId, Summary = "Delete" });
         await _eventManager.DeleteEvent(eventId);
+    }
 
     public async Task SetEventAttendance(string eventId, string accountId, bool attended, int? moonstone,
         string[] characterIds) =>
@@ -303,8 +378,11 @@ public class AdminService : IAdminService
         return names.ToDictionary(x => x.AccountId);
     }
 
-    public async Task<StringResult> AddAdminAccount(string fullName, string emailAddress) =>
-        StringResult.Success(await _userSessionManager.AddAdminAccount(fullName, emailAddress));
+    public async Task<StringResult> AddAdminAccount(string fullName, string emailAddress)
+    {
+        await Log(new AddAdminLogEvent { FullName = fullName, EmailAddress = emailAddress });
+        return StringResult.Success(await _userSessionManager.AddAdminAccount(fullName, emailAddress));
+    }
 
     public async Task<CharacterAccountSummary[]> GetMwFifthCharacters(CharacterState state) =>
         await _characterManager.GetState(state);
@@ -334,11 +412,18 @@ public class AdminService : IAdminService
 
     public async Task RemoveAccountRole(string accountId, AccountRole role)
     {
+        await Log(new AccountRoleLogEvent { AccountId = accountId, RemoveRole = role });
         await _userSessionManager.RemoveAccountRole(accountId, role);
     }
 
+    private async Task Log<TLogEvent>(TLogEvent logEvent) where TLogEvent : LogEvent
+    {
+        await _db.LogEvent(_account.AccountId, _sessionId, logEvent);
+    }
+    
     public async Task AddAccountRole(string accountId, AccountRole role)
     {
+        await Log(new AccountRoleLogEvent { AccountId = accountId, AddRole = role });
         await _userSessionManager.AddAccountRole(accountId, role);
     }
 

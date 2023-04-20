@@ -126,7 +126,7 @@ public class UserSessionManager : IUserSessionManager
 
         var session =
             await _larpContext.Sessions.Find(x => x.Token == token.ToUpperInvariant() && x.AccountId == accountId).FirstOrDefaultAsync()
-            ?? throw new UserSessionException("Token was not found");
+            ?? throw new UserSessionException($"Token {token} for {email} was not found ({deviceName})");
 
         _logger.LogInformation("User {Email} has signed in on {DeviceId}", email, deviceName);
 

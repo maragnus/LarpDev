@@ -1,0 +1,28 @@
+@page "/admin/log"
+@inherits LarpPage
+@inject LandingService LandingService
+
+<PageHeader>Action Log</PageHeader>
+
+<AdminLayout Title="Administrative Actions" Loading="IsLoading">
+    <MudStack Spacing="2">
+    @foreach (var log in _log)
+    {
+        <pre>@log</pre>
+    }
+    </MudStack>
+</AdminLayout>
+
+@code {
+    string[] _log = Array.Empty<string>();
+    
+    protected override async Task OnSafeInitializedAsync()
+    {
+        _log = await LandingService.Admin.GetLog();
+    }
+
+    private void RowClick(DataGridRowClickEventArgs<Account> item)
+    {
+        NavigationManager.NavigateTo("/admin/accounts/" + item.Item.AccountId);
+    }
+}

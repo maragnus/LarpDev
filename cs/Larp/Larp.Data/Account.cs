@@ -25,12 +25,19 @@ public class AccountName
     public List<AccountEmail> Emails { get; set; } = new();
 }
 
+public enum AccountState
+{
+    Active,
+    Archived,
+    Uninvited
+}
+
 [PublicAPI]
 public class Account
 {
     [BsonId, BsonRepresentation(BsonType.ObjectId)]
     public string AccountId { get; set; } = default!;
-
+    public AccountState State { get; set; } = AccountState.Active;
     public string? Name { get; set; }
     public string? Location { get; set; }
     public string? Phone { get; set; }

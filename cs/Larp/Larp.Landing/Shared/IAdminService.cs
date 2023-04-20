@@ -1,5 +1,8 @@
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using Larp.Data.MwFifth;
 using Microsoft.Extensions.FileProviders;
+using MongoDB.Bson;
 
 namespace Larp.Landing.Shared;
 
@@ -11,7 +14,7 @@ public interface IAdminService
     Task<Dashboard> GetDashboard();
 
     [ApiGet("accounts"), ApiAuthenticated(AccountRoles.AdminAccess)]
-    Task<Account[]> GetAccounts();
+    Task<Account[]> GetAccounts(AccountState accountState);
 
     [ApiGet("accounts/{accountId}"), ApiAuthenticated(AccountRoles.AdminAccess)]
     Task<Account> GetAccount(string accountId);
@@ -160,6 +163,16 @@ public interface IAdminService
 
     [ApiGet("events/{eventId}/notes"), ApiAuthenticated(AccountRoles.AdminAccess)]
     Task<PreregistrationNotes> GetEventNotes(string eventId);
+
+    [ApiPost("accounts/{accountId}/uninvite"), ApiAuthenticated(AccountRoles.AccountAdmin)]
+    Task UninviteAccount(string accountId);
+    [ApiPost("accounts/{accountId}/archive"), ApiAuthenticated(AccountRoles.AccountAdmin)]
+    Task ArchiveAccount(string accountId);
+    [ApiPost("accounts/{accountId}/restore"), ApiAuthenticated(AccountRoles.AccountAdmin)]
+    Task RestoreAccount(string accountId);
+
+    [ApiGet("log"), ApiAuthenticated(AccountRoles.AccountAdmin)]
+    Task<string[]> GetLog();
 }
 
 public class Dashboard

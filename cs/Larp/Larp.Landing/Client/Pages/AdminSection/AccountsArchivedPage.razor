@@ -1,0 +1,51 @@
+@page "/admin/accounts/archived"
+@inherits LarpPage
+@inject LandingService LandingService
+
+<PageHeader>Account Manager</PageHeader>
+
+<AdminLayout Title="Archived Accounts">
+    <MudDataGrid T="Account" Items="_allAccounts" RowClick="RowClick" Dense Hover Loading="IsLoading">
+        <Columns>
+            <PropertyColumn Property="x => x.Name" Title="Name"/>
+            <TemplateColumn T="Account">
+                <CellTemplate>
+                    @if (context.Item.State == AccountState.Archived)
+                    {
+                        <MudTooltip Text="User is archived">
+                            <MudIcon Icon="@Icons.Material.Filled.Archive" Color="Color.Primary"/>
+                        </MudTooltip>
+                    }
+                    @if (context.Item.State == AccountState.Uninvited)
+                    {
+                        <MudTooltip Text="User has been disinvited">
+                            <MudIcon Icon="@Icons.Material.Filled.Block" Color="Color.Primary"/>
+                        </MudTooltip>
+                    }
+                </CellTemplate>
+            </TemplateColumn>
+            <PropertyColumn Property="x => x.PreferredEmail" Title="Email"/>
+            <PropertyColumn Property="x => x.Phone" Title="Phone"/>
+            <PropertyColumn Property="x => x.State" Title="State"/>
+            <PropertyColumn Property="x => x.AttachmentCount" Title="Attachments"/>
+        </Columns>
+    </MudDataGrid>
+</AdminLayout>
+
+@code {
+    private Account[] _allAccounts = Array.Empty<Account>();
+
+    protected override async Task OnSafeInitializedAsync()
+    {
+        var uninvited = LandingService.Admin.GetAccounts(AccountState.Uninvited);
+        var archived = LandingService.Admin.GetAccounts(AccountState.Archived);
+        
+        _allAccounts = (await uninvited).Concat(await archived).ToArray();
+    }
+
+    private void RowClick(DataGridRowClickEventArgs<Account> item)
+    {
+        NavigationManager.NavigateTo("/admin/accounts/" + item.Item.AccountId);
+    }
+
+}

@@ -4,7 +4,7 @@
 
 <PageHeader>Account Manager</PageHeader>
 
-<AdminLayout Title="Manage Accounts" Loading="IsLoading">
+<AdminLayout Title="Manage Accounts">
     <div class="pa-2 mb-4">
         <EditForm Model="_search" OnSubmit="Search">
             <MudStack Row Justify="Justify.Center" AlignItems="AlignItems.Start">
@@ -13,7 +13,7 @@
         </EditForm>
     </div>
 
-    <MudDataGrid T="Account" Items="_accounts" RowClick="RowClick" Dense Hover Loading="_allAccounts.Length == 0">
+    <MudDataGrid T="Account" Items="_accounts" RowClick="RowClick" Dense Hover Loading="IsLoading">
         <Columns>
             <PropertyColumn Property="x => x.Name" Title="Name"/>
             <TemplateColumn T="Account">
@@ -51,7 +51,7 @@
 
     protected override async Task OnSafeInitializedAsync()
     {
-        _allAccounts = await LandingService.Admin.GetAccounts();
+        _allAccounts = await LandingService.Admin.GetAccounts(AccountState.Active);
         _accounts = _allAccounts;
     }
 

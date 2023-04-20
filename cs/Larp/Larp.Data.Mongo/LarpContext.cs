@@ -1,6 +1,8 @@
 ﻿using Larp.Data.Mongo.Services;
 using Larp.Data.MwFifth;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.Conventions;
 
 namespace Larp.Data.Mongo;
@@ -36,8 +38,10 @@ public class LarpContext
         Letters = database.GetCollection<Letter>(nameof(Letters));
         LetterTemplates = database.GetCollection<LetterTemplate>(nameof(LetterTemplates));
         MwFifthGame = new MwFifthGameContext(database, cache);
+        EventLog = database.GetCollection<BsonDocument>(nameof(EventLog));
     }
 
+    public IMongoCollection<BsonDocument> EventLog { get; set; }
     public IMongoCollection<AccountAttachment> AccountAttachments { get; set; }
     public IMongoCollection<Account> Accounts { get; }
     public IMongoCollection<Event> Events { get; }
@@ -51,9 +55,20 @@ public class LarpContext
 
     public async Task Migrate()
     {
+        await ActivateAccounts();
         await MigrateToCharacterRevisions();
         await FixCharacters();
         await CreateIndices();
+    }
+
+    private async Task ActivateAccounts()
+    {
+        await Accounts.UpdateManyAsync(
+            x => 
+                x.State != AccountState.Active 
+                && x.State != AccountState.Archived 
+                && x.State != AccountState.Uninvited,
+            Builders<Account>.Update.Set(x => x.State, AccountState.Active));
     }
 
     private async Task CreateIndices()
@@ -126,5 +141,24 @@ public class LarpContext
                 });
             }
         }
+    }
+
+    public async Task LogEvent(string actorAccountId, string? actorSessionId, LogEvent logEvent)
+    {
+        logEvent.LogEventId = ObjectId.GenerateNewId().ToString();
+        logEvent.ActorAccountId = actorAccountId;
+        logEvent.ActorSessionId = actorSessionId;
+        logEvent.ActedOn = DateTimeOffset.Now;
+        await EventLog.InsertOneAsync(logEvent.ToBsonDocument());
+    }
+    
+    public async Task LogEvent<TLogEvent>(string actorAccountId, string? actorSessionId, TLogEvent logEvent)
+        where TLogEvent : LogEvent
+    {
+        logEvent.LogEventId = ObjectId.GenerateNewId().ToString();
+        logEvent.ActorAccountId = actorAccountId;
+        logEvent.ActorSessionId = actorSessionId;
+        logEvent.ActedOn = DateTimeOffset.Now;
+        await EventLog.InsertOneAsync(logEvent.ToBsonDocument());
     }
 }

@@ -21,6 +21,18 @@
                 <MudProgressCircular Indeterminate Size="Size.Large"/>
             </MudOverlay>
             <MudText Typo="Typo.h6">Profile</MudText>
+            @if (_account.State == AccountState.Archived)
+            {
+                <MudAlert Severity="Severity.Error" Icon="@Icons.Material.Filled.Archive">
+                    This account has been archived and cannot be used.
+                </MudAlert>
+            }
+            else if (_account.State == AccountState.Uninvited)
+            {
+                <MudAlert Severity="Severity.Error" Icon="@Icons.Material.Filled.Block">
+                    This account has been disinvited.
+                </MudAlert>
+            }
             <MudGrid>
                 <MudItem xs="12" sm="6">
                     <MudTextField T="string?" Label="Full Name" InputType="InputType.Text" Value="_account.Name" ValueChanged="(value) => Set(() => _account.Name = value)"/>
@@ -131,11 +143,26 @@
                 <MudText Typo="Typo.h6">Utilities</MudText>
                 <MudStack Row>
                     <MudTooltip Text="Merge this account (emails, characters, attendance, etc) into another account and delete this account">
-                        <MudButton Color="Color.Error" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Merge" OnClick="Merge">Merge</MudButton>
+                        <MudButton Color="Color.Warning" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Merge" OnClick="Merge">Merge</MudButton>
                     </MudTooltip>
                     <MudTooltip Text="Attach files and images to this account">
                         <MudButton Color="Color.Tertiary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Attachment" OnClick="Attachments">Manage Attachments</MudButton>
                     </MudTooltip>
+                    @if (_account.State == AccountState.Active)
+                    {
+                        <MudTooltip Text="Disinvitation blocks the character from signing in and notifies them when they attempt to log in that they can no longer access the site">
+                            <MudButton Color="Color.Error" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Block" OnClick="Uninvite">Disinvitation</MudButton>
+                        </MudTooltip>
+                        <MudTooltip Text="Archiving this account will disconnect any emails and they will no longer be able to sign in">
+                            <MudButton Color="Color.Warning" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Archive" OnClick="Archive">Archive</MudButton>
+                        </MudTooltip>
+                    }
+                    else
+                    {
+                        <MudTooltip Text="This will restore an account to Active status, be sure to add their email address if necessary">
+                            <MudButton Color="Color.Warning" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.RestoreFromTrash" OnClick="Restore">Restore</MudButton>
+                        </MudTooltip>
+                    }
                 </MudStack>
             </MudStack>
         </MudPaper>
@@ -333,4 +360,39 @@
         await SafeActionAsync(async () => { await LandingService.Admin.SetAccountNotes(AccountId, _account!.MwFifthPreregistrationNotes); });
     }
 
+    private async Task Uninvite()
+    {
+        var dialog = await DialogService.ShowMessageBox("Disinvite Account", "Are you sure you want to disinvite this account?", "Yes, disinvite", "No, don't change anything");
+        if (dialog != true) return;
+
+        await SafeActionAsync(async () =>
+        {
+            await LandingService.Admin.UninviteAccount(AccountId);
+            await OnParametersSetAsync();
+        });
+    }
+    
+    private async Task Archive()
+    {
+        var dialog = await DialogService.ShowMessageBox("Archive Account", "Are you sure you want to archive this account? This will disconnect any emails from this account. You should merge instead, if possible.", "Yes, archive", "No, don't change anything");
+        if (dialog != true) return;
+
+        await SafeActionAsync(async () =>
+        {
+            await LandingService.Admin.ArchiveAccount(AccountId);
+            await OnParametersSetAsync();
+        });
+    }
+    
+    private async Task Restore()
+    {
+        var dialog = await DialogService.ShowMessageBox("Restore Account", "Are you sure you want to restore this account to active status? Be sure to add an email address if necessary.", "Yes, restore", "No, don't change anything");
+        if (dialog != true) return;
+
+        await SafeActionAsync(async () =>
+        {
+            await LandingService.Admin.RestoreAccount(AccountId);
+            await OnParametersSetAsync();
+        });
+    }
 }

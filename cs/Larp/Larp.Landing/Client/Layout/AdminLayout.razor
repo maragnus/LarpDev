@@ -1,11 +1,13 @@
+@inject LandingService LandingService
+
 @code {
 
     [Parameter]
     public string? Title { get; set; }
-    
+
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
-    
+
     [Parameter]
     public bool Loading { get; set; }
 
@@ -20,13 +22,21 @@
                 <MudDivider Class="m-2"/>
                 <MudNavLink Href="/admin" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
                 <MudNavLink Href="/admin/accounts" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ManageAccounts">Accounts</MudNavLink>
+                <MudNavLink Href="/admin/accounts/archived" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Archive">Archived Accounts</MudNavLink>
                 <MudNavLink Href="/admin/events" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Event">Events</MudNavLink>
-                <MudNavGroup Title="Mystwood 5e" Expanded>
-                    <MudNavLink Href="/admin/mw5e/characters/review" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Edit">Review Submissions</MudNavLink>
-                    <MudNavLink Href="/admin/mw5e/characters" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Person">Manage Characters</MudNavLink>
-                </MudNavGroup>
+                @if (LandingService.IsInRole(AccountRole.MwFifthGameMaster))
+                {
+                    <MudNavGroup Title="Mystwood 5e" Expanded>
+                        <MudNavLink Href="/admin/mw5e/characters/review" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Edit">Review Submissions</MudNavLink>
+                        <MudNavLink Href="/admin/mw5e/characters" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Person">Manage Characters</MudNavLink>
+                    </MudNavGroup>
+                }
                 <MudNavLink Href="/admin/letters/templates" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Email">Letter Templates</MudNavLink>
-                <MudNavLink Href="/admin/data" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Dataset">Import/Export</MudNavLink>
+                @if (LandingService.IsInRole(AccountRole.AccountAdmin))
+                {
+                    <MudNavLink Href="/admin/data" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Dataset">Import/Export</MudNavLink>
+                    <MudNavLink Href="/admin/log" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.History">Activity Log</MudNavLink>
+                }
             </MudNavMenu>
         </MudItem>
         <MudItem md="9" Class="relative">
