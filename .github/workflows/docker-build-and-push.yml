@@ -20,9 +20,7 @@ jobs:
         docker login cr.maragnus.com -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }} && \
         docker build . --file Dockerfile \
             --tag cr.maragnus.com/larpdev:${{ github.run_number }} \
-            --tag cr.maragnus.com/larpdev:${{ github.ref_name }} \
             --tag cr.maragnus.com/larpdev:latest \
             --build-arg BUILD_REVISION=${{ github.run_number }} && \
         docker image push cr.maragnus.com/larpdev:${{ github.run_number }} && \
-        docker image push cr.maragnus.com/larpdev:${{ github.ref_name }} && \
         docker image push cr.maragnus.com/larpdev:latest
