@@ -22,9 +22,14 @@
     <StepDivider/>
 }
 
-@if (Character.ChosenSpells.Length != Character.Wisdom)
+@if (Character.IsNewCharacter && Character.ChosenSpells.Length != Character.Wisdom)
 {
     <MudAlert Severity="Severity.Warning">You need to select a number of spells equal to your Wisdom. You have selected @Character.ChosenSpells.Length spells and need to have @Character.Wisdom spells.</MudAlert>
+    <StepDivider/>
+}
+else if (!Character.IsNewCharacter && Character.ChosenSpells.Length < Character.Wisdom)
+{
+    <MudAlert Severity="Severity.Warning">You need to select at least as many spells as your Wisdom. You have selected @Character.ChosenSpells.Length spells and need to have at least @Character.Wisdom spells.</MudAlert>
     <StepDivider/>
 }
 

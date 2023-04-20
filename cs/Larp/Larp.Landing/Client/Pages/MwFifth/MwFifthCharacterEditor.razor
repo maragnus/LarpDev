@@ -173,7 +173,7 @@
         StateHasChanged();
     }
 
-    private async Task Save()
+    private async Task QuickSave()
     {
         _saveState = AutoSaveState.Saving;
         var success = await SafeActionAsync(async () =>
@@ -186,6 +186,20 @@
         });
 
         _saveState = success ? AutoSaveState.Saved : AutoSaveState.ChangeAvailable;
+    }
+    
+    private async Task Save()
+    {
+        await QuickSave();
+        
+        if (_saveState != AutoSaveState.Saved) return;
+        
+        var response = await DialogService.ShowMessageBox("Draft Saved", "Your draft has been saved for later. But you need to submit your character for review when you're done. Would you like to review your character now?", "Yes, Review", "No, Keep Editing");
+        if (response == true)
+        {
+            _currentStep = _steps[^1];
+            StateHasChanged();
+        }
     }
 
     private async Task DeleteDraft()
@@ -213,14 +227,14 @@
     {
         if (!Admin && !_revision.IsValid)
         {
-            await Save();
+            await QuickSave();
             await DialogService.ShowMessageBox("Submit Character for Review", "You cannot submit your character while it has errors.");
             return;
         }
 
         if (!Admin && _availableMoonstone < _newMoonstoneCost)
         {
-            await Save();
+            await QuickSave();
             await DialogService.ShowMessageBox("Submit Character for Review", "You do not have enough moonstone for this change.");
             return;
         }

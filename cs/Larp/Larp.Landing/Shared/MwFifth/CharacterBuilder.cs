@@ -419,6 +419,8 @@ public class CharacterBuilder
         IsHistoryValid && IsOccupationValid && IsGiftsValid && IsSpellsValid && IsHomelandValid && IsReligionValid &&
         IsNameValid && IsVantagesValid && IsAgeGroupValid && IsSpellsValid && IsChosenSkillsValid && IsHomeChapterValid;
 
+    public bool IsNewCharacter => Revision.PreviousRevisionId == null;
+
     #endregion
 
     #region Populate
@@ -703,7 +705,9 @@ public class CharacterBuilder
         if (HasOccupationalSpells) spells.AddRange(OccupationalSpells.Select(x => x.Name));
         Revision.Spells = spells.ToArray();
 
-        IsSpellsValid = ChosenSpells.Length == Revision.Wisdom;
+        IsSpellsValid = IsNewCharacter 
+            ? ChosenSpells.Length == Revision.Wisdom
+            : ChosenSpells.Length >= Revision.Wisdom;
         HasSpells = HasWisdomSpells;
     }
 
