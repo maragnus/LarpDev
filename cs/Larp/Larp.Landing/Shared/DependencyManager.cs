@@ -15,6 +15,7 @@ public class DependencyManager<T>
         _logger = logger;
         
         var methods = typeof(T).GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+            .DistinctBy(x=>x.Name)
             .ToDictionary(x => x.Name);
 
         var properties = ( 

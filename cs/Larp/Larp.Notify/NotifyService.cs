@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Larp.Common;
 using Larp.Notify.Sendinblue;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -11,6 +12,7 @@ public class NotifyServiceOptions
 {
     public const string SectionName = "Notifications";
 
+    public string SiteUrl { get; set; } = "https://localhost";
     public EmailOptions Email { get; set; } = new EmailOptions();
 }
 
@@ -19,11 +21,6 @@ public class EmailOptions
     public List<string> Senders { get; set; } = new();
     public string ApiKey { get; set; } = default!;
     public string ApiEndPoint { get; set; } = default!;
-}
-
-public interface INotifyService
-{
-    public Task SendEmailAsync(string recipient, string subject, string body);
 }
 
 public class NotifyService : INotifyService
@@ -39,7 +36,10 @@ public class NotifyService : INotifyService
         _client = new HttpClient();
         _client.DefaultRequestHeaders.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
         _client.DefaultRequestHeaders.Add("api-key", _options.ApiKey);
+        SiteUrl = options.Value.SiteUrl;
     }
+
+    public string SiteUrl { get; }
 
     public async Task SendEmailAsync(string recipient, string subject, string body)
     {

@@ -79,6 +79,12 @@
         _steps = new Step[]
         {
             new(
+                "Notes",
+                @<StepRevision Character="_revision" Admin="Admin"/>,
+                @<MudIcon Icon="@Icons.Material.Outlined.Notes"/>,
+                () => true,
+                () => Admin || _revision.ShowNotes),
+            new(
                 "Name",
                 @<StepName Character="_revision"/>,
                 @<MudIcon Icon="@Icons.Material.Outlined.PermIdentity"/>,

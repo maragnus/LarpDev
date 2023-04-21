@@ -1,8 +1,6 @@
 ﻿using Larp.Data.Mongo.Services;
 using Larp.Data.MwFifth;
 using Microsoft.Extensions.Options;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.Conventions;
 
 namespace Larp.Data.Mongo;

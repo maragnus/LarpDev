@@ -1,5 +1,4 @@
 using System.Text;
-using System.Text.Json.Nodes;
 using Larp.Data.MwFifth;
 using Microsoft.Extensions.FileProviders;
 using MongoDB.Bson;
@@ -158,8 +157,8 @@ public class AdminService : IAdminService
     public async Task ApproveMwFifthCharacter(string characterId) =>
         await _characterManager.Approve(characterId, _account.AccountId);
 
-    public async Task RejectMwFifthCharacter(string characterId) =>
-        await _characterManager.Reject(characterId);
+    public async Task RejectMwFifthCharacter(string characterId, string? reviewerNotes) =>
+        await _characterManager.Reject(characterId, reviewerNotes);
 
     public async Task<CharacterAndRevision> ReviseMwFifthCharacter(string characterId) =>
         await _characterManager.GetDraft(characterId, _account, true);

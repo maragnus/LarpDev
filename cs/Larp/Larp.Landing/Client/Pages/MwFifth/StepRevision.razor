@@ -1,0 +1,32 @@
+@using Larp.Landing.Shared.MwFifth
+<MudText Typo="Typo.h6">Reviewer Feedback</MudText>
+
+<MudStack Spacing="4">
+@if (Admin)
+{
+    <MudText Typo="Typo.body1">You can leave notes for the player here. These notes are removed once the character is approved.</MudText>
+    <MudTextField T="string?" Lines="6" Label="Reviewer Notes" @bind-Value="@Character.RevisionReviewerNotes" Variant="Variant.Outlined"/>
+    <MudText Typo="Typo.body1">Here are the notes that the player has left.</MudText>
+    <MudAlert Severity="Severity.Warning" Icon="@Icons.Material.Filled.Notes">@Character.RevisionPlayerNotes</MudAlert>
+}
+else
+{
+    @if (!string.IsNullOrWhiteSpace(Character.RevisionReviewerNotes))
+    {
+        <MudText Typo="Typo.body1">The reviewer has left you some notes. You can reply in the Player Notes below. Submit your character again when finished.</MudText>
+        <MudAlert Severity="Severity.Info" Icon="@Icons.Material.Filled.Notes">@Character.RevisionReviewerNotes</MudAlert>
+    }
+    <MudText Typo="Typo.body1">You can leave notes for the reviewer of your character here.</MudText>
+    <MudTextField T="string?" Lines="6" Label="Player Notes" @bind-Value="@Character.RevisionPlayerNotes" Variant="Variant.Outlined"/>
+}
+</MudStack>
+
+@code {
+
+    [Parameter]
+    public bool Admin { get; set; }
+
+    [Parameter]
+    public CharacterBuilder Character { get; set; } = default!;
+
+}

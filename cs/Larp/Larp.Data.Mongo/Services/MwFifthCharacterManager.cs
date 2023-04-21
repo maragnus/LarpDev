@@ -153,7 +153,7 @@ public class MwFifthCharacterManager
         await UpdateMoonstone(reference.AccountId);
     }
 
-    public async Task Reject(string characterId)
+    public async Task Reject(string characterId, string? reviewerNotes)
     {
         var reference =
             await _mwFifth.CharacterRevisions.AsQueryable()
@@ -169,7 +169,8 @@ public class MwFifthCharacterManager
         await _mwFifth.CharacterRevisions
             .UpdateOneAsync(x => x.CharacterId == reference.UniqueId && x.State == CharacterState.Review,
                 Builders<CharacterRevision>.Update
-                    .Set(x => x.State, CharacterState.Draft));
+                    .Set(x => x.State, CharacterState.Draft)
+                    .Set(x=>x.RevisionReviewerNotes, reviewerNotes));
     }
 
     public async Task<CharacterAndRevision> GetRevision(string revisionId, Account account, bool isAdmin)
@@ -226,6 +227,8 @@ public class MwFifthCharacterManager
         revision.PreviousRevisionId = revision.RevisionId;
         revision.RevisionId = ObjectId.GenerateNewId().ToString();
         revision.State = CharacterState.Draft;
+        revision.RevisionPlayerNotes = null;
+        revision.RevisionReviewerNotes = null;
         await _mwFifth.CharacterRevisions.InsertOneAsync(revision);
         return new CharacterAndRevision(character, revision, moonstone);
     }
@@ -250,6 +253,11 @@ public class MwFifthCharacterManager
         if (revision.State is not (CharacterState.Draft or CharacterState.Review))
             throw new BadRequestException("State may only be Draft or Review");
 
+        if (isAdmin)
+            revision.RevisionPlayerNotes = saved.Revision.RevisionPlayerNotes;
+        else
+            revision.RevisionReviewerNotes = saved.Revision.RevisionReviewerNotes;
+        
         // Update the change summary from the most recent live
         var live = await GetLiveRevision(revision.CharacterId);
         revision.ChangeSummary =

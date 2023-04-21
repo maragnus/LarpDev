@@ -37,11 +37,11 @@
             @Statuses[_characterBuilder.Revision.State].Description
         </MudAlert>
     }
-    
+
     <MudText Typo="Typo.h6" Class="my-4">Notes</MudText>
     <MudPaper Class="pa-4">
-        <MudTextField T="string?" Variant="Variant.Outlined" Lines="2" Label="Preregistration Notes" @bind-Value="@_character.PreregistrationNotes" 
-                      Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Save" AdornmentColor="Color.Success" OnAdornmentClick="SaveNotes" />
+        <MudTextField T="string?" Variant="Variant.Outlined" Lines="2" Label="Preregistration Notes" @bind-Value="@_character.PreregistrationNotes"
+                      Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Save" AdornmentColor="Color.Success" OnAdornmentClick="SaveNotes"/>
     </MudPaper>
 
     @if (_revisions.Length > 0)
@@ -119,40 +119,56 @@
         </MudOverlay>
         @if (_characterBuilder != null)
         {
-            <MudStack Row AlignItems="AlignItems.Start" Class="my-4">
-                <MudTooltip Text="Total Moonstone the player has earned">
-                    <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
-                        <MudAvatar Color="Color.Primary">@_moonstone.Total</MudAvatar>
-                        <MudText Align="Align.Center" Typo="Typo.caption">Player's Total<br/>Moonstone</MudText>
-                    </MudStack>
-                </MudTooltip>
-                <MudTooltip Text="The amount of moonstone available to this player">
-                    <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
-                        <MudAvatar Color="Color.Success">@_moonstone.Available</MudAvatar>
-                        <MudText Align="Align.Center" Typo="Typo.caption">Available<br/>Moonstone</MudText>
-                    </MudStack>
-                </MudTooltip>
-                <MudTooltip Text="The amount of moonstone allocated for this character">
-                    <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
-                        <MudAvatar Color="Color.Info">@_moonstoneUsed</MudAvatar>
-                        <MudText Align="Align.Center" Typo="Typo.caption">Total<br/>Moonstone</MudText>
-                    </MudStack>
-                </MudTooltip>
-                <MudTooltip Text="The amount of moonstone needed for this revision">
-                    <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
-                        <MudAvatar Color="Color.Warning">@(_newMoonstoneCost > 0 ? "+" : "")@(_newMoonstoneCost)</MudAvatar>
-                        <MudText Align="Align.Center" Typo="Typo.caption">Revision<br/>Cost</MudText>
-                    </MudStack>
-                </MudTooltip>
+            <MudStack Spacing="4">
+                <MudStack Row AlignItems="AlignItems.Start" Class="my-4">
+                    <MudTooltip Text="Total Moonstone the player has earned">
+                        <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                            <MudAvatar Color="Color.Primary">@_moonstone.Total</MudAvatar>
+                            <MudText Align="Align.Center" Typo="Typo.caption">Player's Total<br/>Moonstone</MudText>
+                        </MudStack>
+                    </MudTooltip>
+                    <MudTooltip Text="The amount of moonstone available to this player">
+                        <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                            <MudAvatar Color="Color.Success">@_moonstone.Available</MudAvatar>
+                            <MudText Align="Align.Center" Typo="Typo.caption">Available<br/>Moonstone</MudText>
+                        </MudStack>
+                    </MudTooltip>
+                    <MudTooltip Text="The amount of moonstone allocated for this character">
+                        <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                            <MudAvatar Color="Color.Info">@_moonstoneUsed</MudAvatar>
+                            <MudText Align="Align.Center" Typo="Typo.caption">Total<br/>Moonstone</MudText>
+                        </MudStack>
+                    </MudTooltip>
+                    <MudTooltip Text="The amount of moonstone needed for this revision">
+                        <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                            <MudAvatar Color="Color.Warning">@(_newMoonstoneCost > 0 ? "+" : "")@(_newMoonstoneCost)</MudAvatar>
+                            <MudText Align="Align.Center" Typo="Typo.caption">Revision<br/>Cost</MudText>
+                        </MudStack>
+                    </MudTooltip>
 
-                @if (_moonstone.Available < _newMoonstoneCost)
+                    @if (_moonstone.Available < _newMoonstoneCost)
+                    {
+                        <MudAlert Severity="Severity.Error">
+                            This player is short <strong>@(_newMoonstoneCost - _moonstone.Available) Moonstone</strong>
+                        </MudAlert>
+                    }
+                </MudStack>
+                @if (!string.IsNullOrWhiteSpace(_characterBuilder.RevisionReviewerNotes))
                 {
-                    <MudAlert Severity="Severity.Error">
-                        This player is short <strong>@(_newMoonstoneCost - _moonstone.Available) Moonstone</strong>
+                    <MudAlert Severity="Severity.Info" Icon="@Icons.Material.Filled.Notes">
+                        <strong>Reviewer Notes: </strong>
+                        @_characterBuilder.RevisionReviewerNotes
                     </MudAlert>
                 }
+                @if (!string.IsNullOrWhiteSpace(_characterBuilder.RevisionPlayerNotes))
+                {
+                    <MudAlert Severity="Severity.Warning" Icon="@Icons.Material.Filled.Notes">
+                        <strong>Player Notes: </strong>
+                        @_characterBuilder.RevisionPlayerNotes
+                    </MudAlert>
+                }
+                <CharacterSheet Character="_characterBuilder" Admin/>
             </MudStack>
-            <CharacterSheet Character="_characterBuilder" Admin/>
         }
     </div>
 </AdminLayout>
@@ -240,18 +256,18 @@
 
     private async Task Reject()
     {
-        var result = await DialogService.ShowMessageBox(
-            "Return this character",
-            "Are you ready to return this character to the player? This will return the character draft back to the player so they can edit it.",
-            "Yes, Return It",
-            "No, Keep Reviewing");
-
-        if (result != true) return;
+        var parameters = new DialogParameters
+        {
+            { nameof(RejectDialog.ReviewerNotes), _characterBuilder.RevisionReviewerNotes }
+        };
+        var dialog = await DialogService.ShowAsync<RejectDialog>("Return this character", parameters);
+        var result = await dialog.Result;
+        if (result.Canceled) return;
 
         await LoadingActionAsync(async () =>
         {
             var characterId = _characterBuilder!.Revision.RevisionId;
-            await LandingService.Admin.RejectMwFifthCharacter(characterId);
+            await LandingService.Admin.RejectMwFifthCharacter(characterId, (string?)result.Data);
             NavigationManager.NavigateTo($"/admin/mw5e/characters/{characterId}");
             await OnInitializedAsync();
         });
@@ -280,10 +296,7 @@
 
     private async Task SaveNotes()
     {
-        await SafeActionAsync(async () =>
-        {
-            await LandingService.Admin.SetMwFifthCharacterNotes(_character.CharacterId, _character.PreregistrationNotes);
-        });
+        await SafeActionAsync(async () => { await LandingService.Admin.SetMwFifthCharacterNotes(_character.CharacterId, _character.PreregistrationNotes); });
     }
 
 }

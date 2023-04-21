@@ -148,6 +148,7 @@ public class Character
     public string? PreregistrationNotes { get; set; }
 
     public string? PreregistrationRevisionNotes { get; set; }
+    public static string? RevisionReviewerNotes { get; set; }
 }
 
 [PublicAPI]
@@ -219,6 +220,9 @@ public class CharacterRevision
     public int SkillMoonstone { get; set; }
     public int TotalMoonstone => GiftMoonstone + SkillMoonstone;
 
+    public string? RevisionReviewerNotes { get; set; }
+    public string? RevisionPlayerNotes { get; set; }
+
     public static int Triangle(int level)
     {
         return Math.Max(0, level * (level + 1) / 2);
@@ -269,8 +273,13 @@ public class CharacterRevision
             }
             else if (newValue is CharacterSkill[] newSkills && oldValue is CharacterSkill[] oldSkills)
             {
-                if (Summarize(oldSkills, newSkills, x => x.Title, out var oldItems, out var newItems))
-                    result.Add(property.Name, new ChangeSummary(oldItems, newItems));
+                foreach (var type in Enum.GetValues<SkillPurchase>())
+                {
+                    var oldSkillsFiltered = oldSkills.Where(x => x.Type == type);
+                    var newSkillsFiltered = newSkills.Where(x => x.Type == type);
+                    if (Summarize(oldSkillsFiltered, newSkillsFiltered, x => x.Title, out var oldItems, out var newItems))
+                        result.Add($"{property.Name} ({type})", new ChangeSummary(oldItems, newItems));
+                }
             }
             else if (newValue is CharacterVantage[] newVantages && oldValue is CharacterVantage[] oldVantages)
             {

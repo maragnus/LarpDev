@@ -54,15 +54,11 @@ public class CharacterBuilder
 
         set
         {
-            Revision.Skills = Revision.Skills
-                .Where(x => x.Type != SkillPurchase.Occupation)
-                .Concat(value)
-                .ToArray();
-            DependencyManager.Update(this, nameof(OccupationalChosenSkills));
+            ReplaceSkills(SkillPurchase.Occupation, value);
+            DependencyManager.Update(this, nameof(OccupationalSkills));
             StateChanged?.Invoke();
         }
     }
-    
     
     [DependsOn(nameof(PopulateOccupationalDependencies), nameof(Occupation), nameof(NoOccupation), nameof(Enhancement))]
     public SkillChoice[] OccupationalSkillsChoices { get; private set; } = Array.Empty<SkillChoice>();
@@ -218,7 +214,7 @@ public class CharacterBuilder
             StateChanged?.Invoke();
         }
     }
-    
+
     public int GiftMoonstone => Revision.GiftMoonstone;
 
     public int SkillMoonstone => Revision.SkillMoonstone;
@@ -261,6 +257,31 @@ public class CharacterBuilder
         set => Set(x => x.Wisdom = value);
     }
 
+
+    private void ReplaceSkillsByTitle(SkillPurchase purchaseType, IEnumerable<string> spellTitles) =>
+        ReplaceSkills(purchaseType, spellTitles.Select(title => CharacterSkill.FromTitle(title, purchaseType)));
+
+    private void ReplaceSkills(SkillPurchase purchaseType, IEnumerable<CharacterSkill> value)
+    {
+        Revision.Skills = Revision.Skills
+            .Where(x => x.Type != purchaseType)
+            .Concat(value)
+            .Select(FixSkill)
+            .OrderBy(x => x.Name).ThenBy(x => x.Rank)
+            .ToArray();
+    }
+
+    private CharacterSkill FixSkill(CharacterSkill skill)
+    {
+        if (skill.Rank != 1) return skill;
+        var skillDefinition = GameState.Skills.FirstOrDefault(x => x.Name == skill.Name);
+        if (skillDefinition == null) return skill;
+
+        if (skillDefinition.Purchasable is SkillPurchasable.Multiple) return skill;
+        skill.Rank = 0;
+        return skill;
+    }
+
     public string[] OccupationalChosenSkills
     {
         get => Revision.Skills
@@ -270,10 +291,7 @@ public class CharacterBuilder
 
         set
         {
-            Revision.Skills = Revision.Skills
-                .Where(x => x.Type != SkillPurchase.OccupationChoice)
-                .Concat(value.Select(x => CharacterSkill.FromTitle(x, SkillPurchase.OccupationChoice)))
-                .ToArray();
+            ReplaceSkillsByTitle(SkillPurchase.OccupationChoice, value);
             DependencyManager.Update(this, nameof(OccupationalChosenSkills));
             StateChanged?.Invoke();
         }
@@ -287,16 +305,13 @@ public class CharacterBuilder
 
         set
         {
-            Revision.Skills = Revision.Skills
-                .Where(x => x.Type != SkillPurchase.Purchased)
-                .Concat(value)
-                .ToArray();
+            ReplaceSkills(SkillPurchase.Purchased, value);
             DependencyManager.Update(this, nameof(PurchasedSkills));
             UpdateMoonstone();
             StateChanged?.Invoke();
         }
     }
-    
+
     public CharacterSkill[] FreeSkills
     {
         get => Revision.Skills
@@ -305,10 +320,7 @@ public class CharacterBuilder
 
         set
         {
-            Revision.Skills = Revision.Skills
-                .Where(x => x.Type != SkillPurchase.Free)
-                .Concat(value)
-                .ToArray();
+            ReplaceSkills(SkillPurchase.Free, value);
             DependencyManager.Update(this, nameof(FreeSkills));
             UpdateMoonstone();
             StateChanged?.Invoke();
@@ -389,7 +401,8 @@ public class CharacterBuilder
 
     public bool IsReligionValid => !string.IsNullOrEmpty(Revision.Religion);
 
-    [DependsOn(nameof(PopulateSpells), nameof(Wisdom), nameof(Occupation), nameof(NoOccupation), nameof(PurchasedSkills), nameof(ChosenSpells))]
+    [DependsOn(nameof(PopulateSpells), nameof(Wisdom), nameof(Occupation), nameof(NoOccupation),
+        nameof(PurchasedSkills), nameof(ChosenSpells))]
     public bool IsSpellsValid { get; private set; }
 
     [DependsOn(nameof(PopulateSpells), nameof(Wisdom), nameof(Occupation), nameof(NoOccupation))]
@@ -420,6 +433,20 @@ public class CharacterBuilder
         IsNameValid && IsVantagesValid && IsAgeGroupValid && IsSpellsValid && IsChosenSkillsValid && IsHomeChapterValid;
 
     public bool IsNewCharacter => Revision.PreviousRevisionId == null;
+
+    public string? RevisionReviewerNotes
+    {
+        get => Revision.RevisionReviewerNotes;
+        set => Set(x => x.RevisionReviewerNotes = value);
+    }
+    
+    public string? RevisionPlayerNotes
+    {
+        get => Revision.RevisionPlayerNotes;
+        set => Set(x => x.RevisionPlayerNotes = value);
+    }
+
+    public bool ShowNotes => !IsNewCharacter || !string.IsNullOrWhiteSpace(RevisionReviewerNotes);
 
     #endregion
 
@@ -705,7 +732,7 @@ public class CharacterBuilder
         if (HasOccupationalSpells) spells.AddRange(OccupationalSpells.Select(x => x.Name));
         Revision.Spells = spells.ToArray();
 
-        IsSpellsValid = IsNewCharacter 
+        IsSpellsValid = IsNewCharacter
             ? ChosenSpells.Length == Revision.Wisdom
             : ChosenSpells.Length >= Revision.Wisdom;
         HasSpells = HasWisdomSpells;

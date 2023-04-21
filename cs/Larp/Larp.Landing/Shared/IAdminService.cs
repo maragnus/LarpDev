@@ -1,8 +1,5 @@
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using Larp.Data.MwFifth;
 using Microsoft.Extensions.FileProviders;
-using MongoDB.Bson;
 
 namespace Larp.Landing.Shared;
 
@@ -52,7 +49,7 @@ public interface IAdminService
     Task ApproveMwFifthCharacter(string characterId);
 
     [ApiPost("mw5e/characters/{characterId}/reject"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
-    Task RejectMwFifthCharacter(string characterId);
+    Task RejectMwFifthCharacter(string characterId, string? reviewerNotes);
 
     [ApiPost("mw5e/characters/{characterId}/revise"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
     Task<CharacterAndRevision> ReviseMwFifthCharacter(string characterId);

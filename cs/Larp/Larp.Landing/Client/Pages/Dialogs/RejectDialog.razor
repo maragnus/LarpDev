@@ -1,0 +1,28 @@
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing="4">
+            <MudText Typo="Typo.body2">Are you sure you would like to reject this character? It will be returned to the player in Draft status.</MudText>
+            <MudText Typo="Typo.body2">You can leave a note below for the player:</MudText>
+            <MudTextField T="string?" Lines="6" @bind-Value="@ReviewerNotes" Label="Reviewer Notes" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Notes" Variant="Variant.Outlined"/>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Error" Variant="Variant.Filled" OnClick="Reject">Yes, Reject</MudButton>
+        <MudButton Color="Color.Default" Variant="Variant.Filled" OnClick="Close">No, Keep Reviewing</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public string? ReviewerNotes { get; set; }
+
+    [Parameter]
+    public Color Color { get; set; } = Color.Error;
+
+    void Close() => MudDialog.Close(DialogResult.Cancel());
+    void Reject() => MudDialog.Close(DialogResult.Ok(ReviewerNotes));
+}
