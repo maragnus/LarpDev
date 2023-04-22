@@ -28,7 +28,8 @@ public class LandingServiceServer : ILandingService
     public async Task<Result> Login(string email, string deviceName)
     {
         var token = await _userSessionManager.GenerateToken(email, deviceName);
-        await _notifyService.SendEmailAsync(email, "Mystwood Tavern", @$"Your sign in code for Mystwood Tavern is {token}");
+        await _notifyService.SendEmailAsync(email, "Mystwood Tavern",
+            @$"Your sign in code for Mystwood Tavern is {token}");
         return Result.Success;
     }
 
@@ -106,7 +107,8 @@ public class LandingServiceServer : ILandingService
         await _userSessionManager.PreferEmailAddress(_userSession.AccountId!, email);
 
     public async Task AccountUpdate(string? fullName, string? location, string? phone, string? allergies,
-        DateOnly? birthDate) =>
+        DateOnly? birthDate)
+    {
         await _userSessionManager.UpdateUserAccount(_userSession.AccountId!, builder => builder
             .Set(x => x.Name, fullName)
             .Set(x => x.Location, location)
@@ -114,6 +116,7 @@ public class LandingServiceServer : ILandingService
             .Set(x => x.Notes, allergies)
             .Set(x => x.BirthDate, birthDate)
         );
+    }
 
     public async Task<EventsAndLetters> GetEvents(EventList list) =>
         await _eventManager.GetEvents(list, _userSession.AccountId);
@@ -155,7 +158,7 @@ public class LandingServiceServer : ILandingService
     {
         var file =
             await _db.AccountAttachments.Find(x => x.AttachmentId == attachmentId)
-                .Project(x=> new AccountAttachment()
+                .Project(x => new AccountAttachment()
                 {
                     Data = x.Data,
                     FileName = x.FileName,
@@ -169,12 +172,12 @@ public class LandingServiceServer : ILandingService
 
         return new DownloadFileInfo(new MemoryStream(file.Data), file.FileName ?? "file", file.Data.Length);
     }
-    
+
     public async Task<IFileInfo> GetAttachmentThumbnail(string attachmentId, string fileName)
     {
         var file =
             await _db.AccountAttachments.Find(x => x.AttachmentId == attachmentId)
-                .Project(x=> new AccountAttachment()
+                .Project(x => new AccountAttachment()
                 {
                     ThumbnailData = x.ThumbnailData,
                     ThumbnailFileName = x.ThumbnailFileName,
@@ -186,7 +189,8 @@ public class LandingServiceServer : ILandingService
         if (file.ThumbnailData == null)
             throw new ResourceNotFoundException("Attachment thumbnail data is invalid");
 
-        return new DownloadFileInfo(new MemoryStream(file.ThumbnailData), file.ThumbnailFileName ?? "file", file.ThumbnailData.Length);
+        return new DownloadFileInfo(new MemoryStream(file.ThumbnailData), file.ThumbnailFileName ?? "file",
+            file.ThumbnailData.Length);
     }
 }
 

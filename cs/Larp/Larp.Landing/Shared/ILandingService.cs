@@ -27,16 +27,16 @@ public interface ILandingService
     [ApiGet("account"), ApiAuthenticated]
     Task<Account> GetAccount();
 
-    [ApiPost("account/email")]
+    [ApiPost("account/email"), ApiAuthenticated]
     Task AccountEmailAdd(string email);
 
-    [ApiDelete("account/email")]
+    [ApiDelete("account/email"), ApiAuthenticated]
     Task AccountEmailRemove(string email);
 
-    [ApiPost("account/email/preferred")]
+    [ApiPost("account/email/preferred"), ApiAuthenticated]
     Task AccountEmailPreferred(string email);
 
-    [ApiPost("account")]
+    [ApiPost("account"), ApiAuthenticated]
     Task AccountUpdate(string? fullName, string? location, string? phone, string? allergies, DateOnly? birthDate);
 
     [ApiGet("events")]

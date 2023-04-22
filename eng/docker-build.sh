@@ -1,4 +1,5 @@
 #/bin/sh
+set -e
 
 DOCKERFILE="$(dirname "$0")/../Dockerfile"
 

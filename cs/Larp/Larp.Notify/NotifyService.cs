@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using JetBrains.Annotations;
 using Larp.Common;
 using Larp.Notify.Sendinblue;
 using Microsoft.Extensions.Logging;
@@ -13,9 +14,10 @@ public class NotifyServiceOptions
     public const string SectionName = "Notifications";
 
     public string SiteUrl { get; set; } = "https://localhost";
-    public EmailOptions Email { get; set; } = new EmailOptions();
+    public EmailOptions Email { get; set; } = new();
 }
 
+[UsedImplicitly(ImplicitUseTargetFlags.Members)]
 public class EmailOptions
 {
     public List<string> Senders { get; set; } = new();
@@ -48,14 +50,14 @@ public class NotifyService : INotifyService
 
         if (string.IsNullOrWhiteSpace(to.DisplayName))
             to = to with { DisplayName = null };
-        
+
         var email = new Email(sender, new() { to }, subject, body);
 
         try
         {
             var data = JsonSerializer.SerializeToDocument(email);
-            _logger.LogWarning(data.RootElement.ToString());
-            
+            _logger.LogWarning("Sending Email: {Email}", data.RootElement.ToString());
+
             var result = await _client.PostAsJsonAsync(_options.ApiEndPoint, email);
             if (!result.IsSuccessStatusCode)
             {
