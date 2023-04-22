@@ -208,16 +208,10 @@ public class BackupManager
         var fileProvider = _serviceProvider.GetRequiredService<IFileProvider>();
 
         var info = await letterManager.GetByEvent(eventId);
-        var @event = info.Events.First().Value;
         var attendance = await eventManager.GetEventAttendances(eventId);
         var accountNames = await GetAccountNames();
         ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
         var path = fileProvider.GetFileInfo($"{Path.GetRandomFileName()}.xlsx");
-
-        var playerList = @attendance.Select(x => x.AccountId).Distinct().ToList();
-        var accounts = await _larpContext.Accounts.Find(x => playerList.Contains(x.AccountId)).ToListAsync();
-        var characters = await _larpContext.MwFifthGame.CharacterRevisions.Find(x => playerList.Contains(x.AccountId))
-            .ToListAsync();
 
         var file = new FileInfo(path.PhysicalPath!);
         using var package = new ExcelPackage(file);
@@ -230,7 +224,7 @@ public class BackupManager
             {
                 PlayerId = p.AccountId,
                 PlayerName = accountNames.TryGetValue(p.AccountId, out var player) ? player.Name : "No Name Set",
-                Moonstone = p.MwFifth?.Moonstone
+                p.MwFifth?.Moonstone
             }), true, TableStyles.Light6);
         }
 

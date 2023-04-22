@@ -3,7 +3,7 @@
 
 @using System.ComponentModel.DataAnnotations
 @inject LandingService LandingService
-@inject IJSRuntime JS
+@inject IJSRuntime Js
 
 <PageHeader>Account Manager</PageHeader>
 
@@ -221,7 +221,7 @@
     private bool _savingProfile = true;
     private bool _savingRoles = true;
     private bool _savingEmails = true;
-    private bool _changed = false;
+    private bool _changed;
     private bool _isLoadingAttachments = true;
     private Account? _account;
     private CharacterSummary[]? _characters;
@@ -351,7 +351,7 @@
             var file = await LandingService.Service.GetAttachment(attachment.AttachmentId, attachment.FileName ?? "file");
             var fileStream = file.CreateReadStream();
             using var streamRef = new DotNetStreamReference(stream: fileStream);
-            await JS.InvokeVoidAsync("downloadFileFromStream", attachment.FileName ?? "file", streamRef);
+            await Js.InvokeVoidAsync("downloadFileFromStream", attachment.FileName ?? "file", streamRef);
         });
     }
 

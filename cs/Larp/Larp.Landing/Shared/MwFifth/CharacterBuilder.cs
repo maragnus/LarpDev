@@ -541,8 +541,6 @@ public class CharacterBuilder
         {
             switch (Revision.AgeGroup)
             {
-                case null:
-                case Data.MwFifth.AgeGroup.PreTeen:
                 default:
                     occupations = Array.Empty<Occupation>();
                     break;
@@ -561,8 +559,6 @@ public class CharacterBuilder
         {
             switch (Revision.AgeGroup)
             {
-                case null:
-                case Data.MwFifth.AgeGroup.PreTeen:
                 default:
                     occupations = Array.Empty<Occupation>();
                     break;

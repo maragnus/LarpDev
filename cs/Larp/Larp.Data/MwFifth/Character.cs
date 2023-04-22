@@ -299,7 +299,7 @@ public class CharacterRevision
     {
         return Skills
             .GroupBy(x => x.Name)
-            .Select(x => new NameRank(x.Key, x.Sum(x => x.Rank)))
+            .Select(group => new NameRank(group.Key, group.Sum(skill => skill.Rank)))
             .ToArray();
     }
 }

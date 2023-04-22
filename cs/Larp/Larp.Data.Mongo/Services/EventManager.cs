@@ -6,13 +6,11 @@ public class EventManager
 {
     private readonly LarpContext _larpContext;
     private readonly MwFifthCharacterManager _characterManager;
-    private readonly ILogger<EventManager> _logger;
 
-    public EventManager(LarpContext larpContext, MwFifthCharacterManager characterManager, ILogger<EventManager> logger)
+    public EventManager(LarpContext larpContext, MwFifthCharacterManager characterManager)
     {
         _larpContext = larpContext;
         _characterManager = characterManager;
-        _logger = logger;
     }
 
     public async Task<EventAndLetters[]> GetEvents()

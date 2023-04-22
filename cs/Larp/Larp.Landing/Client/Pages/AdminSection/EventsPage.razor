@@ -8,7 +8,7 @@
     {
         <MudStack Row Class="pb-4">
             <MudText Typo="Typo.h6" Class="flex-grow-1">@game</MudText>
-            <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" OnClick="() => AddEvent(game)">Add Event</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" OnClick="() => AddEvent()">Add Event</MudButton>
         </MudStack>
         <MudDataGrid T="EventInfo" Items="events" Dense Filterable Groupable Hover Loading="IsLoading" RowClick="RowClick" RowsPerPage="50">
             <PagerContent>
@@ -50,8 +50,10 @@
         { "PostEvent", Icons.Material.Filled.Email },
     };
 
+    [UsedImplicitly(ImplicitUseTargetFlags.Members)]
     record ComponentInfo(string Title, DateOnly When);
 
+    [UsedImplicitly(ImplicitUseTargetFlags.Members)]
     record EventInfo(Event Event, string Game, string Id, string Title, string Location, DateOnly When,
         ComponentInfo[] Components, int LettersApproved, int LettersSubmitted)
     {
@@ -90,7 +92,7 @@
         NavigationManager.NavigateTo($"/admin/events/{row.Item.Id}");
     }
 
-    private async Task AddEvent(string _)
+    private async Task AddEvent()
     {
         await SafeActionAsync(async () =>
         {

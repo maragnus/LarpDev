@@ -24,8 +24,7 @@ public class LarpDataTestFixture : IDisposable
         };
         Context = new LarpContext(
             Options.Create(options),
-            new LarpDataCache(Options.Create(new MemoryCacheOptions())),
-            NullLogger<LarpContext>.Instance);
+            new LarpDataCache(Options.Create(new MemoryCacheOptions())));
     }
 
     public LarpContext Context { get; set; }

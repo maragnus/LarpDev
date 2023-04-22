@@ -22,7 +22,7 @@
         });
         
         var account = LandingService.Account;
-        _roles = account?.Roles?.ToHashSet() ?? new HashSet<AccountRole>();
+        _roles = account?.Roles.ToHashSet() ?? new HashSet<AccountRole>();
     }
 
     protected override void OnInitialized()

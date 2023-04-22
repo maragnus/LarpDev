@@ -1,4 +1,4 @@
-namespace Larp.Landing.Client;
+namespace Larp.Landing.Client.Services;
 
 public class LandingServiceException : Exception
 {

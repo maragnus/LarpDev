@@ -65,15 +65,10 @@ public class ExcelImporter
         return new ExcelImportResult();
     }
 
+    
     private class ExcelEvent
     {
-        public string Name { get; }
         public Dictionary<int, int> Moonstone { get; } = new();
-
-        public ExcelEvent(string name)
-        {
-            Name = name;
-        }
     }
 
     private async Task ProcessEvents(ExcelWorksheet sheet)
@@ -85,7 +80,7 @@ public class ExcelImporter
         {
             var eventName = sheet.Cells[1, column].Value.ToString();
             if (string.IsNullOrWhiteSpace(eventName)) continue;
-            var excelEvent = new ExcelEvent(eventName);
+            var excelEvent = new ExcelEvent();
 
             for (var row = 2; row < sheet.Rows.EndRow; row++)
             {
@@ -316,7 +311,7 @@ public class ExcelImporter
             {
                 CharacterId = ObjectId.GenerateNewId().ToString(),
                 ImportId = importId,
-                AccountId = account!.AccountId,
+                AccountId = account.AccountId,
                 CharacterName = characterName,
                 CreatedOn = _now,
                 ImportedMoonstone = ToInt(sheet.Cells[row, 2].Value),
@@ -344,7 +339,7 @@ public class ExcelImporter
             var revision = new CharacterRevision
             {
                 RevisionId = ObjectId.GenerateNewId().ToString(),
-                AccountId = account!.AccountId,
+                AccountId = account.AccountId,
                 CharacterId = character.CharacterId,
                 State = CharacterState.Live,
                 CreatedOn = _now,
@@ -459,7 +454,7 @@ public class ExcelImporter
             .Select(item =>
             {
                 string name;
-                int count = 1;
+                int count;
                 var match = Regex.Match(item, @"^(.*) x(\d+)", RegexOptions.Compiled);
                 if (match.Success)
                 {

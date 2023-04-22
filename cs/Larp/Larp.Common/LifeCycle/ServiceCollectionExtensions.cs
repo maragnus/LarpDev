@@ -1,8 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
 
 namespace Larp.Common.LifeCycle;
 
+[PublicAPI]
 public static class ServiceCollectionExtensions
 {
     /// <summary>
@@ -31,8 +33,7 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Executes <paramref name="action"/> during WebHost startup
     /// </summary>
-    public static IServiceCollection AddStartupTask<TStartupTask>(this IServiceCollection serviceCollection, Func<CancellationToken, Task> action, [CallerMemberName] string? name = null!)
-        where TStartupTask : class, IStartupTask
+    public static IServiceCollection AddStartupTask(this IServiceCollection serviceCollection, Func<CancellationToken, Task> action, [CallerMemberName] string? name = null!)
     {
         var lists = GetTaskList(serviceCollection);
         lists.StartupActions.Add((name ?? "Unnamed task", action));
@@ -40,7 +41,7 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Construct <typeparamref name="TStopTask"/> through Dependency Injection and executes <see cref="IStopTask.StartAsync(CancellationToken)"/> during WebHost stop
+    /// Construct <typeparamref name="TStopTask"/> through Dependency Injection and executes <see cref="IStopTask.StopAsync(CancellationToken)"/> during WebHost stop
     /// </summary>
     public static IServiceCollection AddStopTask<TStopTask>(this IServiceCollection serviceCollection)
        where TStopTask : class, IStopTask
@@ -52,7 +53,7 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Executes <see cref="IStopTask.StartAsync(CancellationToken)"/> on <typeparamref name="TStopTask"/> during WebHost stop
+    /// Executes <see cref="IStopTask.StopAsync(CancellationToken)"/> on <typeparamref name="TStopTask"/> during WebHost stop
     /// </summary>
     public static IServiceCollection AddStopTask<TStopTask>(this IServiceCollection serviceCollection, TStopTask stopTask)
         where TStopTask : class, IStopTask
@@ -65,8 +66,7 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Executes <paramref name="action"/> during WebHost stop
     /// </summary>
-    public static IServiceCollection AddStopTask<TStopTask>(this IServiceCollection serviceCollection, Func<CancellationToken, Task> action, [CallerMemberName] string? name = null!)
-        where TStopTask : class, IStopTask
+    public static IServiceCollection AddStopTask(this IServiceCollection serviceCollection, Func<CancellationToken, Task> action, [CallerMemberName] string? name = null!)
     {
         var lists = GetTaskList(serviceCollection);
         lists.StopActions.Add((name ?? "Unnamed task", action));
@@ -80,7 +80,7 @@ public static class ServiceCollectionExtensions
                         .ImplementationInstance is not LifecycleTaskService.LifeCycleTasksLists lists)
         {
             lists = new LifecycleTaskService.LifeCycleTasksLists();
-            serviceCollection.AddSingleton(lists!);
+            serviceCollection.AddSingleton(lists);
             serviceCollection.AddHostedService<LifecycleTaskService>();
         }
 

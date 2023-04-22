@@ -46,7 +46,7 @@ public class FileDownloadSourceGenerator : ISourceGenerator
 [Generator(LanguageNames.CSharp)]
 public class RestfulSourceGenerator : IIncrementalGenerator
 {
-    private static readonly Dictionary<string, string> _httpMethods = new()
+    private static readonly Dictionary<string, string> HttpMethods = new()
     {
         { "KiloTx.Restful.ApiGetAttribute", "HttpMethod.Get" },
         { "KiloTx.Restful.ApiPostAttribute", "HttpMethod.Post" },
@@ -237,10 +237,10 @@ public class RestfulSourceGenerator : IIncrementalGenerator
                     var apiPaths =
                         from attribute in member.GetAttributes()
                         let attributeName = attribute?.AttributeClass?.ToDisplayString() ?? ""
-                        where _httpMethods.ContainsKey(attributeName)
+                        where HttpMethods.ContainsKey(attributeName)
                         select new
                         {
-                            Method = _httpMethods.GetValueOrDefault(attributeName),
+                            Method = HttpMethods.GetValueOrDefault(attributeName),
                             Path = attribute.ConstructorArguments.Single().Value as string
                         };
 

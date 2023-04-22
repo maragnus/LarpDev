@@ -2,7 +2,7 @@
 @using Larp.Landing.Shared
 @using System.Globalization
 @inject LandingService LandingService
-@inject IJSRuntime JS
+@inject IJSRuntime Js
 
 <PageHeader Print>Preregistration</PageHeader>
 
@@ -75,13 +75,13 @@
 {
     var fields = player.PreEventLetter?.Fields ?? new Dictionary<string, string>();
 
-    string[] GetList(string name) => (fields!.GetValueOrDefault(name) ?? "")
+    string[] GetList(string name) => (fields.GetValueOrDefault(name) ?? "")
         .Split(',')
         .Select(x => x.Trim())
         .Where(x => !string.IsNullOrEmpty(x))
         .ToArray();
 
-    bool GetBool(string name) => string.Equals(fields!.GetValueOrDefault(name), "True", StringComparison.InvariantCultureIgnoreCase);
+    bool GetBool(string name) => string.Equals(fields.GetValueOrDefault(name), "True", StringComparison.InvariantCultureIgnoreCase);
 
     var waiver = GetBool(FieldWaiver) ? "" : "Waiver";
     var patreon = GetBool(FieldPatreon) ? " (P)" : "";
@@ -98,7 +98,7 @@
     var cost = costCount == 0 ? 0
         : _notes.Event.EventCost + _notes.Event.ChronicleCost * (costCount - 1);
     if (familyDiscount) cost -= 5 * costCount;
-    if (player.DiscountPercentage.HasValue) cost = (int)Math.Floor((double)cost * (1 - ((double)player.DiscountPercentage.Value / 100d)));
+    if (player.DiscountPercentage.HasValue) cost = (int)Math.Floor(cost * (1 - player.DiscountPercentage.Value / 100d));
 
     var pcingList =
         from component in _notes.Event.Components
@@ -299,7 +299,7 @@
 
     private async Task Print()
     {
-        await JS.InvokeVoidAsync("printPage");
+        await Js.InvokeVoidAsync("printPage");
     }
 
 }

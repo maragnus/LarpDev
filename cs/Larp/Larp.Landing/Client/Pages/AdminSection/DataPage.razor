@@ -1,6 +1,6 @@
 @page "/admin/data"
 @inherits LarpPage
-@inject IJSRuntime JS
+@inject IJSRuntime Js
 
 @code {
     private StringResult? _sendResult;
@@ -15,7 +15,7 @@
         if (_fileNames.Count == 0 || _file == null) return;
 
         _isSending = true;
-        var success = await SafeActionAsync(async () =>
+        await SafeActionAsync(async () =>
         {
             await using var stream = _file.OpenReadStream();
             _sendResult = await LandingService.Admin.Import(stream);
@@ -68,16 +68,13 @@
             var file = await LandingService.Admin.Export();
             var fileStream = file.CreateReadStream();
             using var streamRef = new DotNetStreamReference(stream: fileStream);
-            await JS.InvokeVoidAsync("downloadFileFromStream", $"larp-landing-export-{DateTime.Now:yyyy-MM-dd}.xlsx", streamRef);
+            await Js.InvokeVoidAsync("downloadFileFromStream", $"larp-landing-export-{DateTime.Now:yyyy-MM-dd}.xlsx", streamRef);
         });
     }
 
     private async Task Reseed()
     {
-        await SafeActionAsync(async () =>
-        {
-            await LandingService.Admin.ReseedData();
-        });
+        await SafeActionAsync(async () => { await LandingService.Admin.ReseedData(); });
     }
 
 }
@@ -135,7 +132,7 @@
             <MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Filled" OnClick="Export">Export</MudButton>
         </MudStack>
     </MudPaper>
-    
+
     <MudPaper Class="mb-4 pa-4">
         <MudStack Spacing="4" AlignItems="AlignItems.Start">
             <MudText Typo="Typo.h6">Reseed Game Data</MudText>

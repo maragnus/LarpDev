@@ -198,7 +198,6 @@ public class UserSessionManager : IUserSessionManager
         var normalizedEmail = email.ToLowerInvariant();
 
         var accountFilter = Builders<Account>.Filter;
-        var accountEmailFilter = Builders<AccountEmail>.Filter;
 
         // Unset previously preferred email
         {

@@ -1,7 +1,7 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using JetBrains.Annotations;
-using Larp.Landing.Shared;
+using Larp.Common;
 using Microsoft.Extensions.FileProviders;
 
 namespace Larp.Landing.Client.Services;

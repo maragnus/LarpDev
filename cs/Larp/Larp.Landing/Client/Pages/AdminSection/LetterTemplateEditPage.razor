@@ -154,9 +154,9 @@
         var parameters = new DialogParameters()
         {
             { nameof(LetterDialog.Template), _template },
-            { nameof(LetterDialog.Letter), new Letter() { } },
+            { nameof(LetterDialog.Letter), new Letter() },
             {
-                nameof(LetterDialog.Event), new Event()
+                nameof(LetterDialog.Event), new Event
                 {
                     Title = "Sample Event",
                     Date = now,

@@ -1,6 +1,8 @@
-﻿namespace Larp.Landing.Client.Shared;
+﻿using JetBrains.Annotations;
+
+namespace Larp.Landing.Client.Shared;
 
 public class Revision
 {
-    const string BuildRevision = "Dev";
+    [UsedImplicitly] const string BuildRevision = "Dev";
 }

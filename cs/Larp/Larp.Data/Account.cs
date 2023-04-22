@@ -65,7 +65,7 @@ public class Account
     public string? PreferredEmail =>
         (Emails.FirstOrDefault(x => x.IsPreferred) ?? Emails.FirstOrDefault(x => x.IsVerified))?.Email;
 
-    [BsonIgnore] public string? EmailList => string.Join(", ", Emails.Select(x => x.Email));
+    [BsonIgnore] public string EmailList => string.Join(", ", Emails.Select(x => x.Email));
 
     public bool IsProfileComplete =>
         !string.IsNullOrWhiteSpace(Name)

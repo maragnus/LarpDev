@@ -11,13 +11,10 @@ public class LarpContext
     {
         ConventionRegistry.Register("IgnoreIfDefault",
             new ConventionPack { new IgnoreIfDefaultConvention(true) },
-            t => true);
-
-        // var enumConvention = new ConventionPack() { new EnumRepresentationConvention(BsonType.String) };
-        // ConventionRegistry.Register(nameof(EnumRepresentationConvention), enumConvention, _ => true);
+            _ => true);
     }
 
-    public LarpContext(IOptions<LarpDataOptions> options, LarpDataCache cache, ILogger<LarpContext> logger)
+    public LarpContext(IOptions<LarpDataOptions> options, LarpDataCache cache)
     {
         var client = new MongoClient(options.Value.ConnectionString ??
                                      throw new MongoConfigurationException(

@@ -3,12 +3,10 @@ namespace Larp.Data.Mongo.Services;
 public class LetterManager
 {
     private readonly LarpContext _larpContext;
-    private readonly ILogger<LetterManager> _logger;
 
-    public LetterManager(LarpContext larpContext, ILogger<LetterManager> logger)
+    public LetterManager(LarpContext larpContext)
     {
         _larpContext = larpContext;
-        _logger = logger;
     }
 
     public async Task<Letter> Draft(string letterTemplateId, string eventId, string accountId, string letterName)

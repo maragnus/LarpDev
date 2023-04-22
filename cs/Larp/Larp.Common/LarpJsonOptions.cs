@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Larp.Landing.Shared;
+namespace Larp.Common;
 
 public static class LarpJson
 {

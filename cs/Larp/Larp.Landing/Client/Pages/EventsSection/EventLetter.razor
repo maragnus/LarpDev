@@ -152,7 +152,7 @@
     protected override async Task OnSafeParametersSetAsync()
     {
         var characters = await LandingService.Service.GetCharacterNames();
-        _characters = characters.Values.Select(x=>x ?? "No Name Set").ToArray();
+        _characters = characters.Values.Select(x=>(string?)x ?? "No Name Set").ToArray();
     }
 
     protected override void OnParametersSet()

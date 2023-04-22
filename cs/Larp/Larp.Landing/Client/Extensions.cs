@@ -45,11 +45,11 @@ public class IndexedCollection<TItem> : IEnumerable<TItem>
 
 public static class Extensions
 {
-    private static MethodInfo stateHasChanged;
+    private static readonly MethodInfo StateHasChanged;
 
     static Extensions()
     {
-        stateHasChanged =
+        StateHasChanged =
             typeof(ComponentBase).GetMethod("StateHasChanged", BindingFlags.Instance | BindingFlags.NonPublic)!;
     }
 
@@ -68,7 +68,7 @@ public static class Extensions
 
         fieldInfo?.SetValue(component, true);
         propertyInfo?.SetValue(component, true);
-        stateHasChanged.Invoke(component, Array.Empty<object>());
+        StateHasChanged.Invoke(component, Array.Empty<object>());
         try
         {
             await action();
@@ -93,7 +93,7 @@ public static class Extensions
 
         fieldInfo?.SetValue(component, true);
         propertyInfo?.SetValue(component, true);
-        stateHasChanged.Invoke(component, Array.Empty<object>());
+        StateHasChanged.Invoke(component, Array.Empty<object>());
         try
         {
             while (true)
@@ -116,7 +116,7 @@ public static class Extensions
         {
             fieldInfo?.SetValue(component, false);
             propertyInfo?.SetValue(component, false);
-            stateHasChanged.Invoke(component, Array.Empty<object>());
+            StateHasChanged.Invoke(component, Array.Empty<object>());
         }
     }
 

@@ -2,7 +2,7 @@
 @inherits LarpPage
 
 @inject LandingService LandingService
-@inject IJSRuntime JS
+@inject IJSRuntime Js
 
 <AdminLayout Loading="IsLoading" Title="Edit Event">
     <MudStack Spacing="4">
@@ -105,7 +105,7 @@
             <MudButtonGroup OverrideStyles="false">
                 <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="AddComponent">Add Component</MudButton>
                 <MudButton Color="Color.Tertiary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="AddComponentF123">Add F123</MudButton>
-                <MudButton Color="Color.Tertiary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="AddComponent">Add Halves</MudButton>
+                <MudButton Color="Color.Tertiary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="AddComponent1">Add Halves</MudButton>
             </MudButtonGroup>
         </div>
 
@@ -139,7 +139,6 @@
     private List<EventComponent> _components = new();
     private List<EventLetter> _letters = new();
     private readonly string[] _eventTypes = { "Game", "Workday", "Subscription", "Contest", "Other" };
-    private Dictionary<string, string?> _games = new();
     private DateTime _date;
     private Dictionary<string, LetterTemplate> _letterTemplates = default!;
     private EventsAndLetters _result = default!;
@@ -165,8 +164,6 @@
     {
         _letterTemplates = (await LandingService.Admin.GetLetterTemplateNames())
             .ToDictionary(x => x.LetterTemplateId);
-        _games = LandingService.Games
-            .ToDictionary(x => x.Value.Id, x => x.Value.Title);
     }
 
     private async Task Save()
@@ -203,7 +200,7 @@
             var file = await LandingService.Admin.ExportLetters(EventId);
             var fileStream = file.CreateReadStream();
             using var streamRef = new DotNetStreamReference(stream: fileStream);
-            await JS.InvokeVoidAsync("downloadFileFromStream", $"larp-landing-export-{DateTime.Now:yyyy-MM-dd}.xlsx", streamRef);
+            await Js.InvokeVoidAsync("downloadFileFromStream", $"larp-landing-export-{DateTime.Now:yyyy-MM-dd}.xlsx", streamRef);
         });
     }
 

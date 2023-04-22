@@ -4,6 +4,7 @@ using Larp.Test.Common;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
+// ReSharper disable UnusedAutoPropertyAccessor.Local
 
 namespace Larp.Data.Tests;
 

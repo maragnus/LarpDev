@@ -133,7 +133,7 @@
             await Parallel.ForEachAsync(
                 _attendances.Where(x => x.Changed),
                 new ParallelOptions { MaxDegreeOfParallelism = 4 },
-                async (attendance, token) => { await AttendanceUpdate(attendance); });
+                async (attendance, _) => { await AttendanceUpdate(attendance); });
             UpdateSaveAllNeeded();
         });
         _isSaving = false;

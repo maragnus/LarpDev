@@ -102,6 +102,7 @@ public class LarpDataSeeder
         await _larpContext.Games.InsertManyAsync(games, new InsertManyOptions());
     }
 
+    // ReSharper disable once UnusedMember.Local
     private async Task ImportEvents(JsonElement json)
     {
         var gameIds = (await _larpContext.Games.Find(FilterDefinition<Game>.Empty).ToListAsync())
@@ -112,7 +113,7 @@ public class LarpDataSeeder
         foreach (var ev in events)
             ev.GameId = gameIds[ev.GameId];
 
-        await _larpContext.Events.InsertManyAsync(events, new InsertManyOptions() { });
+        await _larpContext.Events.InsertManyAsync(events, new InsertManyOptions());
     }
 
     private async Task<JsonDocument> GetJsonDocument(string name)
