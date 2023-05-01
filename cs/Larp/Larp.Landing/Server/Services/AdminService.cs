@@ -6,6 +6,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Internal;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace Larp.Landing.Server.Services;
 
@@ -351,6 +352,27 @@ public class AdminService : IAdminService
     public async Task ReseedData()
     {
         await _backupManager.Reseed();
+    }
+
+    public async Task DeleteCharactersUnused()
+    {
+        var characters = await _db.MwFifthGame.Characters
+            .Find(c => c.ImportId.HasValue)
+            .ToListAsync();
+        
+        var revisions = (await _db.MwFifthGame.CharacterRevisions.AsQueryable()
+            .GroupBy(x => x.CharacterId)
+            .Select(x => new
+            {
+                CharacterId = x.Key,
+                Count = x.Count()
+            }).ToListAsync())
+            .ToDictionary(x=>x.CharacterId, x=>x.Count);
+
+        var deletes = new List<string>();
+        deletes.AddRange(characters.Where(x => revisions[x.CharacterId] == 1).Select(x => x.CharacterId));
+        await _db.MwFifthGame.Characters.DeleteManyAsync(x => deletes.Contains(x.CharacterId));
+        await _db.MwFifthGame.CharacterRevisions.DeleteManyAsync(x => deletes.Contains(x.CharacterId));
     }
 
     public async Task SaveOccupations(Occupation[] occupations)

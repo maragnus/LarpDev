@@ -178,6 +178,9 @@ public interface IAdminService
     [ApiPost("data/reseed"), ApiAuthenticated(AccountRoles.AccountAdmin)]
     Task ReseedData();
 
+    [ApiDelete("data/characters/unused"), ApiAuthenticated(AccountRoles.AccountAdmin)]
+    Task DeleteCharactersUnused();
+    
     [ApiPost("mw5e/occupations"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
     Task SaveOccupations(Occupation[] occupations);
 }

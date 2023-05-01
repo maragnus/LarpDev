@@ -447,6 +447,8 @@ public class CharacterBuilder
     }
 
     public bool ShowNotes => !IsNewCharacter || !string.IsNullOrWhiteSpace(RevisionReviewerNotes);
+    
+    public bool HasTalents => Advantages.Any(x => x.Name.Contains("Talent"));
 
     #endregion
 

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Larp.Data.MwFifth;
 using Larp.Landing.Shared.MwFifth;
@@ -485,6 +486,9 @@ public class ExcelImporter
                     count = 1;
                 }
 
+                if (name == "Increased Mana")
+                    Debugger.Break();
+                
                 var skill = _gameState.Skills.FirstOrDefault(x =>
                     string.Equals(x.Name, name, StringComparison.InvariantCultureIgnoreCase));
                 if (skill == null)
@@ -497,7 +501,7 @@ public class ExcelImporter
                 {
                     Name = skill.Name,
                     Purchases = count,
-                    Rank = (skill.RanksPerPurchase ?? 0) * count,
+                    Rank = (skill.RanksPerPurchase ?? 1) * count,
                     Type = purchase
                 };
             })

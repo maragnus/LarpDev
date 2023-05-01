@@ -127,7 +127,7 @@
                 @<StepFreeSkills Character="_revision"/>,
                 @<MudIcon Icon="@Icons.Material.Outlined.CleanHands"/>,
                 () => true,
-                () => _revision.HasSkills),
+                () => _revision.HasSkills || _revision.HasTalents),
             new(
                 "Spells",
                 @<StepSpells Character="_revision"/>,
@@ -296,13 +296,13 @@
                     <MudTooltip Text="@_availableMoonstoneInfo">
                         <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
                             <MudAvatar Color="Color.Success">@_availableMoonstone</MudAvatar>
-                            <MudText Align="Align.Center" Typo="Typo.caption">Available Moonstone</MudText>
+                            <MudText Align="Align.Center" Typo="Typo.caption">Unspent Moonstone</MudText>
                         </MudStack>
                     </MudTooltip>
                     <MudTooltip Text="The amount of moonstone allocated for this character">
                         <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
                             <MudAvatar Color="Color.Success">@_totalMoonstone</MudAvatar>
-                            <MudText Align="Align.Center" Typo="Typo.caption">Total Moonstone</MudText>
+                            <MudText Align="Align.Center" Typo="Typo.caption">Spent Moonstone</MudText>
                         </MudStack>
                     </MudTooltip>
                     <MudTooltip Text="The amount of moonstone needed for this revision">

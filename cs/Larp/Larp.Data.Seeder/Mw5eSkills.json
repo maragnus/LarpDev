@@ -387,6 +387,7 @@
     "title": "Increased Mana",
     "class": "Standard",
     "purchasable": "Multiple",
+    "ranksPerPurchase": 1,
     "costPerPurchase": 10
   },
   {
