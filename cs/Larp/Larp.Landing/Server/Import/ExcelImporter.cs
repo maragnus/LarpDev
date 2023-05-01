@@ -331,10 +331,27 @@ public class ExcelImporter
                 _logger.LogWarning(
                     "Unable to import character {ImportId} {CharacterName} because no home chapter was provided",
                     importId, characterName);
+                continue;
             }
 
             TranslateOccupation((string?)sheet.Cells[row, 7].Value, out var occupation, out var occupationSkills);
             TranslateOccupation((string?)sheet.Cells[row, 8].Value, out var enhancement, out var enhancementSkills);
+
+            if (occupation != null && _gameState.Occupations.All(x => x.Name != occupation))
+            {
+                _logger.LogWarning(
+                    "Unable to import character {ImportId} {CharacterName} because occupation {Occupation} does not exist",
+                    importId, characterName, occupation);
+                continue;
+            }
+            
+            if (enhancement != null &&_gameState.Occupations.All(x => x.Name != enhancement))
+            {
+                _logger.LogWarning(
+                    "Unable to import character {ImportId} {CharacterName} because occupational enhancement {Occupation} does not exist",
+                    importId, characterName, enhancement);
+                continue;
+            }
 
             var revision = new CharacterRevision
             {
@@ -432,7 +449,7 @@ public class ExcelImporter
         if (value == null)
             return;
 
-        var match = Regex.Match(value, @"^([\w\- /]+)( \((.*)\))?$", RegexOptions.Compiled);
+        var match = Regex.Match(value.Trim(), @"^([\w\- /]+)( \((.*)\))?$", RegexOptions.Compiled);
 
         if (!match.Success)
             return;

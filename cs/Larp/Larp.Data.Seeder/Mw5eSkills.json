@@ -1137,34 +1137,44 @@
     "title": "Aquilan Exploration",
     "class": "Unavailable",
     "purchasable": "Unavailable",
-    "chapters": ["keep"]
+    "chapters": [
+      "keep"
+    ]
   },
   {
     "name": "Deep Lore",
     "title": "Deep Lore",
     "class": "Unavailable",
     "purchasable": "Unavailable",
-    "chapters": ["keep"]
+    "chapters": [
+      "keep"
+    ]
   },
   {
     "name": "Old Faith Favor",
     "title": "Old Faith Favor",
     "class": "Unavailable",
     "purchasable": "Unavailable",
-    "chapters": ["burgundar"]
+    "chapters": [
+      "burgundar"
+    ]
   },
   {
     "name": "Improved Old Faith Favor",
     "title": "Improved Old Faith Favor",
     "class": "Unavailable",
     "purchasable": "Unavailable",
-    "chapters": ["burgundar"]
+    "chapters": [
+      "burgundar"
+    ]
   },
   {
     "name": "Intercession",
     "title": "Intercession",
     "class": "Unavailable",
     "purchasable": "Unavailable",
-    "chapters": ["burgundar"]
+    "chapters": [
+      "burgundar"
+    ]
   }
 ]

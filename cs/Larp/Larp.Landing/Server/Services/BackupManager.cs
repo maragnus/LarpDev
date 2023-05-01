@@ -79,6 +79,7 @@ public class BackupManager
                 TotalMoonstone = p.MwFifthMoonstone,
                 UsedMoonstone = p.MwFifthMoonstone,
                 UnspentMoonstone = p.MwFifthMoonstone - p.MwFifthUsedMoonstone,
+                Status = p.State.ToString()
             }), true, TableStyles.Light6);
         }
 

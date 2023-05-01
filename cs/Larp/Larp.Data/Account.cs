@@ -28,6 +28,7 @@ public class AccountName
 
 public enum AccountState
 {
+    Undefined,
     Active,
     Archived,
     Uninvited

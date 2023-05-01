@@ -78,6 +78,13 @@
                     continue;
                 }
                 
+                if (item.StartsWith("Weapon Use") && item.Contains("any", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    foreach (var skill in LandingService.MwFifthGameState.Skills.Where(s=>s.Name.StartsWith("Weapon Use")))
+                        SetSkill(skill.Name, true);
+                    continue;
+                }
+                
                 SetSkill(item, true);
             }
         }

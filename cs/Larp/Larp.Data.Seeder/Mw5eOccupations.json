@@ -2101,5 +2101,164 @@
     "chapters": [
       "novgorond"
     ]
+  },
+  {
+    "name": "Head Librarian",
+    "type": "Plot",
+    "skills": [
+      "Bardic Voice 2",
+      "Commerce",
+      "Copyist",
+      "Duty 1",
+      "News and Rumors",
+      "Research 2",
+      "Scribe 4",
+      "Occupational Spells"
+    ],
+    "duty": "cataloguing the library",
+    "chapters": [
+      "keep"
+    ]
+  },
+  {
+    "name": "Lord Mayor",
+    "type": "Plot",
+    "skills": [
+      "Bardic Voice 2",
+      "Duty 1",
+      "Income 25",
+      "Improved Leadership (Townsperson)",
+      "Information Gathering",
+      "News \u0026 Rumors",
+      "Retainers 2",
+      "Wear Armor 2"
+    ],
+    "duty": "holding Court or Council",
+    "chapters": [
+      "keep"
+    ]
+  },
+  {
+    "name": "Shadow Guild Superintendent (Bellmeire)",
+    "type": "Plot",
+    "skills": [
+      "Agility",
+      "Buy/Sell 30",
+      "Commerce",
+      "Evade Trap",
+      "Fence",
+      "Flee",
+      "Income 20",
+      "Information Gathering",
+      "Leadership",
+      "News \u0026 Rumors",
+      "Retainers 1",
+      "Set Trap",
+      "Tarot Mortis Punchinello"
+    ],
+    "leadership": "Guild Members",
+    "chapters": [
+      "keep"
+    ]
+  },
+  {
+    "name": "Lowtown Brewer/Craft Brewer",
+    "specialties": [
+      "Lowtown Brewer",
+      "Craft Brewer"
+    ],
+    "type": "Enhancement",
+    "skills": [],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Apprenticeship",
+          "Apothecary 2",
+          "Cooking 2"
+        ]
+      }
+    ],
+    "chapters": [
+      "keep"
+    ]
+  },
+  {
+    "name": "Shadow Guild Initiate",
+    "type": "Enhancement",
+    "skills": [
+      "Apprenticeship"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Scavenging",
+          "Improved Scavenging"
+        ]
+      }
+    ],
+    "chapters": [
+      "keep"
+    ]
+  },
+  {
+    "name": "War Veteran",
+    "type": "Enhancement",
+    "skills": [],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Livery",
+          "Weapon Use (Bow)",
+          "Weapon Use (Claws)",
+          "Weapon Use (Dagger)",
+          "Weapon Use (Fists)",
+          "Weapon Use (Flail)",
+          "Weapon Use (Hand Crossbow)",
+          "Weapon Use (Javelin)",
+          "Weapon Use (Normal Crossbow)",
+          "Weapon Use (One Handed Axe)",
+          "Weapon Use (One Handed Blunt)",
+          "Weapon Use (One Handed Sword)",
+          "Weapon Use (One Handed Tool)",
+          "Weapon Use (Polearm)",
+          "Weapon Use (Spear)",
+          "Weapon Use (Staff)",
+          "Weapon Use (Schiltron)",
+          "Weapon Use (Thrown Weapon)",
+          "Weapon Use (Two Handed Axe)",
+          "Weapon Use (Two Handed Blunt)",
+          "Weapon Use (Two Handed Sword)",
+          "Weapon Use (Two Handed Tool)",
+          "Weapon Use (Large Shield)",
+          "Weapon Specialization (Bow)",
+          "Weapon Specialization (Claws)",
+          "Weapon Specialization (Dagger)",
+          "Weapon Specialization (Fists)",
+          "Weapon Specialization (Flail)",
+          "Weapon Specialization (Hand Crossbow)",
+          "Weapon Specialization (Javelin)",
+          "Weapon Specialization (Normal Crossbow)",
+          "Weapon Specialization (One Handed Axe)",
+          "Weapon Specialization (One Handed Blunt)",
+          "Weapon Specialization (One Handed Sword)",
+          "Weapon Specialization (One Handed Tool)",
+          "Weapon Specialization (Polearm)",
+          "Weapon Specialization (Spear)",
+          "Weapon Specialization (Schiltron)",
+          "Weapon Specialization (Staff)",
+          "Weapon Specialization (Thrown Weapon)",
+          "Weapon Specialization (Two Handed Axe)",
+          "Weapon Specialization (Two Handed Blunt)",
+          "Weapon Specialization (Two Handed Sword)",
+          "Weapon Specialization (Two Handed Tool)"
+        ]
+      }
+    ],
+    "chapters": [
+      "keep"
+    ]
   }
 ]

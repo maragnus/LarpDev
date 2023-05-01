@@ -51,9 +51,26 @@ public class LarpContext
     public async Task Migrate()
     {
         await ActivateAccounts();
+        await FixAccounts();
         await MigrateToCharacterRevisions();
         await FixCharacters();
         await CreateIndices();
+    }
+
+    private async Task FixAccounts()
+    {
+        var accounts = await Accounts.Find(_ => true).ToListAsync();
+        foreach (var account in accounts.Where(x => x.Emails.Any(x => x.Email.Contains(" "))))
+        {
+            foreach (var email in account.Emails)
+            {
+                email.Email = email.Email.Replace(" ", "");
+                email.NormalizedEmail = email.Email.ToLowerInvariant();
+            }
+
+            await Accounts.UpdateOneAsync(a => a.AccountId == account.AccountId,
+                Builders<Account>.Update.Set(a => a.Emails, account.Emails));
+        }
     }
 
     private async Task ActivateAccounts()
