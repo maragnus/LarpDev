@@ -94,6 +94,7 @@ public enum SkillPurchasable
 public class SkillDefinition
 {
     public string Name { get; set; } = default!;
+    
     public string Title { get; set; } = default!;
 
     public SkillClass Class { get; set; }
@@ -106,13 +107,17 @@ public class SkillDefinition
     [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public int? CostPerPurchase { get; set; }
 
-    public string[] Iterations { get; set; } = Array.Empty<string>();
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public string[]? Iterations { get; set; }
 
     [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string Description { get; set; } = default!;
 
     [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? PreregistrationNote { get; set; }
+    
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public string[]? Chapters { get; set; }
 }
 
 [PublicAPI]
@@ -145,22 +150,38 @@ public class SkillChoice
 public class Occupation
 {
     public string Name { get; set; } = default!;
-    public string[] Specialties { get; set; } = Array.Empty<string>();
+    
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public string[]? Specialties { get; set; }
+    
     public OccupationType Type { get; set; }
+    
     public string[] Skills { get; set; } = Array.Empty<string>();
-    public SkillChoice[] Choices { get; set; } = Array.Empty<SkillChoice>();
+    
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public SkillChoice[]? Choices { get; set; }
+
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? Duty { get; set; }
+    
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? Livery { get; set; }
+    
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? Leadership { get; set; }
-    public string[] Chapters { get; set; } = Array.Empty<string>();
+    
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public string[]? Chapters { get; set; }
 
     // ReSharper disable once NonReadonlyMemberInGetHashCode
     public override int GetHashCode() => Name.GetHashCode();
 
+    public bool HasSkill(string skillName) => Skills.Contains(skillName);
+    
     public bool IsChapter(string? homeChapter)
     {
         // If this is not chapter-specific, match
-        if (Chapters.Length == 0)
+        if (Chapters == null || Chapters.Length == 0)
             return true;
         // If it is chapter-specific and the player hasn't selected a chapter, no match
         if (string.IsNullOrEmpty(homeChapter))

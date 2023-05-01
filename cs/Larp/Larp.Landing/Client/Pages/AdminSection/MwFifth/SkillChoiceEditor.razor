@@ -1,0 +1,85 @@
+﻿@inject IDialogService DialogService
+@inject LandingService LandingService
+
+<MudPaper Class="pa-4">
+    <MudGrid>
+        <MudItem xs="12">
+            @foreach (var skill in Choice.Choices)
+            {
+                <MudChip Text="@skill" OnClose="() => RemoveSkill(skill)"/>
+            }
+        </MudItem>
+        <MudItem xs="12" md="3">
+            <MudTextField Label="Choose Count" T="int" InputType="InputType.Number" @bind-Value="Choice.Count" Variant="Variant.Outlined"/>
+        </MudItem>
+        <MudItem xs="12" md="9">
+            <MudStack Row AlignItems="AlignItems.Center">
+                <MudSelectExtended Label="Add Skill" T="string" SearchBox SearchFunc="SearchFunc" SearchBoxClearable SearchBoxAutoFocus ItemCollection="Skills" @ref="_addSkill" Variant="Variant.Outlined"/>
+                <MudTextField Label="Ranks" T="int?" InputType="InputType.Number" @ref="_addSkillRank" Clearable Variant="Variant.Outlined"/>
+                <MudButton OnClick="AddSkill" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Variant="Variant.Filled">Add</MudButton>
+                <MudButton OnClick="AddSkills" StartIcon="@Icons.Material.Filled.AddBox" Color="Color.Primary" Variant="Variant.Filled">Auto Add Skills</MudButton>
+            </MudStack>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@code {
+
+    [Parameter]
+    public SkillChoice Choice { get; set; } = default!;
+
+    [Parameter]
+    public ICollection<string> Skills { get; set; } = default!;
+
+    private MudSelectExtended<string>? _addSkill;
+    private MudTextField<int?>? _addSkillRank;
+
+    private void SetSkill(string skillName, bool shouldHaveSkill)
+    {
+        var hasSkill = Choice.Choices.Contains(skillName);
+
+        if (hasSkill && !shouldHaveSkill)
+            Choice.Choices = Choice.Choices.Where(x => x != skillName).ToArray();
+        else if (!hasSkill && shouldHaveSkill)
+            Choice.Choices = Choice.Choices.Concat(new[] { skillName }).ToArray();
+    }
+
+    private void RemoveSkill(string skill)
+    {
+        SetSkill(skill, false);
+    }
+
+    private async Task AddSkill()
+    {
+        var name = _addSkill!.Value;
+        var rank = _addSkillRank!.Value;
+        if (name == null) return;
+        SetSkill(rank.HasValue ? $"{name} {rank}" : name, true);
+        await _addSkill.Clear();
+        await _addSkillRank.Clear();
+    }
+
+    private bool SearchFunc(string arg1, string arg2) => arg1.Contains(arg2, StringComparison.InvariantCultureIgnoreCase);
+    
+    
+    private async Task AddSkills()
+    {
+        var dialog = await DialogService.ShowAsync<SkillDialog>("Automatically Add Skills");
+        var result = await dialog.Result;
+        if (result.Canceled) return;
+        if (result.Data is string[] skills)
+        {
+            foreach (var item in skills)
+            {
+                if (item.StartsWith("Weapon Specialization") && item.Contains("any", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    foreach (var skill in LandingService.MwFifthGameState.Skills.Where(s=>s.Name.StartsWith("Weapon Specialization")))
+                        SetSkill(skill.Name, true);
+                    continue;
+                }
+                
+                SetSkill(item, true);
+            }
+        }
+    }
+}

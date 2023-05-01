@@ -22,6 +22,11 @@ public class MwFifthGameContext
     public IMongoCollection<Character> Characters { get; }
     public IMongoCollection<CharacterRevision> CharacterRevisions { get; }
 
+    public void ClearGameState()
+    {
+        _cache.Remove(GameStateCacheName);
+    }
+    
     public async ValueTask<GameState> GetGameState()
     {
         if (_cache.TryGetValue(GameStateCacheName, out GameState? gameState))

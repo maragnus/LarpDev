@@ -91,6 +91,10 @@ public interface IAdminService
     [ApiContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")]
     Task<IFileInfo> Export();
 
+    [ApiGet("data/export/occupations"), ApiAuthenticated(AccountRoles.AccountAdmin)]
+    [ApiContentType("application/json")]
+    Task<IFileInfo> ExportOccupations();
+    
     [ApiGet("letters/events/{eventId}/export"), ApiAuthenticated(AccountRoles.AccountAdmin)]
     [ApiContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")]
     Task<IFileInfo> ExportLetters(string eventId);
@@ -173,6 +177,9 @@ public interface IAdminService
 
     [ApiPost("data/reseed"), ApiAuthenticated(AccountRoles.AccountAdmin)]
     Task ReseedData();
+
+    [ApiPost("mw5e/occupations"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    Task SaveOccupations(Occupation[] occupations);
 }
 
 public class Dashboard

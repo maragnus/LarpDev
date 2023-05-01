@@ -3,7 +3,7 @@
       "windowsAuthentication": false,
       "anonymousAuthentication": true,
       "iisExpress": {
-        "applicationUrl": "http://localhost:2835",
+        "applicationUrl": "http://localhost:2835/",
         "sslPort": 44381
       }
     },
@@ -14,6 +14,7 @@
         "launchBrowser": true,
         "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
         "applicationUrl": "http://localhost:5287",
+        "launchUrl": "http://localhost:5287/admin/mw5e/occupations",
         "environmentVariables": {
           "ASPNETCORE_ENVIRONMENT": "Development"
         }

@@ -1,0 +1,43 @@
+﻿@using System.Text.RegularExpressions
+
+<MudDialog T="string?">
+    <DialogContent>
+        <MudTextField T="string?" Label="Skill List (comma-delimited)" @ref="_skills" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Default" Variant="Variant.Filled" OnClick="Add" StartIcon="@Icons.Material.Filled.AddBox">Add</MudButton>
+        <MudButton Color="Color.Default" Variant="Variant.Filled" OnClick="Close">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = default!;
+
+    private MudTextField<string?> _skills;
+
+    private void Close() => MudDialog.Cancel();
+
+    private void Add()
+    {
+        var value = _skills.Value;
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            MudDialog.Cancel();
+            return;
+        }
+
+        var items = Regex.Matches(value.ReplaceLineEndings(" "), @"(.*?( \([^)]*\)?)?)(,|$)");
+
+        var skills = items
+            .Select(x => x.Groups[1].Value.Trim())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToArray();
+        
+        MudDialog.Close(skills);
+    }
+
+}
+
+}

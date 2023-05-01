@@ -18,14 +18,14 @@ public class LarpDataSeeder
     private const string Mw5eResourceNamePrefix = LarpResourceNamePrefix + "Mw5e";
     private readonly ISystemClock _clock;
 
-    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    public static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         Converters = { new JsonStringEnumConverter() }
     };
 
-    private readonly JsonDocumentOptions _jsonDocumentOptions = new()
+    public static readonly JsonDocumentOptions JsonDocumentOptions = new()
     {
         AllowTrailingCommas = true,
         CommentHandling = JsonCommentHandling.Skip
@@ -122,7 +122,7 @@ public class LarpDataSeeder
         await using var jsonFile =
             Assembly.GetExecutingAssembly().GetManifestResourceStream(fileName + ".json")
             ?? throw new ApplicationException($"Embedded resource \"{fileName}.json\" could not be accessed");
-        return await JsonDocument.ParseAsync(jsonFile, _jsonDocumentOptions);
+        return await JsonDocument.ParseAsync(jsonFile, JsonDocumentOptions);
     }
 
     private async Task ImportData<TEntity>(GameState gameState, Expression<Func<TEntity[]>> expression)
@@ -147,7 +147,7 @@ public class LarpDataSeeder
             TEntity e;
             try
             {
-                e = JsonSerializer.Deserialize<TEntity>(j, _jsonSerializerOptions)!;
+                e = JsonSerializer.Deserialize<TEntity>(j, JsonSerializerOptions)!;
             }
             catch (Exception ex)
             {

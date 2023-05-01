@@ -1,7 +1,7 @@
 [
   {
-    "type": "Basic",
     "name": "Adventurer",
+    "type": "Basic",
     "skills": [
       "Agility",
       "Scavenging",
@@ -10,9 +10,8 @@
     ]
   },
   {
-    "type": "Basic",
     "name": "Apprentice",
-    "duty": "assist master",
+    "type": "Basic",
     "skills": [
       "Agility",
       "Apprenticeship",
@@ -38,21 +37,22 @@
           "Production (1 Time)"
         ]
       }
-    ]
+    ],
+    "duty": "assist master"
   },
   {
-    "type": "Basic",
     "name": "Baker",
+    "type": "Basic",
     "skills": [
       "Cooking 4",
       "Income 10",
-      "News & Rumors",
+      "News \u0026 Rumors",
       "Weapon Use (Flail)"
     ]
   },
   {
-    "type": "Basic",
     "name": "Barber Surgeon",
+    "type": "Basic",
     "skills": [
       "Apothecary 2",
       "Cure Affliction",
@@ -60,22 +60,22 @@
     ]
   },
   {
-    "type": "Basic",
     "name": "Bard/Minstrel/Thespian",
     "specialties": [
       "Bard",
       "Minstrel",
       "Thespian"
     ],
+    "type": "Basic",
     "skills": [
       "Bardic Voice 4",
       "Entertainer",
-      "News & Rumors"
+      "News \u0026 Rumors"
     ]
   },
   {
-    "type": "Basic",
     "name": "Beggar",
+    "type": "Basic",
     "skills": [
       "Agility",
       "Begging",
@@ -94,24 +94,24 @@
     "livery": "rags and patches"
   },
   {
-    "type": "Basic",
     "name": "Blacksmith",
-    "livery": "leather apron",
+    "type": "Basic",
     "skills": [
       "Livery",
       "Metalworking 4",
       "Weapon Specialization (One Handed Blunt)",
       "Weapon Specialization (Two Handed Blunt)"
-    ]
+    ],
+    "livery": "leather apron"
   },
   {
-    "type": "Basic",
     "name": "Boatman",
+    "type": "Basic",
     "skills": [
       "Buy/Sell 10",
       "Income 5",
       "Production (1 Water)",
-      "News & Rumors",
+      "News \u0026 Rumors",
       "Work Rhythm"
     ],
     "choices": [
@@ -125,23 +125,23 @@
     ]
   },
   {
-    "type": "Basic",
     "name": "Butcher",
-    "livery": "bloodstained apron",
+    "type": "Basic",
     "skills": [
       "Butcher",
       "Cooking 2",
       "Livery",
       "Toughness"
-    ]
+    ],
+    "livery": "bloodstained apron"
   },
   {
-    "type": "Basic",
     "name": "Clerk/Forger",
     "specialties": [
       "Clerk",
       "Forger"
     ],
+    "type": "Basic",
     "skills": [
       "Copyist",
       "Production (2 Parchment)",
@@ -150,51 +150,51 @@
     ]
   },
   {
-    "type": "Basic",
     "name": "Courier",
+    "type": "Basic",
     "skills": [
       "Agility",
       "Income 5",
-      "News & Rumors",
+      "News \u0026 Rumors",
       "Pathfinding",
       "Scribe 2"
     ]
   },
   {
-    "type": "Basic",
     "name": "Dancer/Juggler/Acrobat",
     "specialties": [
       "Dancer",
       "Juggler",
       "Acrobat"
     ],
-    "livery": "performance costume",
+    "type": "Basic",
     "skills": [
       "Agility",
       "Entertainer",
       "Livery",
-      "News & Rumors",
+      "News \u0026 Rumors",
       "Weapon Specialization (Thrown Weapon)"
-    ]
+    ],
+    "livery": "performance costume"
   },
   {
-    "type": "Basic",
     "name": "Folk Healer",
+    "type": "Basic",
     "skills": [
       "Apothecary 2",
       "Cure Affliction",
       "Detect Health",
-      "News & Rumors"
+      "News \u0026 Rumors"
     ]
   },
   {
-    "type": "Basic",
     "name": "Fortune Teller",
+    "type": "Basic",
     "skills": [
       "Fortune Telling",
       "Income 10",
       "Mage Lore",
-      "News & Rumors",
+      "News \u0026 Rumors",
       "Serene Contemplation"
     ],
     "choices": [
@@ -208,8 +208,8 @@
     ]
   },
   {
-    "type": "Basic",
     "name": "Gentlefolk",
+    "type": "Basic",
     "skills": [
       "Bestow Favor",
       "Income 10"
@@ -231,8 +231,8 @@
     ]
   },
   {
-    "type": "Basic",
     "name": "Gravedigger",
+    "type": "Basic",
     "skills": [
       "Engineering",
       "Income 5",
@@ -244,8 +244,8 @@
     ]
   },
   {
-    "type": "Basic",
     "name": "Herbalist",
+    "type": "Basic",
     "skills": [
       "Apothecary 4",
       "Cure Affliction",
@@ -254,8 +254,8 @@
     ]
   },
   {
-    "type": "Basic",
     "name": "Herder",
+    "type": "Basic",
     "skills": [
       "Pathfinding",
       "Production (2 Cloth)",
@@ -265,8 +265,8 @@
     ]
   },
   {
-    "type": "Basic",
     "name": "Hermit",
+    "type": "Basic",
     "skills": [
       "Apothecary 2",
       "Cure Affliction",
@@ -275,8 +275,8 @@
     ]
   },
   {
-    "type": "Basic",
     "name": "Hunter",
+    "type": "Basic",
     "skills": [
       "Butcher",
       "Pathfinding",
@@ -288,9 +288,8 @@
     ]
   },
   {
-    "type": "Basic",
     "name": "Laborer",
-    "duty": "Manual Labor",
+    "type": "Basic",
     "skills": [
       "Duty 2",
       "Engineering",
@@ -307,18 +306,18 @@
           "Weapon Use (Two Handed Blunt)"
         ]
       }
-    ]
+    ],
+    "duty": "Manual Labor"
   },
   {
-    "type": "Basic",
     "name": "Lackey",
-    "livery": "your master's colors",
+    "type": "Basic",
     "skills": [
       "Buy/Sell 10",
       "Commerce",
       "Livery",
       "Quick Learner",
-      "News & Rumors"
+      "News \u0026 Rumors"
     ],
     "choices": [
       {
@@ -328,11 +327,12 @@
           "Unarmed Combat"
         ]
       }
-    ]
+    ],
+    "livery": "your master\u0027s colors"
   },
   {
-    "type": "Basic",
     "name": "Lay Cleric",
+    "type": "Basic",
     "skills": [
       "Divine Lore",
       "Divine Spells",
@@ -355,8 +355,8 @@
     ]
   },
   {
-    "type": "Basic",
     "name": "Locksmith",
+    "type": "Basic",
     "skills": [
       "Engineering",
       "Income 5",
@@ -366,32 +366,31 @@
     ]
   },
   {
-    "type": "Basic",
     "name": "Novice Monk",
-    "livery": "robe or habit",
+    "type": "Basic",
     "skills": [
       "Divine Lore",
       "Livery",
       "Research",
       "Scribe 2",
       "Serene Contemplation"
-    ]
+    ],
+    "livery": "robe or habit"
   },
   {
-    "type": "Basic",
     "name": "Peddler",
+    "type": "Basic",
     "skills": [
       "Buy/Sell (50)",
       "Commerce",
       "Income 10",
-      "News & Rumors",
+      "News \u0026 Rumors",
       "Pathfinding"
     ]
   },
   {
-    "type": "Basic",
     "name": "Penitent",
-    "livery": "icons of faith",
+    "type": "Basic",
     "skills": [
       "Battle Rage",
       "Blessed",
@@ -399,12 +398,12 @@
       "Livery",
       "Weapon Specialization (Flail)",
       "Weapon Use (Flail)"
-    ]
+    ],
+    "livery": "icons of faith"
   },
   {
-    "type": "Basic",
     "name": "Ragpicker",
-    "duty": "Clean up trash",
+    "type": "Basic",
     "skills": [
       "Duty 2",
       "Scavenging",
@@ -428,12 +427,12 @@
           "Weapon Use (Polearm)"
         ]
       }
-    ]
+    ],
+    "duty": "Clean up trash"
   },
   {
-    "type": "Basic",
     "name": "Ratcatcher",
-    "livery": "rats or rat symbols",
+    "type": "Basic",
     "skills": [
       "Engineering",
       "Livery",
@@ -441,11 +440,12 @@
       "Poisoner 2",
       "Set Trap",
       "Slayer (Vermin)"
-    ]
+    ],
+    "livery": "rats or rat symbols"
   },
   {
-    "type": "Basic",
     "name": "Squire",
+    "type": "Basic",
     "skills": [
       "Income 10",
       "Wear Armor 4"
@@ -461,12 +461,12 @@
     ]
   },
   {
-    "type": "Basic",
     "name": "Street Vendor",
+    "type": "Basic",
     "skills": [
       "Buy/Sell 10",
       "Cooking 2",
-      "News & Rumors",
+      "News \u0026 Rumors",
       "Scavenging"
     ],
     "choices": [
@@ -481,63 +481,61 @@
     ]
   },
   {
-    "type": "Basic",
     "name": "Tailor/Leatherworker",
     "specialties": [
       "Tailor",
       "Leatherworker"
     ],
-    "duty": "mending and patching",
+    "type": "Basic",
     "skills": [
       "Duty 1",
       "Medicine",
       "Sewing 4"
-    ]
+    ],
+    "duty": "mending and patching"
   },
   {
-    "type": "Basic",
     "name": "Tavern Keeper",
-    "duty": "minding the tavern",
+    "type": "Basic",
     "skills": [
       "Cooking 2",
       "Drinks on the House",
       "Duty 1",
       "Income 10",
       "Information Gathering",
-      "News & Rumors",
+      "News \u0026 Rumors",
       "Sell Drinks"
-    ]
+    ],
+    "duty": "minding the tavern"
   },
   {
-    "type": "Basic",
     "name": "Tinker",
+    "type": "Basic",
     "skills": [
       "Armor Repair",
       "Buy/Sell (30)",
       "Commerce",
-      "News & Rumors",
+      "News \u0026 Rumors",
       "Scavenging",
       "Tinkering"
     ]
   },
   {
-    "type": "Basic",
     "name": "Town Crier",
+    "type": "Basic",
     "skills": [
       "Bardic Voice 2",
       "Duty 1",
       "Income 10",
       "Information Gathering",
-      "News & Rumors",
+      "News \u0026 Rumors",
       "Unarmed Combat"
     ],
     "duty": "shout proclamations you have been hired to or seditious blather"
   },
   {
-    "type": "Basic",
     "name": "Town Guard",
-    "duty": "inspection by a Corporal or Captain of the Guard",
-    "livery": "based on local Chapter",
+    "type": "Basic",
     "skills": [
       "Duty 1",
       "Income 5",
@@ -546,12 +544,13 @@
       "Weapon Specialization (any one Weapon Type)",
       "Weapon Use (Large Shield)",
       "Wear Armor 3"
-    ]
+    ],
+    "duty": "inspection by a Corporal or Captain of the Guard",
+    "livery": "based on local Chapter"
   },
   {
-    "type": "Basic",
     "name": "Woodsfolk",
-    "duty": "gathering firewood",
+    "type": "Basic",
     "skills": [
       "Duty 1",
       "Weapon Specialization (One Handed Axe)",
@@ -559,11 +558,12 @@
       "Wear Armor 1",
       "Woodworking 4",
       "Woodwise"
-    ]
+    ],
+    "duty": "gathering firewood"
   },
   {
-    "type": "Youth",
     "name": "Adventurer (Youth)",
+    "type": "Youth",
     "skills": [
       "Agility",
       "Scavenging",
@@ -572,9 +572,8 @@
     ]
   },
   {
-    "type": "Youth",
     "name": "Apprentice (Youth)",
-    "duty": "assist master",
+    "type": "Youth",
     "skills": [
       "Agility",
       "Apprenticeship",
@@ -600,26 +599,26 @@
           "Production (1 Time)"
         ]
       }
-    ]
+    ],
+    "duty": "assist master"
   },
   {
-    "type": "Youth",
     "name": "Bard/Minstrel/Thespian (Youth)",
     "specialties": [
       "Bard",
       "Minstrel",
       "Thespian"
     ],
+    "type": "Youth",
     "skills": [
       "Bardic Voice 4",
       "Entertainer",
-      "News & Rumors"
+      "News \u0026 Rumors"
     ]
   },
   {
-    "type": "Youth",
     "name": "Beggar (Youth)",
-    "livery": "rags and patches",
+    "type": "Youth",
     "skills": [
       "Agility",
       "Begging",
@@ -634,58 +633,58 @@
           "Weapon Use (Staff)"
         ]
       }
-    ]
+    ],
+    "livery": "rags and patches"
   },
   {
-    "type": "Youth",
     "name": "Dancer/Juggler/Acrobat (Youth)",
     "specialties": [
       "Dancer",
       "Juggler",
       "Acrobat"
     ],
-    "livery": "performance costume",
+    "type": "Youth",
     "skills": [
       "Agility",
       "Entertainer",
       "Livery",
-      "News & Rumors",
+      "News \u0026 Rumors",
       "Weapon Specialization (Thrown Weapon)"
-    ]
+    ],
+    "livery": "performance costume"
   },
   {
-    "type": "Youth",
     "name": "Guttersnipe (Youth)",
-    "duty": "assist master",
+    "type": "Youth",
     "skills": [
       "Agility",
       "Duty 1",
       "Evade Trap",
       "Production (1 Death)",
       "Scavenging"
-    ]
+    ],
+    "duty": "assist master"
   },
   {
-    "type": "Youth",
     "name": "Initiate (Youth)",
-    "livery": "robes or other religious symbols",
+    "type": "Youth",
     "skills": [
       "Divine Lore",
       "Livery",
       "Quick Learner",
       "Serene Contemplation"
-    ]
+    ],
+    "livery": "robes or other religious symbols"
   },
   {
-    "type": "Youth",
     "name": "Lackey (Youth)",
-    "livery": "your master's colors",
+    "type": "Youth",
     "skills": [
       "Buy/Sell 10",
       "Commerce",
       "Livery",
       "Quick Learner",
-      "News & Rumors"
+      "News \u0026 Rumors"
     ],
     "choices": [
       {
@@ -695,23 +694,24 @@
           "Unarmed Combat"
         ]
       }
-    ]
+    ],
+    "livery": "your master\u0027s colors"
   },
   {
-    "type": "Youth",
     "name": "Page (Youth)",
-    "livery": "your patron’s colors",
+    "type": "Youth",
     "skills": [
       "Agility",
       "Income 5",
       "Livery",
       "Quick Learner",
       "Wear Armor 2"
-    ]
+    ],
+    "livery": "your patron\u2019s colors"
   },
   {
-    "type": "Youth",
     "name": "Student (Youth)",
+    "type": "Youth",
     "skills": [
       "Copyist",
       "Production (1 Parchment)",
@@ -720,20 +720,20 @@
     ]
   },
   {
-    "type": "Youth",
     "name": "Town Guard Recruit (Youth)",
-    "duty": "inspection by Corporal or Captain of the Guard",
-    "livery": "green and black Town Guard tabard",
+    "type": "Youth",
     "skills": [
       "Duty 1",
       "Income 5",
       "Livery",
       "Wear Armor 2"
-    ]
+    ],
+    "duty": "inspection by Corporal or Captain of the Guard",
+    "livery": "green and black Town Guard tabard"
   },
   {
-    "type": "Youth",
     "name": "Ward (Youth)",
+    "type": "Youth",
     "skills": [
       "Bestow Favor",
       "Income 10",
@@ -742,13 +742,12 @@
     ]
   },
   {
-    "type": "Advanced",
     "name": "Absolver/Flagellant",
     "specialties": [
       "Absolver",
       "Flagellant"
     ],
-    "livery": "icons of faith",
+    "type": "Advanced",
     "skills": [
       "Absolution",
       "Battle Rage",
@@ -760,12 +759,12 @@
       "Toughness",
       "Weapon Specialization (Flail)",
       "Weapon Use (Flail)"
-    ]
+    ],
+    "livery": "icons of faith"
   },
   {
-    "type": "Advanced",
     "name": "Almoner",
-    "duty": "distribute money to the needy",
+    "type": "Advanced",
     "skills": [
       "Begging",
       "Blessed",
@@ -774,10 +773,10 @@
       "Divine Lore",
       "Duty 1",
       "Income 10"
-    ]
+    ],
+    "duty": "distribute money to the needy"
   },
   {
-    "type": "Advanced",
     "name": "Artist (Author/Gilder/Painter/Sculptor)",
     "specialties": [
       "Artist",
@@ -786,6 +785,7 @@
       "Painter",
       "Sculptor"
     ],
+    "type": "Advanced",
     "skills": [
       "Artistry",
       "Income 10",
@@ -814,8 +814,8 @@
     ]
   },
   {
-    "type": "Advanced",
     "name": "Astrologer",
+    "type": "Advanced",
     "skills": [
       "Fortune Telling",
       "Divine Lore",
@@ -828,9 +828,8 @@
     ]
   },
   {
-    "type": "Advanced",
     "name": "Beekeeper",
-    "livery": "beekeeping garb with mask",
+    "type": "Advanced",
     "skills": [
       "Apothecary 2",
       "Income 10",
@@ -842,14 +841,12 @@
       "Swarm Magic",
       "Wear Armor 1",
       "Woodwise"
-    ]
+    ],
+    "livery": "beekeeping garb with mask"
   },
   {
-    "type": "Advanced",
     "name": "Corporal of the Guard",
-    "duty": "inspecting the Guard",
-    "livery": "based on local Chapter",
-    "leadership": "Town Guard",
+    "type": "Advanced",
     "skills": [
       "Armstraining 2",
       "Duty 2",
@@ -860,13 +857,16 @@
       "Weapon Specialization (any one Weapon Type)",
       "Weapon Use (Large Shield)",
       "Wear Armor 4"
-    ]
+    ],
+    "duty": "inspecting the Guard",
+    "livery": "based on local Chapter",
+    "leadership": "Town Guard"
   },
   {
-    "type": "Advanced",
     "name": "Crofter",
+    "type": "Advanced",
     "skills": [
-      "News & Rumors",
+      "News \u0026 Rumors",
       "Production (2 Cloth)",
       "Production (4 Food)",
       "Production (4 Wood)",
@@ -876,22 +876,22 @@
     ]
   },
   {
-    "type": "Advanced",
     "name": "Demagogue",
-    "leadership": "those who have joined your cause",
+    "type": "Advanced",
     "skills": [
       "Armstraining 4",
       "Bardic Voice 4",
       "Income 10",
       "Information Gathering",
       "Leadership",
-      "News & Rumors",
+      "News \u0026 Rumors",
       "Unarmed Combat"
-    ]
+    ],
+    "leadership": "those who have joined your cause"
   },
   {
-    "type": "Advanced",
     "name": "Dragon Slayer",
+    "type": "Advanced",
     "skills": [
       "Battle Rage",
       "Livery",
@@ -906,9 +906,8 @@
     "livery": "Fantastical costume, hair, and tattoos"
   },
   {
-    "type": "Advanced",
     "name": "Executioner",
-    "livery": "black hood",
+    "type": "Advanced",
     "skills": [
       "Entertainer",
       "Execution",
@@ -920,12 +919,12 @@
       "Weapon Specialization (One Handed Sword)",
       "Weapon Specialization (Two Handed Axe)",
       "Weapon Specialization (Two Handed Sword)"
-    ]
+    ],
+    "livery": "black hood"
   },
   {
-    "type": "Advanced",
     "name": "Famulus",
-    "livery": "your master's symbol",
+    "type": "Advanced",
     "skills": [
       "Armstraining 2",
       "Iron Will",
@@ -934,21 +933,22 @@
       "Slayer (Daemons)",
       "Weapon Specialization (any one Weapon Type)",
       "Warcaster"
-    ]
+    ],
+    "livery": "your master\u0027s symbol"
   },
   {
-    "type": "Advanced",
     "name": "Fence/Pawnbroker",
     "specialties": [
       "Fence",
       "Pawnbroker"
     ],
+    "type": "Advanced",
     "skills": [
       "Buy/Sell (50)",
       "Commerce",
       "Fence",
       "Income 10",
-      "News & Rumors",
+      "News \u0026 Rumors",
       "Retainers 1"
     ],
     "choices": [
@@ -962,13 +962,13 @@
     ]
   },
   {
-    "type": "Advanced",
     "name": "Forester/Ranger/Gamekeeper",
     "specialties": [
       "Forester",
       "Ranger",
       "Gamekeeper"
     ],
+    "type": "Advanced",
     "skills": [
       "Pathfinding",
       "Production (8 Wood)",
@@ -980,8 +980,8 @@
     ]
   },
   {
-    "type": "Advanced",
     "name": "Freeholder",
+    "type": "Advanced",
     "skills": [
       "Butcher",
       "Patronage 1",
@@ -994,10 +994,8 @@
     ]
   },
   {
-    "type": "Advanced",
     "name": "Gaoler",
-    "duty": "inspecting prisoners and upkeeping cells",
-    "livery": "Town Guard",
+    "type": "Advanced",
     "skills": [
       "Duty 1",
       "Income 10",
@@ -1008,12 +1006,13 @@
       "Weapon Specialization (Two Handed Blunt)",
       "Warcaster",
       "Wear Armor 3"
-    ]
+    ],
+    "duty": "inspecting prisoners and upkeeping cells",
+    "livery": "Town Guard"
   },
   {
-    "type": "Advanced",
     "name": "Herald",
-    "livery": "Herald’s garb",
+    "type": "Advanced",
     "skills": [
       "Armstraining 2",
       "Bardic Voice 4",
@@ -1022,11 +1021,12 @@
       "Livery",
       "Occupational Spells",
       "Scribe 2"
-    ]
+    ],
+    "livery": "Herald\u2019s garb"
   },
   {
-    "type": "Advanced",
     "name": "Juror",
+    "type": "Advanced",
     "skills": [
       "Bardic Voice 2",
       "Research",
@@ -1043,17 +1043,15 @@
           "Engineering",
           "Iron Will",
           "Mage Lore",
-          "News & Rumors",
+          "News \u0026 Rumors",
           "Woodwise"
         ]
       }
     ]
   },
   {
-    "type": "Advanced",
     "name": "Knight Errant",
-    "livery": "Your heraldry",
-    "leadership": "any non-Knight sworn to aid you",
+    "type": "Advanced",
     "skills": [
       "Armstraining 4",
       "Income 10",
@@ -1061,11 +1059,13 @@
       "Livery",
       "Retainers 1",
       "Wear Armor 6"
-    ]
+    ],
+    "livery": "Your heraldry",
+    "leadership": "any non-Knight sworn to aid you"
   },
   {
-    "type": "Advanced",
     "name": "Librarian",
+    "type": "Advanced",
     "skills": [
       "Copyist",
       "Research x2",
@@ -1074,8 +1074,8 @@
     ]
   },
   {
-    "type": "Advanced",
     "name": "Litigant",
+    "type": "Advanced",
     "skills": [
       "Bardic Voice 2",
       "Battle Rage",
@@ -1085,13 +1085,13 @@
     ]
   },
   {
-    "type": "Advanced",
     "name": "Master Thespian",
+    "type": "Advanced",
     "skills": [
       "Bardic Voice 6",
       "Master Entertainer",
       "Income 10",
-      "News & Rumors",
+      "News \u0026 Rumors",
       "Scribe 2"
     ],
     "choices": [
@@ -1105,24 +1105,24 @@
     ]
   },
   {
-    "type": "Advanced",
     "name": "Merchant",
+    "type": "Advanced",
     "skills": [
       "Buy/Sell (100)",
       "Commerce",
       "Income 20",
-      "News & Rumors",
+      "News \u0026 Rumors",
       "Patronage 1",
       "Retainers 2",
       "any one Craft 2 skill"
     ]
   },
   {
-    "type": "Advanced",
     "name": "Miller",
+    "type": "Advanced",
     "skills": [
       "Income 20",
-      "News & Rumors",
+      "News \u0026 Rumors",
       "Production (8 Food)",
       "Woodworking 4"
     ],
@@ -1138,8 +1138,8 @@
     ]
   },
   {
-    "type": "Advanced",
     "name": "Miner",
+    "type": "Advanced",
     "skills": [
       "Commerce",
       "Engineering",
@@ -1152,8 +1152,8 @@
     ]
   },
   {
-    "type": "Advanced",
     "name": "Philosopher",
+    "type": "Advanced",
     "skills": [
       "Loremaster",
       "Production (2 Parchment)",
@@ -1163,9 +1163,8 @@
     ]
   },
   {
-    "type": "Advanced",
     "name": "Physician",
-    "livery": "doctor’s robes",
+    "type": "Advanced",
     "skills": [
       "Apothecary 6",
       "Cure Affliction",
@@ -1174,15 +1173,16 @@
       "Occupational Spells",
       "Research",
       "Serene Contemplation"
-    ]
+    ],
+    "livery": "doctor\u2019s robes"
   },
   {
-    "type": "Advanced",
     "name": "Pit Fighter/Judicial Champion",
     "specialties": [
       "Pit Fighter",
       "Judicial Champion"
     ],
+    "type": "Advanced",
     "skills": [
       "Armstraining 4",
       "Battle Rage",
@@ -1193,8 +1193,8 @@
     ]
   },
   {
-    "type": "Advanced",
     "name": "Poacher",
+    "type": "Advanced",
     "skills": [
       "Butcher",
       "Pathfinding",
@@ -1207,9 +1207,8 @@
     ]
   },
   {
-    "type": "Advanced",
     "name": "Quarrier",
-    "duty": "Manual Labor",
+    "type": "Advanced",
     "skills": [
       "Duty 1",
       "Engineering",
@@ -1218,11 +1217,12 @@
       "Weapon Use (Two Handed Blunt)",
       "Wear Armor 1",
       "Work Rhythm"
-    ]
+    ],
+    "duty": "Manual Labor"
   },
   {
-    "type": "Advanced",
     "name": "Ruffian",
+    "type": "Advanced",
     "skills": [
       "Brawler",
       "Scavenging",
@@ -1233,8 +1233,8 @@
     ]
   },
   {
-    "type": "Advanced",
     "name": "Sacristan",
+    "type": "Advanced",
     "skills": [
       "Blessed",
       "Divine Lore",
@@ -1247,9 +1247,8 @@
     ]
   },
   {
-    "type": "Advanced",
     "name": "Sawbones",
-    "livery": "Apron and gloves",
+    "type": "Advanced",
     "skills": [
       "Apothecary 4",
       "Cure Affliction",
@@ -1257,28 +1256,29 @@
       "Medicine",
       "Sewing 2",
       "Weapon Specialization (Dagger)"
-    ]
+    ],
+    "livery": "Apron and gloves"
   },
   {
-    "type": "Advanced",
     "name": "Sergeant at Arms/Bodyguard",
     "specialties": [
       "Sergeant at Arms",
       "Bodyguard"
     ],
-    "livery": "patron’s colors",
-    "leadership": "retainers and followers of your patron",
+    "type": "Advanced",
     "skills": [
       "Armstraining 6",
       "Income 10",
       "Leadership",
       "Livery",
       "Wear Armor 4"
-    ]
+    ],
+    "livery": "patron\u2019s colors",
+    "leadership": "retainers and followers of your patron"
   },
   {
-    "type": "Advanced",
     "name": "Sharp",
+    "type": "Advanced",
     "skills": [
       "Bardic Voice 2",
       "Commerce",
@@ -1286,26 +1286,26 @@
       "Fortune Telling",
       "Information Gathering",
       "Iron Will",
-      "News & Rumors",
+      "News \u0026 Rumors",
       "Room for More",
       "Unarmed Combat."
     ]
   },
   {
-    "type": "Advanced",
     "name": "Steward",
-    "leadership": "retainers and followers of your patron",
+    "type": "Advanced",
     "skills": [
       "Buy/Sell (50)",
       "Cooking 6",
       "Commerce",
       "Leadership",
       "Scribe 2"
-    ]
+    ],
+    "leadership": "retainers and followers of your patron"
   },
   {
-    "type": "Advanced",
     "name": "Theologian",
+    "type": "Advanced",
     "skills": [
       "Bardic Voice 2",
       "Divine Lore",
@@ -1316,10 +1316,8 @@
     ]
   },
   {
-    "type": "Advanced",
     "name": "Varlet",
-    "duty": "fulfilling the requests of your master",
-    "leadership": "your master",
+    "type": "Advanced",
     "skills": [
       "Duty 2",
       "Income 5",
@@ -1327,11 +1325,13 @@
       "Leadership",
       "Unarmed Combat",
       "Craft skill 2"
-    ]
+    ],
+    "duty": "fulfilling the requests of your master",
+    "leadership": "your master"
   },
   {
-    "type": "Plot",
     "name": "Cantor",
+    "type": "Plot",
     "skills": [
       "Absolution",
       "Bardic Voice 4",
@@ -1339,17 +1339,14 @@
       "Divine Spells",
       "Entertainer",
       "Grant Karma",
-      "News & Rumors",
+      "News \u0026 Rumors",
       "Religious Ceremony",
       "Serene Contemplation"
     ]
   },
   {
-    "type": "Plot",
     "name": "Captain of the Guard",
-    "duty": "reviewing the guard",
-    "livery": "based on local Chapter",
-    "leadership": "Town Guard",
+    "type": "Plot",
     "skills": [
       "Duty 1",
       "Income 15",
@@ -1361,26 +1358,27 @@
       "Weapon Specialization (any one Weapon Type)",
       "Weapon Use (Large Shield)",
       "Wear Armor 5"
-    ]
+    ],
+    "duty": "reviewing the guard",
+    "livery": "based on local Chapter",
+    "leadership": "Town Guard"
   },
   {
-    "type": "Plot",
     "name": "Friar",
+    "type": "Plot",
     "skills": [
       "Absolution",
       "Divine Lore",
       "Divine Spells",
       "Grant Karma",
-      "News & Rumors",
+      "News \u0026 Rumors",
       "Pathfinding",
       "Religious Ceremony"
     ]
   },
   {
-    "type": "Plot",
     "name": "Inquisitor",
-    "livery": "icons of faith",
-    "leadership": "anyone under your command in battle",
+    "type": "Plot",
     "skills": [
       "Battlemage",
       "Divine Lore",
@@ -1399,12 +1397,13 @@
           "Research"
         ]
       }
-    ]
+    ],
+    "livery": "icons of faith",
+    "leadership": "anyone under your command in battle"
   },
   {
-    "type": "Plot",
     "name": "Knight Paladin",
-    "livery": "your heraldry",
+    "type": "Plot",
     "skills": [
       "Absolution",
       "Battlemage",
@@ -1416,12 +1415,12 @@
       "Livery",
       "Religious Ceremony",
       "Retainers 1, Wear Armor 10"
-    ]
+    ],
+    "livery": "your heraldry"
   },
   {
-    "type": "Plot",
     "name": "Knight Penitent",
-    "livery": "your heraldry",
+    "type": "Plot",
     "skills": [
       "Battlemage",
       "Blessed",
@@ -1431,13 +1430,12 @@
       "Livery",
       "Retainers 1",
       "Wear Armor 8"
-    ]
+    ],
+    "livery": "your heraldry"
   },
   {
-    "type": "Plot",
     "name": "Knight of the Realm",
-    "livery": "Your heraldry",
-    "leadership": "anyone wearing your colors",
+    "type": "Plot",
     "skills": [
       "Armstraining 4",
       "Income (50)",
@@ -1446,13 +1444,13 @@
       "Patronage 3",
       "Retainers 6",
       "Wear Armor 8"
-    ]
+    ],
+    "livery": "Your heraldry",
+    "leadership": "anyone wearing your colors"
   },
   {
-    "type": "Plot",
     "name": "Knight Templar",
-    "livery": "your heraldry",
-    "leadership": "any non-Knight sworn to aid you",
+    "type": "Plot",
     "skills": [
       "Battlemage",
       "Leadership",
@@ -1463,26 +1461,28 @@
       "Retainers 1",
       "Scribe 4",
       "Wear Armor 6"
-    ]
+    ],
+    "livery": "your heraldry",
+    "leadership": "any non-Knight sworn to aid you"
   },
   {
-    "type": "Plot",
     "name": "Magistrate",
-    "duty": "holding court",
+    "type": "Plot",
     "skills": [
       "Bardic Voice 2",
       "Commerce",
       "Duty 1",
       "Income 20",
-      "News & Rumors",
+      "News \u0026 Rumors",
       "Research",
       "Retainers 3",
       "Scribe 4"
-    ]
+    ],
+    "duty": "holding court"
   },
   {
-    "type": "Plot",
     "name": "Ordained Priest",
+    "type": "Plot",
     "skills": [
       "Absolution",
       "Battlemage",
@@ -1507,26 +1507,25 @@
     ]
   },
   {
-    "type": "Plot",
     "name": "Tavern Master",
-    "duty": "minding the tavern",
+    "type": "Plot",
     "skills": [
       "Buy/Sell 20",
       "Cooking 2",
       "Drinks on the House",
       "Duty 2",
       "Income 10",
-      "News & Rumors",
+      "News \u0026 Rumors",
       "Patronage",
       "Retainers 1",
       "Sell Drinks",
       "Tavern Share"
-    ]
+    ],
+    "duty": "minding the tavern"
   },
   {
-    "type": "Plot",
     "name": "Witch Hunter",
-    "leadership": "anyone under your command in battle",
+    "type": "Plot",
     "skills": [
       "Armstraining 2",
       "Battlemage",
@@ -1545,14 +1544,12 @@
           "Research"
         ]
       }
-    ]
+    ],
+    "leadership": "anyone under your command in battle"
   },
   {
-    "type": "Basic",
     "name": "Drengr",
-    "chapters": [
-      "burgundar"
-    ],
+    "type": "Basic",
     "skills": [
       "Iron Will",
       "Unarmed Combat",
@@ -1566,26 +1563,29 @@
           "Weapon Specialization (One Handed Sword)"
         ]
       }
+    ],
+    "chapters": [
+      "burgundar"
     ]
   },
   {
-    "type": "Enhancement",
     "name": "Alchemist",
+    "type": "Enhancement",
     "skills": [
-      "Production (Chaos or Time)"
+      "Production (1 Chaos or 1 Time)"
     ]
   },
   {
-    "type": "Enhancement",
     "name": "Barback",
+    "type": "Enhancement",
     "skills": [
       "Income 5",
       "Sell Drinks"
     ]
   },
   {
-    "type": "Enhancement",
     "name": "Guild Crafter",
+    "type": "Enhancement",
     "skills": [
       "Guild Wages",
       "Livery"
@@ -1593,8 +1593,8 @@
     "livery": "guild patch and visible tools of the trade"
   },
   {
-    "type": "Enhancement",
     "name": "Master Crafter",
+    "type": "Enhancement",
     "skills": [
       "Guild Wages",
       "Instruction",
@@ -1605,19 +1605,501 @@
     "livery": "guild patch and visible tools of the trade"
   },
   {
-    "type": "Enhancement",
     "name": "Master Healer",
+    "type": "Enhancement",
     "skills": [
       "Medicine"
     ]
   },
   {
-    "type": "Enhancement",
     "name": "Town Guard Auxiliary",
+    "type": "Enhancement",
     "skills": [
       "Income 5",
       "Livery"
     ],
     "livery": "based on local Chapter"
+  },
+  {
+    "name": "Legionnaire",
+    "type": "Basic",
+    "skills": [
+      "Duty 1",
+      "Income 5",
+      "Livery",
+      "Weapon Specialization (One Handed Sword)",
+      "Weapon Use (Large Shield)",
+      "Wear Armor 4"
+    ],
+    "duty": "patrolling the town",
+    "livery": "Red and White tabard, patch, or similar",
+    "chapters": [
+      "burgundar"
+    ]
+  },
+  {
+    "name": "Oath-Sworn/Gothi",
+    "specialties": [
+      "Oath-Sworn",
+      "Gothi"
+    ],
+    "type": "Basic",
+    "skills": [
+      "Bardic Voice 2",
+      "Old Faith Favor",
+      "News \u0026 Rumors",
+      "Religious Ceremony"
+    ],
+    "chapters": [
+      "burgundar"
+    ]
+  },
+  {
+    "name": "Surveyor",
+    "type": "Basic",
+    "skills": [
+      "Income 10",
+      "Pathfinding",
+      "Scribe 2",
+      "Woodwise"
+    ],
+    "chapters": [
+      "burgundar"
+    ]
+  },
+  {
+    "name": "Legionnaire\u2019s Recruit",
+    "type": "Youth",
+    "skills": [
+      "Duty 1",
+      "Income 5",
+      "Livery",
+      "Wear Armor 2"
+    ],
+    "duty": "patrolling the town",
+    "livery": "Red and White tabard, patch, or similar",
+    "chapters": [
+      "burgundar"
+    ]
+  },
+  {
+    "name": "Huscarl",
+    "type": "Advanced",
+    "skills": [
+      "Armstraining 4",
+      "Leadership",
+      "Wear Armor 3",
+      "Weapon Specialization (One Handed Sword)",
+      "Weapon Specialization (One Handed Axe)"
+    ],
+    "leadership": "your Jarl\u0027s retainers",
+    "chapters": [
+      "burgundar"
+    ]
+  },
+  {
+    "name": "Centurion",
+    "type": "Advanced",
+    "skills": [
+      "Armstraining 4",
+      "Duty 1",
+      "Income 10",
+      "Leadership",
+      "Livery",
+      "Weapon Use (Large Shield)",
+      "Wear Armor 4"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Weapon Specialization (Bow)",
+          "Weapon Specialization (Claws)",
+          "Weapon Specialization (Dagger)",
+          "Weapon Specialization (Fists)",
+          "Weapon Specialization (Flail)",
+          "Weapon Specialization (Hand Crossbow)",
+          "Weapon Specialization (Javelin)",
+          "Weapon Specialization (Normal Crossbow)",
+          "Weapon Specialization (One Handed Axe)",
+          "Weapon Specialization (One Handed Blunt)",
+          "Weapon Specialization (One Handed Sword)",
+          "Weapon Specialization (One Handed Tool)",
+          "Weapon Specialization (Polearm)",
+          "Weapon Specialization (Spear)",
+          "Weapon Specialization (Schiltron)",
+          "Weapon Specialization (Staff)",
+          "Weapon Specialization (Thrown Weapon)",
+          "Weapon Specialization (Two Handed Axe)",
+          "Weapon Specialization (Two Handed Blunt)",
+          "Weapon Specialization (Two Handed Sword)",
+          "Weapon Specialization (Two Handed Tool)",
+          "Weapon Specialization (Any one Weapon Type)"
+        ]
+      }
+    ],
+    "duty": "drilling and training the Legionairres",
+    "livery": "based on local Chapter",
+    "leadership": "Legionaries",
+    "chapters": [
+      "burgundar"
+    ]
+  },
+  {
+    "name": "Oath-Binder/Guldr",
+    "specialties": [
+      "Oath-Binder",
+      "Guldr"
+    ],
+    "type": "Plot",
+    "skills": [
+      "Bardic Voice 2",
+      "Duty 1",
+      "Improved Old Faith Favor",
+      "Intercession",
+      "News \u0026 Rumors",
+      "Religious Ceremony"
+    ],
+    "duty": "settling of disputes",
+    "chapters": [
+      "burgundar"
+    ]
+  },
+  {
+    "name": "Primus Pilus",
+    "type": "Plot",
+    "skills": [
+      "Bardic Voice 2",
+      "Duty 1",
+      "Income 15",
+      "Livery",
+      "Patronage 1",
+      "Weapon Use (Large Shield)",
+      "Wear Armor 5",
+      "Leadership",
+      "Improved Leadership"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Weapon Specialization (Bow)",
+          "Weapon Specialization (Claws)",
+          "Weapon Specialization (Dagger)",
+          "Weapon Specialization (Fists)",
+          "Weapon Specialization (Flail)",
+          "Weapon Specialization (Hand Crossbow)",
+          "Weapon Specialization (Javelin)",
+          "Weapon Specialization (Normal Crossbow)",
+          "Weapon Specialization (One Handed Axe)",
+          "Weapon Specialization (One Handed Blunt)",
+          "Weapon Specialization (One Handed Sword)",
+          "Weapon Specialization (One Handed Tool)",
+          "Weapon Specialization (Polearm)",
+          "Weapon Specialization (Spear)",
+          "Weapon Specialization (Schiltron)",
+          "Weapon Specialization (Staff)",
+          "Weapon Specialization (Thrown Weapon)",
+          "Weapon Specialization (Two Handed Axe)",
+          "Weapon Specialization (Two Handed Blunt)",
+          "Weapon Specialization (Two Handed Sword)",
+          "Weapon Specialization (Two Handed Tool)"
+        ]
+      }
+    ],
+    "duty": "reviewing the Centurion and Legionaries",
+    "livery": "based on local Chapter",
+    "leadership": "Legionaries and Centurions",
+    "chapters": [
+      "burgundar"
+    ]
+  },
+  {
+    "name": "Thane",
+    "type": "Plot",
+    "skills": [
+      "Armstraining 4",
+      "Bardic Voice 2",
+      "Battle Rage",
+      "Improved Leadership (your Jarl\u0027s retainers)",
+      "Income 15",
+      "Wear Armor 6"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Weapon Specialization (Bow)",
+          "Weapon Specialization (Claws)",
+          "Weapon Specialization (Dagger)",
+          "Weapon Specialization (Fists)",
+          "Weapon Specialization (Flail)",
+          "Weapon Specialization (Hand Crossbow)",
+          "Weapon Specialization (Javelin)",
+          "Weapon Specialization (Normal Crossbow)",
+          "Weapon Specialization (One Handed Axe)",
+          "Weapon Specialization (One Handed Blunt)",
+          "Weapon Specialization (One Handed Sword)",
+          "Weapon Specialization (One Handed Tool)",
+          "Weapon Specialization (Polearm)",
+          "Weapon Specialization (Spear)",
+          "Weapon Specialization (Schiltron)",
+          "Weapon Specialization (Staff)",
+          "Weapon Specialization (Thrown Weapon)",
+          "Weapon Specialization (Two Handed Axe)",
+          "Weapon Specialization (Two Handed Blunt)",
+          "Weapon Specialization (Two Handed Sword)",
+          "Weapon Specialization (Two Handed Tool)",
+          "Weapon Specialization (Any one Weapon Type)"
+        ]
+      }
+    ],
+    "chapters": [
+      "burgundar"
+    ]
+  },
+  {
+    "name": "Legionnaire\u2019s Auxiliary",
+    "type": "Enhancement",
+    "skills": [
+      "Livery",
+      "Income 5"
+    ],
+    "livery": "Red and White tabard, patch, or similar",
+    "chapters": [
+      "burgundar"
+    ]
+  },
+  {
+    "name": "Brewer/Vintner",
+    "specialties": [
+      "Brewer",
+      "Vintner"
+    ],
+    "type": "Basic",
+    "skills": [
+      "Brawler",
+      "Cooking 4",
+      "Sell Drinks",
+      "Unarmed Combat",
+      "Woodwise"
+    ],
+    "chapters": [
+      "keep"
+    ]
+  },
+  {
+    "name": "Night Watch",
+    "type": "Basic",
+    "skills": [
+      "Duty 1",
+      "Income 10",
+      "Wear Armor 2",
+      "Weapon Specialization (Normal Crossbow)",
+      "Weapon Specialization (Hand Crossbow)",
+      "Production (1 Fire)"
+    ],
+    "duty": "patrolling the road ",
+    "chapters": [
+      "keep"
+    ]
+  },
+  {
+    "name": "Treasure Hunter",
+    "type": "Basic",
+    "skills": [
+      "Agility",
+      "Aquilan Exploration",
+      "Deep Lore",
+      "Scavenging",
+      "Warcaster",
+      "Wear Armor 1"
+    ],
+    "chapters": [
+      "keep"
+    ]
+  },
+  {
+    "name": "Mystic/Spirit Talker",
+    "specialties": [
+      "Mystic",
+      "Spirit Talker"
+    ],
+    "type": "Advanced",
+    "skills": [
+      "Bardic Voice 2",
+      "Divine Lore",
+      "Fortune Telling",
+      "Income 10",
+      "Increased Mana",
+      "Mage Lore",
+      "Scribe 2",
+      "Serene Contemplation",
+      "Occupational Spells"
+    ],
+    "chapters": [
+      "keep"
+    ]
+  },
+  {
+    "name": "Naturalist/Cartographer",
+    "specialties": [
+      "Naturalist",
+      "Cartographer"
+    ],
+    "type": "Advanced",
+    "skills": [
+      "Scribe",
+      "Serene Contemplation",
+      "Woodwise",
+      "Duty 1"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Aquilan Exploration",
+          "Information Gathering",
+          "Pathfinding",
+          "Research"
+        ]
+      }
+    ],
+    "duty": "area of study",
+    "chapters": [
+      "keep"
+    ]
+  },
+  {
+    "name": "Crusader",
+    "type": "Basic",
+    "skills": [
+      "Battle Mage",
+      "Duty 1",
+      "Wear Armor 4",
+      "Income 20"
+    ],
+    "duty": "defend the wall",
+    "chapters": [
+      "novgorond"
+    ]
+  },
+  {
+    "name": "Fire Warden",
+    "type": "Basic",
+    "skills": [
+      "Production (2 Fire)",
+      "Production (1 Charcoal)",
+      "Duty 1",
+      "Serene Contemplation"
+    ],
+    "duty": "build a fire, light torches, and/or feed an existing fire",
+    "chapters": [
+      "novgorond"
+    ]
+  },
+  {
+    "name": "Guide",
+    "type": "Basic",
+    "skills": [
+      "Agility",
+      "Pathfinding",
+      "Scavenging",
+      "Serene Contemplation",
+      "Woodwise"
+    ],
+    "chapters": [
+      "novgorond"
+    ]
+  },
+  {
+    "name": "Ice Cutter",
+    "type": "Basic",
+    "skills": [
+      "Engineering",
+      "Production (2 Water)",
+      "Toughness",
+      "Work Rhythm"
+    ],
+    "chapters": [
+      "novgorond"
+    ]
+  },
+  {
+    "name": "Princely Partizan",
+    "type": "Basic",
+    "skills": [
+      "Income 2",
+      "Livery",
+      "Warcaster",
+      "Weapon Specialization (Hewing Spear)",
+      "Wear Armor 3",
+      "Production (1 Hewing Spear)"
+    ],
+    "livery": "Grey Coat and Purple Mantel",
+    "chapters": [
+      "novgorond"
+    ]
+  },
+  {
+    "name": "Miser",
+    "type": "Advanced",
+    "skills": [
+      "Buy/Sell 500",
+      "Commerce",
+      "Cosmopolitan Connections",
+      "Income 20",
+      "News \u0026 Rumors",
+      "Retainers 1"
+    ],
+    "chapters": [
+      "novgorond"
+    ]
+  },
+  {
+    "name": "Money Changer",
+    "type": "Advanced",
+    "skills": [
+      "Buy/Sell 250",
+      "Commerce",
+      "Income 10",
+      "News \u0026 Rumors"
+    ],
+    "chapters": [
+      "novgorond"
+    ]
+  },
+  {
+    "name": "Yheti Slayer",
+    "type": "Advanced",
+    "skills": [
+      "Agility",
+      "Battle Rage",
+      "Detect Health",
+      "Livery",
+      "Pathfinding",
+      "Precision",
+      "Slayer (Yheti)"
+    ],
+    "livery": "White fur cape",
+    "chapters": [
+      "novgorond"
+    ]
+  },
+  {
+    "name": "Knight Crusader",
+    "type": "Plot",
+    "skills": [
+      "Battle Mage",
+      "Duty 1",
+      "Livery",
+      "Wear Armor 8",
+      "Income 30"
+    ],
+    "duty": "defend the wall",
+    "livery": "Chosen colors and symbols",
+    "chapters": [
+      "novgorond"
+    ]
   }
 ]

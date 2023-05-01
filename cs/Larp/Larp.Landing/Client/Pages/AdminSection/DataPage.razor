@@ -72,6 +72,17 @@
         });
     }
 
+    private async Task ExportOccupations()
+    {
+        await SafeActionAsync(async () =>
+        {
+            var file = await LandingService.Admin.ExportOccupations();
+            var fileStream = file.CreateReadStream();
+            using var streamRef = new DotNetStreamReference(stream: fileStream);
+            await Js.InvokeVoidAsync("downloadFileFromStream", "Mw5eOccupations.json", streamRef);
+        });
+    }
+    
     private async Task Reseed()
     {
         await SafeActionAsync(async () => { await LandingService.Admin.ReseedData(); });
@@ -129,7 +140,8 @@
     <MudPaper Class="mb-4 pa-4">
         <MudStack Spacing="4" AlignItems="AlignItems.Start">
             <MudText Typo="Typo.h6">Export Data</MudText>
-            <MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Filled" OnClick="Export">Export</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Filled" OnClick="Export">Export Players and Characters</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Filled" OnClick="ExportOccupations">Export Occupations</MudButton>
         </MudStack>
     </MudPaper>
 

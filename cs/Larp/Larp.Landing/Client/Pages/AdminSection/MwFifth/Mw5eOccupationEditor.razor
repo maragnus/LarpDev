@@ -1,0 +1,195 @@
+﻿@using System.Text.RegularExpressions
+@inject IDialogService DialogService
+
+<MudGrid>
+    <MudItem xs="12" md="4">
+        <MudTextField Label="Name" Value="@Occupation.Name" ValueChanged="UpdateName" T="string" Variant="Variant.Outlined"/>
+    </MudItem>
+    <MudItem xs="12" md="4">
+        <MudSelectExtended Label="Type" @bind-Value="@Occupation.Type" ItemCollection="(ICollection<OccupationType>)_types" T="OccupationType" Variant="Variant.Outlined"/>
+    </MudItem>
+    <MudItem xs="12" md="4">
+        <MudSelectExtended Label="Chapters" SelectedValues="@(Occupation.Chapters ?? Array.Empty<string>())" ItemCollection="(ICollection<string>)HomeChapters" MultiSelection SelectedValuesChanged="UpdateChapters" T="string" Variant="Variant.Outlined"/>
+    </MudItem>
+    <MudItem xs="12" md="4">
+        <MudTextField Label="Livery" Value="@Occupation.Livery" ValueChanged="SetLivery" T="string" Variant="Variant.Outlined"/>
+    </MudItem>
+    <MudItem xs="12" md="4">
+        <MudTextField Label="Duty" Value="@Occupation.Duty" ValueChanged="SetDuty" T="string" Variant="Variant.Outlined"/>
+    </MudItem>
+    <MudItem xs="12" md="4">
+        <MudTextField Label="Leadership" Value="@Occupation.Leadership" ValueChanged="SetLeadership" T="string" Variant="Variant.Outlined"/>
+    </MudItem>
+
+    <MudItem xs="12" md="4">
+        <MudChipField Label="Specialties" Values="@((Occupation.Specialties ?? Array.Empty<string>()).ToList())" ReadOnly T="string" Delimiter="@(',')" ChipSize="Size.Medium" Closeable="false" Variant="Variant.Outlined"/>
+    </MudItem>
+    <MudItem xs="12">
+        @foreach (var skill in Occupation.Skills)
+        {
+            <MudChip Text="@skill" OnClose="() => RemoveSkill(skill)"/>
+        }
+        <MudStack Row AlignItems="AlignItems.Center">
+            <MudSelectExtended Label="Add Skill" T="string" ItemCollection="_skills" SearchBox SearchFunc="SearchFunc" SearchBoxClearable SearchBoxAutoFocus @ref="_addSkill" Variant="Variant.Outlined"/>
+            <MudTextField Label="Ranks" T="int?" InputType="InputType.Number" @ref="_addSkillRank" Clearable Variant="Variant.Outlined"/>
+            <MudButton OnClick="AddSkill" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Variant="Variant.Filled">Add</MudButton>
+            <MudButton OnClick="AddSkills" StartIcon="@Icons.Material.Filled.AddBox" Color="Color.Primary" Variant="Variant.Filled">Auto Add Skills</MudButton>
+        </MudStack>
+    </MudItem>
+    <MudItem xs="12">
+        @foreach (var choice in Occupation.Choices ?? Array.Empty<SkillChoice>())
+        {
+            <SkillChoiceEditor Choice="choice" Skills="_skills" />
+        }
+        <MudButton OnClick="AddChoice" Class="mt-4" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.QuestionMark" Color="Color.Primary">Add Choice</MudButton>
+        <MudButton OnClick="RemoveChoice" Class="mt-4" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" Disabled="Occupation.Choices == null || Occupation.Choices.Length == 0" Color="Color.Primary">Remove Choice</MudButton>
+    </MudItem>
+</MudGrid>
+
+@code {
+
+    [Parameter]
+    public Occupation Occupation { get; set; } = default!;
+
+    [Parameter]
+    public SkillDefinition[] Skills { get; set; } = default!;
+
+    [Parameter]
+    public string[] HomeChapters { get; set; } = default!;
+
+    private readonly ICollection<OccupationType> _types = Enum.GetValues<OccupationType>();
+
+    private MudSelectExtended<string>? _addSkill;
+    private MudTextField<int?>? _addSkillRank;
+    private ICollection<string> _skills = default!;
+
+    protected override void OnInitialized()
+    {
+        _skills = Skills.Select(x => x.Name).ToList();
+    }
+
+    private void UpdateChapters(IEnumerable<string> chapters)
+    {
+        Occupation.Chapters = chapters.ToArray();
+    }
+
+    private void UpdateName(string name)
+    {
+        Occupation.Name = name;
+        if (name.Contains("/"))
+            Occupation.Specialties = name.Split("/");
+        else
+            Occupation.Specialties = Array.Empty<string>();
+    }
+
+    private void SetLeadership(string? value)
+    {
+        Occupation.Leadership = value;
+        SetSkill("Leadership", !string.IsNullOrWhiteSpace(value));
+    }
+
+    private void SetDuty(string? value)
+    {
+        Occupation.Duty = value;
+        SetSkill("Duty 1", !string.IsNullOrWhiteSpace(value));
+    }
+
+    private void SetLivery(string? value)
+    {
+        Occupation.Livery = value;
+        SetSkill("Livery", !string.IsNullOrWhiteSpace(value));
+    }
+
+    private void SetSkill(string skillName, bool shouldHaveSkill)
+    {
+        var hasSkill = Occupation.HasSkill(skillName);
+
+        if (hasSkill && !shouldHaveSkill)
+            Occupation.Skills = Occupation.Skills.Where(x => x != skillName).ToArray();
+        else if (!hasSkill && shouldHaveSkill)
+            Occupation.Skills = Occupation.Skills.Concat(new[] { skillName }).ToArray();
+    }
+
+    private void RemoveSkill(string skill)
+    {
+        switch (skill)
+        {
+            case "Livery":
+                Occupation.Livery = null;
+                break;
+            case "Leadership":
+                Occupation.Leadership = null;
+                break;
+            case "Duty 1":
+            case "Duty 2":
+            case "Duty 3":
+            case "Duty 4":
+                Occupation.Duty = null;
+                break;
+        }
+        SetSkill(skill, false);
+    }
+
+    private async Task AddSkill()
+    {
+        var name = _addSkill!.Value;
+        var rank = _addSkillRank!.Value;
+        if (name == null) return;
+        SetSkill(rank.HasValue ? $"{name} {rank}" : name, true);
+        await _addSkill.Clear();
+        await _addSkillRank.Clear();
+    }
+
+    private void AddChoice()
+    {
+        var newChoice = new [] { new SkillChoice()
+        {
+            Count = 1,
+            Choices = Array.Empty<string>()
+        } };
+        
+        if (Occupation.Choices == null)
+            Occupation.Choices = newChoice;
+        else
+            Occupation.Choices = Occupation.Choices.Concat(newChoice).ToArray();
+    }
+
+    private bool SearchFunc(string arg1, string arg2) => arg1.Contains(arg2, StringComparison.InvariantCultureIgnoreCase);
+
+    private async Task AddSkills()
+    {
+        var dialog = await DialogService.ShowAsync<SkillDialog>("Automatically Add Skills");
+        var result = await dialog.Result;
+        if (result.Canceled) return;
+        if (result.Data is string[] skills)
+        {
+            foreach (var item in skills)
+            {
+                var match = Regex.Match(item, @"(.*) \((.*)\)", RegexOptions.Compiled);
+                string name = item;
+                string? description = null;
+                if (match.Success)
+                {
+                    name = match.Groups[1].Value;
+                    description = match.Groups[2].Value;
+                }
+                
+                if (name.StartsWith("Duty"))
+                    SetDuty(description);
+                else if (name == "Livery")
+                    SetLivery(description);
+                else if (name == "Leadership")
+                    SetLeadership(description);
+                else
+                    SetSkill(item, true);
+            }
+        }
+    }
+
+    private void RemoveChoice()
+    {
+        if (Occupation.Choices == null) return;
+        Occupation.Choices = Occupation.Choices![..^1];
+    }
+
+}

@@ -1131,5 +1131,40 @@
     "class": "Minor",
     "purchasable": "Once",
     "costPerPurchase": 5
+  },
+  {
+    "name": "Aquilan Exploration",
+    "title": "Aquilan Exploration",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "chapters": ["keep"]
+  },
+  {
+    "name": "Deep Lore",
+    "title": "Deep Lore",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "chapters": ["keep"]
+  },
+  {
+    "name": "Old Faith Favor",
+    "title": "Old Faith Favor",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "chapters": ["burgundar"]
+  },
+  {
+    "name": "Improved Old Faith Favor",
+    "title": "Improved Old Faith Favor",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "chapters": ["burgundar"]
+  },
+  {
+    "name": "Intercession",
+    "title": "Intercession",
+    "class": "Unavailable",
+    "purchasable": "Unavailable",
+    "chapters": ["burgundar"]
   }
 ]

@@ -277,5 +277,6 @@ public class BackupManager
     {
         var seeder = _serviceProvider.GetRequiredService<LarpDataSeeder>();
         await seeder.Reseed();
+        _larpContext.MwFifthGame.ClearGameState();
     }
 }

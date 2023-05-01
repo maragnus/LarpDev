@@ -200,5 +200,5 @@ public class LandingService
     }
 
     public bool IsInRole(AccountRole role) =>
-        Account.Roles.Contains(role);
+        Account?.Roles?.Contains(role) == true;
 }

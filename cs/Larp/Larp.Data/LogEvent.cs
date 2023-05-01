@@ -97,3 +97,14 @@ public class EventChangeLogEvent : LogEvent
     
     public string? Summary { get; set; }
 }
+
+public class GameStateLogEvent : LogEvent
+{
+    public GameStateLogEvent() : base("Game State Changed")
+    {
+    }
+
+    public string GameName { get; set; } = default!;
+    
+    public string? Summary { get; set; }
+}

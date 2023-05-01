@@ -1,6 +1,9 @@
 using System.Text;
+using System.Text.Json;
 using Larp.Data.MwFifth;
+using Larp.Data.Seeder;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Internal;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -17,11 +20,12 @@ public class AdminService : IAdminService
     private readonly AttachmentManager _attachmentManager;
     private readonly BackupManager _backupManager;
     private readonly string? _sessionId;
-
+    private readonly ISystemClock _clock;
+    
     public AdminService(LarpContext db, IUserSession userSession,
         MwFifthCharacterManager characterManager, IUserSessionManager userSessionManager,
         LetterManager letterManager, EventManager eventManager,
-        AttachmentManager attachmentManager, BackupManager backupManager)
+        AttachmentManager attachmentManager, BackupManager backupManager, ISystemClock clock)
     {
         _db = db;
         _characterManager = characterManager;
@@ -30,6 +34,7 @@ public class AdminService : IAdminService
         _eventManager = eventManager;
         _attachmentManager = attachmentManager;
         _backupManager = backupManager;
+        _clock = clock;
         _account = userSession.Account!;
         _sessionId = userSession.SessionId;
     }
@@ -41,7 +46,17 @@ public class AdminService : IAdminService
             .ToListAsync();
         return accounts.ToArray();
     }
-    
+
+    public async Task<IFileInfo> ExportOccupations()
+    {
+        var gameState = await _db.MwFifthGame.GetGameState();
+        var memory = new MemoryStream();
+        var options = new JsonSerializerOptions(LarpDataSeeder.JsonSerializerOptions) { WriteIndented = true };
+        await JsonSerializer.SerializeAsync(memory, gameState.Occupations, options);
+        memory.Seek(0, SeekOrigin.Begin);
+        return new DownloadFileInfo(memory, "Mw5eOccupations.json", (int)memory.Length);
+    }
+
     public Task<IFileInfo> ExportLetters(string eventId) =>
         _backupManager.ExportLetters(eventId);
 
@@ -336,6 +351,33 @@ public class AdminService : IAdminService
     public async Task ReseedData()
     {
         await _backupManager.Reseed();
+    }
+
+    public async Task SaveOccupations(Occupation[] occupations)
+    {
+        foreach (var occupation in occupations)
+        {
+            if (occupation.Specialties?.Length == 0)
+                occupation.Specialties = null;
+            if (occupation.Choices?.Length == 0)
+                occupation.Choices = null;
+            if (occupation.Chapters?.Length == 0)
+                occupation.Chapters = null;
+        }
+        
+        var filter = Builders<BsonDocument>.Filter.Eq(nameof(GameState.Name), GameState.GameName);
+        var update = Builders<BsonDocument>.Update
+            .Set(nameof(GameState.Occupations), occupations)
+            .Set(nameof(GameState.Revision), Guid.NewGuid().ToString("N"))
+            .Set(nameof(GameState.LastUpdated), _clock.UtcNow.ToString("O"));
+        var result = await _db.GameStates.UpdateOneAsync(filter, update);
+        
+        if (result.ModifiedCount != 1)
+            throw new BadRequestException("Game State could not be updated");
+
+        _db.MwFifthGame.ClearGameState();
+
+        await Log(new GameStateLogEvent() { GameName = GameState.GameName, Summary = "Updated Occupations" });
     }
 
     public async Task<EventAndLetters[]> GetEvents() =>

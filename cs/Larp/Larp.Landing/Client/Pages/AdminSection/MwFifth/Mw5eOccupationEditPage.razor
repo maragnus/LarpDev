@@ -1,0 +1,72 @@
+﻿@page "/admin/mw5e/occupations"
+@using System.Text.Json
+@inherits LarpPage
+@inject LandingService LandingService
+
+<AdminLayout Title="Mystwood 5e Occupations">
+    <MudOverlay Visible="_isSaving" Absolute DarkBackground>
+        <MudText Typo="Typo.h5">Saving...</MudText>
+        <MudProgressCircular Indeterminate/>
+    </MudOverlay>
+    <MudButtonGroup OverrideStyles="false" Class="my-4">
+        <MudButton StartIcon="@Icons.Material.Filled.Save" OnClick="Save" Color="Color.Success" Variant="Variant.Filled">Save</MudButton>
+        <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="Add" Color="Color.Primary" Variant="Variant.Filled">Add Occupation</MudButton>
+    </MudButtonGroup>
+
+    <MudDataGrid T="Occupation" Items="_occupations" Loading="IsLoading">
+        <Columns>
+            <HierarchyColumn T="Occupation"/>
+            <PropertyColumn Property="x => x.Name" Title="Name"/>
+            <PropertyColumn Property="x => x.Type" Title="Type"/>
+            <TemplateColumn T="Occupation" Title="Chapters">
+                <CellTemplate>
+                    @(context.Item.Chapters == null || context.Item.Chapters.Length == 0 ? "All" : string.Join(", ", context.Item.Chapters))
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+        <ChildRowContent>
+            <Mw5eOccupationEditor Occupation="context.Item" Skills="_skills" HomeChapters="_chapters"></Mw5eOccupationEditor>
+        </ChildRowContent>
+    </MudDataGrid>
+
+    <MudButtonGroup OverrideStyles="false" Class="my-4">
+        <MudButton StartIcon="@Icons.Material.Filled.Save" OnClick="Save" Color="Color.Success" Variant="Variant.Filled">Save</MudButton>
+        <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="Add" Color="Color.Primary" Variant="Variant.Filled">Add Occupation</MudButton>
+    </MudButtonGroup>
+</AdminLayout>
+
+
+@code {
+    private readonly List<Occupation> _occupations = new();
+    private string[] _chapters = Array.Empty<string>();
+    private SkillDefinition[] _skills = Array.Empty<SkillDefinition>();
+    private bool _isSaving;
+
+    protected override async Task OnSafeInitializedAsync()
+    {
+        var gameState = await LandingService.MwFifth.GetGameState("");
+        _occupations.AddRange(gameState.Occupations);
+        _chapters = gameState.HomeChapters.Select(x => x.Name).ToArray();
+        _skills = gameState.Skills;
+        Console.WriteLine(JsonSerializer.Serialize(gameState));
+    }
+
+    private async Task Save()
+    {
+        _isSaving = true;
+        await SafeActionAsync(async () =>
+        {
+            await LandingService.Admin.SaveOccupations(_occupations.ToArray());
+        });
+        _isSaving = false;
+    }
+
+    private void Add()
+    {
+        _occupations.Add(new Occupation()
+        {
+            Name = "New Occupation",
+            Type = OccupationType.Basic
+        });
+    }
+}
