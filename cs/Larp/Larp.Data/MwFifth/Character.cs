@@ -283,7 +283,7 @@ public class CharacterRevision
             }
             else if (newValue is CharacterVantage[] newVantages && oldValue is CharacterVantage[] oldVantages)
             {
-                if (Summarize(newVantages, oldVantages, x => x.Title, out var oldItems, out var newItems))
+                if (Summarize(oldVantages, newVantages, x => x.Title, out var oldItems, out var newItems))
                     result.Add(property.Name, new ChangeSummary(oldItems, newItems));
             }
             else if (((oldValue == null) != (newValue == null)) || oldValue?.Equals(newValue) == false)
