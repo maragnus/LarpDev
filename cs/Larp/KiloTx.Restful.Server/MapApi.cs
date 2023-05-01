@@ -168,7 +168,7 @@ public static class MapApiExtensions
             return Convert.ChangeType(value, desiredType);
 
         if (desiredType == typeof(string))
-            return value;
+            return stringValue.Trim();
 
         if (desiredType.IsEnum)
         {
