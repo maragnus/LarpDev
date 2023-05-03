@@ -22,7 +22,7 @@ public class AdminService : IAdminService
     private readonly BackupManager _backupManager;
     private readonly string? _sessionId;
     private readonly ISystemClock _clock;
-    
+
     public AdminService(LarpContext db, IUserSession userSession,
         MwFifthCharacterManager characterManager, IUserSessionManager userSessionManager,
         LetterManager letterManager, EventManager eventManager,
@@ -63,8 +63,8 @@ public class AdminService : IAdminService
 
     async Task IAdminService.MergeAccounts(string fromAccountId, string toAccountId)
     {
-        await Log(new AccountMergeLogEvent{ FromAccountId = fromAccountId, ToAccountId = toAccountId});
-        
+        await Log(new AccountMergeLogEvent { FromAccountId = fromAccountId, ToAccountId = toAccountId });
+
         await _db.Sessions.UpdateManyAsync(x => x.AccountId == fromAccountId,
             Builders<Session>.Update.Set(x => x.AccountId, toAccountId));
 
@@ -76,12 +76,12 @@ public class AdminService : IAdminService
 
         await _db.Letters.UpdateManyAsync(x => x.AccountId == fromAccountId,
             Builders<Letter>.Update.Set(x => x.AccountId, toAccountId));
-        
+
         await _db.Letters.UpdateManyAsync(x => x.ApprovedBy == fromAccountId,
             Builders<Letter>.Update.Set(x => x.ApprovedBy, toAccountId));
 
         await _characterManager.MoveAll(fromAccountId, toAccountId);
-        
+
         var attendances = await _db.Attendances
             .Find(attendance => attendance.AccountId == fromAccountId).ToListAsync();
 
@@ -193,11 +193,16 @@ public class AdminService : IAdminService
     public async Task SetMwFifthCharacterNotes(string characterId, string? notes) =>
         await _characterManager.SetNotes(characterId, notes);
 
-    public async Task SetAccountNotes(string accountId, string? notes)
+    public async Task SetAccountPreregistrationNotes(string accountId, string? notes)
     {
-        var update = Builders<Account>.Update
-            .Set(x => x.MwFifthPreregistrationNotes, notes);
-        await _db.Accounts.UpdateOneAsync(x => x.AccountId == accountId, update);
+        await _userSessionManager.UpdateUserAccount(accountId, update => update
+            .Set(x => x.MwFifthPreregistrationNotes, notes));
+    }
+
+    public async Task SetAccountAdminNotes(string accountId, string? notes)
+    {
+        await _userSessionManager.UpdateUserAccount(accountId, update => update
+            .Set(x => x.AdminNotes, notes));
     }
 
     public async Task<PreregistrationNotes> GetEventNotes(string eventId)
@@ -246,7 +251,7 @@ public class AdminService : IAdminService
                 }
             });
         }
-        
+
         var attendees = new List<PlayerAttendee>();
         foreach (var (_, letter) in info.Letters)
         {
@@ -291,7 +296,7 @@ public class AdminService : IAdminService
         await Log(new AccountStateLogEvent { AccountId = accountId, AccountState = AccountState.Uninvited });
         await _userSessionManager.UpdateUserAccount(accountId, x => x
             .Set(account => account.State, AccountState.Uninvited)
-            );
+        );
     }
 
     public async Task ArchiveAccount(string accountId)
@@ -327,7 +332,7 @@ public class AdminService : IAdminService
                 .Append(names.GetValueOrDefault(log[nameof(LogEvent.ActorAccountId)].AsObjectId.ToString())?.Name ??
                         "Unknown Account")
                 .Append(") ");
-            
+
             log.Remove("_id");
             log.Remove(nameof(LogEvent.LogEventId));
             log.Remove(nameof(LogEvent.ActorAccountId));
@@ -359,15 +364,15 @@ public class AdminService : IAdminService
         var characters = await _db.MwFifthGame.Characters
             .Find(c => c.ImportId.HasValue)
             .ToListAsync();
-        
+
         var revisions = (await _db.MwFifthGame.CharacterRevisions.AsQueryable()
-            .GroupBy(x => x.CharacterId)
-            .Select(x => new
-            {
-                CharacterId = x.Key,
-                Count = x.Count()
-            }).ToListAsync())
-            .ToDictionary(x=>x.CharacterId, x=>x.Count);
+                .GroupBy(x => x.CharacterId)
+                .Select(x => new
+                {
+                    CharacterId = x.Key,
+                    Count = x.Count()
+                }).ToListAsync())
+            .ToDictionary(x => x.CharacterId, x => x.Count);
 
         var deletes = new List<string>();
         deletes.AddRange(characters.Where(x => revisions[x.CharacterId] == 1).Select(x => x.CharacterId));
@@ -386,14 +391,14 @@ public class AdminService : IAdminService
             if (occupation.Chapters?.Length == 0)
                 occupation.Chapters = null;
         }
-        
+
         var filter = Builders<BsonDocument>.Filter.Eq(nameof(GameState.Name), GameState.GameName);
         var update = Builders<BsonDocument>.Update
             .Set(nameof(GameState.Occupations), occupations)
             .Set(nameof(GameState.Revision), Guid.NewGuid().ToString("N"))
             .Set(nameof(GameState.LastUpdated), _clock.UtcNow.ToString("O"));
         var result = await _db.GameStates.UpdateOneAsync(filter, update);
-        
+
         if (result.ModifiedCount != 1)
             throw new BadRequestException("Game State could not be updated");
 
@@ -401,6 +406,9 @@ public class AdminService : IAdminService
 
         await Log(new GameStateLogEvent() { GameName = GameState.GameName, Summary = "Updated Occupations" });
     }
+
+    public async Task<EventAttendance[]> GetAccountAttendances(string accountId) =>
+        await _eventManager.GetAccountAttendances(accountId);
 
     public async Task<EventAndLetters[]> GetEvents() =>
         await _eventManager.GetEvents();
@@ -489,7 +497,7 @@ public class AdminService : IAdminService
     {
         await _db.LogEvent(_account.AccountId, _sessionId, logEvent);
     }
-    
+
     public async Task AddAccountRole(string accountId, AccountRole role)
     {
         await Log(new AccountRoleLogEvent { AccountId = accountId, AddRole = role });
@@ -515,15 +523,13 @@ public class AdminService : IAdminService
     public async Task UpdateAccount(string accountId, string? name, string? location, string? phone,
         DateOnly? birthDate, string? notes, int? discount)
     {
-        var update = Builders<Account>.Update
+        await _userSessionManager.UpdateUserAccount(accountId, update => update
             .Set(x => x.Name, name)
             .Set(x => x.Location, location)
             .Set(x => x.Phone, phone)
             .Set(x => x.Notes, notes)
             .Set(x => x.BirthDate, birthDate)
-            .Set(x=>x.DiscountPercent, discount);
-
-        await _db.Accounts.UpdateOneAsync(x => x.AccountId == accountId, update);
+            .Set(x => x.DiscountPercent, discount));
     }
 
     public async Task<CharacterAndRevision> GetMwFifthCharacterLatest(string characterId) =>

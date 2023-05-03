@@ -1,0 +1,146 @@
+﻿@using Larp.Common
+@inherits LarpPage
+
+@inject LandingService LandingService
+
+<MudPaper Class="pa-4 relative" Style="min-height: 250px">
+    <MudOverlay DarkBackground Absolute Visible="IsLoading">
+        <MudText Typo="Typo.h6">Refreshing...</MudText>
+        <MudProgressCircular Indeterminate Size="Size.Large"/>
+    </MudOverlay>
+    <MudStack Spacing="4">
+        <MudText Typo="Typo.h6">Attendance</MudText>
+
+        <MudDataGrid T="AttendanceInfo" Items="_events" Hover Elevation="0" Filterable="true" Loading="IsLoading" Groupable Dense>
+            <Columns>
+                <TemplateColumn T="AttendanceInfo" Groupable="false" Sortable="false" Filterable="false">
+                    <CellTemplate>
+                        <MudIcon Icon="@context.Item.Icon" Color="Color.Primary" Size="Size.Small"/>
+                    </CellTemplate>
+                </TemplateColumn>
+                <PropertyColumn Property="x => x.When" Title="Date" Format="ddd, MMM d, yyyy" Groupable="false"/>
+                <PropertyColumn Property="x => x.EventTitle" Title="Title" Groupable="false"/>
+                <PropertyColumn Property="x => x.EventType" Title="Type"/>
+                <PropertyColumn Property="x => x.MwFifthMoonstone" Title="Moonstone" Groupable="false"/>
+                <TemplateColumn T="AttendanceInfo" Sortable="false" Filterable="false" Groupable="false">
+                    <CellTemplate>
+                        @foreach (var letter in context.Item.Letters)
+                        {
+                            var style = LetterTooltip[letter.State];
+                            var icon = LetterIcon[letter.Name];
+                            <MudTooltip Text="@style.Tooltip">
+                                <MudIconButton Disabled="letter.State == LetterState.Locked" Size="Size.Small" Icon="@icon" Color="@style.Color" OnClick="() => OpenLetter(context.Item.EventId, letter.Name)"/>
+                            </MudTooltip>
+                        }
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid>
+
+    </MudStack>
+</MudPaper>
+
+@code
+{
+    [Parameter]
+    public string AccountId { get; set; } = default!;
+
+    private AttendanceInfo[] _events = Array.Empty<AttendanceInfo>();
+
+    [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+    private class AttendanceInfo
+    {
+        public IEnumerable<string> MwFifthCharacters { get; init; } = Array.Empty<string>();
+
+        public string MwFifthMoonstone { get; init; } = default!;
+
+        public DateOnly When { get; init; }
+
+        public string EventId { get; init; } = default!;
+
+        public string EventType { get; init; } = default!;
+
+        public string EventTitle { get; init; } = default!;
+
+        public string GameName { get; init; } = default!;
+
+        public string Icon { get; init; } = default!;
+
+        public Letter[] Letters { get; init; } = default!;
+    }
+    
+    static readonly Dictionary<LetterState, (string Tooltip, Color Color)> LetterTooltip = new()
+    {
+        { LetterState.NotStarted, ("You have not started the letter for this event", Color.Warning) },
+        { LetterState.Draft, ("You have not submitted this letter yet", Color.Warning) },
+        { LetterState.Submitted, ("Your event letter has been submitted and is waiting for approval", Color.Tertiary) },
+        { LetterState.Approved, ("Your event letter has been approved", Color.Success) },
+        { LetterState.Locked, ("Letter is currently closed", Color.Success) },
+    };
+
+    static readonly Dictionary<string, string> LetterIcon = new()
+    {
+        { "PreEvent", Icons.Material.Filled.Rsvp },
+        { "PostEvent", Icons.Material.Filled.Email },
+    };
+
+    protected override async Task OnSafeInitializedAsync()
+    {
+        var games = LandingService.Games
+            .ToDictionary(x => x.Value.Id, x => x.Value.Title ?? x.Value.Name);
+
+        var attendances = await LandingService.Admin.GetAccountAttendances(AccountId);
+
+        static IEnumerable<Letter> GetLetters(Event @event, Letter[] letters)
+        {
+            foreach (var name in @event.LetterTemplates)
+            {
+                // TODO -- if not IsOpen then change LetterState.NotStarted or LetterState.Draft to LetterState.Locked
+                yield return letters.FirstOrDefault(x => x.EventId == @event.EventId && x.Name == name.Name)
+                             ?? new Letter() { Name = name.Name, State = name.IsOpen ? LetterState.NotStarted : LetterState.Locked };
+            }
+        }
+        
+        _events = attendances
+            .Select(attendance =>
+            {
+                return new AttendanceInfo
+                {
+                    Icon = GetIcon(attendance.Event.EventType, attendance.Event.Title),
+                    GameName = games.TryGetValue(attendance.Event.GameId, out var gameName) ? gameName : "No Game",
+                    EventTitle = attendance.Event.Title ?? "No Title",
+                    EventType = attendance.Event.EventType ?? "No Type",
+                    When = attendance.Event.Date,
+                    MwFifthMoonstone = attendance.MwFifth?.Moonstone.ToString() ?? "N/A",
+                    Letters = GetLetters(attendance.Event, attendance.Letters).ToArray(),
+                    EventId = attendance.EventId
+                };
+
+                string GetIcon(string? type, string? title)
+                {
+                    if (type == null || title == null) return Icons.Material.Filled.Event;
+                    if (type.Contains("Subscription", StringComparison.InvariantCultureIgnoreCase))
+                        return Icons.Material.Filled.AttachMoney;
+                    if (title.Contains("Patreon", StringComparison.InvariantCultureIgnoreCase))
+                        return Icons.Material.Filled.AttachMoney;
+                    if (title.Contains("Trivia", StringComparison.InvariantCultureIgnoreCase))
+                        return Icons.Material.Filled.Celebration;
+                    if (type.Contains("Game", StringComparison.InvariantCultureIgnoreCase))
+                        return Icons.Material.Filled.SportsHandball;
+                    if (type.Contains("Workday", StringComparison.InvariantCultureIgnoreCase))
+                        return Icons.Material.Filled.Handyman;
+                    if (type.Contains("Contest", StringComparison.InvariantCultureIgnoreCase))
+                        return Icons.Material.Filled.Celebration;
+                    if (type.Contains("Other", StringComparison.InvariantCultureIgnoreCase))
+                        return Icons.Material.Filled.Celebration;
+                    return Icons.Material.Filled.AddBox;
+                }
+            })
+            .ToArray();
+    }
+
+    private void OpenLetter(string eventId, string letterName)
+    {
+        NavigationManager.NavigateTo($"/events/{eventId}/letter/{letterName}");
+    }
+}

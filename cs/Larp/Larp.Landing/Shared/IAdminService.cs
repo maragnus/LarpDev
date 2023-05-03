@@ -159,9 +159,12 @@ public interface IAdminService
     [ApiPost("mw5e/characters/{characterId}/notes"), ApiAuthenticated(AccountRoles.AdminAccess)]
     Task SetMwFifthCharacterNotes(string characterId, string? notes);
 
-    [ApiPost("accounts/{accountId}/notes"), ApiAuthenticated(AccountRoles.AdminAccess)]
-    Task SetAccountNotes(string accountId, string? notes);
-
+    [ApiPost("accounts/{accountId}/notes/preregistration"), ApiAuthenticated(AccountRoles.AdminAccess)]
+    Task SetAccountPreregistrationNotes(string accountId, string? notes);
+    
+    [ApiPost("accounts/{accountId}/notes/admin"), ApiAuthenticated(AccountRoles.AdminAccess)]
+    Task SetAccountAdminNotes(string accountId, string? notes);
+    
     [ApiGet("events/{eventId}/notes"), ApiAuthenticated(AccountRoles.AdminAccess)]
     Task<PreregistrationNotes> GetEventNotes(string eventId);
 
@@ -183,6 +186,9 @@ public interface IAdminService
     
     [ApiPost("mw5e/occupations"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
     Task SaveOccupations(Occupation[] occupations);
+
+    [ApiGet("account/{accountId}/attendance"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    Task<EventAttendance[]> GetAccountAttendances(string accountId);
 }
 
 public class Dashboard

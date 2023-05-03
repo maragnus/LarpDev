@@ -1,0 +1,70 @@
+﻿@inherits LarpPage
+
+@inject LandingService LandingService
+@inject IJSRuntime Js
+
+<MudPaper Class="pa-4 relative" Style="min-height: 250px">
+    <MudOverlay DarkBackground Absolute Visible="IsLoading">
+        <MudText Typo="Typo.h6">Refreshing...</MudText>
+        <MudProgressCircular Indeterminate Size="Size.Large"/>
+    </MudOverlay>
+    <MudStack Spacing="4">
+        <MudText Typo="Typo.h6">Attachments</MudText>
+
+        @if (_attachments.Length == 0)
+        {
+            <MudAlert Severity="Severity.Info">This account has no attachments</MudAlert>
+        }
+        <MudGrid>
+            @foreach (var attachment in _attachments)
+            {
+                var url = $"/api/attachments/thumbnails/{attachment.AttachmentId}/{attachment.ThumbnailFileName ?? attachment.FileName}";
+                var fullUrl = $"/api/attachments/{attachment.AttachmentId}/{attachment.FileName}";
+                <MudItem sm="6" md="4" lg="3">
+                    <MudStack Spacing="1" Justify="Justify.FlexStart">
+                        <a href="@fullUrl" target="_blank">
+                            <MudImage Src="@url" Alt="@attachment.Title" Height="150" ObjectFit="ObjectFit.Cover" Class="rounded-lg"/>
+                        </a>
+                        <MudStack Row Justify="Justify.FlexStart">
+                            <MudStack>
+                                <MudText Typo="Typo.caption">
+                                    <strong>@attachment.Title</strong>
+                                </MudText>
+                                <MudText Typo="Typo.caption">Uploaded by @GetName(attachment.UploadedBy) on @attachment.UploadedOn.ToString("MMM d, yyyy")</MudText>
+                            </MudStack>
+                            <MudIconButton Icon="@Icons.Material.Filled.Download" Color="Color.Primary" OnClick="async () => await Download(attachment)">Download</MudIconButton>
+                        </MudStack>
+                    </MudStack>
+                </MudItem>
+            }
+        </MudGrid>
+    </MudStack>
+</MudPaper>
+
+@code {
+    [Parameter]
+    public string AccountId { get; set; } = default!;
+
+    private Dictionary<string, AccountName> _accountNames = new();
+
+    private AccountAttachment[] _attachments = Array.Empty<AccountAttachment>();
+    
+    private string GetName(string accountId) => _accountNames.GetValueOrDefault(accountId)?.Name ?? "No Name Set";
+
+    protected override async Task OnSafeParametersSetAsync()
+    {
+        _attachments = await LandingService.Admin.GetAccountAttachments(AccountId);
+        _accountNames = await LandingService.Admin.GetAccountNames();
+    }
+    
+    private async Task Download(AccountAttachment attachment)
+    {
+        await SafeActionAsync(async () =>
+        {
+            var file = await LandingService.Service.GetAttachment(attachment.AttachmentId, attachment.FileName ?? "file");
+            var fileStream = file.CreateReadStream();
+            using var streamRef = new DotNetStreamReference(stream: fileStream);
+            await Js.InvokeVoidAsync("downloadFileFromStream", attachment.FileName ?? "file", streamRef);
+        });
+    }
+}

@@ -1,13 +1,13 @@
 @page "/admin/accounts/{AccountId}"
+
+@using Larp.Landing.Client.Pages.AdminSection.AccountComponents
 @inherits LarpPage
 
-@using System.ComponentModel.DataAnnotations
 @inject LandingService LandingService
-@inject IJSRuntime Js
 
 <PageHeader>Account Manager</PageHeader>
 
-@if (_account == null || _characters == null)
+@if (_account == null)
 {
     <AdminLayout Title="Manage Account" Loading/>
     return;
@@ -15,129 +15,13 @@
 
 <AdminLayout Title="Manage Accounts" Loading="IsLoading">
     <MudStack Spacing="4">
-        <MudPaper Class="pa-4 relative">
-            <MudOverlay DarkBackground Absolute Visible="_savingProfile">
-                <MudText Typo="Typo.h6">Saving...</MudText>
-                <MudProgressCircular Indeterminate Size="Size.Large"/>
-            </MudOverlay>
-            <MudText Typo="Typo.h6">Profile</MudText>
-            @if (_account.State == AccountState.Archived)
-            {
-                <MudAlert Severity="Severity.Error" Icon="@Icons.Material.Filled.Archive">
-                    This account has been archived and cannot be used.
-                </MudAlert>
-            }
-            else if (_account.State == AccountState.Uninvited)
-            {
-                <MudAlert Severity="Severity.Error" Icon="@Icons.Material.Filled.Block">
-                    This account has been disinvited.
-                </MudAlert>
-            }
-            <MudGrid>
-                <MudItem xs="12" sm="6">
-                    <MudTextField T="string?" Label="Full Name" InputType="InputType.Text" Value="_account.Name" ValueChanged="(value) => Set(() => _account.Name = value)"/>
-                </MudItem>
-                <MudItem xs="12" sm="6">
-                    <MudTextField T="string?" Label="Location" InputType="InputType.Text" Placeholder="Harrison, Maine" Value="_account.Location" ValueChanged="(value) => Set(() => _account.Location = value)"/>
-                </MudItem>
-                <MudItem xs="12" sm="6">
-                    <MudTextField T="string?" Label="Phone" InputType="InputType.Telephone" Value="_account.Phone" ValueChanged="(value) => Set(() => _account.Phone = value)"/>
-                </MudItem>
-                <MudItem xs="8" sm="4">
-                    <MudDatePicker T="DateTime?" Label="Birthdate" Clearable Date="_account.BirthDate?.ToDateTime(TimeOnly.MinValue)" DateChanged="(value) => Set(() => _account.BirthDate = value.HasValue ? DateOnly.FromDateTime(value.Value) : null)"/>
-                </MudItem>
-                <MudItem xs="4" sm="2">
-                    <MudField T="int?" Label="Age" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Calculate">@_account.Age</MudField>
-                </MudItem>
-                <MudItem xs="12" sm="8">
-                    <MudTextField T="string?" Label="Allergies & Disabilities" InputType="InputType.Text" Value="_account.Notes" ValueChanged="(value) => Set(() => _account.Notes = value)"/>
-                </MudItem>
-                <MudItem xs="12" sm="4">
-                    <MudTextField T="int?" Label="Event Discount" InputType="InputType.Number" Value="_account.DiscountPercent" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Percent" ValueChanged="(value) => Set(() => _account.DiscountPercent = value)"/>
-                </MudItem>
-                <MudItem xs="12">
-                    <MudButton StartIcon="@Icons.Material.Filled.Save" Disabled="!_changed" OnClick="Save" Color="Color.Primary" Variant="Variant.Outlined">Save Changes</MudButton>
-                </MudItem>
-            </MudGrid>
-        </MudPaper>
-
-        <MudPaper Class="pa-4 relative">
-            <MudOverlay DarkBackground Absolute Visible="_savingEmails">
-                <MudText Typo="Typo.h6">Saving...</MudText>
-                <MudProgressCircular Indeterminate Size="Size.Large"/>
-            </MudOverlay>
-            <MudText Typo="Typo.h6">Emails</MudText>
-            <EditForm Model="_newEmailModel" OnValidSubmit="AddEmailSubmit">
-                <DataAnnotationsValidator/>
-                <MudStack Row Spacing="4" Justify="Justify.FlexStart" AlignItems="AlignItems.Center" Class="mt-2">
-                    <MudTextField T="string?" @ref="_newEmailField" OnlyValidateIfDirty Label="New Email Address" Variant="Variant.Outlined" Class="flex-grow-1" InputType="InputType.Email" @bind-Value="@_newEmailModel.EmailAddress" For="() => _newEmailModel.EmailAddress"/>
-                    <MudButton StartIcon="@Icons.Material.Filled.Add" ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Outlined">Add Email</MudButton>
-                </MudStack>
-            </EditForm>
-            <MudChipSet OnClose="DeleteEmail" AllClosable="true">
-                @foreach (var email in _account.Emails)
-                {
-                    <MudChip T="string" Value="email.Email">
-                        <MudStack Row AlignItems="AlignItems.Center">
-                            @email.Email
-                            @if (email.IsVerified)
-                            {
-                                <MudTooltip Text="The player has verified this is their email address">
-                                    <MudIcon Size="Size.Small" Color="Color.Primary" Icon="@Icons.Material.Filled.VerifiedUser"/>
-                                </MudTooltip>
-                            }
-                            @if (email.IsPreferred)
-                            {
-                                <MudTooltip Text="The player prefers this email address for contact">
-                                    <MudIcon Size="Size.Small" Color="Color.Warning" Icon="@Icons.Material.Filled.Star"/>
-                                </MudTooltip>
-                            }
-                        </MudStack>
-                    </MudChip>
-                }
-            </MudChipSet>
-        </MudPaper>
-
-        <MudPaper Class="pa-4 relative">
-            <MudOverlay DarkBackground Absolute Visible="_savingRoles">
-                <MudText Typo="Typo.h6">Saving...</MudText>
-                <MudProgressCircular Indeterminate Size="Size.Large"/>
-            </MudOverlay>
-            <MudStack Spacing="4">
-                <MudText Typo="Typo.h6">Roles</MudText>
-                <MudSwitch T="bool" Checked="_account.Roles.Contains(AccountRole.AdminAccess)" CheckedChanged="value => SetRole(AccountRole.AdminAccess, value)" Color="Color.Success" UnCheckedColor="Color.Error">Access to administration section</MudSwitch>
-                <MudSwitch T="bool" Checked="_account.Roles.Contains(AccountRole.AccountAdmin)" CheckedChanged="value => SetRole(AccountRole.AccountAdmin, value)" Color="Color.Success" UnCheckedColor="Color.Error">Can manage accounts and access</MudSwitch>
-                <MudSwitch T="bool" Checked="_account.Roles.Contains(AccountRole.MwFifthGameMaster)" CheckedChanged="value => SetRole(AccountRole.MwFifthGameMaster, value)" Color="Color.Success" UnCheckedColor="Color.Error">Can manage Mystwood 5e characters</MudSwitch>
-            </MudStack>
-        </MudPaper>
-
-        <MudPaper>
-            <MudDataGrid T="CharacterSummary" Items="_characters" RowClick="RowClick" Dense Groupable Hover Loading="IsLoading">
-                <Columns>
-                    <TemplateColumn T="CharacterSummary" Title="Status">
-                        <CellTemplate>
-                            @switch (context.Item.State)
-                            {
-                                case CharacterState.Live:
-                                    <MudChip Size="Size.Small" Color="Color.Success">Live</MudChip>
-                                    break;
-                                case CharacterState.Review:
-                                    <MudChip Size="Size.Small" Color="@Color.Warning">Review</MudChip>
-                                    break;
-                                case CharacterState.Draft:
-                                    <MudChip Size="Size.Small" Color="@Color.Info">Draft</MudChip>
-                                    break;
-                            }
-                        </CellTemplate>
-                    </TemplateColumn>
-                    <PropertyColumn Property="x => x.Name" Title="Character Name"/>
-                    <PropertyColumn Property="x => x.HomeChapter" Title="Home Chapter"/>
-                    <PropertyColumn Property="x => x.Summary" Title="Summary"/>
-                    <PropertyColumn Property="x => x.Level" Title="Level"/>
-                </Columns>
-            </MudDataGrid>
-        </MudPaper>
-
+        <ProfileEditor Account="_account" RefreshFunc="RefreshAccount" />
+        <NotesEditor Account="_account" RefreshFunc="RefreshAccount" />
+        <EmailEditor Account="_account" RefreshFunc="RefreshAccount" />
+        <RoleEditor Account="_account" RefreshFunc="RefreshAccount" />
+        <CharacterList AccountId="@AccountId" />
+        <AttendanceList AccountId="@AccountId" />
+        
         <MudPaper Class="pa-4">
             <MudStack Spacing="4">
                 <MudText Typo="Typo.h6">Utilities</MudText>
@@ -166,50 +50,6 @@
                 </MudStack>
             </MudStack>
         </MudPaper>
-
-        <MudPaper Class="pa-4">
-            <MudText Typo="Typo.h6" Class="mb-4">Notes</MudText>
-            <MudTextField T="string?" Variant="Variant.Outlined" Lines="2" Label="Preregistration Notes" @bind-Value="@_account.MwFifthPreregistrationNotes"
-                          Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Save" AdornmentColor="Color.Success" OnAdornmentClick="SaveNotes"/>
-        </MudPaper>
-
-        <MudPaper Class="pa-4 relative" Style="min-height: 250px">
-            <MudOverlay DarkBackground Absolute Visible="_isLoadingAttachments">
-                <MudText Typo="Typo.h6">Refreshing...</MudText>
-                <MudProgressCircular Indeterminate Size="Size.Large"/>
-            </MudOverlay>
-            <MudStack Spacing="4">
-                <MudText Typo="Typo.h6">Attachments</MudText>
-
-                @if (_attachments.Length == 0)
-                {
-                    <MudAlert Severity="Severity.Info">This account has no attachments</MudAlert>
-                }
-                <MudGrid>
-                    @foreach (var attachment in _attachments)
-                    {
-                        var url = $"/api/attachments/thumbnails/{attachment.AttachmentId}/{attachment.ThumbnailFileName ?? attachment.FileName}";
-                        var fullUrl = $"/api/attachments/{attachment.AttachmentId}/{attachment.FileName}";
-                        <MudItem sm="6" md="4" lg="3">
-                            <MudStack Spacing="1" Justify="Justify.FlexStart">
-                                <a href="@fullUrl" target="_blank">
-                                    <MudImage Src="@url" Alt="@attachment.Title" Height="150" ObjectFit="ObjectFit.Cover" Class="rounded-lg"/>
-                                </a>
-                                <MudStack Row Justify="Justify.FlexStart">
-                                    <MudStack>
-                                        <MudText Typo="Typo.caption">
-                                            <strong>@attachment.Title</strong>
-                                        </MudText>
-                                        <MudText Typo="Typo.caption">Uploaded by @GetName(attachment.UploadedBy) on @attachment.UploadedOn.ToString("MMM d, yyyy")</MudText>
-                                    </MudStack>
-                                    <MudIconButton Icon="@Icons.Material.Filled.Download" Color="Color.Primary" OnClick="async () => await Download(attachment)">Download</MudIconButton>
-                                </MudStack>
-                            </MudStack>
-                        </MudItem>
-                    }
-                </MudGrid>
-            </MudStack>
-        </MudPaper>
     </MudStack>
 </AdminLayout>
 
@@ -218,108 +58,18 @@
     [Parameter]
     public string AccountId { get; set; } = default!;
 
-    private bool _savingProfile = true;
-    private bool _savingRoles = true;
-    private bool _savingEmails = true;
-    private bool _changed;
-    private bool _isLoadingAttachments = true;
     private Account? _account;
-    private CharacterSummary[]? _characters;
-    private AccountAttachment[] _attachments = Array.Empty<AccountAttachment>();
-    private Dictionary<string, AccountName> _accountNames = default!;
 
-    class NewEmailModel
+    private async Task RefreshAccount()
     {
-        [EmailAddress, Display(Name = "Email Address")]
-        public string? EmailAddress { get; set; }
+        _account = await LandingService.Admin.GetAccount(AccountId);
+        StateHasChanged();
     }
-
-    private readonly NewEmailModel _newEmailModel = new();
-    private MudTextField<string?>? _newEmailField;
-
+    
     protected override async Task OnSafeParametersSetAsync()
     {
-        _savingProfile = true;
-        _savingRoles = true;
-        _savingEmails = true;
-        StateHasChanged();
-
         _account = await LandingService.Admin.GetAccount(AccountId);
-        _characters = await LandingService.Admin.GetAccountCharacters(AccountId);
-        _changed = false;
-        _savingProfile = false;
-        _savingRoles = false;
-        _savingEmails = false;
         IsLoading = false; // Lie a little so the attachments can pop up later
-        StateHasChanged();
-
-        _attachments = await LandingService.Admin.GetAccountAttachments(AccountId);
-        _accountNames = await LandingService.Admin.GetAccountNames();
-        _isLoadingAttachments = false;
-    }
-
-    private void RowClick(DataGridRowClickEventArgs<CharacterSummary> obj)
-    {
-        NavigationManager.NavigateTo($"/admin/{obj.Item.GameName}/characters/{obj.Item.Id}");
-    }
-
-    private void Set(Action update)
-    {
-        update();
-        _changed = true;
-    }
-
-    private async Task Save()
-    {
-        _savingProfile = true;
-        StateHasChanged();
-
-        await SafeActionAsync(async () =>
-        {
-            await LandingService.Admin.UpdateAccount(AccountId, _account!.Name, _account.Location, _account.Phone, _account.BirthDate, _account.Notes, _account.DiscountPercent);
-            _changed = false;
-            _account = await LandingService.Admin.GetAccount(AccountId);
-        });
-        _savingProfile = false;
-    }
-
-    private async Task SetRole(AccountRole role, bool hasRole)
-    {
-        _savingRoles = true;
-        await SafeActionAsync(async () =>
-        {
-            if (hasRole)
-                await LandingService.Admin.AddAccountRole(AccountId, role);
-            else
-                await LandingService.Admin.RemoveAccountRole(AccountId, role);
-
-            _account = await LandingService.Admin.GetAccount(AccountId);
-        });
-        _savingRoles = false;
-    }
-
-    private async Task DeleteEmail(MudChip obj)
-    {
-        _savingEmails = true;
-        StateHasChanged();
-        await SafeActionAsync(async () =>
-        {
-            await LandingService.Admin.RemoveAccountEmail(AccountId, (string)obj.Value);
-            await OnParametersSetAsync();
-        });
-        _savingEmails = false;
-    }
-
-    private async Task AddEmailSubmit()
-    {
-        _savingEmails = true;
-        StateHasChanged();
-        await SafeActionAsync(async () =>
-        {
-            await LandingService.Admin.AddAccountEmail(AccountId, _newEmailModel.EmailAddress!);
-            await OnParametersSetAsync();
-        });
-        _savingEmails = false;
     }
 
     private async Task Merge()
@@ -340,24 +90,6 @@
     private void Attachments()
     {
         NavigationManager.NavigateTo($"/admin/accounts/{AccountId}/attachments");
-    }
-
-    private string GetName(string accountId) => _accountNames.GetValueOrDefault(accountId)?.Name ?? "No Name Set";
-
-    private async Task Download(AccountAttachment attachment)
-    {
-        await SafeActionAsync(async () =>
-        {
-            var file = await LandingService.Service.GetAttachment(attachment.AttachmentId, attachment.FileName ?? "file");
-            var fileStream = file.CreateReadStream();
-            using var streamRef = new DotNetStreamReference(stream: fileStream);
-            await Js.InvokeVoidAsync("downloadFileFromStream", attachment.FileName ?? "file", streamRef);
-        });
-    }
-
-    private async Task SaveNotes()
-    {
-        await SafeActionAsync(async () => { await LandingService.Admin.SetAccountNotes(AccountId, _account!.MwFifthPreregistrationNotes); });
     }
 
     private async Task Uninvite()

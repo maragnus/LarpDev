@@ -1,0 +1,86 @@
+﻿@using System.ComponentModel.DataAnnotations
+@inherits LarpPage
+
+@inject LandingService LandingService
+
+<MudPaper Class="pa-4 relative">
+    <MudOverlay DarkBackground Absolute Visible="_savingEmails || IsLoading">
+        <MudText Typo="Typo.h6">@(_savingEmails ? "Saving..." : "Loading...")</MudText>
+        <MudProgressCircular Indeterminate Size="Size.Large"/>
+    </MudOverlay>
+    <MudText Typo="Typo.h6">Emails</MudText>
+    <EditForm Model="_newEmailModel" OnValidSubmit="AddEmailSubmit">
+        <DataAnnotationsValidator/>
+        <MudStack Row Spacing="4" Justify="Justify.FlexStart" AlignItems="AlignItems.Center" Class="mt-2">
+            <MudTextField T="string?" @ref="_newEmailField" OnlyValidateIfDirty Label="New Email Address" Variant="Variant.Outlined" Class="flex-grow-1" InputType="InputType.Email" @bind-Value="@_newEmailModel.EmailAddress" For="() => _newEmailModel.EmailAddress"/>
+            <MudButton StartIcon="@Icons.Material.Filled.Add" ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Outlined">Add Email</MudButton>
+        </MudStack>
+    </EditForm>
+    <MudChipSet OnClose="DeleteEmail" AllClosable="true">
+        @foreach (var email in Account.Emails)
+        {
+            <MudChip T="string" Value="email.Email">
+                <MudStack Row AlignItems="AlignItems.Center">
+                    @email.Email
+                    @if (email.IsVerified)
+                    {
+                        <MudTooltip Text="The player has verified this is their email address">
+                            <MudIcon Size="Size.Small" Color="Color.Primary" Icon="@Icons.Material.Filled.VerifiedUser"/>
+                        </MudTooltip>
+                    }
+                    @if (email.IsPreferred)
+                    {
+                        <MudTooltip Text="The player prefers this email address for contact">
+                            <MudIcon Size="Size.Small" Color="Color.Warning" Icon="@Icons.Material.Filled.Star"/>
+                        </MudTooltip>
+                    }
+                </MudStack>
+            </MudChip>
+        }
+    </MudChipSet>
+</MudPaper>
+
+@code
+{
+    [Parameter]
+    public Account Account { get; set; } = default!;
+
+    [Parameter]
+    public Func<Task>? RefreshFunc { get; set; }
+
+    private bool _savingEmails;
+
+    class NewEmailModel
+    {
+        [EmailAddress, Display(Name = "Email Address")]
+        public string? EmailAddress { get; set; }
+    }
+
+    private readonly NewEmailModel _newEmailModel = new();
+    private MudTextField<string?>? _newEmailField;
+
+    private async Task DeleteEmail(MudChip obj)
+    {
+        _savingEmails = true;
+        StateHasChanged();
+
+        await SafeActionAsync(async () =>
+        {
+            await LandingService.Admin.RemoveAccountEmail(Account.AccountId, (string)obj.Value);
+            await OnParametersSetAsync();
+        });
+        _savingEmails = false;
+    }
+
+    private async Task AddEmailSubmit()
+    {
+        _savingEmails = true;
+        StateHasChanged();
+        await SafeActionAsync(async () =>
+        {
+            await LandingService.Admin.AddAccountEmail(Account.AccountId, _newEmailModel.EmailAddress!);
+            await OnParametersSetAsync();
+        });
+        _savingEmails = false;
+    }
+}

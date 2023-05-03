@@ -7,11 +7,14 @@ public class MwFifthCharacterManager
     private readonly LarpContext _larpContext;
     private readonly ILogger _logger;
     private readonly MwFifthGameContext _mwFifth;
+    private readonly IUserSessionManager _userManager;
 
-    public MwFifthCharacterManager(LarpContext larpContext, ILogger<MwFifthCharacterManager> logger)
+    public MwFifthCharacterManager(LarpContext larpContext, ILogger<MwFifthCharacterManager> logger,
+        IUserSessionManager userManager)
     {
         _larpContext = larpContext;
         _logger = logger;
+        _userManager = userManager;
         _mwFifth = larpContext.MwFifthGame;
     }
 
@@ -26,8 +29,8 @@ public class MwFifthCharacterManager
             : Builders<Character>.Projection.Exclude(x => x.PreregistrationNotes);
 
         return await _mwFifth.Characters.Find(x => x.CharacterId == characterId)
-                .Project(projection).FirstOrDefaultAsync()
-            ?? throw new ResourceNotFoundException();
+                   .Project(projection).FirstOrDefaultAsync()
+               ?? throw new ResourceNotFoundException();
     }
 
     public async Task Move(string characterId, string newAccountId)
@@ -131,10 +134,10 @@ public class MwFifthCharacterManager
         await _mwFifth.Characters
             .UpdateOneAsync(x => x.CharacterId == reference.CharacterId,
                 Builders<Character>.Update
-                    .Set(x=>x.State, CharacterState.Live)
+                    .Set(x => x.State, CharacterState.Live)
                     .Set(x => x.CharacterName, reference.CharacterName)
                     .Set(x => x.UsedMoonstone, reference.GiftMoonstone + reference.SkillMoonstone)
-                    .Set(x=>x.PreregistrationRevisionNotes, reference.PreregistrationNotes));
+                    .Set(x => x.PreregistrationRevisionNotes, reference.PreregistrationNotes));
 
         // Mark all (hopefully only one) Live characters are Archive
         await _mwFifth.CharacterRevisions
@@ -170,7 +173,7 @@ public class MwFifthCharacterManager
             .UpdateOneAsync(x => x.CharacterId == reference.UniqueId && x.State == CharacterState.Review,
                 Builders<CharacterRevision>.Update
                     .Set(x => x.State, CharacterState.Draft)
-                    .Set(x=>x.RevisionReviewerNotes, reviewerNotes));
+                    .Set(x => x.RevisionReviewerNotes, reviewerNotes));
     }
 
     public async Task<CharacterAndRevision> GetRevision(string revisionId, Account account, bool isAdmin)
@@ -257,7 +260,7 @@ public class MwFifthCharacterManager
             revision.RevisionPlayerNotes = saved.Revision.RevisionPlayerNotes;
         else
             revision.RevisionReviewerNotes = saved.Revision.RevisionReviewerNotes;
-        
+
         // Update the change summary from the most recent live
         var live = await GetLiveRevision(revision.CharacterId);
         revision.ChangeSummary =
@@ -349,10 +352,9 @@ public class MwFifthCharacterManager
         var moonstoneTotal = await this._larpContext.Attendances.AsQueryable()
             .Where(attendance => attendance.AccountId == accountId && attendance.MwFifth != null)
             .SumAsync(attendance => attendance.MwFifth!.Moonstone ?? 0);
-        await _larpContext.Accounts.UpdateOneAsync(x => x.AccountId == accountId,
-            Builders<Account>.Update
-                .Set(x => x.MwFifthMoonstone, moonstoneTotal)
-                .Set(x => x.MwFifthUsedMoonstone, moonstoneUsed));
+        await _userManager.UpdateUserAccount(accountId, update => update
+            .Set(x => x.MwFifthMoonstone, moonstoneTotal)
+            .Set(x => x.MwFifthUsedMoonstone, moonstoneUsed));
     }
 
     public async Task UpdateMoonstone()

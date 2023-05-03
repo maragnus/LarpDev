@@ -1,4 +1,6 @@
-﻿namespace Larp.Data;
+﻿using System.Text.Json.Serialization;
+
+namespace Larp.Data;
 
 [PublicAPI]
 public enum EventRsvp
@@ -46,17 +48,38 @@ public class Event
     public string EventId { get; set; } = default!;
 
     public string GameId { get; set; } = default!;
+    
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? Title { get; set; }
+    
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? Location { get; set; }
+    
     public DateOnly Date { get; set; }
+    
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? EventType { get; set; }
+    
     public bool IsHidden { get; set; }
+    
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? ImportId { get; set; }
+    
     public EventComponent[] Components { get; set; } = Array.Empty<EventComponent>();
+    
     public EventLetter[] LetterTemplates { get; set; } = Array.Empty<EventLetter>();
-    public string? Notes { get; set; }
+    
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public string? PreregistrationNotes { get; set; }
+
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public string? AdminNotes { get; set; }
+    
     public int EventCost { get; set; }
+    
     public int ChronicleCost { get; set; }
+    
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? Chapter { get; set; }
 }
 

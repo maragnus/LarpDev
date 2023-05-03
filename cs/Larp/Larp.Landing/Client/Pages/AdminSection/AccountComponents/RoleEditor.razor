@@ -1,0 +1,44 @@
+﻿@inherits LarpPage
+
+@inject LandingService LandingService
+
+
+<MudPaper Class="pa-4 relative">
+    <MudOverlay DarkBackground Absolute Visible="IsLoading || _savingRoles">
+        <MudText Typo="Typo.h6">@(IsLoading ? "Loading..." : "Saving...")</MudText>
+        <MudProgressCircular Indeterminate Size="Size.Large"/>
+    </MudOverlay>
+    <MudStack Spacing="4">
+        <MudText Typo="Typo.h6">Roles</MudText>
+        <MudSwitch T="bool" Checked="Account.Roles.Contains(AccountRole.AdminAccess)" CheckedChanged="value => SetRole(AccountRole.AdminAccess, value)" Color="Color.Success" UnCheckedColor="Color.Error">Access to administration section</MudSwitch>
+        <MudSwitch T="bool" Checked="Account.Roles.Contains(AccountRole.AccountAdmin)" CheckedChanged="value => SetRole(AccountRole.AccountAdmin, value)" Color="Color.Success" UnCheckedColor="Color.Error">Can manage accounts and access</MudSwitch>
+        <MudSwitch T="bool" Checked="Account.Roles.Contains(AccountRole.MwFifthGameMaster)" CheckedChanged="value => SetRole(AccountRole.MwFifthGameMaster, value)" Color="Color.Success" UnCheckedColor="Color.Error">Can manage Mystwood 5e characters</MudSwitch>
+    </MudStack>
+</MudPaper>
+
+@code
+{
+    [Parameter]
+    public Account Account { get; set; } = default!;
+    
+    [Parameter]
+    public Func<Task>? RefreshFunc { get; set; }
+    
+    private bool _savingRoles;
+
+    private async Task SetRole(AccountRole role, bool hasRole)
+    {
+        _savingRoles = true;
+        await SafeActionAsync(async () =>
+        {
+            if (hasRole)
+                await LandingService.Admin.AddAccountRole(Account.AccountId, role);
+            else
+                await LandingService.Admin.RemoveAccountRole(Account.AccountId, role);
+
+            if (RefreshFunc != null)
+                await RefreshFunc();
+        });
+        _savingRoles = false;
+    }
+}

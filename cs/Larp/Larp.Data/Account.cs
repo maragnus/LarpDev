@@ -57,6 +57,7 @@ public class Account
     public int? MwFifthMoonstone { get; set; }
     public int? MwFifthUsedMoonstone { get; set; }
     public string? MwFifthPreregistrationNotes { get; set; }
+    public string? AdminNotes { get; set; }
 
     public int? DiscountPercent { get; set; }
     

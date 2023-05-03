@@ -1,0 +1,82 @@
+﻿@inherits LarpPage
+
+@inject LandingService LandingService
+
+<MudPaper Class="pa-4 relative">
+    <MudOverlay DarkBackground Absolute Visible="_savingProfile || IsLoading">
+        <MudText Typo="Typo.h6">@(IsLoading ? "Loading..." : "Saving...")</MudText>
+        <MudProgressCircular Indeterminate Size="Size.Large"/>
+    </MudOverlay>
+    <MudText Typo="Typo.h6">Profile</MudText>
+    @if (Account.State == AccountState.Archived)
+    {
+        <MudAlert Severity="Severity.Error" Icon="@Icons.Material.Filled.Archive">
+            This account has been archived and cannot be used.
+        </MudAlert>
+    }
+    else if (Account.State == AccountState.Uninvited)
+    {
+        <MudAlert Severity="Severity.Error" Icon="@Icons.Material.Filled.Block">
+            This account has been disinvited.
+        </MudAlert>
+    }
+    <MudGrid>
+        <MudItem xs="12" sm="6">
+            <MudTextField T="string?" Label="Full Name" InputType="InputType.Text" Value="Account.Name" ValueChanged="(value) => Set(() => Account.Name = value)"/>
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <MudTextField T="string?" Label="Location" InputType="InputType.Text" Placeholder="Harrison, Maine" Value="Account.Location" ValueChanged="(value) => Set(() => Account.Location = value)"/>
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <MudTextField T="string?" Label="Phone" InputType="InputType.Telephone" Value="Account.Phone" ValueChanged="(value) => Set(() => Account.Phone = value)"/>
+        </MudItem>
+        <MudItem xs="8" sm="4">
+            <MudDatePicker T="DateTime?" Label="Birthdate" Clearable Date="Account.BirthDate?.ToDateTime(TimeOnly.MinValue)" DateChanged="(value) => Set(() => Account.BirthDate = value.HasValue ? DateOnly.FromDateTime(value.Value) : null)"/>
+        </MudItem>
+        <MudItem xs="4" sm="2">
+            <MudField T="int?" Label="Age" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Calculate">@Account.Age</MudField>
+        </MudItem>
+        <MudItem xs="12" sm="8">
+            <MudTextField T="string?" Label="Allergies & Disabilities" InputType="InputType.Text" Value="Account.Notes" ValueChanged="(value) => Set(() => Account.Notes = value)"/>
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudTextField T="int?" Label="Event Discount" InputType="InputType.Number" Value="Account.DiscountPercent" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Percent" ValueChanged="(value) => Set(() => Account.DiscountPercent = value)"/>
+        </MudItem>
+        <MudItem xs="12">
+            <MudButton StartIcon="@Icons.Material.Filled.Save" Disabled="!_changed" OnClick="Save" Color="Color.Primary" Variant="Variant.Outlined">Save Changes</MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@code
+{
+    [Parameter]
+    public Account Account { get; set; } = default!;
+
+    [Parameter]
+    public Func<Task>? RefreshFunc { get; set; }
+
+    private bool _savingProfile;
+    private bool _changed;
+
+    private void Set(Action update)
+    {
+        update();
+        _changed = true;
+    }
+
+    private async Task Save()
+    {
+        _savingProfile = true;
+        StateHasChanged();
+
+        await SafeActionAsync(async () =>
+        {
+            await LandingService.Admin.UpdateAccount(Account.AccountId, Account!.Name, Account.Location, Account.Phone, Account.BirthDate, Account.Notes, Account.DiscountPercent);
+            _changed = false;
+            if (RefreshFunc != null)
+                await RefreshFunc();
+        });
+        _savingProfile = false;
+    }
+}

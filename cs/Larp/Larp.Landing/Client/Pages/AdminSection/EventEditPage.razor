@@ -32,7 +32,10 @@
                 </MudTooltip>
             </MudItem>
             <MudItem xs="12">
-                <MudTextField T="string?" Label="Preregistration Notes" @bind-Value="@_event.Notes" Variant="Variant.Outlined"/>
+                <MudTextField T="string?" Label="Preregistration Notes" @bind-Value="@_event.PreregistrationNotes" Variant="Variant.Outlined"/>
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField T="string?" Label="Administrative Notes" @bind-Value="@_event.AdminNotes" Variant="Variant.Outlined"/>
             </MudItem>
             <MudItem xs="6">
                 <MudTextField T="int" Label="First Chronicle Cost" @bind-Value="@_event.EventCost" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AttachMoney" Variant="Variant.Outlined"/>

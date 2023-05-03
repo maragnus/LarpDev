@@ -94,8 +94,24 @@ public class LandingServiceServer : ILandingService
         return characters.Select(x => x.ToSummary(gameState)).ToArray();
     }
 
-    public Task<Account> GetAccount() =>
-        Task.FromResult(_userSession.Account!);
+    public Task<Account> GetAccount()
+    {
+        var account = _userSession.Account ?? new Account();
+        return Task.FromResult(new Account
+        {
+            AccountId = account.AccountId,
+            Emails = account.Emails,
+            Location =account.Location,
+            Name = account.Name,
+            Notes = account.Notes,
+            BirthDate = account.BirthDate,
+            Roles = account.Roles,
+            Phone = account.Phone,
+            MwFifthMoonstone = account.MwFifthMoonstone,
+            MwFifthUsedMoonstone = account.MwFifthUsedMoonstone,
+            Created = account.Created
+        });
+    }
 
     public async Task AccountEmailAdd(string email) =>
         await _userSessionManager.AddEmailAddress(_userSession.AccountId!, email);

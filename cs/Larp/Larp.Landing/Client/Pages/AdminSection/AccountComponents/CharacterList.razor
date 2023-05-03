@@ -1,0 +1,58 @@
+﻿@inherits LarpPage
+
+@inject LandingService LandingService
+
+<MudPaper Class="pa-4 relative">
+    <MudStack Spacing="4">
+        <MudText Typo="Typo.h6">Characters</MudText>
+
+        <MudDataGrid T="CharacterSummary" Items="_characters" Elevation="0" Bordered="false" RowClick="RowClick" Dense Groupable Hover Loading="_isLoading">
+            <NoRecordsContent>
+                <MudText Typo="Typo.caption">This account has no characters</MudText>
+            </NoRecordsContent>
+            <Columns>
+                <TemplateColumn T="CharacterSummary" Title="Status">
+                    <CellTemplate>
+                        @switch (context.Item.State)
+                        {
+                            case CharacterState.Live:
+                                <MudChip Size="Size.Small" Color="Color.Success">Live</MudChip>
+                                break;
+                            case CharacterState.Review:
+                                <MudChip Size="Size.Small" Color="@Color.Warning">Review</MudChip>
+                                break;
+                            case CharacterState.Draft:
+                                <MudChip Size="Size.Small" Color="@Color.Info">Draft</MudChip>
+                                break;
+                        }
+                    </CellTemplate>
+                </TemplateColumn>
+                <PropertyColumn Property="x => x.Name" Title="Character Name"/>
+                <PropertyColumn Property="x => x.HomeChapter" Title="Home Chapter"/>
+                <PropertyColumn Property="x => x.Summary" Title="Summary"/>
+                <PropertyColumn Property="x => x.Level" Title="Level"/>
+            </Columns>
+        </MudDataGrid>
+    </MudStack>
+</MudPaper>
+
+@code
+{
+    [Parameter]
+    public string AccountId { get; set; } = default!;
+
+    private CharacterSummary[]? _characters;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _characters = await LandingService.Admin.GetAccountCharacters(AccountId);
+        _isLoading = false;
+    }
+
+    private void RowClick(DataGridRowClickEventArgs<CharacterSummary> obj)
+    {
+        NavigationManager.NavigateTo($"/admin/{obj.Item.GameName}/characters/{obj.Item.Id}");
+    }
+
+    private bool _isLoading = true;
+}

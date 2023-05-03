@@ -1,0 +1,36 @@
+﻿@inherits LarpPage
+
+@inject LandingService LandingService
+
+<MudPaper Class="pa-4">
+    <MudStack Spacing="4">
+        <MudText Typo="Typo.h6" Class="mb-4">Notes</MudText>
+        <MudTextField T="string?" Variant="Variant.Outlined" Lines="2" Label="Preregistration Notes" @bind-Value="@Account.MwFifthPreregistrationNotes" Disabled="_savingNotes"
+                      Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Save" AdornmentColor="Color.Success" OnAdornmentClick="SaveNotes"/>
+        <MudTextField T="string?" Variant="Variant.Outlined" Lines="2" Label="Administrative Notes" @bind-Value="@Account.AdminNotes" Disabled="_savingNotes"
+                      Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Save" AdornmentColor="Color.Success" OnAdornmentClick="SaveNotes"/>
+    </MudStack>
+</MudPaper>
+
+@code
+{
+    [Parameter]
+    public Account Account { get; set; } = default!;
+
+    [Parameter]
+    public Func<Task>? RefreshFunc { get; set; }
+
+    private bool _savingNotes;
+
+    private async Task SaveNotes()
+    {
+        await SafeActionAsync(async () =>
+        {
+            _savingNotes = true;
+            StateHasChanged();
+            await LandingService.Admin.SetAccountPreregistrationNotes(Account.AccountId, Account.MwFifthPreregistrationNotes);
+            await LandingService.Admin.SetAccountAdminNotes(Account.AccountId, Account.AdminNotes);
+        });
+        _savingNotes = false;
+    }
+}
