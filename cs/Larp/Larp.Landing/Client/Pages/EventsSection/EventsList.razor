@@ -16,27 +16,39 @@
         <PropertyColumn Property="x => x.Game" Title="Game" Hidden="true"/>
         <PropertyColumn Property="x => x.When" Title="Date" Format="ddd, MMM d, yyyy" Groupable="false"/>
         <PropertyColumn Property="x => x.Title" Title="Title" Groupable="false"/>
-        <PropertyColumn Property="x => x.Location" Title="Location"/>
+        <PropertyColumn Property="x => x.Location" Title="Location" Hidden/>
         <TemplateColumn T="EventInfo" Title="Event Letters" Groupable="false" Filterable="false" Sortable="false">
             <CellTemplate>
-                @foreach (var letter in context.Item.Letters)
-                {
-                    var style = LetterTooltip[letter.State];
-                    var icon = LetterIcon[letter.Name];
-                    <MudTooltip Text="@style.Tooltip">
-                        <MudIconButton Disabled="letter.State == LetterState.Locked" Size="Size.Small" Icon="@icon" Color="@style.Color" OnClick="() => ViewLetter(context.Item.Id, letter.Name)"/>
-                    </MudTooltip>
-                }
+                <MudStack Row Spacing="4">
+                    @foreach (var letter in context.Item.Letters)
+                    {
+                        var style = LetterTooltip[letter.State];
+                        var icon = LetterIcon[letter.Name];
+                        <MudTooltip Text="@style.Tooltip">
+                            <MudIconButton Disabled="letter.State == LetterState.Locked" Size="Size.Large" Variant="Variant.Filled" Icon="@icon" Color="@style.Color" OnClick="() => ViewLetter(context.Item.Id, letter.Name)"/>
+                        </MudTooltip>
+                    }
+                    @if (LandingService.IsInRole(AccountRole.AdminAccess))
+                    {
+                        <MudIconButton Href="@($"/admin/events/{context.Item.Id}")" Variant="Variant.Filled" Icon="@Icons.Material.Filled.Edit" Color="Color.Default"/>
+                    }
+                </MudStack>
             </CellTemplate>
         </TemplateColumn>
     </Columns>
     <ChildRowContent>
-        <MudDataGrid T="ComponentInfo" Items="context.Item.Components" Dense SortMode="SortMode.None" Loading="IsLoading">
-            <Columns>
-                <PropertyColumn Property="x => x.When" Title="Date" Format="dddd, MMM d, yyyy"/>
-                <PropertyColumn Property="x => x.Title" Title="Title"/>
-            </Columns>
-        </MudDataGrid>
+        <MudStack Spacing="4">
+            @if (!string.IsNullOrWhiteSpace(context.Item.Location))
+            {
+                <MudText>@context.Item.Location</MudText>
+            }
+            <MudDataGrid T="ComponentInfo" Items="context.Item.Components" Elevation="0" Dense SortMode="SortMode.None" Loading="IsLoading">
+                <Columns>
+                    <PropertyColumn Property="x => x.When" Title="Date" Format="dddd, MMM d, yyyy"/>
+                    <PropertyColumn Property="x => x.Title" Title="Title"/>
+                </Columns>
+            </MudDataGrid>
+        </MudStack>
     </ChildRowContent>
 </MudDataGrid>
 
