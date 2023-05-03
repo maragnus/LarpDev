@@ -2,17 +2,6 @@
 
 namespace Larp.Data;
 
-[PublicAPI]
-public enum EventRsvp
-{
-    Unanswered,
-    No, // Will not attend
-    Maybe, // Potentially attending
-    Yes, // Intention to attend
-    Confirmed, // User confirmed their attendance (post letter)
-    Approved, // Admin has approved user's attendance
-}
-
 public enum EventList
 {
     Upcoming,
@@ -81,14 +70,6 @@ public class Event
     
     [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? Chapter { get; set; }
-}
-
-[PublicAPI]
-public enum EventAttendanceType
-{
-    Player,
-    Staff,
-    Mixed
 }
 
 [PublicAPI]

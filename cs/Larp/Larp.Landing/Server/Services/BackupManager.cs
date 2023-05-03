@@ -76,6 +76,7 @@ public class BackupManager
                 p.Location,
                 p.Notes,
                 PreregistrationNotes = p.MwFifthPreregistrationNotes,
+                AdministrativeNotes = p.AdminNotes,
                 TotalMoonstone = p.MwFifthMoonstone,
                 UsedMoonstone = p.MwFifthMoonstone,
                 UnspentMoonstone = p.MwFifthMoonstone - p.MwFifthUsedMoonstone,
