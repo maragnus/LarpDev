@@ -86,9 +86,7 @@
     var waiver = GetBool(FieldWaiver) ? "" : "Waiver";
     var patreon = GetBool(FieldPatreon) ? " (P)" : "";
     var familyDiscount = GetBool(FieldDiscount);
-    var characters = GetList("characters").ToHashSet();
-    if (characters.Count == 0)
-        characters = player.Characters.Select(x => x.Name).ToHashSet();
+    var characters = GetList(FieldCharacters).ToHashSet();
 
     var costCount =
         (from component in _notes.Event.Components
@@ -100,16 +98,19 @@
     if (familyDiscount) cost -= 5 * costCount;
     if (player.DiscountPercentage.HasValue) cost = (int)Math.Floor(cost * (1 - player.DiscountPercentage.Value / 100d));
 
+    var isPcing = fields.GetValueOrDefault(FieldRoles, "").Contains("(PC)");
+    var isNpcing = fields.GetValueOrDefault(FieldRoles, "").Contains("(NPC)");
+    
     var pcingList =
         from component in _notes.Event.Components
         join attending in GetList(FieldPcing) on component.Name equals attending
         select component.ComponentId;
-    var pcing = string.Join("", pcingList);
+    var pcing = isPcing ? string.Join("", pcingList) : "";
     var npcingList =
         from component in _notes.Event.Components
         join attending in GetList(FieldNpcing) on component.Name equals attending
         select component.ComponentId;
-    var npcing = string.Join("", npcingList);
+    var npcing = isNpcing ? string.Join("", npcingList) : "";
 
     var sheets = player.Characters
         .Where(x => characters.Contains(x.Name))
@@ -121,7 +122,7 @@
     {
         sheets.Add((0, new CharacterAttendee
         {
-            Name = "No Character",
+            Name = isPcing ? "No Character" : isNpcing ? "NPCing" : "No Character",
             HomeChapter = ""
         }));
     }
@@ -296,7 +297,9 @@
         const string FieldPcing = "pcing";
         const string FieldNpcing = "npcing";
         const string FieldPlot = "plot";
-
+        const string FieldCharacters = "characters";
+        const string FieldRoles = "roles";
+    
     private async Task Print()
     {
         await Js.InvokeVoidAsync("printPage");

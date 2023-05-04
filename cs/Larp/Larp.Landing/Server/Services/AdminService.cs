@@ -255,6 +255,7 @@ public class AdminService : IAdminService
         var attendees = new List<PlayerAttendee>();
         foreach (var (_, letter) in info.Letters)
         {
+            if (letter.Name != "PreEvent") continue;
             var account = accounts.GetValueOrDefault(letter.AccountId);
             var characters = accountCharacters[letter.AccountId].ToList();
             var attendee = new PlayerAttendee
