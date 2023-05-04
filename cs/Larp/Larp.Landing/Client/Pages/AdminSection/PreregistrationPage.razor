@@ -117,6 +117,9 @@
         .OrderBy(x => x.Name)
         .Select((attendee, i) => (i, attendee))
         .ToList();
+    
+    if (!isPcing)
+        sheets.Clear();
 
     if (sheets.Count == 0)
     {
@@ -146,10 +149,11 @@
         var instruction = SkilledIn(isHome, SkillInstruction, 3) + SkilledIn(isHome, SkillImprovedInstruction, 3);
         var instructionTags = instruction == 0 ? "" : $"{instruction} Instruction";
         var home = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(character.HomeChapter);
-        var visitor = isHome ? null : "Visitor";
+        var visitor = !isPcing ? null : isHome ? null : "Visitor";
         var playerName = $"{@player.Name} {(string.IsNullOrEmpty(player.Age) ? "" : $"({@player.Age})")}";
         var isPlot = GetBool(FieldPlot);
-
+        var waiverTag = index == 0 ? waiver : "";
+        
         <tr style="page-break-inside: avoid">
             @if (index == 0)
             {
@@ -219,7 +223,7 @@
                 @SkilledIn(true, SkillUnwashed, "UW")
             </td>
             <td>
-                @CommaList(waiver, string.Join(", ", production), salvageTags, instructionTags, visitor, character.Notes)
+                @CommaList(waiverTag, string.Join(", ", production), salvageTags, instructionTags, visitor, character.Notes)
             </td>
             @if (_showSkills)
             {
