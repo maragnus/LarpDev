@@ -70,8 +70,12 @@
                 .ToArray();
 
         _spells = Character.AllSpells.TryFromKeys(Character.Revision.Spells).ToArray();
-    }
 
+        var increasedMana = _skills.Where(s => s.Name == "Increased Mana").Sum(s => s.Rank);
+        var manaProperty = Character.Properties.FirstOrDefault(x => x.Name == "Mana");
+        if (increasedMana > 0 && manaProperty != null && int.TryParse(manaProperty.Value, out var mana))
+            manaProperty.Value = (mana + increasedMana).ToString();
+    }
 }
 
 @if (Print)
@@ -111,27 +115,6 @@
                         <div class="gift-name">
                             @name
                         </div>
-                        @if (FullLayout)
-                        {
-/*
-                            <MudHidden Breakpoint="Breakpoint.SmAndDown">
-                                <div class="gift-stars">
-                                    <div>
-                                        @for (var i = 0; i < Math.Min(5, rank); i++)
-                                        {
-                                            <MudIcon Icon="@Icons.Material.Filled.Star" Size="Size.Small"/>
-                                        }
-                                    </div>
-                                    <div>
-                                        @for (var i = 5; i < Math.Min(10, rank); i++)
-                                        {
-                                            <MudIcon Icon="@Icons.Material.Filled.Star" Size="Size.Small"/>
-                                        }
-                                    </div>
-                                </div>
-                            </MudHidden>
-                        */
-                        }
                     </div>
                 </MudItem>
             }
