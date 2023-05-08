@@ -14,7 +14,7 @@
         "launchBrowser": true,
         "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
         "applicationUrl": "http://localhost:5287",
-        "launchUrl": "http://localhost:5287/admin/mw5e/occupations",
+        "launchUrl": "http://localhost:5287/admin/mw5e/spells",
         "environmentVariables": {
           "ASPNETCORE_ENVIRONMENT": "Development"
         }

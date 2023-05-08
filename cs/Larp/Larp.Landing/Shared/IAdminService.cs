@@ -187,6 +187,9 @@ public interface IAdminService
     [ApiPost("mw5e/occupations"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
     Task SaveOccupations(Occupation[] occupations);
 
+    [ApiPost("mw5e/spells"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    Task SaveSpells(Spell[] spells);
+
     [ApiGet("account/{accountId}/attendance"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
     Task<EventAttendance[]> GetAccountAttendances(string accountId);
 }

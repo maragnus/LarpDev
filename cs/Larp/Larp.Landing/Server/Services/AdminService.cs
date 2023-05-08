@@ -408,6 +408,23 @@ public class AdminService : IAdminService
         await Log(new GameStateLogEvent() { GameName = GameState.GameName, Summary = "Updated Occupations" });
     }
 
+    public async Task SaveSpells(Spell[] spells)
+    {
+        var filter = Builders<BsonDocument>.Filter.Eq(nameof(GameState.Name), GameState.GameName);
+        var update = Builders<BsonDocument>.Update
+            .Set(nameof(GameState.Spells), spells)
+            .Set(nameof(GameState.Revision), Guid.NewGuid().ToString("N"))
+            .Set(nameof(GameState.LastUpdated), _clock.UtcNow.ToString("O"));
+        var result = await _db.GameStates.UpdateOneAsync(filter, update);
+
+        if (result.ModifiedCount != 1)
+            throw new BadRequestException("Game State could not be updated");
+
+        _db.MwFifthGame.ClearGameState();
+
+        await Log(new GameStateLogEvent() { GameName = GameState.GameName, Summary = "Updated Spells" });
+    }
+
     public async Task<EventAttendance[]> GetAccountAttendances(string accountId) =>
         await _eventManager.GetAccountAttendances(accountId);
 

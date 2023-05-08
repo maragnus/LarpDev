@@ -695,7 +695,9 @@ public class CharacterBuilder
     }
 
     private IEnumerable<string> DivineSpells(string category) =>
-        AllDivineSpells.Where(x => x.Category == category).Select(x => x.Name);
+        AllDivineSpells.Where(spell => 
+                spell.Categories.Any(spellCategory=> spellCategory == category))
+            .Select(spell => spell.Name);
 
     private void PopulateSpells()
     {
@@ -703,7 +705,9 @@ public class CharacterBuilder
         HasBardicSpells = HasWisdomSpells && HasSkill("Bardic Voice");
         HasDivineSpells = HasWisdomSpells && HasSkill("Divine Spells");
         HasOccupationalSpells = HasWisdomSpells && HasSkill("Occupational Spells");
-        OccupationalSpells = AllOccupationalSpells.Where(x => x.Category == Revision.Occupation).ToArray();
+        OccupationalSpells = AllOccupationalSpells
+            .Where(spell => spell.Categories.Any(category => category == Revision.Occupation))
+            .ToArray();
 
         var spells = new HashSet<string>();
         if (HasWisdomSpells) spells.AddRange(ChosenSpells);
