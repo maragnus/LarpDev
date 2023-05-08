@@ -126,3 +126,13 @@
     padding: 0.25em 0.5em;
     box-sizing: border-box
 }
+
+.spell-info {
+    display: flex;
+    align-content: flex-start;
+    justify-content: space-between;
+    margin-bottom: 0.5em;
+}
+.spell-type, .spell-mana {
+    font-weight: bolder;
+}

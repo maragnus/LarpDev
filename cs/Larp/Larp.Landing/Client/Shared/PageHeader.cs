@@ -26,6 +26,5 @@ public sealed class PageHeader : ComponentBase
             return;
 
         PageInfo.HeaderText = ChildContent;
-        PageInfo.Print = Print;
     }
 }

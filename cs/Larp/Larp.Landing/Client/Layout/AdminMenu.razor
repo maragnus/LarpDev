@@ -1,0 +1,45 @@
+﻿@inject LandingService LandingService
+
+<MudNavMenu Color="Color.Tertiary" Rounded Bordered>
+    <MudText Typo="Typo.h6" Class="px-4">Administration</MudText>
+    <MudText Typo="Typo.body2" Class="px-4 mud-dark-text">Manage accounts and games</MudText>
+    <MudDivider Class="m-2"/>
+    <MudNavLink Href="/admin" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
+    <MudNavLink Href="/admin/accounts" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ManageAccounts">Accounts</MudNavLink>
+    <MudNavLink Href="/admin/accounts/archived" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Archive">Archived Accounts</MudNavLink>
+    <MudNavLink Href="/admin/events" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Event">Events</MudNavLink>
+    <MudNavLink Href="/admin/letters/templates" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Email">Letter Templates</MudNavLink>
+    @if (LandingService.IsInRole(AccountRole.MwFifthGameMaster))
+    {
+        <MudDivider/>
+        <MudNavGroup Title="Mystwood 5e" Expanded>
+            <MudNavLink Href="/admin/mw5e/characters/review" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Edit">Review Submissions</MudNavLink>
+            <MudNavLink Href="/admin/mw5e/characters" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Person">Manage Characters</MudNavLink>
+            <MudNavLink Href="/admin/mw5e/occupations" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Work">Occupations</MudNavLink>
+            <MudNavLink Href="/admin/mw5e/spells" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Bookmark">Spells</MudNavLink>
+        </MudNavGroup>
+    }
+    @if (LandingService.IsInRole(AccountRole.AccountAdmin))
+    {
+        <MudDivider/>
+        <MudNavLink Href="/admin/data" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Dataset">Import/Export</MudNavLink>
+        <MudNavLink Href="/admin/log" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.History">Activity Log</MudNavLink>
+    }
+    <MudDivider/>
+    <MudNavLink Href="/" Match="@NavLinkMatch.All" IconColor="@Color.Error" Icon="@Icons.Material.Filled.ArrowBack">
+        <MudText Typo="@Typo.body1">Exit Admin Section</MudText>
+    </MudNavLink>
+</MudNavMenu>
+
+@code
+{
+    protected override void OnInitialized()
+    {
+        LandingService.AuthenticatedChanged += LandingServiceOnAuthenticatedChanged;
+    }
+
+    private void LandingServiceOnAuthenticatedChanged(object? sender, EventArgs e)
+    {
+        StateHasChanged();
+    }
+}

@@ -213,12 +213,18 @@
     </MudItem>
     @foreach (var spell in _spells)
     {
+        var type = spell.Type == SpellType.GestureOrVoice
+            ? "Gesture/Voice"
+            : spell.Type.ToString();
+        
         <MudItem xs="@(Print ? 4 : 12)" sm="@(Print ? 4 : FullLayout ? 3 : 4)">
             <div class="spell-container">
                 <div class="spell-name">@spell.Name</div>
+                <div class="spell-info">
+                    <div class="spell-type">@type</div>
+                    <div class="spell-mana">@spell.Mana Mana</div>
+                </div>
                 <div>@spell.Effect</div>
-                <div>@spell.Type</div>
-                <div>@spell.Mana Mana</div>
             </div>
         </MudItem>
     }

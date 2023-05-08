@@ -1,0 +1,90 @@
+﻿@implements IAsyncDisposable
+@inject NavigationManager NavigationManager
+@inject LandingService LandingService
+
+@code {
+        const string AdminPath = "/admin";
+
+    [CascadingParameter]
+    protected PageInfo PageInfo
+    {
+        get => _pageInfo!;
+        set
+        {
+            if (_pageInfo != null)
+                _pageInfo.PageInfoChanged -= PageInfoChanged;
+            _pageInfo = value;
+            if (_pageInfo != null)
+                _pageInfo.PageInfoChanged += PageInfoChanged;
+        }
+    }
+
+    private IDisposable? _navChange;
+    private bool _isDrawerOpen;
+    private bool _isAdminSection;
+    private PageInfo? _pageInfo;
+
+    private bool IsAdminPath(string uri) =>
+        (new Uri(uri)).AbsolutePath.StartsWith(AdminPath);
+
+    private bool IsAdminDashboard(string uri) =>
+        (new Uri(uri)).AbsolutePath == AdminPath;
+
+    private void UpdateLocation(string uri)
+    {
+        _isAdminSection = IsAdminPath(uri);
+        _isDrawerOpen = IsAdminDashboard(uri);
+        StateHasChanged();
+    }
+
+    protected override void OnParametersSet()
+    {
+        UpdateLocation(NavigationManager.Uri);
+        _navChange = NavigationManager.RegisterLocationChangingHandler(context =>
+        {
+            UpdateLocation(context.TargetLocation);
+            return ValueTask.CompletedTask;
+        });
+    }
+
+    private void PageInfoChanged(object? sender, EventArgs e)
+    {
+        StateHasChanged();
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        _navChange?.Dispose();
+        PageInfo = default!;
+        return ValueTask.CompletedTask;
+    }
+
+    private void DrawerToggle()
+    {
+        _isDrawerOpen = !_isDrawerOpen;
+        StateHasChanged();
+    }
+
+    private void AccountClick()
+    {
+        NavigationManager.NavigateTo(LandingService.IsAuthenticated ? "/profile" : "/login");
+    }
+
+}
+
+<MudAppBar Color="Color.Primary" Fixed Dense Class="no-print">
+    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle"/>
+    <MudText>@PageInfo.HeaderText</MudText>
+    <MudSpacer/>
+    <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" OnClick="AccountClick"/>
+</MudAppBar>
+<MudDrawer @bind-Open="@_isDrawerOpen" Class="no-print" ClipMode="DrawerClipMode.Docked" Fixed>
+    @if (_isAdminSection)
+    {
+        <AdminMenu/>
+    }
+    else
+    {
+        <NavMenu/>
+    }
+</MudDrawer>

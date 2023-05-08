@@ -7,23 +7,24 @@
         <MudText Typo="Typo.h5">Saving...</MudText>
         <MudProgressCircular Indeterminate/>
     </MudOverlay>
-    <MudStack Spacing="4">
-        <MudButtonGroup OverrideStyles="false" Class="my-4">
-            <MudButton StartIcon="@Icons.Material.Filled.Save" OnClick="Save" Color="Color.Success" Variant="Variant.Filled">Save</MudButton>
-            <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="Add" Color="Color.Primary" Variant="Variant.Filled">Add Occupation</MudButton>
-        </MudButtonGroup>
-        <MudDrawerContainer>
-            <MudDrawer>
-                <MudListExtended T="Spell" ItemCollection="_spells" @bind-SelectedValue="@_spell" ToStringFunc="ToStringFunc" SearchBox SearchBoxClearable SearchBoxAutoFocus SearchFunc="SearchFunc" Clickable/>
-            </MudDrawer>
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="4" lg="3" Style="height: 75vh; overflow: hidden auto">
+            <MudListExtended T="Spell" ItemCollection="_spells" @bind-SelectedValue="@_spell" ToStringFunc="ToStringFunc" SearchBox SearchBoxClearable SearchBoxAutoFocus SearchFunc="SearchFunc" Clickable/>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="8" lg="9">
+            <MudButtonGroup OverrideStyles="false" Class="mb-4">
+                <MudButton StartIcon="@Icons.Material.Filled.Save" OnClick="Save" Color="Color.Success" Variant="Variant.Filled">Save</MudButton>
+                <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="Add" Color="Color.Primary" Variant="Variant.Filled">Add Spell</MudButton>
+            </MudButtonGroup>
+
             <MudPaper Class="pa-4">
                 @if (_spell != null)
                 {
                     <Mw5eSpellEditor Spell="_spell" Categories="_categories"/>
                 }
             </MudPaper>
-        </MudDrawerContainer>
-    </MudStack>
+        </MudItem>
+    </MudGrid>
 </AdminLayout>
 
 @code {
@@ -48,7 +49,7 @@
 
     private void Add()
     {
-        _spells.Add(new Spell()
+        _spells.Add(_spell = new Spell()
         {
             Name = "New Spell",
             Type = SpellType.Voice

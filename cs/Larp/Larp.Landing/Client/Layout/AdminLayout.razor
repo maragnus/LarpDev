@@ -13,51 +13,20 @@
 
 }
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
-    <MudGrid>
-        <MudItem md="3">
-            <MudNavMenu Color="Color.Tertiary" Rounded Bordered>
-                <MudText Typo="Typo.h6" Class="px-4">Administration</MudText>
-                <MudText Typo="Typo.body2" Class="px-4 mud-dark-text">Manage accounts and games</MudText>
-                <MudDivider Class="m-2"/>
-                <MudNavLink Href="/admin" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
-                <MudNavLink Href="/admin/accounts" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ManageAccounts">Accounts</MudNavLink>
-                <MudNavLink Href="/admin/accounts/archived" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Archive">Archived Accounts</MudNavLink>
-                <MudNavLink Href="/admin/events" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Event">Events</MudNavLink>
-                @if (LandingService.IsInRole(AccountRole.MwFifthGameMaster))
-                {
-                    <MudNavGroup Title="Mystwood 5e" Expanded>
-                        <MudNavLink Href="/admin/mw5e/characters/review" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Edit">Review Submissions</MudNavLink>
-                        <MudNavLink Href="/admin/mw5e/characters" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Person">Manage Characters</MudNavLink>
-                        <MudNavLink Href="/admin/mw5e/occupations" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Work">Occupations</MudNavLink>
-                        <MudNavLink Href="/admin/mw5e/spells" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Bookmark">Spells</MudNavLink>
-                    </MudNavGroup>
-                }
-                <MudNavLink Href="/admin/letters/templates" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Email">Letter Templates</MudNavLink>
-                @if (LandingService.IsInRole(AccountRole.AccountAdmin))
-                {
-                    <MudNavLink Href="/admin/data" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Dataset">Import/Export</MudNavLink>
-                    <MudNavLink Href="/admin/log" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.History">Activity Log</MudNavLink>
-                }
-            </MudNavMenu>
-        </MudItem>
-        <MudItem md="9" Class="relative">
-            @if (Title != null)
-            {
-                <MudText Typo="Typo.h6" Class="mb-4">@Title</MudText>
-            }
-            @if (Loading)
-            {
-                <MudOverlay DarkBackground Absolute Visible>
-                    <MudText Typo="Typo.h6">Loading...</MudText>
-                    <MudProgressCircular Indeterminate Size="Size.Large"/>
-                </MudOverlay>
-            }
-            else
-            {
-                @ChildContent
-            }
-        </MudItem>
-    </MudGrid>
-
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4 relative">
+    @if (Title != null)
+    {
+        <MudText Typo="Typo.h6" Class="mb-4">@Title</MudText>
+    }
+    @if (Loading)
+    {
+        <MudOverlay DarkBackground Absolute Visible>
+            <MudText Typo="Typo.h6">Loading...</MudText>
+            <MudProgressCircular Indeterminate Size="Size.Large"/>
+        </MudOverlay>
+    }
+    else
+    {
+        @ChildContent
+    }
 </MudContainer>
