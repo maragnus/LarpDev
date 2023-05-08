@@ -1,4 +1,24 @@
-﻿@inject LandingService LandingService
+﻿@implements IDisposable
+
+@inject LandingService LandingService
+
+@code
+{
+    protected override void OnInitialized() =>
+        LandingService.AuthenticatedChanged += LandingServiceOnAuthenticatedChanged;
+
+    private void LandingServiceOnAuthenticatedChanged(object? sender, EventArgs e) =>
+        StateHasChanged();
+
+    public void Dispose()=>
+        LandingService.AuthenticatedChanged -= LandingServiceOnAuthenticatedChanged;
+}
+
+@if (!LandingService.IsAuthenticated)
+{
+    <NavMenu/>
+    return;
+}
 
 <MudNavMenu Color="Color.Tertiary" Rounded Bordered>
     <MudText Typo="Typo.h6" Class="px-4">Administration</MudText>
@@ -36,16 +56,3 @@
         <MudText Typo="@Typo.body1">Exit Admin Section</MudText>
     </MudNavLink>
 </MudNavMenu>
-
-@code
-{
-    protected override void OnInitialized()
-    {
-        LandingService.AuthenticatedChanged += LandingServiceOnAuthenticatedChanged;
-    }
-
-    private void LandingServiceOnAuthenticatedChanged(object? sender, EventArgs e)
-    {
-        StateHasChanged();
-    }
-}

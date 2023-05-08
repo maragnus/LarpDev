@@ -56,7 +56,14 @@ public class NotifyService : INotifyService
         try
         {
             var data = JsonSerializer.SerializeToDocument(email);
-            _logger.LogWarning("Sending Email: {Email}", data.RootElement.ToString());
+
+            if (string.IsNullOrWhiteSpace(_options.ApiKey))
+            {
+                _logger.LogWarning("Cannot send email because ApiKey is empty: {Email}", data.RootElement.ToString());
+                return;
+            }
+            
+            _logger.LogInformation("Sending Email: {Email}", data.RootElement.ToString());
 
             var result = await _client.PostAsJsonAsync(_options.ApiEndPoint, email);
             if (!result.IsSuccessStatusCode)

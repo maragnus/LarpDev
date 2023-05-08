@@ -61,7 +61,11 @@
     private async Task Save()
     {
         _saving = true;
-        await SafeActionAsync(async () => { await LandingService.Service.AccountUpdate(_fullName, _location, _phone, _allergies, _birthDate.HasValue ? DateOnly.FromDateTime(_birthDate.Value) : null); });
+        await SafeActionAsync(async () =>
+        {
+            await LandingService.Service.AccountUpdate(_fullName, _location, _phone, _allergies, _birthDate.HasValue ? DateOnly.FromDateTime(_birthDate.Value) : null);
+            await OnSafeInitializedAsync();
+        });
         _saving = false;
     }
 

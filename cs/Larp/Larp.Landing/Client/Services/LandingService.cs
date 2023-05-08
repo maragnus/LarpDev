@@ -78,7 +78,7 @@ public class LandingService
     {
         _httpClientFactory.SetAuthenticationToken(sessionId);
         IsAuthenticated = !string.IsNullOrEmpty(sessionId);
-        AuthenticatedChanged?.Invoke(this, EventArgs.Empty);
+        InvokeAuthenticatedChanged();
     }
 
     public async Task Refresh()
@@ -92,6 +92,11 @@ public class LandingService
             GetMwFifthGameState(),
             GetAccount());
         _logger.LogInformation("Refresh complete");
+    }
+
+    private void InvokeAuthenticatedChanged()
+    {
+        AuthenticatedChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private async Task GetGames()
@@ -144,24 +149,7 @@ public class LandingService
             $"{info.BrowserName} on {info.OSName} {info.OSVersion} {info.DeviceModel} {info.DeviceType}"
                 .Replace("  ", " ").Trim();
     }
-
-    public async Task ValidateSession()
-    {
-        if (!IsAuthenticated)
-            return;
-
-        try
-        {
-            var result = await Service.Validate();
-            if (!result.IsSuccess)
-                SetSessionId(null);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Failed to validate session");
-        }
-    }
-
+    
     public async Task Reset()
     {
         await Logout(true);
@@ -174,14 +162,13 @@ public class LandingService
         try
         {
             Account = await Service.GetAccount();
-            AuthenticatedChanged?.Invoke(this, EventArgs.Empty);
+            InvokeAuthenticatedChanged();
             return Account;
         }
         catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
         {
             Account = null;
             SetSessionId(null);
-            AuthenticatedChanged?.Invoke(this, EventArgs.Empty);
             return new Account();
         }
         catch (BadRequestException ex)
@@ -189,7 +176,6 @@ public class LandingService
             _logger.LogError(ex, "GetAccount failed");
             Account = null;
             SetSessionId(null);
-            AuthenticatedChanged?.Invoke(this, EventArgs.Empty);
             return new Account();
         }
         catch (Exception ex)

@@ -1,4 +1,18 @@
-﻿@inject LandingService LandingService
+﻿@implements IDisposable
+
+@inject LandingService LandingService
+
+@code
+{
+    protected override void OnInitialized() =>
+        LandingService.AuthenticatedChanged += LandingServiceOnAuthenticatedChanged;
+
+    private void LandingServiceOnAuthenticatedChanged(object? sender, EventArgs e) =>
+        StateHasChanged();
+
+    public void Dispose()=>
+        LandingService.AuthenticatedChanged -= LandingServiceOnAuthenticatedChanged;
+}
 
 <MudDrawerHeader Style="padding: 0; margin: 0">
     @if (LandingService.IsAuthenticated)
