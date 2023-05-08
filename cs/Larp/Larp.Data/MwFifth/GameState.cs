@@ -254,12 +254,13 @@ public class Spell
     public string Name { get; set; } = default!;
     public SpellType Type { get; set; }
     public string Category { get; set; } = default!;
+    public string[] Categories { get; set; } = Array.Empty<string>();
     public int Mana { get; set; }
     public string Effect { get; set; } = default!;
 
-    public bool IsBardic => Category is "Bardic";
-    public bool IsDivine => Category.StartsWith("Divine");
-    public bool IsGiftOfWisdom => Category is "Gift of Wisdom";
+    public bool IsBardic => Categories.Contains("Bardic");
+    public bool IsDivine => Categories.Any(x => x.StartsWith("Divine"));
+    public bool IsGiftOfWisdom => Categories.Contains("Gift of Wisdom");
     public bool IsOccupational => !IsBardic && !IsDivine && !IsGiftOfWisdom;
 
     // ReSharper disable once NonReadonlyMemberInGetHashCode

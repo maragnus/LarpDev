@@ -8,36 +8,31 @@
         <MudText Typo="Typo.h5">Saving...</MudText>
         <MudProgressCircular Indeterminate/>
     </MudOverlay>
-    <MudButtonGroup OverrideStyles="false" Class="my-4">
-        <MudButton StartIcon="@Icons.Material.Filled.Save" OnClick="Save" Color="Color.Success" Variant="Variant.Filled">Save</MudButton>
-        <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="Add" Color="Color.Primary" Variant="Variant.Filled">Add Occupation</MudButton>
-    </MudButtonGroup>
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="4" lg="3" Style="height: 75vh; overflow: hidden auto">
+            <MudListExtended T="Occupation" ItemCollection="_occupations" @bind-SelectedValue="@_occupation" ToStringFunc="ToStringFunc" SearchBox SearchBoxClearable SearchBoxAutoFocus SearchFunc="SearchFunc" Clickable/>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="8" lg="9">
+            <MudButtonGroup OverrideStyles="false" Class="mb-4">
+                <MudButton StartIcon="@Icons.Material.Filled.Save" OnClick="Save" Color="Color.Success" Variant="Variant.Filled">Save</MudButton>
+                <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="Add" Color="Color.Primary" Variant="Variant.Filled">Add Occupation</MudButton>
+            </MudButtonGroup>
 
-    <MudDataGrid T="Occupation" Items="_occupations" Loading="IsLoading">
-        <Columns>
-            <HierarchyColumn T="Occupation"/>
-            <PropertyColumn Property="x => x.Name" Title="Name"/>
-            <PropertyColumn Property="x => x.Type" Title="Type"/>
-            <TemplateColumn T="Occupation" Title="Chapters">
-                <CellTemplate>
-                    @(context.Item.Chapters == null || context.Item.Chapters.Length == 0 ? "All" : string.Join(", ", context.Item.Chapters))
-                </CellTemplate>
-            </TemplateColumn>
-        </Columns>
-        <ChildRowContent>
-            <Mw5eOccupationEditor Occupation="context.Item" Skills="_skills" HomeChapters="_chapters"></Mw5eOccupationEditor>
-        </ChildRowContent>
-    </MudDataGrid>
-
-    <MudButtonGroup OverrideStyles="false" Class="my-4">
-        <MudButton StartIcon="@Icons.Material.Filled.Save" OnClick="Save" Color="Color.Success" Variant="Variant.Filled">Save</MudButton>
-        <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="Add" Color="Color.Primary" Variant="Variant.Filled">Add Occupation</MudButton>
-    </MudButtonGroup>
+            <MudPaper Class="pa-4">
+                @if (_occupation != null)
+                {
+                    <Mw5eOccupationEditor Occupation="_occupation" Skills="_skills" HomeChapters="_chapters"/>
+                }
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+    
 </AdminLayout>
 
 
 @code {
     private readonly List<Occupation> _occupations = new();
+    private Occupation? _occupation;
     private string[] _chapters = Array.Empty<string>();
     private SkillDefinition[] _skills = Array.Empty<SkillDefinition>();
     private bool _isSaving;
@@ -63,10 +58,15 @@
 
     private void Add()
     {
-        _occupations.Add(new Occupation()
+        _occupations.Add(_occupation = new Occupation()
         {
             Name = "New Occupation",
             Type = OccupationType.Basic
         });
     }
+    
+    private bool SearchFunc(Occupation occupation, string query) =>
+        occupation.Name.Contains(query, StringComparison.InvariantCultureIgnoreCase);
+
+    private string ToStringFunc(Occupation occupation) => $"{occupation.Name} ({occupation.Type}) {string.Join(", ", occupation.Chapters ?? Array.Empty<string>())}".TrimEnd();
 }

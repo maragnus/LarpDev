@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Larp.Data.MwFifth;
 using Larp.Data.Seeder;
 using Microsoft.Extensions.FileProviders;
@@ -38,6 +39,12 @@ public class AdminService : IAdminService
         _clock = clock;
         _account = userSession.Account!;
         _sessionId = userSession.SessionId;
+    }
+
+    private static string NormalizeName(string religionName, string religionTitle)
+    {
+        var name = string.IsNullOrWhiteSpace(religionName) ? religionTitle : religionName;
+        return Regex.Replace(name.ToLowerInvariant(), "[^a-z]", "");
     }
 
     public async Task<Account[]> GetAccounts(AccountState accountState)
@@ -392,10 +399,81 @@ public class AdminService : IAdminService
             if (occupation.Chapters?.Length == 0)
                 occupation.Chapters = null;
         }
+        
+        await UpdateGameState(nameof(GameState.Occupations), occupations);
+    }
 
+    public async Task SaveSpells(Spell[] spells)
+    {
+        foreach (var spell in spells)
+        {
+            if (spell.Categories.Length == 0 || spell.Categories.Any(string.IsNullOrWhiteSpace))
+                spell.Categories = new[] { "Gift of Wisdom" };
+        }
+        await UpdateGameState(nameof(GameState.Spells), spells);
+    }
+
+    public async Task SaveSkills(SkillDefinition[] skills)
+    {
+        foreach (var skill in skills)
+        {
+            if (skill.Chapters?.Length == 0)
+                skill.Chapters = null;
+            if (skill.CostPerPurchase == 0)
+                skill.CostPerPurchase = null;
+            if (skill.RanksPerPurchase == 0)
+                skill.RanksPerPurchase = null;
+            if (string.IsNullOrWhiteSpace(skill.Description))
+                skill.Description = "";
+            // if (!skill.Title.StartsWith(skill.Name))
+            //     throw new BadRequestException($"Skill '{skill.Name}' with title '{skill.Title}' do not match");
+            if (skill is { Purchasable: SkillPurchasable.Multiple or SkillPurchasable.Once, CostPerPurchase: null })
+                throw new BadRequestException($"Skill '{skill.Name}' requires {nameof(SkillDefinition.CostPerPurchase)}");
+            if (skill is { Purchasable: SkillPurchasable.Multiple, RanksPerPurchase: null })
+                skill.RanksPerPurchase = 1;
+        }
+
+        await UpdateGameState(nameof(GameState.Skills), skills);
+    }
+
+    public async Task SaveAdvantages(Vantage[] vantages)
+    {
+        foreach (var vantage in vantages)
+            vantage.Title = $"{vantage.Name} {vantage.Rank}";
+        
+        await UpdateGameState(nameof(GameState.Advantages), vantages);
+    }
+
+    public async Task SaveDisadvantages(Vantage[] vantages)
+    {
+        foreach (var vantage in vantages)
+            vantage.Title = $"{vantage.Name} {vantage.Rank}";
+        
+        await UpdateGameState(nameof(GameState.Disadvantages), vantages);
+    }
+
+    public async Task SaveChapters(HomeChapter[] chapters)
+    {
+        foreach (var chapter in chapters)
+            chapter.Name = NormalizeName(chapter.Name, chapter.Title);
+        
+        await UpdateGameState(nameof(GameState.HomeChapters), chapters);
+    }
+
+    public async Task SaveReligions(Religion[] religions)
+    {
+        foreach (var religion in religions)
+            religion.Name = NormalizeName(religion.Name, religion.Title);
+        
+        await UpdateGameState(nameof(GameState.Religions), religions);
+    }
+
+    
+    private async Task UpdateGameState<TField>(string property, TField items)
+    {
         var filter = Builders<BsonDocument>.Filter.Eq(nameof(GameState.Name), GameState.GameName);
         var update = Builders<BsonDocument>.Update
-            .Set(nameof(GameState.Occupations), occupations)
+            .Set(property, items)
             .Set(nameof(GameState.Revision), Guid.NewGuid().ToString("N"))
             .Set(nameof(GameState.LastUpdated), _clock.UtcNow.ToString("O"));
         var result = await _db.GameStates.UpdateOneAsync(filter, update);
@@ -405,9 +483,9 @@ public class AdminService : IAdminService
 
         _db.MwFifthGame.ClearGameState();
 
-        await Log(new GameStateLogEvent() { GameName = GameState.GameName, Summary = "Updated Occupations" });
+        await Log(new GameStateLogEvent() { GameName = GameState.GameName, Summary = $"Updated {property}" });
     }
-
+    
     public async Task<EventAttendance[]> GetAccountAttendances(string accountId) =>
         await _eventManager.GetAccountAttendances(accountId);
 

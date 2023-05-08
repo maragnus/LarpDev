@@ -4,6 +4,16 @@ namespace Larp.Landing.Client.Shared;
 
 public class PageInfo
 {
-    public RenderFragment? HeaderText { get; set; }
-    public bool Print { get; set; }
+    private RenderFragment? _headerText;
+    public event EventHandler? PageInfoChanged;  
+    
+    public RenderFragment? HeaderText
+    {
+        get => _headerText;
+        set
+        {
+            _headerText = value;
+            PageInfoChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
 }

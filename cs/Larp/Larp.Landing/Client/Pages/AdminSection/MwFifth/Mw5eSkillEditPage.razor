@@ -1,0 +1,65 @@
+﻿@page "/admin/mw5e/skills"
+@inherits LarpPage
+@inject LandingService LandingService
+
+<AdminLayout Title="Mystwood 5e Skills">
+    <MudOverlay Visible="_isSaving" Absolute DarkBackground>
+        <MudText Typo="Typo.h5">Saving...</MudText>
+        <MudProgressCircular Indeterminate/>
+    </MudOverlay>
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="4" lg="3" Style="height: 75vh; overflow: hidden auto">
+            <MudListExtended T="SkillDefinition" ItemCollection="_skills" @bind-SelectedValue="@_skill" ToStringFunc="ToStringFunc" SearchBox SearchBoxClearable SearchBoxAutoFocus SearchFunc="SearchFunc" Clickable/>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="8" lg="9">
+            <MudButtonGroup OverrideStyles="false" Class="mb-4">
+                <MudButton StartIcon="@Icons.Material.Filled.Save" OnClick="Save" Color="Color.Success" Variant="Variant.Filled">Save</MudButton>
+                <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="Add" Color="Color.Primary" Variant="Variant.Filled">Add Skill</MudButton>
+            </MudButtonGroup>
+
+            <MudPaper Class="pa-4">
+                @if (_skill != null)
+                {
+                    <Mw5eSkillEditor Skill="_skill" Chapters="_chapters"/>
+                }
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</AdminLayout>
+
+@code {
+    private bool _isSaving;
+    private readonly List<SkillDefinition> _skills = new();
+    private SkillDefinition? _skill;
+    private string[] _chapters = Array.Empty<string>();
+
+    protected override async Task OnSafeInitializedAsync()
+    {
+        var gameState = await LandingService.MwFifth.GetGameState("");
+        _skills.AddRange(gameState.Skills);
+        _chapters = gameState.HomeChapters.Select(x => x.Name).Distinct().Order().ToArray();
+    }
+
+    private async Task Save()
+    {
+        _isSaving = true;
+        await SafeActionAsync(async () => { await LandingService.Admin.SaveSkills(_skills.ToArray()); });
+        _isSaving = false;
+    }
+
+    private void Add()
+    {
+        _skills.Add(_skill = new SkillDefinition()
+        {
+            Name = "New Skill",
+            Title = "New Skill X",
+            Purchasable = SkillPurchasable.Unavailable,
+            Class = SkillClass.Unavailable
+        });
+    }
+
+    private bool SearchFunc(SkillDefinition skill, string query) =>
+        skill.Name.Contains(query, StringComparison.InvariantCultureIgnoreCase);
+
+    private string ToStringFunc(SkillDefinition skill) => $"{skill.Name} ({skill.Class} {skill.Purchasable})";
+}

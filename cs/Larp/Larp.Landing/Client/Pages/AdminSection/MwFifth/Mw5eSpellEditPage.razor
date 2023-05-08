@@ -1,0 +1,63 @@
+﻿@page "/admin/mw5e/spells"
+@inherits LarpPage
+@inject LandingService LandingService
+
+<AdminLayout Title="Mystwood 5e Spells">
+    <MudOverlay Visible="_isSaving" Absolute DarkBackground>
+        <MudText Typo="Typo.h5">Saving...</MudText>
+        <MudProgressCircular Indeterminate/>
+    </MudOverlay>
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="4" lg="3" Style="height: 75vh; overflow: hidden auto">
+            <MudListExtended T="Spell" ItemCollection="_spells" @bind-SelectedValue="@_spell" ToStringFunc="ToStringFunc" SearchBox SearchBoxClearable SearchBoxAutoFocus SearchFunc="SearchFunc" Clickable/>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="8" lg="9">
+            <MudButtonGroup OverrideStyles="false" Class="mb-4">
+                <MudButton StartIcon="@Icons.Material.Filled.Save" OnClick="Save" Color="Color.Success" Variant="Variant.Filled">Save</MudButton>
+                <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="Add" Color="Color.Primary" Variant="Variant.Filled">Add Spell</MudButton>
+            </MudButtonGroup>
+
+            <MudPaper Class="pa-4">
+                @if (_spell != null)
+                {
+                    <Mw5eSpellEditor Spell="_spell" Categories="_categories"/>
+                }
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</AdminLayout>
+
+@code {
+    private bool _isSaving;
+    private readonly List<Spell> _spells = new();
+    private Spell? _spell;
+    private string[] _categories = Array.Empty<string>();
+
+    protected override async Task OnSafeInitializedAsync()
+    {
+        var gameState = await LandingService.MwFifth.GetGameState("");
+        _spells.AddRange(gameState.Spells);
+        _categories = gameState.Spells.SelectMany(x => x.Categories).Distinct().Order().ToArray();
+    }
+
+    private async Task Save()
+    {
+        _isSaving = true;
+        await SafeActionAsync(async () => { await LandingService.Admin.SaveSpells(_spells.ToArray()); });
+        _isSaving = false;
+    }
+
+    private void Add()
+    {
+        _spells.Add(_spell = new Spell()
+        {
+            Name = "New Spell",
+            Type = SpellType.Voice
+        });
+    }
+
+    private bool SearchFunc(Spell spell, string query) =>
+        spell.Name.Contains(query, StringComparison.InvariantCultureIgnoreCase);
+
+    private string ToStringFunc(Spell spell) => $"{spell.Name} ({spell.Type})";
+}

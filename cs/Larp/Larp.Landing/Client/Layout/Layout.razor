@@ -1,22 +1,30 @@
 ﻿@inherits LayoutComponentBase
 @inject LandingService LandingService
 <CascadingValue Value="@_pageInfo">
-    <NavMenu/>
-    @if (!_isLoaded)
-    {
-        <MudProgressCircular Size="Size.Large" Indeterminate />
-    }
-    else
-    {
-        @Body   
-    }
+    <MudLayout>
+        <LayoutHeader/>
+        <MudMainContent>
+            @if (!_isLoaded)
+            {
+                <MudProgressCircular Size="Size.Large" Indeterminate/>
+            }
+            else
+            {
+                @Body
+            }
+        </MudMainContent>
+    </MudLayout>
 </CascadingValue>
 
 @code {
-    [UsedImplicitly]
-    private PageInfo _pageInfo = new() { HeaderText = @<span>@LandingService.ServiceName</span> };
+
+    [UsedImplicitly] private PageInfo _pageInfo = new()
+    {
+        HeaderText = @<span>@LandingService.ServiceName</span>
+    };
+
     private bool _isLoaded;
-    
+
     protected override async Task OnInitializedAsync()
     {
         try
@@ -28,4 +36,5 @@
             _isLoaded = true;
         }
     }
+
 }

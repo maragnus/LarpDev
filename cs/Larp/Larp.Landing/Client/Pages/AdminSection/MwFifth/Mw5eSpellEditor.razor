@@ -1,0 +1,38 @@
+﻿@code {
+
+    [Parameter]
+    public Spell Spell { get; set; } = default!;
+
+    [Parameter]
+    public string[] Categories { get; set; } = Array.Empty<string>();
+
+    private static SpellType[] _types = Enum.GetValues<SpellType>().ToArray();
+
+    private IEnumerable<string> CategoryList
+    {
+        get => Spell.Categories;
+        set => Spell.Categories = value.ToArray();
+    }
+
+
+}
+
+<EditForm Model="Spell">
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <MudTextField Label="Name" @bind-Value="@Spell.Name" Required Variant="Variant.Outlined"/>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudNumericField Label="Mana" @bind-Value="@Spell.Mana" Required Variant="Variant.Outlined"/>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudSelectExtended Label="Categories" @bind-SelectedValues="@CategoryList" ItemCollection="Categories" MultiSelection Required Variant="Variant.Outlined"/>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudSelectExtended T="SpellType" Label="Type" @bind-Value="@Spell.Type" ItemCollection="_types" Required Variant="Variant.Outlined"/>
+        </MudItem>
+        <MudItem xs="12" md="12">
+            <MudTextField Label="Effect" Lines="4" @bind-Value="@Spell.Effect" Required Variant="Variant.Outlined"/>
+        </MudItem>
+    </MudGrid>
+</EditForm>

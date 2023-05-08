@@ -50,11 +50,28 @@ public class LarpContext
 
     public async Task Migrate()
     {
+        await FixSpells();
         await ActivateAccounts();
         await FixAccounts();
         await MigrateToCharacterRevisions();
         await FixCharacters();
         await CreateIndices();
+    }
+
+    private async Task FixSpells()
+    {
+        var gameState = await MwFifthGame.GetGameState();
+        if (gameState.Spells.All(x => x.Categories.Length != 0)) return;
+
+        foreach (var spell in gameState.Spells.Where(x => x.Categories.Length == 0))
+        {
+            spell.Categories = new[] { spell.Category };
+            spell.Category = null!;
+        }
+
+        await GameStates.UpdateOneAsync(
+            Builders<BsonDocument>.Filter.Eq("Name", GameState.GameName),
+            Builders<BsonDocument>.Update.Set("Spells", gameState.Spells));
     }
 
     private async Task FixAccounts()
