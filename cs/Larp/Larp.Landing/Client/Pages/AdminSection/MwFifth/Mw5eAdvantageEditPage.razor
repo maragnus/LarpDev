@@ -1,0 +1,77 @@
+﻿@page "/admin/mw5e/advantages"
+@inherits LarpPage
+@inject LandingService LandingService
+
+<AdminLayout Title="Mystwood 5e Advantages">
+    <MudOverlay Visible="_isSaving" Absolute DarkBackground>
+        <MudText Typo="Typo.h5">Saving...</MudText>
+        <MudProgressCircular Indeterminate/>
+    </MudOverlay>
+    <MudStack>
+        <MudButtonGroup OverrideStyles="false">
+            <MudButton StartIcon="@Icons.Material.Filled.Save" OnClick="Save" Color="Color.Success" Variant="Variant.Filled">Save</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="Add" Color="Color.Primary" Variant="Variant.Filled">Add Advantage</MudButton>
+        </MudButtonGroup>
+
+        <MudDataGrid T="Vantage" Items="_vantages" ReadOnly="false" EditMode="DataGridEditMode.Cell" EditTrigger="DataGridEditTrigger.OnRowClick">
+            <Columns>
+                <PropertyColumn Property="x => x.Name" Title="Name" IsEditable>
+                    <EditTemplate>
+                        <MudTextField @bind-Value="@context.Item.Name"/>
+                    </EditTemplate>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.Rank" Title="Rank" IsEditable>
+                    <EditTemplate>
+                        <MudNumericField @bind-Value="@context.Item.Rank" Style="width: 4em"/>
+                    </EditTemplate>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.Physical" Title="Physical" IsEditable>
+                    <EditTemplate>
+                        <MudSwitch Checked="@context.Item.Physical" Color="Color.Success" UnCheckedColor="Color.Error" CheckedChanged="(bool value) => { context.Item.Physical = value; }" Style="width: 4em"/>
+                    </EditTemplate>
+                </PropertyColumn>
+                <PropertyColumn Property="x => x.Description" Title="Description" IsEditable>
+                    <EditTemplate>
+                        <MudTextField Lines="4" @bind-Value="@context.Item.Description"/>
+                    </EditTemplate>
+                </PropertyColumn>
+            </Columns>
+        </MudDataGrid>
+
+        <MudButtonGroup OverrideStyles="false">
+            <MudButton StartIcon="@Icons.Material.Filled.Save" OnClick="Save" Color="Color.Success" Variant="Variant.Filled">Save</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="Add" Color="Color.Primary" Variant="Variant.Filled">Add Advantage</MudButton>
+        </MudButtonGroup>
+    </MudStack>
+</AdminLayout>
+
+@code {
+    private bool _isSaving;
+    private readonly List<Vantage> _vantages = new();
+
+    protected override async Task OnSafeInitializedAsync()
+    {
+        var gameState = await LandingService.MwFifth.GetGameState("");
+        _vantages.AddRange(gameState.Advantages);
+    }
+
+    private async Task Save()
+    {
+        _isSaving = true;
+        await SafeActionAsync(async () => { await LandingService.Admin.SaveAdvantages(_vantages.ToArray()); });
+        _isSaving = false;
+    }
+
+    private void Add()
+    {
+        _vantages.Add(new Vantage()
+        {
+            Name = "New Advantage",
+            Title = "New Advantage 1",
+            Rank = 1,
+            Physical = false,
+            Description = ""
+        });
+    }
+
+}

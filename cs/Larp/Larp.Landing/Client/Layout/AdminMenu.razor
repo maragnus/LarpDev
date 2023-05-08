@@ -12,12 +12,17 @@
     @if (LandingService.IsInRole(AccountRole.MwFifthGameMaster))
     {
         <MudDivider/>
-        <MudNavGroup Title="Mystwood 5e" Expanded>
+        <MudNavGroup Title="Mystwood 5e">
             <MudNavLink Href="/admin/mw5e/characters/review" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Edit">Review Submissions</MudNavLink>
             <MudNavLink Href="/admin/mw5e/characters" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Person">Manage Characters</MudNavLink>
+            <MudDivider/>
             <MudNavLink Href="/admin/mw5e/occupations" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Work">Occupations</MudNavLink>
-            <MudNavLink Href="/admin/mw5e/spells" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Bookmark">Spells</MudNavLink>
+            <MudNavLink Href="/admin/mw5e/spells" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Book">Spells</MudNavLink>
             <MudNavLink Href="/admin/mw5e/skills" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Handyman">Skills</MudNavLink>
+            <MudNavLink Href="/admin/mw5e/advantages" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Blind">Advantages</MudNavLink>
+            <MudNavLink Href="/admin/mw5e/disadvantages" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Blind">Disadvantages</MudNavLink>
+            <MudNavLink Href="/admin/mw5e/chapters" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Home">Chapters</MudNavLink>
+            <MudNavLink Href="/admin/mw5e/religions" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.GroupWork">Religions</MudNavLink>
         </MudNavGroup>
     }
     @if (LandingService.IsInRole(AccountRole.AccountAdmin))

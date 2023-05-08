@@ -1,0 +1,58 @@
+﻿@page "/admin/mw5e/religions"
+@inherits LarpPage
+@inject LandingService LandingService
+
+<AdminLayout Title="Mystwood 5e Religions">
+    <MudOverlay Visible="_isSaving" Absolute DarkBackground>
+        <MudText Typo="Typo.h5">Saving...</MudText>
+        <MudProgressCircular Indeterminate/>
+    </MudOverlay>
+    <MudStack Spacing="4">
+        <MudButtonGroup OverrideStyles="false">
+            <MudButton StartIcon="@Icons.Material.Filled.Save" OnClick="Save" Color="Color.Success" Variant="Variant.Filled">Save</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="Add" Color="Color.Primary" Variant="Variant.Filled">Add Religion</MudButton>
+        </MudButtonGroup>
+
+        <MudDataGrid T="Religion" Items="_religions" ReadOnly="false" EditMode="DataGridEditMode.Cell" EditTrigger="DataGridEditTrigger.OnRowClick">
+            <Columns>
+                <PropertyColumn Property="x => x.Name" Title="Name" IsEditable/>
+                <PropertyColumn Property="x => x.Title" Title="Title" IsEditable/>
+                <PropertyColumn Property="x => x.Description" Title="Description" IsEditable/>
+            </Columns>
+        </MudDataGrid>
+        
+        <MudButtonGroup OverrideStyles="false">
+            <MudButton StartIcon="@Icons.Material.Filled.Save" OnClick="Save" Color="Color.Success" Variant="Variant.Filled">Save</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="Add" Color="Color.Primary" Variant="Variant.Filled">Add Religion</MudButton>
+        </MudButtonGroup>
+    </MudStack>
+</AdminLayout>
+
+@code {
+    private bool _isSaving;
+    private readonly List<Religion> _religions = new();
+
+    protected override async Task OnSafeInitializedAsync()
+    {
+        var gameState = await LandingService.MwFifth.GetGameState("");
+        _religions.AddRange(gameState.Religions);
+    }
+
+    private async Task Save()
+    {
+        _isSaving = true;
+        await SafeActionAsync(async () => { await LandingService.Admin.SaveReligions(_religions.ToArray()); });
+        _isSaving = false;
+    }
+
+    private void Add()
+    {
+        _religions.Add(new Religion()
+        {
+            Name = "new-god",
+            Title = "New God",
+            Description = "This is the New God"
+        });
+    }
+
+}

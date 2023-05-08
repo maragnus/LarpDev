@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Larp.Data.MwFifth;
 using Larp.Data.Seeder;
 using Microsoft.Extensions.FileProviders;
@@ -38,6 +39,12 @@ public class AdminService : IAdminService
         _clock = clock;
         _account = userSession.Account!;
         _sessionId = userSession.SessionId;
+    }
+
+    private static string NormalizeName(string religionName, string religionTitle)
+    {
+        var name = string.IsNullOrWhiteSpace(religionName) ? religionTitle : religionName;
+        return Regex.Replace(name.ToLowerInvariant(), "[^a-z]", "");
     }
 
     public async Task<Account[]> GetAccounts(AccountState accountState)
@@ -392,20 +399,8 @@ public class AdminService : IAdminService
             if (occupation.Chapters?.Length == 0)
                 occupation.Chapters = null;
         }
-
-        var filter = Builders<BsonDocument>.Filter.Eq(nameof(GameState.Name), GameState.GameName);
-        var update = Builders<BsonDocument>.Update
-            .Set(nameof(GameState.Occupations), occupations)
-            .Set(nameof(GameState.Revision), Guid.NewGuid().ToString("N"))
-            .Set(nameof(GameState.LastUpdated), _clock.UtcNow.ToString("O"));
-        var result = await _db.GameStates.UpdateOneAsync(filter, update);
-
-        if (result.ModifiedCount != 1)
-            throw new BadRequestException("Game State could not be updated");
-
-        _db.MwFifthGame.ClearGameState();
-
-        await Log(new GameStateLogEvent() { GameName = GameState.GameName, Summary = "Updated Occupations" });
+        
+        await UpdateGameState(nameof(GameState.Occupations), occupations);
     }
 
     public async Task SaveSpells(Spell[] spells)
@@ -415,24 +410,11 @@ public class AdminService : IAdminService
             if (spell.Categories.Length == 0 || spell.Categories.Any(string.IsNullOrWhiteSpace))
                 spell.Categories = new[] { "Gift of Wisdom" };
         }
-        
-        var filter = Builders<BsonDocument>.Filter.Eq(nameof(GameState.Name), GameState.GameName);
-        var update = Builders<BsonDocument>.Update
-            .Set(nameof(GameState.Spells), spells)
-            .Set(nameof(GameState.Revision), Guid.NewGuid().ToString("N"))
-            .Set(nameof(GameState.LastUpdated), _clock.UtcNow.ToString("O"));
-        var result = await _db.GameStates.UpdateOneAsync(filter, update);
-
-        if (result.ModifiedCount != 1)
-            throw new BadRequestException("Game State could not be updated");
-
-        _db.MwFifthGame.ClearGameState();
-
-        await Log(new GameStateLogEvent() { GameName = GameState.GameName, Summary = "Updated Spells" });
+        await UpdateGameState(nameof(GameState.Spells), spells);
     }
 
     public async Task SaveSkills(SkillDefinition[] skills)
-    {       
+    {
         foreach (var skill in skills)
         {
             if (skill.Chapters?.Length == 0)
@@ -451,9 +433,47 @@ public class AdminService : IAdminService
                 skill.RanksPerPurchase = 1;
         }
 
+        await UpdateGameState(nameof(GameState.Skills), skills);
+    }
+
+    public async Task SaveAdvantages(Vantage[] vantages)
+    {
+        foreach (var vantage in vantages)
+            vantage.Title = $"{vantage.Name} {vantage.Rank}";
+        
+        await UpdateGameState(nameof(GameState.Advantages), vantages);
+    }
+
+    public async Task SaveDisadvantages(Vantage[] vantages)
+    {
+        foreach (var vantage in vantages)
+            vantage.Title = $"{vantage.Name} {vantage.Rank}";
+        
+        await UpdateGameState(nameof(GameState.Disadvantages), vantages);
+    }
+
+    public async Task SaveChapters(HomeChapter[] chapters)
+    {
+        foreach (var chapter in chapters)
+            chapter.Name = NormalizeName(chapter.Name, chapter.Title);
+        
+        await UpdateGameState(nameof(GameState.HomeChapters), chapters);
+    }
+
+    public async Task SaveReligions(Religion[] religions)
+    {
+        foreach (var religion in religions)
+            religion.Name = NormalizeName(religion.Name, religion.Title);
+        
+        await UpdateGameState(nameof(GameState.Religions), religions);
+    }
+
+    
+    private async Task UpdateGameState<TField>(string property, TField items)
+    {
         var filter = Builders<BsonDocument>.Filter.Eq(nameof(GameState.Name), GameState.GameName);
         var update = Builders<BsonDocument>.Update
-            .Set(nameof(GameState.Skills), skills)
+            .Set(property, items)
             .Set(nameof(GameState.Revision), Guid.NewGuid().ToString("N"))
             .Set(nameof(GameState.LastUpdated), _clock.UtcNow.ToString("O"));
         var result = await _db.GameStates.UpdateOneAsync(filter, update);
@@ -463,9 +483,9 @@ public class AdminService : IAdminService
 
         _db.MwFifthGame.ClearGameState();
 
-        await Log(new GameStateLogEvent() { GameName = GameState.GameName, Summary = "Updated Skills" });
+        await Log(new GameStateLogEvent() { GameName = GameState.GameName, Summary = $"Updated {property}" });
     }
-
+    
     public async Task<EventAttendance[]> GetAccountAttendances(string accountId) =>
         await _eventManager.GetAccountAttendances(accountId);
 

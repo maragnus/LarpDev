@@ -84,6 +84,9 @@ public interface IAdminService
     [ApiGet("events/{eventId}/attendance"), ApiAuthenticated(AccountRoles.AdminAccess)]
     Task<Attendance[]> GetEventAttendances(string eventId);
 
+    [ApiGet("account/{accountId}/attendance"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    Task<EventAttendance[]> GetAccountAttendances(string accountId);
+
     [ApiPost("data/import"), ApiAuthenticated(AccountRoles.AccountAdmin)]
     Task<StringResult> Import(Stream data);
 
@@ -192,9 +195,18 @@ public interface IAdminService
 
     [ApiPost("mw5e/skills"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
     Task SaveSkills(SkillDefinition[] skills);
+
+    [ApiPost("mw5e/advantages"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    Task SaveAdvantages(Vantage[] vantages);
+
+    [ApiPost("mw5e/disadvantages"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    Task SaveDisadvantages(Vantage[] vantages);
     
-    [ApiGet("account/{accountId}/attendance"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
-    Task<EventAttendance[]> GetAccountAttendances(string accountId);
+    [ApiPost("mw5e/chapters"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    Task SaveChapters(HomeChapter[] chapters);
+
+    [ApiPost("mw5e/religions"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    Task SaveReligions(Religion[] religions);
 }
 
 public class Dashboard
