@@ -1,0 +1,47 @@
+﻿@code {
+
+    [Parameter]
+    public SkillDefinition Skill { get; set; } = default!;
+
+    [Parameter]
+    public string[] Chapters { get; set; } = Array.Empty<string>();
+
+    private static SkillPurchasable[] _purchasables = Enum.GetValues<SkillPurchasable>().ToArray();
+    private static SkillClass[] _classes = Enum.GetValues<SkillClass>().ToArray();
+
+    private IEnumerable<string> ChapterList
+    {
+        get => Skill.Chapters ?? Array.Empty<string>();
+        set => Skill.Chapters = value.ToArray();
+    }
+
+}
+
+<EditForm Model="Skill">
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <MudTextField Label="Name" @bind-Value="@Skill.Name" Required Variant="Variant.Outlined"/>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudTextField Label="Title" @bind-Value="@Skill.Title" Required Variant="Variant.Outlined"/>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudNumericField Label="Cost per Purchase" @bind-Value="@Skill.CostPerPurchase" Clearable Variant="Variant.Outlined"/>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudNumericField Label="Ranks per Purchase" @bind-Value="@Skill.RanksPerPurchase" Clearable Variant="Variant.Outlined"/>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudSelectExtended Label="Chapters" @bind-SelectedValues="@ChapterList" ItemCollection="Chapters" MultiSelection Variant="Variant.Outlined"/>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudSelectExtended T="SkillPurchasable" Label="Purchasable" @bind-Value="@Skill.Purchasable" ItemCollection="_purchasables" Required Variant="Variant.Outlined"/>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudSelectExtended T="SkillClass" Label="Class" @bind-Value="@Skill.Class" ItemCollection="_classes" Required Variant="Variant.Outlined"/>
+        </MudItem>
+        <MudItem xs="12" md="12">
+            <MudTextField Label="Description" Lines="4" @bind-Value="@Skill.Description" Required Variant="Variant.Outlined"/>
+        </MudItem>
+    </MudGrid>
+</EditForm>

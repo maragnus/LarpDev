@@ -190,6 +190,9 @@ public interface IAdminService
     [ApiPost("mw5e/spells"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
     Task SaveSpells(Spell[] spells);
 
+    [ApiPost("mw5e/skills"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    Task SaveSkills(SkillDefinition[] skills);
+    
     [ApiGet("account/{accountId}/attendance"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
     Task<EventAttendance[]> GetAccountAttendances(string accountId);
 }

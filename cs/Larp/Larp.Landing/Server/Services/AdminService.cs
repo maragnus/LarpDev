@@ -410,6 +410,12 @@ public class AdminService : IAdminService
 
     public async Task SaveSpells(Spell[] spells)
     {
+        foreach (var spell in spells)
+        {
+            if (spell.Categories.Length == 0 || spell.Categories.Any(string.IsNullOrWhiteSpace))
+                spell.Categories = new[] { "Gift of Wisdom" };
+        }
+        
         var filter = Builders<BsonDocument>.Filter.Eq(nameof(GameState.Name), GameState.GameName);
         var update = Builders<BsonDocument>.Update
             .Set(nameof(GameState.Spells), spells)
@@ -423,6 +429,41 @@ public class AdminService : IAdminService
         _db.MwFifthGame.ClearGameState();
 
         await Log(new GameStateLogEvent() { GameName = GameState.GameName, Summary = "Updated Spells" });
+    }
+
+    public async Task SaveSkills(SkillDefinition[] skills)
+    {       
+        foreach (var skill in skills)
+        {
+            if (skill.Chapters?.Length == 0)
+                skill.Chapters = null;
+            if (skill.CostPerPurchase == 0)
+                skill.CostPerPurchase = null;
+            if (skill.RanksPerPurchase == 0)
+                skill.RanksPerPurchase = null;
+            if (string.IsNullOrWhiteSpace(skill.Description))
+                skill.Description = "";
+            // if (!skill.Title.StartsWith(skill.Name))
+            //     throw new BadRequestException($"Skill '{skill.Name}' with title '{skill.Title}' do not match");
+            if (skill is { Purchasable: SkillPurchasable.Multiple or SkillPurchasable.Once, CostPerPurchase: null })
+                throw new BadRequestException($"Skill '{skill.Name}' requires {nameof(SkillDefinition.CostPerPurchase)}");
+            if (skill is { Purchasable: SkillPurchasable.Multiple, RanksPerPurchase: null })
+                skill.RanksPerPurchase = 1;
+        }
+
+        var filter = Builders<BsonDocument>.Filter.Eq(nameof(GameState.Name), GameState.GameName);
+        var update = Builders<BsonDocument>.Update
+            .Set(nameof(GameState.Skills), skills)
+            .Set(nameof(GameState.Revision), Guid.NewGuid().ToString("N"))
+            .Set(nameof(GameState.LastUpdated), _clock.UtcNow.ToString("O"));
+        var result = await _db.GameStates.UpdateOneAsync(filter, update);
+
+        if (result.ModifiedCount != 1)
+            throw new BadRequestException("Game State could not be updated");
+
+        _db.MwFifthGame.ClearGameState();
+
+        await Log(new GameStateLogEvent() { GameName = GameState.GameName, Summary = "Updated Skills" });
     }
 
     public async Task<EventAttendance[]> GetAccountAttendances(string accountId) =>
