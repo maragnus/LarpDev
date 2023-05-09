@@ -487,6 +487,8 @@ public class CharacterBuilder
 
     private void PopulateAbilities()
     {
+        _logger.LogInformation("Populating Gift for Level {Level}", Level);
+
         var abilities = new List<Ability>();
         var properties = new List<GiftPropertyValue>();
 
@@ -501,13 +503,14 @@ public class CharacterBuilder
             if (giftLevel <= 0) return;
 
             // Abilities are accumulative of gift levels
-            var a = AllGifts[giftName].Ranks[0..(giftLevel - 1)]
+            var a = AllGifts[giftName].Ranks
+                .Where(rank => rank.Rank <= giftLevel)
                 .SelectMany(x => x.Abilities);
             abilities.AddRange(a);
 
             // Properties are only from current gift level
             var gift = AllGifts[giftName];
-            var rank = gift.Ranks[giftLevel - 1];
+            var rank = gift.Ranks.First(rank => rank.Rank == giftLevel);
             var p = gift.Properties.Select((name, index) =>
                 new GiftPropertyValue(name, rank.Properties[index]));
             properties.AddRange(p);
