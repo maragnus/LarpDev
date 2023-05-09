@@ -108,7 +108,7 @@
         public string? EmailAddress { get; set; }
 
         [Required, Display(Name = "Code")]
-        [RegularExpression(@"[A-Za-z0-9]{6}", ErrorMessage = "Please enter the code carefully from your email")]
+        [RegularExpression(@"\s*[A-Za-z0-9]{3,8}\s*", ErrorMessage = "Please enter the code carefully from your email")]
         public string? Token { get; set; }
 
         [Required, Display(Name = "Device Name")]

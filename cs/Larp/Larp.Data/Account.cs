@@ -1,4 +1,5 @@
-﻿using Larp.Common;
+﻿using System.Text.RegularExpressions;
+using Larp.Common;
 
 namespace Larp.Data;
 
@@ -43,6 +44,7 @@ public class Account
     public string? Name { get; set; }
     public string? Location { get; set; }
     public string? Phone { get; set; }
+    public string? NormalizedPhone { get; set; }
     public List<AccountEmail> Emails { get; set; } = new();
     public bool IsSuperAdmin { get; set; }
     public string? Notes { get; set; }
@@ -67,6 +69,18 @@ public class Account
     public string? PreferredEmail =>
         (Emails.FirstOrDefault(x => x.IsPreferred) ?? Emails.FirstOrDefault(x => x.IsVerified))?.Email;
 
+    public static string? BuildNormalizedPhone(string? phone)
+    {
+        if (string.IsNullOrWhiteSpace(phone)) return null;
+        var normalizedPhone = Regex.Replace(phone.Trim(), @"[^\d]", "");
+        
+        if (normalizedPhone.Length == 10 
+            || (normalizedPhone.Length == 11 && normalizedPhone.StartsWith("1")))
+            return normalizedPhone;
+
+        return null;
+    }
+    
     [BsonIgnore] public string EmailList => string.Join(", ", Emails.Select(x => x.Email));
 
     public bool IsProfileComplete =>

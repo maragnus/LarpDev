@@ -5,7 +5,7 @@ public class UserSessionManagerOptions
     public const string SectionName = "UserSessionManager";
 
     /// <summary>Number of characters to send to the user to authenticate their account</summary>
-    public int TokenLength { get; set; } = 6;
+    public int TokenLength { get; set; } = 4;
 
     /// <summary>Frequency to check database when validating a session</summary>
     public TimeSpan CacheDuration { get; set; } = TimeSpan.FromMinutes(1);

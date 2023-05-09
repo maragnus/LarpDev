@@ -132,9 +132,9 @@ public class UserSessionManager : IUserSessionManager
     public async Task<string> CreateUserSession(string email, string token, string deviceName)
     {
         var accountId = await GetAccountIdFromEmail(email);
-
+        token = token.Trim().ToUpperInvariant();
         var session =
-            await _larpContext.Sessions.Find(x => x.Token == token.ToUpperInvariant() && x.AccountId == accountId)
+            await _larpContext.Sessions.Find(x => x.Token == token && x.AccountId == accountId)
                 .FirstOrDefaultAsync()
             ?? throw new UserSessionException($"Token {token} for {email} was not found ({deviceName})");
 
@@ -167,10 +167,19 @@ public class UserSessionManager : IUserSessionManager
 
     private async Task<string?> GetAccountIdFromEmail(string email)
     {
+        var phone = Account.BuildNormalizedPhone(email);
+        
         var normalizedEmail = email.ToLowerInvariant();
         var filter = Builders<Account>.Filter
             .ElemMatch(x => x.Emails, x => x.NormalizedEmail == normalizedEmail);
 
+        if (phone != null)
+        {
+            filter = Builders<Account>.Filter.Or(
+                Builders<Account>.Filter.Eq(x => x.NormalizedPhone, phone),
+                filter);
+        }
+        
         var project = Builders<Account>.Projection
             .Expression(a => a.AccountId);
 

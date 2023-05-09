@@ -15,13 +15,13 @@
     [CascadingParameter]
     MudDialogInstance MudDialog { get; set; } = default!;
 
-    private MudTextField<string?> _skills;
+    private MudTextField<string?>? _skills;
 
     private void Close() => MudDialog.Cancel();
 
     private void Add()
     {
-        var value = _skills.Value;
+        var value = _skills?.Value;
         if (string.IsNullOrWhiteSpace(value))
         {
             MudDialog.Cancel();

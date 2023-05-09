@@ -28,8 +28,8 @@ public class LandingServiceServer : ILandingService
     public async Task<Result> Login(string email, string deviceName)
     {
         var token = await _userSessionManager.GenerateToken(email, deviceName);
-        await _notifyService.SendEmailAsync(email, "Mystwood Tavern",
-            @$"Your sign in code for Mystwood Tavern is {token}");
+        var body = @$"Your sign in code for Mystwood Tavern is {token}";
+        await _notifyService.SendEmailAsync(email, "Mystwood Tavern", body);
         return Result.Success;
     }
 
@@ -129,6 +129,7 @@ public class LandingServiceServer : ILandingService
             .Set(x => x.Name, fullName)
             .Set(x => x.Location, location)
             .Set(x => x.Phone, phone)
+            .Set(x => x.NormalizedPhone, Account.BuildNormalizedPhone(phone))
             .Set(x => x.Notes, allergies)
             .Set(x => x.BirthDate, birthDate)
         );

@@ -77,6 +77,7 @@ public class LarpContext
     private async Task FixAccounts()
     {
         var accounts = await Accounts.Find(_ => true).ToListAsync();
+        
         foreach (var account in accounts.Where(x => x.Emails.Any(x => x.Email.Contains(" "))))
         {
             foreach (var email in account.Emails)
@@ -87,6 +88,12 @@ public class LarpContext
 
             await Accounts.UpdateOneAsync(a => a.AccountId == account.AccountId,
                 Builders<Account>.Update.Set(a => a.Emails, account.Emails));
+        }
+
+        foreach (var account in accounts.Where(x => x.NormalizedPhone == null && !string.IsNullOrEmpty(x.Phone)))
+        {
+            await Accounts.UpdateOneAsync(a => a.AccountId == account.AccountId,
+                Builders<Account>.Update.Set(a => a.NormalizedPhone, Account.BuildNormalizedPhone( account.Phone)));            
         }
     }
 

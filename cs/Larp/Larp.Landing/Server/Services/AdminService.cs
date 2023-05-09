@@ -606,6 +606,7 @@ public class AdminService : IAdminService
             .Set(x => x.Name, name)
             .Set(x => x.Location, location)
             .Set(x => x.Phone, phone)
+            .Set(x => x.NormalizedPhone, Account.BuildNormalizedPhone(phone))
             .Set(x => x.Notes, notes)
             .Set(x => x.BirthDate, birthDate)
             .Set(x => x.DiscountPercent, discount));
