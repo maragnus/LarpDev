@@ -96,6 +96,7 @@ public class EventChangeLogEvent : LogEvent
     public string EventId { get; set; } = default!;
     
     public string? Summary { get; set; }
+    public string? ChangeSummary { get; set; }
 }
 
 public class GameStateLogEvent : LogEvent

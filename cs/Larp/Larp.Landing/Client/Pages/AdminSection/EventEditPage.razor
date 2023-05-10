@@ -15,13 +15,13 @@
         </MudButtonGroup>
         <MudGrid>
             <MudItem xs="12" md="6">
-                <MudTextField T="string?" Label="Title" Required @bind-Value="@_event.Title" Variant="Variant.Outlined"/>
+                <MudTextField T="string?" Label="Title" @bind-Value="@_event.Title" Required Variant="Variant.Outlined"/>
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudTextField T="string?" Label="Location" @bind-Value="@_event.Location" Variant="Variant.Outlined"/>
+                <MudTextField T="string?" Label="Location" @bind-Value="@_event.Location" Required Variant="Variant.Outlined"/>
             </MudItem>
             <MudItem xs="12" md="4">
-                <MudSelectExtended T="string?" Label="Event Type" Required @bind-Value="@_event.EventType" ItemCollection="_eventTypes" Variant="Variant.Outlined"/>
+                <MudSelectExtended T="string?" Label="Event Type" @bind-Value="@_event.EventType" Required ItemCollection="_eventTypes" Variant="Variant.Outlined"/>
             </MudItem>
             <MudItem xs="12" md="4">
                 <MudDatePicker T="DateTime" Label="When" Required Date="@_date" DateChanged="date => _date = date ?? DateTime.Today" Variant="Variant.Outlined"/>
@@ -31,11 +31,11 @@
                     <MudSwitch T="bool" Label="Hidden" Color="@Color.Secondary" UncheckedColor="@Color.Success" @bind-Checked="@_event.IsHidden"/>
                 </MudTooltip>
             </MudItem>
-            <MudItem xs="12">
-                <MudTextField T="string?" Label="Preregistration Notes" @bind-Value="@_event.PreregistrationNotes" Variant="Variant.Outlined"/>
+            <MudItem xs="12" md="12" lg="6">
+                <MudTextField T="string?" Label="Preregistration Notes" Lines="3" @bind-Value="@_event.PreregistrationNotes" Variant="Variant.Outlined"/>
             </MudItem>
-            <MudItem xs="12">
-                <MudTextField T="string?" Label="Administrative Notes" @bind-Value="@_event.AdminNotes" Variant="Variant.Outlined"/>
+            <MudItem xs="12" md="12" lg="6">
+                <MudTextField T="string?" Label="Administrative Notes" Lines="3" @bind-Value="@_event.AdminNotes" Variant="Variant.Outlined"/>
             </MudItem>
             <MudItem xs="6">
                 <MudTextField T="int" Label="First Chronicle Cost" @bind-Value="@_event.EventCost" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AttachMoney" Variant="Variant.Outlined"/>

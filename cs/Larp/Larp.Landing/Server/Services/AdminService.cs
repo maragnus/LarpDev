@@ -497,7 +497,10 @@ public class AdminService : IAdminService
 
     public async Task SaveEvent(string eventId, Event @event)
     {
-        await Log(new EventChangeLogEvent { EventId = eventId, Summary = "Update" });
+        var oldEvent = await _eventManager.GetEvent(eventId);
+        var changeSummary = Event.BuildChangeSummary(oldEvent, @event);
+        
+        await Log(new EventChangeLogEvent { EventId = eventId, Summary = "Update", ChangeSummary = JsonSerializer.Serialize(changeSummary, new JsonSerializerOptions { WriteIndented = true}) });
         await _eventManager.SaveEvent(eventId, @event);
     }
 
