@@ -5,8 +5,7 @@ using Larp.Landing.Server.Services;
 using Larp.Landing.Shared.MwFifth;
 using Larp.Notify;
 using Microsoft.Extensions.FileProviders;
-using ISystemClock = Microsoft.Extensions.Internal.ISystemClock;
-using SystemClock = Microsoft.Extensions.Internal.SystemClock;
+using Microsoft.Extensions.Internal;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +22,7 @@ builder.Configuration
     services.AddRazorPages();
     services.AddHttpContextAccessor();
     services.AddSingleton<IFileProvider>(_ => new PhysicalFileProvider(Path.GetTempPath()));
-    
+
     // Larp.Notify
     services.AddScoped<INotifyService, NotifyService>();
     services.Configure<NotifyServiceOptions>(
@@ -58,12 +57,6 @@ builder.Configuration
 }
 
 var app = builder.Build();
-
-await using (var scope = app.Services.CreateAsyncScope())
-{
-    var larpContext = scope.ServiceProvider.GetRequiredService<LarpContext>();
-    await larpContext.Migrate();
-}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
