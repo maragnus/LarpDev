@@ -1,47 +1,13 @@
 ﻿using System.Collections.Immutable;
 using System.Text;
 using System.Text.RegularExpressions;
+using KiloTx.Restful.ClientGenerator.Extensions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using static KiloTx.Restful.ClientGenerator.Helpers;
 
 namespace KiloTx.Restful.ClientGenerator;
-
-[Generator(LanguageNames.CSharp)]
-public class FileDownloadSourceGenerator : ISourceGenerator
-{
-    public void Initialize(GeneratorInitializationContext context)
-    {
-    }
-
-    public void Execute(GeneratorExecutionContext context)
-    {
-        var source = new SourceCodeBuilder()
-            .AppendLine("#nullable enable")
-            .AppendLine()
-            .AppendLine("namespace KiloTx.Restful;")
-            .AppendLine()
-            .AppendLine("internal class DownloadFileInfo : Microsoft.Extensions.FileProviders.IFileInfo")
-            .OpenBlock()
-            .AppendLine("private readonly MemoryStream _stream;")
-            .AppendLine("public DownloadFileInfo(MemoryStream stream, string name, int length)")
-            .OpenBlock()
-            .AppendLine("Name = name;")
-            .AppendLine("Length = length;")
-            .AppendLine("_stream = stream;")
-            .CloseBlock()
-            .AppendLine("public Stream CreateReadStream() => _stream;")
-            .AppendLine("public bool Exists => true;")
-            .AppendLine("public long Length { get; }")
-            .AppendLine("public string? PhysicalPath => null;")
-            .AppendLine("public string Name { get; }")
-            .AppendLine("public DateTimeOffset LastModified => DateTimeOffset.Now;")
-            .AppendLine("public bool IsDirectory => false;")
-            .CloseBlock();
-
-        context.AddSource("DownloadFileInfo.g.cs", source);
-    }
-}
 
 [Generator(LanguageNames.CSharp)]
 public class RestfulSourceGenerator : IIncrementalGenerator
@@ -55,53 +21,24 @@ public class RestfulSourceGenerator : IIncrementalGenerator
         { "KiloTx.Restful.ApiPatchAttribute", "HttpMethod.Patch" }
     };
 
-    private static bool IsRestfullImplementation(SyntaxNode syntaxNode, CancellationToken cancellationToken)
+    public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        if (syntaxNode is not AttributeSyntax attribute)
-            return false;
+        var types =
+            context.SyntaxProvider.CreateSyntaxProvider(IsRestfullImplementation, Helpers.GetTypeFromAttribute)
+                .Where(t => t != null)
+                .Collect();
 
-        var name = attribute.Name switch
+        context.RegisterSourceOutput(types, GenerateSource!);
+    }
+
+    private static bool IsRestfullImplementation(SyntaxNode syntaxNode, CancellationToken cancellationToken) =>
+        syntaxNode is AttributeSyntax attribute
+        && attribute.Name switch
         {
             SimpleNameSyntax ins => ins.Identifier.Text,
             QualifiedNameSyntax qns => qns.Right.Identifier.Text,
             _ => null
-        };
-
-        return name is "RestfulImplementation" or "RestfulImplementationAttribute";
-    }
-
-    private static ITypeSymbol? GetTypeFromAttribute(GeneratorSyntaxContext context,
-        CancellationToken cancellationToken)
-    {
-        var attributeSyntax = (AttributeSyntax)context.Node;
-
-        // "attribute.Parent" is "AttributeListSyntax"
-        // "attribute.Parent.Parent" is a C# fragment the attributes are applied to
-        TypeDeclarationSyntax? typeNode = attributeSyntax.Parent?.Parent switch
-        {
-            ClassDeclarationSyntax classDeclarationSyntax => classDeclarationSyntax,
-            RecordDeclarationSyntax recordDeclarationSyntax => recordDeclarationSyntax,
-            StructDeclarationSyntax structDeclarationSyntax => structDeclarationSyntax,
-            _ => null
-        };
-
-        if (typeNode == null)
-            return null;
-
-        if (context.SemanticModel.GetDeclaredSymbol(typeNode) is not ITypeSymbol type)
-            return null;
-
-        return type;
-    }
-
-    public void Initialize(IncrementalGeneratorInitializationContext context)
-    {
-        var types = context.SyntaxProvider.CreateSyntaxProvider(IsRestfullImplementation, GetTypeFromAttribute)
-            .Where(t => t != null)
-            .Collect();
-
-        context.RegisterSourceOutput(types, GenerateSource!);
-    }
+        } is "RestfulImplementation" or "RestfulImplementationAttribute";
 
     private static void GenerateSource(SourceProductionContext context, ImmutableArray<ITypeSymbol> types)
     {
@@ -129,11 +66,6 @@ public class RestfulSourceGenerator : IIncrementalGenerator
             context.AddSource($"{hintName}.g.cs", source);
         }
     }
-
-    private static string ToCamelCase(string value) =>
-        value.Length == 0
-            ? value
-            : char.ToLowerInvariant(value[0]) + value[1..];
 
     private static SourceText GenerateSourceCode(ITypeSymbol type)
     {
@@ -223,7 +155,6 @@ public class RestfulSourceGenerator : IIncrementalGenerator
                     var taskType = member.ReturnType as INamedTypeSymbol ??
                                    throw new InvalidOperationException(
                                        $"Method {member.Name} must have a Task return type");
-                    // TODO -- expect Task
                     var returnType = taskType.IsGenericType ? taskType.TypeArguments.Single() : null;
                     var returnTypeName = returnType?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
 
@@ -389,27 +320,5 @@ public class RestfulSourceGenerator : IIncrementalGenerator
         source.PrependLine("#nullable enable");
 
         return source;
-    }
-
-    private static IEnumerable<string> GetUsings(ISymbol? symbol)
-    {
-        if (symbol?.ContainingNamespace == null) yield break;
-
-        yield return symbol.ContainingNamespace.ToDisplayString();
-
-        if (symbol is not INamedTypeSymbol { IsGenericType: true } genericType) yield break;
-
-        foreach (var namespaceName in genericType.TypeArguments.SelectMany(GetUsings))
-            yield return namespaceName;
-    }
-
-    private record InterfaceAttribute(ITypeSymbol Interface, ITypeSymbol HttpClientFactory);
-
-    private static ImmutableArray<InterfaceAttribute> GetInterfaces(ISymbol type)
-    {
-        return type.GetAttributes()
-            .Where(x => x.AttributeClass?.Name == nameof(RestfulImplementationAttribute))
-            .Select(x => new InterfaceAttribute(x.AttributeClass!.TypeArguments[0], x.AttributeClass!.TypeArguments[1]))
-            .ToImmutableArray();
     }
 }
