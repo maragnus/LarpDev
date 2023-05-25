@@ -13,16 +13,16 @@ namespace Larp.Landing.Server.Services;
 
 public class AdminService : IAdminService
 {
-    private readonly LarpContext _db;
-    private readonly MwFifthCharacterManager _characterManager;
-    private readonly IUserSessionManager _userSessionManager;
-    private readonly LetterManager _letterManager;
     private readonly Account _account;
-    private readonly EventManager _eventManager;
     private readonly AttachmentManager _attachmentManager;
     private readonly BackupManager _backupManager;
-    private readonly string? _sessionId;
+    private readonly MwFifthCharacterManager _characterManager;
     private readonly ISystemClock _clock;
+    private readonly LarpContext _db;
+    private readonly EventManager _eventManager;
+    private readonly LetterManager _letterManager;
+    private readonly string? _sessionId;
+    private readonly IUserSessionManager _userSessionManager;
 
     public AdminService(LarpContext db, IUserSession userSession,
         MwFifthCharacterManager characterManager, IUserSessionManager userSessionManager,
@@ -39,12 +39,6 @@ public class AdminService : IAdminService
         _clock = clock;
         _account = userSession.Account!;
         _sessionId = userSession.SessionId;
-    }
-
-    private static string NormalizeName(string religionName, string religionTitle)
-    {
-        var name = string.IsNullOrWhiteSpace(religionName) ? religionTitle : religionName;
-        return Regex.Replace(name.ToLowerInvariant(), "[^a-z]", "");
     }
 
     public async Task<Account[]> GetAccounts(AccountState accountState)
@@ -365,6 +359,7 @@ public class AdminService : IAdminService
     public async Task ReseedData()
     {
         await _backupManager.Reseed();
+        await Log(new GameStateLogEvent() { GameName = GameState.GameName, Summary = $"Reseed" });
     }
 
     public async Task DeleteCharactersUnused()
@@ -399,7 +394,7 @@ public class AdminService : IAdminService
             if (occupation.Chapters?.Length == 0)
                 occupation.Chapters = null;
         }
-        
+
         await UpdateGameState(nameof(GameState.Occupations), occupations);
     }
 
@@ -410,6 +405,7 @@ public class AdminService : IAdminService
             if (spell.Categories.Length == 0 || spell.Categories.Any(string.IsNullOrWhiteSpace))
                 spell.Categories = new[] { "Gift of Wisdom" };
         }
+
         await UpdateGameState(nameof(GameState.Spells), spells);
     }
 
@@ -428,7 +424,8 @@ public class AdminService : IAdminService
             // if (!skill.Title.StartsWith(skill.Name))
             //     throw new BadRequestException($"Skill '{skill.Name}' with title '{skill.Title}' do not match");
             if (skill is { Purchasable: SkillPurchasable.Multiple or SkillPurchasable.Once, CostPerPurchase: null })
-                throw new BadRequestException($"Skill '{skill.Name}' requires {nameof(SkillDefinition.CostPerPurchase)}");
+                throw new BadRequestException(
+                    $"Skill '{skill.Name}' requires {nameof(SkillDefinition.CostPerPurchase)}");
             if (skill is { Purchasable: SkillPurchasable.Multiple, RanksPerPurchase: null })
                 skill.RanksPerPurchase = 1;
         }
@@ -440,7 +437,7 @@ public class AdminService : IAdminService
     {
         foreach (var vantage in vantages)
             vantage.Title = $"{vantage.Name} {vantage.Rank}";
-        
+
         await UpdateGameState(nameof(GameState.Advantages), vantages);
     }
 
@@ -448,7 +445,7 @@ public class AdminService : IAdminService
     {
         foreach (var vantage in vantages)
             vantage.Title = $"{vantage.Name} {vantage.Rank}";
-        
+
         await UpdateGameState(nameof(GameState.Disadvantages), vantages);
     }
 
@@ -456,7 +453,7 @@ public class AdminService : IAdminService
     {
         foreach (var chapter in chapters)
             chapter.Name = NormalizeName(chapter.Name, chapter.Title);
-        
+
         await UpdateGameState(nameof(GameState.HomeChapters), chapters);
     }
 
@@ -464,28 +461,10 @@ public class AdminService : IAdminService
     {
         foreach (var religion in religions)
             religion.Name = NormalizeName(religion.Name, religion.Title);
-        
+
         await UpdateGameState(nameof(GameState.Religions), religions);
     }
 
-    
-    private async Task UpdateGameState<TField>(string property, TField items)
-    {
-        var filter = Builders<BsonDocument>.Filter.Eq(nameof(GameState.Name), GameState.GameName);
-        var update = Builders<BsonDocument>.Update
-            .Set(property, items)
-            .Set(nameof(GameState.Revision), Guid.NewGuid().ToString("N"))
-            .Set(nameof(GameState.LastUpdated), _clock.UtcNow.ToString("O"));
-        var result = await _db.GameStates.UpdateOneAsync(filter, update);
-
-        if (result.ModifiedCount != 1)
-            throw new BadRequestException("Game State could not be updated");
-
-        _db.MwFifthGame.ClearGameState();
-
-        await Log(new GameStateLogEvent() { GameName = GameState.GameName, Summary = $"Updated {property}" });
-    }
-    
     public async Task<EventAttendance[]> GetAccountAttendances(string accountId) =>
         await _eventManager.GetAccountAttendances(accountId);
 
@@ -499,8 +478,12 @@ public class AdminService : IAdminService
     {
         var oldEvent = await _eventManager.GetEvent(eventId);
         var changeSummary = Event.BuildChangeSummary(oldEvent, @event);
-        
-        await Log(new EventChangeLogEvent { EventId = eventId, Summary = "Update", ChangeSummary = JsonSerializer.Serialize(changeSummary, new JsonSerializerOptions { WriteIndented = true}) });
+
+        await Log(new EventChangeLogEvent
+        {
+            EventId = eventId, Summary = "Update",
+            ChangeSummary = JsonSerializer.Serialize(changeSummary, new JsonSerializerOptions { WriteIndented = true })
+        });
         await _eventManager.SaveEvent(eventId, @event);
     }
 
@@ -575,11 +558,6 @@ public class AdminService : IAdminService
         await _userSessionManager.RemoveAccountRole(accountId, role);
     }
 
-    private async Task Log<TLogEvent>(TLogEvent logEvent) where TLogEvent : LogEvent
-    {
-        await _db.LogEvent(_account.AccountId, _sessionId, logEvent);
-    }
-
     public async Task AddAccountRole(string accountId, AccountRole role)
     {
         await Log(new AccountRoleLogEvent { AccountId = accountId, AddRole = role });
@@ -620,4 +598,33 @@ public class AdminService : IAdminService
 
     public async Task<CharacterAndRevisions> GetMwFifthCharacterRevisions(string characterId) =>
         await _characterManager.GetRevisions(characterId, _account, true);
+
+    private static string NormalizeName(string religionName, string religionTitle)
+    {
+        var name = string.IsNullOrWhiteSpace(religionName) ? religionTitle : religionName;
+        return Regex.Replace(name.ToLowerInvariant(), "[^a-z]", "");
+    }
+
+
+    private async Task UpdateGameState<TField>(string property, TField items)
+    {
+        var filter = Builders<BsonDocument>.Filter.Eq(nameof(GameState.Name), GameState.GameName);
+        var update = Builders<BsonDocument>.Update
+            .Set(property, items)
+            .Set(nameof(GameState.Revision), Guid.NewGuid().ToString("N"))
+            .Set(nameof(GameState.LastUpdated), _clock.UtcNow.ToString("O"));
+        var result = await _db.GameStates.UpdateOneAsync(filter, update);
+
+        if (result.ModifiedCount != 1)
+            throw new BadRequestException("Game State could not be updated");
+
+        _db.MwFifthGame.ClearGameState();
+
+        await Log(new GameStateLogEvent() { GameName = GameState.GameName, Summary = $"Updated {property}" });
+    }
+
+    private async Task Log<TLogEvent>(TLogEvent logEvent) where TLogEvent : LogEvent
+    {
+        await _db.LogEvent(_account.AccountId, _sessionId, logEvent);
+    }
 }

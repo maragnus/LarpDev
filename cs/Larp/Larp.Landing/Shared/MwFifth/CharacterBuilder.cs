@@ -8,11 +8,45 @@ namespace Larp.Landing.Shared.MwFifth;
 
 public class CharacterBuilder
 {
-    private DependencyManager<CharacterBuilder> DependencyManager { get; }
-
     private readonly ILogger _logger;
 
+    public CharacterBuilder(CharacterAndRevision character, GameState gameState, ILogger logger)
+    {
+        _logger = logger;
+        Character = character.Character;
+        Revision = character.Revision;
+        GameState = gameState;
+        DependencyManager = new DependencyManager<CharacterBuilder>(logger);
+
+        AllWisdomSpells = GameState.Spells.Where(x => x.IsGiftOfWisdom).ToArray();
+        AllBardicSpells = GameState.Spells.Where(x => x.IsBardic).ToArray();
+        AllDivineSpells = GameState.Spells.Where(x => x.IsDivine).ToArray();
+        AllOccupationalSpells = GameState.Spells.Where(x => x.IsOccupational).ToArray();
+        AllPurchasableSkills = GameState.Skills.Where(x => x.Purchasable != SkillPurchasable.Unavailable).ToArray();
+        AllHomeChapters = GameState.HomeChapters.ToDictionary(x => x.Name);
+        AllGifts = GameState.Gifts.ToDictionary(x => x.Name);
+        AllReligions = GameState.Religions;
+        AllSpells = GameState.Spells
+            .GroupBy(x => x.Name) // Some Occupations share skills
+            .ToDictionary(x => x.Key, x => x.First());
+
+        _chosenSpells = AllSpells
+            .TryFromKeys(Revision.Spells)
+            .Where(x => x.IsGiftOfWisdom)
+            .Select(x => x.Name)
+            .ToArray();
+
+        PopulateOccupations();
+        PopulateOccupationalDependencies();
+        PopulateSkills();
+        DependencyManager.UpdateAll(this);
+    }
+
+    private DependencyManager<CharacterBuilder> DependencyManager { get; }
+
     public Action? StateChanged { get; set; }
+
+    private bool HasSkill(string skillName) => Skills.Contains(skillName);
 
     #region GameState
 
@@ -59,47 +93,13 @@ public class CharacterBuilder
             StateChanged?.Invoke();
         }
     }
-    
+
     [DependsOn(nameof(PopulateOccupationalDependencies), nameof(Occupation), nameof(NoOccupation), nameof(Enhancement))]
     public SkillChoice[] OccupationalSkillsChoices { get; private set; } = Array.Empty<SkillChoice>();
 
     public SkillDefinition[] AllPurchasableSkills { get; }
 
     #endregion
-
-    public CharacterBuilder(CharacterAndRevision character, GameState gameState, ILogger logger)
-    {
-        _logger = logger;
-        Character = character.Character;
-        Revision = character.Revision;
-        GameState = gameState;
-        DependencyManager = new DependencyManager<CharacterBuilder>(logger);
-
-        AllWisdomSpells = GameState.Spells.Where(x => x.IsGiftOfWisdom).ToArray();
-        AllBardicSpells = GameState.Spells.Where(x => x.IsBardic).ToArray();
-        AllDivineSpells = GameState.Spells.Where(x => x.IsDivine).ToArray();
-        AllOccupationalSpells = GameState.Spells.Where(x => x.IsOccupational).ToArray();
-        AllPurchasableSkills = GameState.Skills.Where(x => x.Purchasable != SkillPurchasable.Unavailable).ToArray();
-        AllHomeChapters = GameState.HomeChapters.ToDictionary(x => x.Name);
-        AllGifts = GameState.Gifts.ToDictionary(x => x.Name);
-        AllReligions = GameState.Religions;
-        AllSpells = GameState.Spells
-            .GroupBy(x => x.Name) // Some Occupations share skills
-            .ToDictionary(x => x.Key, x => x.First());
-
-        _chosenSpells = AllSpells
-            .TryFromKeys(Revision.Spells)
-            .Where(x => x.IsGiftOfWisdom)
-            .Select(x => x.Name)
-            .ToArray();
-
-        PopulateOccupations();
-        PopulateOccupationalDependencies();
-        PopulateSkills();
-        DependencyManager.UpdateAll(this);
-    }
-
-    private bool HasSkill(string skillName) => Skills.Contains(skillName);
 
     #region Character
 
@@ -286,7 +286,7 @@ public class CharacterBuilder
     {
         get => Revision.Skills
             .Where(x => x.Type == SkillPurchase.OccupationChoice)
-            .Select(x => x.Name)
+            .Select(x => x.Title)
             .ToArray();
 
         set
@@ -439,7 +439,7 @@ public class CharacterBuilder
         get => Revision.RevisionReviewerNotes;
         set => Set(x => x.RevisionReviewerNotes = value);
     }
-    
+
     public string? RevisionPlayerNotes
     {
         get => Revision.RevisionPlayerNotes;
@@ -447,7 +447,7 @@ public class CharacterBuilder
     }
 
     public bool ShowNotes => !IsNewCharacter || !string.IsNullOrWhiteSpace(RevisionReviewerNotes);
-    
+
     public bool HasTalents => Advantages.Any(x => x.Name.Contains("Talent"));
 
     #endregion
@@ -698,8 +698,8 @@ public class CharacterBuilder
     }
 
     private IEnumerable<string> DivineSpells(string category) =>
-        AllDivineSpells.Where(spell => 
-                spell.Categories.Any(spellCategory=> spellCategory == category))
+        AllDivineSpells.Where(spell =>
+                spell.Categories.Any(spellCategory => spellCategory == category))
             .Select(spell => spell.Name);
 
     private void PopulateSpells()

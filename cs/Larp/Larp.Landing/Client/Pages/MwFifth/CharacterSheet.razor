@@ -1,8 +1,5 @@
-@using Larp.Landing.Shared.MwFifth
-@using Larp.Landing.Client.Pages.MwFifth.Components
 @using Larp.Common
-@using MudBlazor.Services
-
+@using Larp.Landing.Shared.MwFifth
 @code {
 
     [Parameter]
@@ -76,6 +73,7 @@
         if (increasedMana > 0 && manaProperty != null && int.TryParse(manaProperty.Value, out var mana))
             manaProperty.Value = (mana + increasedMana).ToString();
     }
+
 }
 
 @if (Print)
@@ -211,12 +209,34 @@
             </div>
         </div>
     </MudItem>
+    <MudItem xs="12" sm="@(Print ? 4 : FullLayout ? 6 : 12)" Style="page-break-inside: avoid">
+        <div></div>
+    </MudItem>
+    @if (!Print)
+    {
+        <MudItem xs="12" sm="@(FullLayout ? 6 : 12)" Style="page-break-inside: avoid">
+            <div class="list-container">
+                <div class="list-header">Public History</div>
+                <div class="list-text">
+                    @(Character.Revision.PublicHistory ?? "No Public History")
+                </div>
+            </div>
+        </MudItem>
+        <MudItem xs="12" sm="@(FullLayout ? 6 : 12)" Style="page-break-inside: avoid">
+            <div class="list-container">
+                <div class="list-header">Private History</div>
+                <div class="list-text">
+                    @(Character.Revision.PrivateHistory ?? "No Private History")
+                </div>
+            </div>
+        </MudItem>
+    }
     @foreach (var spell in _spells)
     {
         var type = spell.Type == SpellType.GestureOrVoice
             ? "Gesture/Voice"
             : spell.Type.ToString();
-        
+
         <MudItem xs="@(Print ? 4 : 12)" sm="@(Print ? 4 : FullLayout ? 3 : 4)">
             <div class="spell-container">
                 <div class="spell-name">@spell.Name</div>

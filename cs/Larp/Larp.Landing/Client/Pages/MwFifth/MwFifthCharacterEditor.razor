@@ -1,8 +1,5 @@
-@using Larp.Landing.Shared.MwFifth
-@using System.Text.Json
-@using Larp.Landing.Client.Pages.Dialogs
-@using Larp.Landing.Shared
 @inject LandingService LandingService
+@using Larp.Landing.Shared.MwFifth
 @inherits LarpPage
 
 @code {
@@ -193,13 +190,13 @@
 
         _saveState = success ? AutoSaveState.Saved : AutoSaveState.ChangeAvailable;
     }
-    
+
     private async Task Save()
     {
         await QuickSave();
-        
-        if (_saveState != AutoSaveState.Saved) return;
-        
+
+        if (Admin || _saveState != AutoSaveState.Saved) return;
+
         var response = await DialogService.ShowMessageBox("Draft Saved", "Your draft has been saved for later. But you need to submit your character for review when you're done. Would you like to review your character now?", "Yes, Review", "No, Keep Editing");
         if (response == true)
         {

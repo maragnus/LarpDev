@@ -36,8 +36,8 @@ public class LarpContext
         EventLog = database.GetCollection<BsonDocument>(nameof(EventLog));
     }
 
-    public IMongoCollection<BsonDocument> EventLog { get; set; }
-    public IMongoCollection<AccountAttachment> AccountAttachments { get; set; }
+    public IMongoCollection<BsonDocument> EventLog { get; }
+    public IMongoCollection<AccountAttachment> AccountAttachments { get; }
     public IMongoCollection<Account> Accounts { get; }
     public IMongoCollection<Event> Events { get; }
     public IMongoCollection<Attendance> Attendances { get; }
@@ -77,8 +77,8 @@ public class LarpContext
     private async Task FixAccounts()
     {
         var accounts = await Accounts.Find(_ => true).ToListAsync();
-        
-        foreach (var account in accounts.Where(x => x.Emails.Any(x => x.Email.Contains(" "))))
+
+        foreach (var account in accounts.Where(account => account.Emails.Any(email => email.Email.Contains(' '))))
         {
             foreach (var email in account.Emails)
             {
@@ -93,16 +93,16 @@ public class LarpContext
         foreach (var account in accounts.Where(x => x.NormalizedPhone == null && !string.IsNullOrEmpty(x.Phone)))
         {
             await Accounts.UpdateOneAsync(a => a.AccountId == account.AccountId,
-                Builders<Account>.Update.Set(a => a.NormalizedPhone, Account.BuildNormalizedPhone( account.Phone)));            
+                Builders<Account>.Update.Set(a => a.NormalizedPhone, Account.BuildNormalizedPhone(account.Phone)));
         }
     }
 
     private async Task ActivateAccounts()
     {
         await Accounts.UpdateManyAsync(
-            x => 
-                x.State != AccountState.Active 
-                && x.State != AccountState.Archived 
+            x =>
+                x.State != AccountState.Active
+                && x.State != AccountState.Archived
                 && x.State != AccountState.Uninvited,
             Builders<Account>.Update.Set(x => x.State, AccountState.Active));
     }
@@ -187,7 +187,7 @@ public class LarpContext
         logEvent.ActedOn = DateTimeOffset.Now;
         await EventLog.InsertOneAsync(logEvent.ToBsonDocument());
     }
-    
+
     public async Task LogEvent<TLogEvent>(string actorAccountId, string? actorSessionId, TLogEvent logEvent)
         where TLogEvent : LogEvent
     {

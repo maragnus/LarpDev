@@ -541,9 +541,36 @@
       "Income 5",
       "Livery",
       "Warcaster",
-      "Weapon Specialization (any one Weapon Type)",
       "Weapon Use (Large Shield)",
       "Wear Armor 3"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Weapon Specialization (Bow)",
+          "Weapon Specialization (Claws)",
+          "Weapon Specialization (Dagger)",
+          "Weapon Specialization (Fists)",
+          "Weapon Specialization (Flail)",
+          "Weapon Specialization (Hand Crossbow)",
+          "Weapon Specialization (Javelin)",
+          "Weapon Specialization (Normal Crossbow)",
+          "Weapon Specialization (One Handed Axe)",
+          "Weapon Specialization (One Handed Blunt)",
+          "Weapon Specialization (One Handed Sword)",
+          "Weapon Specialization (One Handed Tool)",
+          "Weapon Specialization (Polearm)",
+          "Weapon Specialization (Spear)",
+          "Weapon Specialization (Schiltron)",
+          "Weapon Specialization (Staff)",
+          "Weapon Specialization (Thrown Weapon)",
+          "Weapon Specialization (Two Handed Axe)",
+          "Weapon Specialization (Two Handed Blunt)",
+          "Weapon Specialization (Two Handed Sword)",
+          "Weapon Specialization (Two Handed Tool)"
+        ]
+      }
     ],
     "duty": "inspection by a Corporal or Captain of the Guard",
     "livery": "based on local Chapter"
@@ -854,9 +881,36 @@
       "Leadership",
       "Livery",
       "Warcaster",
-      "Weapon Specialization (any one Weapon Type)",
       "Weapon Use (Large Shield)",
       "Wear Armor 4"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Weapon Specialization (Bow)",
+          "Weapon Specialization (Claws)",
+          "Weapon Specialization (Dagger)",
+          "Weapon Specialization (Fists)",
+          "Weapon Specialization (Flail)",
+          "Weapon Specialization (Hand Crossbow)",
+          "Weapon Specialization (Javelin)",
+          "Weapon Specialization (Normal Crossbow)",
+          "Weapon Specialization (One Handed Axe)",
+          "Weapon Specialization (One Handed Blunt)",
+          "Weapon Specialization (One Handed Sword)",
+          "Weapon Specialization (One Handed Tool)",
+          "Weapon Specialization (Polearm)",
+          "Weapon Specialization (Spear)",
+          "Weapon Specialization (Schiltron)",
+          "Weapon Specialization (Staff)",
+          "Weapon Specialization (Thrown Weapon)",
+          "Weapon Specialization (Two Handed Axe)",
+          "Weapon Specialization (Two Handed Blunt)",
+          "Weapon Specialization (Two Handed Sword)",
+          "Weapon Specialization (Two Handed Tool)"
+        ]
+      }
     ],
     "duty": "inspecting the Guard",
     "livery": "based on local Chapter",
@@ -931,8 +985,35 @@
       "Livery",
       "Mage Lore",
       "Slayer (Daemons)",
-      "Weapon Specialization (any one Weapon Type)",
       "Warcaster"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Weapon Specialization (Bow)",
+          "Weapon Specialization (Claws)",
+          "Weapon Specialization (Dagger)",
+          "Weapon Specialization (Fists)",
+          "Weapon Specialization (Flail)",
+          "Weapon Specialization (Hand Crossbow)",
+          "Weapon Specialization (Javelin)",
+          "Weapon Specialization (Normal Crossbow)",
+          "Weapon Specialization (One Handed Axe)",
+          "Weapon Specialization (One Handed Blunt)",
+          "Weapon Specialization (One Handed Sword)",
+          "Weapon Specialization (One Handed Tool)",
+          "Weapon Specialization (Polearm)",
+          "Weapon Specialization (Spear)",
+          "Weapon Specialization (Schiltron)",
+          "Weapon Specialization (Staff)",
+          "Weapon Specialization (Thrown Weapon)",
+          "Weapon Specialization (Two Handed Axe)",
+          "Weapon Specialization (Two Handed Blunt)",
+          "Weapon Specialization (Two Handed Sword)",
+          "Weapon Specialization (Two Handed Tool)"
+        ]
+      }
     ],
     "livery": "your master\u0027s symbol"
   },
@@ -1113,8 +1194,23 @@
       "Income 20",
       "News \u0026 Rumors",
       "Patronage 1",
-      "Retainers 2",
-      "any one Craft 2 skill"
+      "Retainers 2"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Apothecary 2",
+          "Armstraining 2",
+          "Bardic Voice 2",
+          "Cooking 2",
+          "Metalworking 2",
+          "Poisoner 2",
+          "Scribe 2",
+          "Sewing 2",
+          "Woodworking 2"
+        ]
+      }
     ]
   },
   {
@@ -1241,9 +1337,36 @@
       "Research",
       "Scribe 2",
       "Set Trap",
-      "Weapon Specialization (any one)",
       "Wear Armor 2",
       "Woodworking 2"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Weapon Specialization (Bow)",
+          "Weapon Specialization (Claws)",
+          "Weapon Specialization (Dagger)",
+          "Weapon Specialization (Fists)",
+          "Weapon Specialization (Flail)",
+          "Weapon Specialization (Hand Crossbow)",
+          "Weapon Specialization (Javelin)",
+          "Weapon Specialization (Normal Crossbow)",
+          "Weapon Specialization (One Handed Axe)",
+          "Weapon Specialization (One Handed Blunt)",
+          "Weapon Specialization (One Handed Sword)",
+          "Weapon Specialization (One Handed Tool)",
+          "Weapon Specialization (Polearm)",
+          "Weapon Specialization (Spear)",
+          "Weapon Specialization (Schiltron)",
+          "Weapon Specialization (Staff)",
+          "Weapon Specialization (Thrown Weapon)",
+          "Weapon Specialization (Two Handed Axe)",
+          "Weapon Specialization (Two Handed Blunt)",
+          "Weapon Specialization (Two Handed Sword)",
+          "Weapon Specialization (Two Handed Tool)"
+        ]
+      }
     ]
   },
   {
@@ -1323,8 +1446,23 @@
       "Income 5",
       "Information Gathering",
       "Leadership",
-      "Unarmed Combat",
-      "Craft skill 2"
+      "Unarmed Combat"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Apothecary 2",
+          "Armstraining 2",
+          "Bardic Voice 2",
+          "Cooking 2",
+          "Metalworking 2",
+          "Poisoner 2",
+          "Scribe 2",
+          "Sewing 2",
+          "Woodworking 2"
+        ]
+      }
     ],
     "duty": "fulfilling the requests of your master",
     "leadership": "your master"
@@ -1355,9 +1493,36 @@
       "Patronage 1",
       "Scribe 2",
       "Warcaster",
-      "Weapon Specialization (any one Weapon Type)",
       "Weapon Use (Large Shield)",
       "Wear Armor 5"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Weapon Specialization (Bow)",
+          "Weapon Specialization (Claws)",
+          "Weapon Specialization (Dagger)",
+          "Weapon Specialization (Fists)",
+          "Weapon Specialization (Flail)",
+          "Weapon Specialization (Hand Crossbow)",
+          "Weapon Specialization (Javelin)",
+          "Weapon Specialization (Normal Crossbow)",
+          "Weapon Specialization (One Handed Axe)",
+          "Weapon Specialization (One Handed Blunt)",
+          "Weapon Specialization (One Handed Sword)",
+          "Weapon Specialization (One Handed Tool)",
+          "Weapon Specialization (Polearm)",
+          "Weapon Specialization (Spear)",
+          "Weapon Specialization (Schiltron)",
+          "Weapon Specialization (Staff)",
+          "Weapon Specialization (Thrown Weapon)",
+          "Weapon Specialization (Two Handed Axe)",
+          "Weapon Specialization (Two Handed Blunt)",
+          "Weapon Specialization (Two Handed Sword)",
+          "Weapon Specialization (Two Handed Tool)"
+        ]
+      }
     ],
     "duty": "reviewing the guard",
     "livery": "based on local Chapter",
@@ -1590,6 +1755,22 @@
       "Guild Wages",
       "Livery"
     ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Apothecary 2",
+          "Armstraining 2",
+          "Bardic Voice 2",
+          "Cooking 2",
+          "Metalworking 2",
+          "Poisoner 2",
+          "Scribe 2",
+          "Sewing 2",
+          "Woodworking 2"
+        ]
+      }
+    ],
     "livery": "guild patch and visible tools of the trade"
   },
   {
@@ -1601,6 +1782,22 @@
       "Livery",
       "Masterwork",
       "Retainer 1"
+    ],
+    "choices": [
+      {
+        "count": 1,
+        "choices": [
+          "Apothecary 4",
+          "Armstraining 4",
+          "Bardic Voice 4",
+          "Cooking 4",
+          "Metalworking 4",
+          "Poisoner 4",
+          "Scribe 4",
+          "Sewing 4",
+          "Woodworking 4"
+        ]
+      }
     ],
     "livery": "guild patch and visible tools of the trade"
   },
@@ -1733,8 +1930,7 @@
           "Weapon Specialization (Two Handed Axe)",
           "Weapon Specialization (Two Handed Blunt)",
           "Weapon Specialization (Two Handed Sword)",
-          "Weapon Specialization (Two Handed Tool)",
-          "Weapon Specialization (Any one Weapon Type)"
+          "Weapon Specialization (Two Handed Tool)"
         ]
       }
     ],
@@ -1849,8 +2045,7 @@
           "Weapon Specialization (Two Handed Axe)",
           "Weapon Specialization (Two Handed Blunt)",
           "Weapon Specialization (Two Handed Sword)",
-          "Weapon Specialization (Two Handed Tool)",
-          "Weapon Specialization (Any one Weapon Type)"
+          "Weapon Specialization (Two Handed Tool)"
         ]
       }
     ],

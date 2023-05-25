@@ -14,7 +14,7 @@
         "launchBrowser": true,
         "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
         "applicationUrl": "http://localhost:5287",
-        "launchUrl": "http://localhost:5287/admin/mw5e/spells",
+        "launchUrl": "http://localhost:5287/",
         "environmentVariables": {
           "ASPNETCORE_ENVIRONMENT": "Development"
         }
@@ -25,7 +25,7 @@
         "launchBrowser": true,
         "inspectUri": "{wsProtocol}://{url.hostname}:{url.port}/_framework/debug/ws-proxy?browser={browserInspectUri}",
         "applicationUrl": "https://localhost:7078;http://localhost:5287",
-        "launchUrl": "https://localhost:7078/admin/events/6437f37bb5044416424f74a1/preregistration",
+        "launchUrl": "https://localhost:7078/",
         "environmentVariables": {
           "ASPNETCORE_ENVIRONMENT": "Development"
         }

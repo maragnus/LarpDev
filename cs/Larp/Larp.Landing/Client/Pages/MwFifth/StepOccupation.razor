@@ -119,7 +119,7 @@ else if (!Character.NoOccupation)
             }
         </MudChipSet>
     }
-    
+
     @if (_enhancement?.Skills.Length > 0)
     {
         <StepDivider/>
@@ -155,6 +155,7 @@ else if (!Character.NoOccupation)
 }
 
 @code {
+
     [Parameter]
     public CharacterBuilder Character { get; set; } = default!;
 
@@ -175,7 +176,7 @@ else if (!Character.NoOccupation)
         {
             Skills = skillChoice.Choices;
             Count = skillChoice.Count;
-            SelectSkills(revision.Skills.Where(skill => skill.Type == SkillPurchase.OccupationChoice).Select(x => x.Name));
+            SelectSkills(revision.Skills.Where(skill => skill.Type == SkillPurchase.OccupationChoice).Select(x => x.Title));
         }
 
         public void SelectSkills(IEnumerable<string> skills)
