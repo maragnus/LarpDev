@@ -6,19 +6,21 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <NoWarn>8669,8602,BL0005</NoWarn>
+        <InvariantGlobalization>true</InvariantGlobalization>
+        <PublishTrimmed>true</PublishTrimmed>
+        <BlazorEnableTimeZoneSupport>false</BlazorEnableTimeZoneSupport>
     </PropertyGroup>
 
-    <PropertyGroup>
-        <BlazorEnableTimeZoneSupport>false</BlazorEnableTimeZoneSupport>
+    <ItemGroup>
         <BlazorWebAssemblyLazyLoad Include="CsvHelper.dll"/>
         <BlazorWebAssemblyLazyLoad Include="AWSSDK.Core.dll"/>
         <BlazorWebAssemblyLazyLoad Include="zxing.dll"/>
-        <BlazorWebAssemblyLazyLoad Include="MongoDB.Bson.dll"/>
+        <BlazorWebAssemblyLazyLoad Include="ZstdSharp.dll"/>
+        <BlazorWebAssemblyLazyLoad Include="MongoDB.Driver.dll"/>
         <BlazorWebAssemblyLazyLoad Include="MongoDB.Driver.Core.dll"/>
         <BlazorWebAssemblyLazyLoad Include="SharpCompress.dll"/>
-        <InvariantGlobalization>true</InvariantGlobalization>
-        <PublishTrimmed>true</PublishTrimmed>
-    </PropertyGroup>
+        <BlazorWebAssemblyLazyLoad Include="System.Data.Common.dll"/>
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
