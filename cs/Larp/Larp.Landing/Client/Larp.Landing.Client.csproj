@@ -7,6 +7,8 @@
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <NoWarn>8669,8602,BL0005</NoWarn>
         <BlazorEnableTimeZoneSupport>false</BlazorEnableTimeZoneSupport>
+        <InvariantGlobalization>true</InvariantGlobalization>
+        <PublishTrimmed>true</PublishTrimmed>
     </PropertyGroup>
 
     <ItemGroup>
