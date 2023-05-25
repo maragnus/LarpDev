@@ -9,7 +9,7 @@
     <ItemGroup>
       <PackageReference Include="JetBrains.Annotations" Version="2023.2.0-eap2" />
       <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
-      <PackageReference Include="MongoDB.Driver" Version="2.19.1" />
+      <PackageReference Include="MongoDB.Bson" Version="2.19.2"/>
     </ItemGroup>
 
     <ItemGroup>

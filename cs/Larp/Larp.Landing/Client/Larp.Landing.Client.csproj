@@ -6,7 +6,16 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <NoWarn>8669,8602,BL0005</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup>
         <BlazorEnableTimeZoneSupport>false</BlazorEnableTimeZoneSupport>
+        <BlazorWebAssemblyLazyLoad Include="CsvHelper.dll"/>
+        <BlazorWebAssemblyLazyLoad Include="AWSSDK.Core.dll"/>
+        <BlazorWebAssemblyLazyLoad Include="zxing.dll"/>
+        <BlazorWebAssemblyLazyLoad Include="MongoDB.Bson.dll"/>
+        <BlazorWebAssemblyLazyLoad Include="MongoDB.Driver.Core.dll"/>
+        <BlazorWebAssemblyLazyLoad Include="SharpCompress.dll"/>
         <InvariantGlobalization>true</InvariantGlobalization>
         <PublishTrimmed>true</PublishTrimmed>
     </PropertyGroup>
