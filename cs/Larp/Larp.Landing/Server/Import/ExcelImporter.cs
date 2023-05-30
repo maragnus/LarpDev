@@ -15,16 +15,16 @@ public class ExcelImportResult
 
 public class ExcelImporter
 {
+    private readonly MwFifthCharacterManager _characterManager;
     private readonly LarpContext _larpContext;
+    private readonly ILogger<ExcelImporter> _logger;
+    private Dictionary<int, Character> _characters = default!;
 
     private Dictionary<string, Event> _events = default!;
-    private Dictionary<int, Account> _players = default!;
-    private Dictionary<int, Character> _characters = default!;
     private string _gameId = default!;
-    private readonly ILogger<ExcelImporter> _logger;
-    private readonly MwFifthCharacterManager _characterManager;
     private GameState _gameState = default!;
     private DateTimeOffset _now;
+    private Dictionary<int, Account> _players = default!;
 
     public ExcelImporter(LarpContext larpContext, ILogger<ExcelImporter> logger,
         MwFifthCharacterManager characterManager)
@@ -64,12 +64,6 @@ public class ExcelImporter
         await _characterManager.UpdateMoonstone();
 
         return new ExcelImportResult();
-    }
-
-    
-    private class ExcelEvent
-    {
-        public Dictionary<int, int> Moonstone { get; } = new();
     }
 
     private async Task ProcessEvents(ExcelWorksheet sheet)
@@ -262,7 +256,7 @@ public class ExcelImporter
                 account.Emails.Add(new AccountEmail()
                 {
                     Email = email,
-                    NormalizedEmail = email.ToLowerInvariant(),
+                    NormalizedEmail = AccountEmail.NormalizeEmail(email),
                     IsPreferred = true,
                     IsVerified = false
                 });
@@ -345,8 +339,8 @@ public class ExcelImporter
                     importId, characterName, occupation);
                 continue;
             }
-            
-            if (enhancement != null &&_gameState.Occupations.All(x => x.Name != enhancement))
+
+            if (enhancement != null && _gameState.Occupations.All(x => x.Name != enhancement))
             {
                 _logger.LogWarning(
                     "Unable to import character {ImportId} {CharacterName} because occupational enhancement {Occupation} does not exist",
@@ -488,7 +482,7 @@ public class ExcelImporter
 
                 if (name == "Increased Mana")
                     Debugger.Break();
-                
+
                 var skill = _gameState.Skills.FirstOrDefault(x =>
                     string.Equals(x.Name, name, StringComparison.InvariantCultureIgnoreCase));
                 if (skill == null)
@@ -542,5 +536,11 @@ public class ExcelImporter
         if (homeChapter.StartsWith("Novgorond", StringComparison.InvariantCultureIgnoreCase))
             return "novgorond";
         return homeChapter;
+    }
+
+
+    private class ExcelEvent
+    {
+        public Dictionary<int, int> Moonstone { get; } = new();
     }
 }

@@ -19,12 +19,15 @@ public class TestDataHelper
             AccountId = ObjectId.GenerateNewId().ToString(),
             State = AccountState.Active,
             Name = name,
-            Emails = { new AccountEmail()
+            Emails =
             {
-                Email = email,
-                NormalizedEmail = email.ToLowerInvariant(),
-                IsVerified = true
-            } },
+                new AccountEmail()
+                {
+                    Email = email,
+                    NormalizedEmail = AccountEmail.NormalizeEmail(email),
+                    IsVerified = true
+                }
+            },
             Created = created
         };
 

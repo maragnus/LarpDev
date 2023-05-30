@@ -50,61 +50,25 @@ public class LarpContext
 
     public async Task Migrate()
     {
-        await FixSpells();
-        await ActivateAccounts();
         await FixAccounts();
-        await MigrateToCharacterRevisions();
-        await FixCharacters();
         await CreateIndices();
-    }
-
-    private async Task FixSpells()
-    {
-        var gameState = await MwFifthGame.GetGameState();
-        if (gameState.Spells.All(x => x.Categories.Length != 0)) return;
-
-        foreach (var spell in gameState.Spells.Where(x => x.Categories.Length == 0))
-        {
-            spell.Categories = new[] { spell.Category };
-            spell.Category = null!;
-        }
-
-        await GameStates.UpdateOneAsync(
-            Builders<BsonDocument>.Filter.Eq("Name", GameState.GameName),
-            Builders<BsonDocument>.Update.Set("Spells", gameState.Spells));
     }
 
     private async Task FixAccounts()
     {
         var accounts = await Accounts.Find(_ => true).ToListAsync();
 
-        foreach (var account in accounts.Where(account => account.Emails.Any(email => email.Email.Contains(' '))))
+        foreach (var account in accounts.Where(account =>
+                     account.Emails.Any(email => email.NormalizedEmail.Contains("@gmail.com"))))
         {
             foreach (var email in account.Emails)
             {
-                email.Email = email.Email.Replace(" ", "");
-                email.NormalizedEmail = email.Email.ToLowerInvariant();
+                email.NormalizedEmail = AccountEmail.NormalizeEmail(email.Email);
             }
 
             await Accounts.UpdateOneAsync(a => a.AccountId == account.AccountId,
                 Builders<Account>.Update.Set(a => a.Emails, account.Emails));
         }
-
-        foreach (var account in accounts.Where(x => x.NormalizedPhone == null && !string.IsNullOrEmpty(x.Phone)))
-        {
-            await Accounts.UpdateOneAsync(a => a.AccountId == account.AccountId,
-                Builders<Account>.Update.Set(a => a.NormalizedPhone, Account.BuildNormalizedPhone(account.Phone)));
-        }
-    }
-
-    private async Task ActivateAccounts()
-    {
-        await Accounts.UpdateManyAsync(
-            x =>
-                x.State != AccountState.Active
-                && x.State != AccountState.Archived
-                && x.State != AccountState.Uninvited,
-            Builders<Account>.Update.Set(x => x.State, AccountState.Active));
     }
 
     private async Task CreateIndices()
@@ -131,52 +95,6 @@ public class LarpContext
             new CreateIndexModel<CharacterRevision>(Builders<CharacterRevision>.IndexKeys.Ascending(x => x.AccountId)),
             new CreateIndexModel<CharacterRevision>(Builders<CharacterRevision>.IndexKeys.Ascending(x => x.CharacterId))
         });
-    }
-
-    private async Task FixCharacters()
-    {
-        var characters = (await MwFifthGame.Characters
-                .Find(_ => true)
-                .ToListAsync())
-            .ToDictionary(x => x.CharacterId);
-
-        var revisions = await MwFifthGame.CharacterRevisions
-            .Find(x => x.State == CharacterState.Live)
-            .ToListAsync();
-
-        foreach (var revision in revisions)
-        {
-            var character = characters[revision.CharacterId];
-            var usedMoonstone = revision.SkillMoonstone + revision.GiftMoonstone;
-            if (character.CharacterName == revision.CharacterName && usedMoonstone == character.UsedMoonstone)
-                continue;
-
-            await MwFifthGame.Characters.UpdateOneAsync(
-                characterFilter => characterFilter.CharacterId == revision.CharacterId,
-                Builders<Character>.Update
-                    .Set(x => x.CharacterName, revision.CharacterName)
-                    .Set(x => x.UsedMoonstone, usedMoonstone));
-        }
-    }
-
-    private async Task MigrateToCharacterRevisions()
-    {
-        var count = await MwFifthGame.Characters.CountDocumentsAsync(_ => true);
-        if (count == 0)
-        {
-            var revisions = await MwFifthGame.CharacterRevisions.Find(_ => true).ToListAsync();
-            var ids = revisions.GroupBy(x => x.CharacterId);
-            foreach (var id in ids)
-            {
-                var first = id.First();
-                await MwFifthGame.Characters.InsertOneAsync(new Character()
-                {
-                    CharacterId = first.CharacterId,
-                    AccountId = first.AccountId,
-                    CreatedOn = first.CreatedOn
-                });
-            }
-        }
     }
 
     public async Task LogEvent(string actorAccountId, string? actorSessionId, LogEvent logEvent)

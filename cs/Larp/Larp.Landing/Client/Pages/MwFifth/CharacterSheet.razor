@@ -22,6 +22,8 @@
     private Spell[] _spells = Array.Empty<Spell>();
     private string[] _aggregateSkills = Array.Empty<string>();
     private CharacterSkill[] _skills = Array.Empty<CharacterSkill>();
+    private Dictionary<string, string> _properties = new();
+    private Dictionary<string, int> _skillRanks = new();
 
     protected override void OnParametersSet()
     {
@@ -46,6 +48,7 @@
         _homeChapter = Character.GetHomeChapter()?.Title ?? "Invalid Home Chapter";
         _specialty = Character.Specialty ?? Character.GetOccupation()?.Name ?? "No Occupation";
         _religion = Character.GetReligion()?.Title ?? "No Religion";
+        _properties = Character.Properties.ToDictionary(property => property.Name, property => property.Value);
 
         string SkillAggregate(IGrouping<string, CharacterSkill> item)
         {
@@ -68,10 +71,38 @@
 
         _spells = Character.AllSpells.TryFromKeys(Character.Revision.Spells).ToArray();
 
-        var increasedMana = _skills.Where(s => s.Name == "Increased Mana").Sum(s => s.Rank);
-        var manaProperty = Character.Properties.FirstOrDefault(x => x.Name == "Mana");
-        if (increasedMana > 0 && manaProperty != null && int.TryParse(manaProperty.Value, out var mana))
-            manaProperty.Value = (mana + increasedMana).ToString();
+        _skillRanks = _skills
+            .GroupBy(skill => skill.Name)
+            .ToDictionary(
+                group => group.Key,
+                group => group.Sum(skill => skill.Rank));
+
+        AdjustProperty("Mana", "Increased Mana", false, (value, rank) => value += rank);
+        AdjustProperty("Battle Endurance per Renew", "Improved Battle Endurance", false, (value, _) => value + 1);
+        AdjustProperty("Elemental Bursts per Renew", "Improved Burst Casting", false, (value, _) => value + 1);
+        AdjustProperty("Elemental Storms per Renew", "Improved Storm Casting", false, (value, _) => value + 1);
+        AdjustProperty("Leadership", "Leadership", true, (value, _) => value + 2);
+        AdjustProperty("Leadership", "Improved Leadership", false, (value, _) => value + 2);
+        AdjustProperty("Butcher Tags", "Butcher", true, (value, _) => value + 6);
+        AdjustProperty("Butcher Tags", "Improved Butcher", false, (value, _) => value + 3);
+        AdjustProperty("Scavenging Tags", "Scavenging", true, (value, _) => value + 3);
+        AdjustProperty("Scavenging Tags", "Improved Scavenging", false, (value, _) => value + 3);
+    }
+
+    void AdjustProperty(string propertyName, string skillName, bool add, Func<int, int, int> adjust)
+    {
+        if (!_skillRanks.TryGetValue(skillName, out var ranks))
+            return;
+
+        if (_properties.TryGetValue(propertyName, out var value))
+        {
+            if (int.TryParse(value, out var intValue))
+                _properties[propertyName] = adjust(intValue, ranks).ToString();
+        }
+        else if (add)
+        {
+            _properties[propertyName] = adjust(0, ranks).ToString();
+        }
     }
 
 }
@@ -118,7 +149,8 @@
             }
         </MudGrid>
     </MudItem>
-    @foreach (var (name, value) in Character.Properties)
+
+    @foreach (var (name, value) in _properties)
     {
         if (value == "-") continue;
         <MudItem xs="Print ? 4 : 6" sm="4" Style="page-break-inside: avoid">

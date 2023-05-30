@@ -10,7 +10,8 @@ public enum AccountRole
     MwFifthGameMaster
 }
 
-public static class AccountRoles {
+public static class AccountRoles
+{
     public const string AdminAccess = nameof(AccountRole.AdminAccess);
     public const string AccountAdmin = nameof(AccountRole.AccountAdmin);
     public const string MwFifthGameMaster = nameof(AccountRole.MwFifthGameMaster);
@@ -40,6 +41,7 @@ public class Account
 {
     [BsonId, BsonRepresentation(BsonType.ObjectId)]
     public string AccountId { get; set; } = default!;
+
     public AccountState State { get; set; } = AccountState.Active;
     public string? Name { get; set; }
     public string? Location { get; set; }
@@ -62,31 +64,31 @@ public class Account
     public string? AdminNotes { get; set; }
 
     public int? DiscountPercent { get; set; }
-    
+
     public int AttachmentCount { get; set; }
-    
+
     [BsonIgnore]
     public string? PreferredEmail =>
         (Emails.FirstOrDefault(x => x.IsPreferred) ?? Emails.FirstOrDefault(x => x.IsVerified))?.Email;
 
-    public static string? BuildNormalizedPhone(string? phone)
-    {
-        if (string.IsNullOrWhiteSpace(phone)) return null;
-        var normalizedPhone = Regex.Replace(phone.Trim(), @"[^\d]", "");
-        
-        if (normalizedPhone.Length == 10 
-            || (normalizedPhone.Length == 11 && normalizedPhone.StartsWith("1")))
-            return normalizedPhone;
-
-        return null;
-    }
-    
     [BsonIgnore] public string EmailList => string.Join(", ", Emails.Select(x => x.Email));
 
     public bool IsProfileComplete =>
         !string.IsNullOrWhiteSpace(Name)
         && !string.IsNullOrWhiteSpace(Location)
         && !string.IsNullOrWhiteSpace(Phone);
+
+    public static string? BuildNormalizedPhone(string? phone)
+    {
+        if (string.IsNullOrWhiteSpace(phone)) return null;
+        var normalizedPhone = Regex.Replace(phone.Trim(), @"[^\d]", "");
+
+        if (normalizedPhone.Length == 10
+            || (normalizedPhone.Length == 11 && normalizedPhone.StartsWith("1")))
+            return normalizedPhone;
+
+        return null;
+    }
 }
 
 [PublicAPI]
@@ -96,4 +98,12 @@ public class AccountEmail
     public string NormalizedEmail { get; set; } = default!;
     public bool IsVerified { get; set; }
     public bool IsPreferred { get; set; }
+
+    public static string NormalizeEmail(string email)
+    {
+        var normalized = email.Trim().ToLowerInvariant();
+        if (normalized.EndsWith("@gmail.com"))
+            normalized = normalized[..normalized.IndexOf('@')].Replace(".", "") + "@gmail.com";
+        return normalized;
+    }
 }
