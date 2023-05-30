@@ -41,8 +41,8 @@ public class UserSessionManager : IUserSessionManager
     private static readonly SemaphoreSlim TokenLock = new(1);
     private readonly LarpDataCache _cache;
     private readonly ISystemClock _clock;
-    private readonly ILogger<UserSessionManager> _logger;
     private readonly LarpContext _larpContext;
+    private readonly ILogger<UserSessionManager> _logger;
     private readonly UserSessionManagerOptions _options;
 
     public UserSessionManager(LarpContext larpContext, LarpDataCache cache, ISystemClock clock,
@@ -57,7 +57,7 @@ public class UserSessionManager : IUserSessionManager
 
     public async Task<string> GenerateToken(string email, string deviceId)
     {
-        var normalizedEmail = email.ToLowerInvariant();
+        var normalizedEmail = AccountEmail.NormalizeEmail(email);
 
         var accountId = await GetAccountIdFromEmail(email);
         if (accountId != null)
@@ -96,7 +96,7 @@ public class UserSessionManager : IUserSessionManager
 
     public async Task<string> GenerateToken(string accountId, string email, string deviceId)
     {
-        var normalizedEmail = email.ToLowerInvariant();
+        var normalizedEmail = AccountEmail.NormalizeEmail(email);
 
         await TokenLock.WaitAsync();
         try
@@ -165,33 +165,9 @@ public class UserSessionManager : IUserSessionManager
         return session.SessionId;
     }
 
-    private async Task<string?> GetAccountIdFromEmail(string email)
-    {
-        var phone = Account.BuildNormalizedPhone(email);
-        
-        var normalizedEmail = email.ToLowerInvariant();
-        var filter = Builders<Account>.Filter
-            .ElemMatch(x => x.Emails, x => x.NormalizedEmail == normalizedEmail);
-
-        if (phone != null)
-        {
-            filter = Builders<Account>.Filter.Or(
-                Builders<Account>.Filter.Eq(x => x.NormalizedPhone, phone),
-                filter);
-        }
-        
-        var project = Builders<Account>.Projection
-            .Expression(a => a.AccountId);
-
-        return await _larpContext.Accounts
-            .Find(filter)
-            .Project(project)
-            .FirstOrDefaultAsync();
-    }
-
     public async Task ConfirmEmailAddress(string accountId, string email)
     {
-        var normalizedEmail = email.ToLowerInvariant();
+        var normalizedEmail = AccountEmail.NormalizeEmail(email);
 
         var accountFilter = Builders<Account>.Filter.And(
             Builders<Account>.Filter.Eq(x => x.AccountId, accountId),
@@ -204,7 +180,7 @@ public class UserSessionManager : IUserSessionManager
 
     public async Task PreferEmailAddress(string accountId, string email)
     {
-        var normalizedEmail = email.ToLowerInvariant();
+        var normalizedEmail = AccountEmail.NormalizeEmail(email);
 
         var accountFilter = Builders<Account>.Filter;
 
@@ -236,7 +212,7 @@ public class UserSessionManager : IUserSessionManager
             var accountFilter = Builders<Account>.Filter;
             var emailFilter = Builders<AccountEmail>.Filter;
 
-            var normalizedEmail = email.ToLowerInvariant();
+            var normalizedEmail = AccountEmail.NormalizeEmail(email);
 
             // Make sure the email address doesn't already exist
             var emailExists = await _larpContext.Accounts
@@ -272,7 +248,7 @@ public class UserSessionManager : IUserSessionManager
 
     public async Task RemoveEmailAddress(string accountId, string email)
     {
-        var normalizedEmail = email.ToLowerInvariant();
+        var normalizedEmail = AccountEmail.NormalizeEmail(email);
         var accountFilter = Builders<Account>.Filter;
         var emailFilter = Builders<AccountEmail>.Filter;
 
@@ -365,7 +341,7 @@ public class UserSessionManager : IUserSessionManager
 
     public async Task<Account?> FindByEmail(string email)
     {
-        var normalizedEmail = email.ToLowerInvariant();
+        var normalizedEmail = AccountEmail.NormalizeEmail(email);
         var filter = Builders<Account>.Filter
             .ElemMatch(x => x.Emails, x => x.NormalizedEmail == normalizedEmail);
 
@@ -390,7 +366,7 @@ public class UserSessionManager : IUserSessionManager
                 new AccountEmail()
                 {
                     Email = emailAddress,
-                    NormalizedEmail = emailAddress.ToLowerInvariant(),
+                    NormalizedEmail = AccountEmail.NormalizeEmail(emailAddress),
                     IsPreferred = true
                 }
             },
@@ -427,6 +403,30 @@ public class UserSessionManager : IUserSessionManager
         }
 
         return new UserSessionValidationResult(UserSessionValidationResultStatusCode.NotConfirmed);
+    }
+
+    private async Task<string?> GetAccountIdFromEmail(string email)
+    {
+        var phone = Account.BuildNormalizedPhone(email);
+
+        var normalizedEmail = AccountEmail.NormalizeEmail(email);
+        var filter = Builders<Account>.Filter
+            .ElemMatch(x => x.Emails, x => x.NormalizedEmail == normalizedEmail);
+
+        if (phone != null)
+        {
+            filter = Builders<Account>.Filter.Or(
+                Builders<Account>.Filter.Eq(x => x.NormalizedPhone, phone),
+                filter);
+        }
+
+        var project = Builders<Account>.Projection
+            .Expression(a => a.AccountId);
+
+        return await _larpContext.Accounts
+            .Find(filter)
+            .Project(project)
+            .FirstOrDefaultAsync();
     }
 
     private static string RandomReadableString(int length)

@@ -466,8 +466,8 @@
         "title": "Passion",
         "properties": [
             "Max Damage per Bolt/Burst",
-            "Bursts per Renew",
-            "Storms per Renew"
+            "Elemental Bursts per Renew",
+            "Elemental Storms per Renew"
         ],
         "ranks": [
             {

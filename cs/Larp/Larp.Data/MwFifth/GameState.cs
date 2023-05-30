@@ -48,6 +48,10 @@ public class GiftPropertyValue
     {
     }
 
+    public GiftPropertyValue(GiftPropertyValue clone) : this(clone.Name, clone.Value)
+    {
+    }
+
     public GiftPropertyValue(string name, string value)
     {
         Name = name;
@@ -94,7 +98,7 @@ public enum SkillPurchasable
 public class SkillDefinition
 {
     public string Name { get; set; } = default!;
-    
+
     public string Title { get; set; } = default!;
 
     public SkillClass Class { get; set; }
@@ -115,7 +119,7 @@ public class SkillDefinition
 
     [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? PreregistrationNote { get; set; }
-    
+
     [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string[]? Chapters { get; set; }
 }
@@ -150,26 +154,26 @@ public class SkillChoice
 public class Occupation
 {
     public string Name { get; set; } = default!;
-    
+
     [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string[]? Specialties { get; set; }
-    
+
     public OccupationType Type { get; set; }
-    
+
     public string[] Skills { get; set; } = Array.Empty<string>();
-    
+
     [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public SkillChoice[]? Choices { get; set; }
 
     [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? Duty { get; set; }
-    
+
     [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? Livery { get; set; }
-    
+
     [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? Leadership { get; set; }
-    
+
     [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string[]? Chapters { get; set; }
 
@@ -177,7 +181,7 @@ public class Occupation
     public override int GetHashCode() => Name.GetHashCode();
 
     public bool HasSkill(string skillName) => Skills.Contains(skillName);
-    
+
     public bool IsChapter(string? homeChapter)
     {
         // If this is not chapter-specific, match
