@@ -61,5 +61,7 @@
     private bool SearchFunc(SkillDefinition skill, string query) =>
         skill.Name.Contains(query, StringComparison.InvariantCultureIgnoreCase);
 
-    private string ToStringFunc(SkillDefinition skill) => $"{skill.Name} ({skill.Class} {skill.Purchasable})";
+    private string ToStringFunc(SkillDefinition skill) =>
+        $"{skill.Name} [{skill.Class}, {(skill.CostPerPurchase is > 0 ? $"{skill.CostPerPurchase} MS, " : "")} {skill.Purchasable}]";
+
 }
