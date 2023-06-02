@@ -75,7 +75,9 @@
             .GroupBy(skill => skill.Name)
             .ToDictionary(
                 group => group.Key,
-                group => group.Sum(skill => skill.Rank));
+                group => Math.Max(1, group.Sum(skill => skill.Rank)));
+
+        CalculateHitPointBonus();
 
         AdjustProperty("Mana", "Increased Mana", false, (value, rank) => value += rank);
         AdjustProperty("Battle Endurance per Renew", "Improved Battle Endurance", false, (value, _) => value + 1);
@@ -87,6 +89,18 @@
         AdjustProperty("Butcher Tags", "Improved Butcher", false, (value, _) => value + 3);
         AdjustProperty("Scavenging Tags", "Scavenging", true, (value, _) => value + 3);
         AdjustProperty("Scavenging Tags", "Improved Scavenging", false, (value, _) => value + 3);
+    }
+
+    private void CalculateHitPointBonus()
+    {
+        var courageHp = _properties.TryGetValue("Hit Point Bonus", out var hpBonus)
+            ? (int.TryParse(hpBonus.TrimStart('+'), out var hpBonusInt) ? hpBonusInt : 0)
+            : 0;
+        var prowessHp = Character.Abilities.Contains("Extra Hit Point") ? 1 : 0;
+        var toughnessHp = _skillRanks.TryGetValue("Toughness", out var toughnessRank) ? toughnessRank : 0;
+        var hp = Math.Max(courageHp, prowessHp) + toughnessHp;
+        if (hp > 0)
+            _properties["Hit Point Bonus"] = $"+{hp}";
     }
 
     void AdjustProperty(string propertyName, string skillName, bool add, Func<int, int, int> adjust)
