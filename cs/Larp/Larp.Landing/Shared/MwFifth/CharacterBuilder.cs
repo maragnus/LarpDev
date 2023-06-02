@@ -705,7 +705,7 @@ public class CharacterBuilder
     private void PopulateSpells()
     {
         HasWisdomSpells = Revision.Wisdom > 0;
-        HasBardicSpells = HasWisdomSpells && HasSkill("Bardic Voice");
+        HasBardicSpells = HasWisdomSpells && HasSkill("Bardic Magic");
         HasDivineSpells = HasWisdomSpells && HasSkill("Divine Spells");
         HasOccupationalSpells = HasWisdomSpells && HasSkill("Occupational Spells");
         OccupationalSpells = AllOccupationalSpells
