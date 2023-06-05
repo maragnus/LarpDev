@@ -1,5 +1,4 @@
-﻿@using Larp.Common
-@inherits LarpPage
+﻿@inherits LarpPage
 
 @inject LandingService LandingService
 
@@ -68,7 +67,7 @@
 
         public Letter[] Letters { get; init; } = default!;
     }
-    
+
     static readonly Dictionary<LetterState, (string Tooltip, Color Color)> LetterTooltip = new()
     {
         { LetterState.NotStarted, ("You have not started the letter for this event", Color.Warning) },
@@ -82,6 +81,7 @@
     {
         { "PreEvent", Icons.Material.Filled.Rsvp },
         { "PostEvent", Icons.Material.Filled.Email },
+        { "BetweenEvent", Icons.Material.Filled.ShoppingCart },
     };
 
     protected override async Task OnSafeInitializedAsync()
@@ -95,12 +95,12 @@
         {
             foreach (var name in @event.LetterTemplates)
             {
-                // TODO -- if not IsOpen then change LetterState.NotStarted or LetterState.Draft to LetterState.Locked
+    // TODO -- if not IsOpen then change LetterState.NotStarted or LetterState.Draft to LetterState.Locked
                 yield return letters.FirstOrDefault(x => x.EventId == @event.EventId && x.Name == name.Name)
                              ?? new Letter() { Name = name.Name, State = name.IsOpen ? LetterState.NotStarted : LetterState.Locked };
             }
         }
-        
+
         _events = attendances
             .Select(attendance =>
             {

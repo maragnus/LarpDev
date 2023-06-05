@@ -4,8 +4,8 @@ namespace Larp.Data.Mongo.Services;
 
 public class EventManager
 {
-    private readonly LarpContext _larpContext;
     private readonly MwFifthCharacterManager _characterManager;
+    private readonly LarpContext _larpContext;
 
     public EventManager(LarpContext larpContext, MwFifthCharacterManager characterManager)
     {
@@ -111,7 +111,7 @@ public class EventManager
     }
 
     public async Task SetEventAttendance(string eventId, string accountId, bool attended, int? moonstone,
-        string[] characterIds)
+        decimal? paid, decimal? expected, string[] characterIds)
     {
         if (!attended)
         {
@@ -122,6 +122,8 @@ public class EventManager
         var update = Builders<Attendance>.Update
             .Set(x => x.EventId, eventId)
             .Set(x => x.AccountId, accountId)
+            .Set(x => x.ProvidedPayment, paid)
+            .Set(x => x.ExpectedPayment, expected)
             .Set(x => x.MwFifth,
                 new MwFifthAttendance
                 {
@@ -181,7 +183,8 @@ public class EventManager
             _ => throw new ArgumentOutOfRangeException(nameof(list), list, null)
         };
 
-        var eventProjection = Builders<Event>.Projection.Exclude(x => x.PreregistrationNotes).Exclude(x => x.AdminNotes);
+        var eventProjection =
+            Builders<Event>.Projection.Exclude(x => x.PreregistrationNotes).Exclude(x => x.AdminNotes);
         var events = await _larpContext.Events.Find(filter).Project<Event>(eventProjection).ToListAsync();
         var templateIds = letters.Values.Select(x => x.TemplateId).Distinct().ToList();
         var templates = await _larpContext.LetterTemplates
@@ -216,7 +219,7 @@ public class EventManager
 
         // Clear admin-only info
         attendances.ForEach(x => x.Event.PreregistrationNotes = default);
-        
+
         return attendances
             .Select(x => new EventAttendance(
                 x.Attedance,

@@ -1,6 +1,6 @@
 @page "/events/attendance"
-@using Larp.Common
 @inject LandingService LandingService
+@using Larp.Common
 @inherits LarpPage
 
 <PageHeader>Event Attendance</PageHeader>
@@ -38,7 +38,7 @@
         <MudDataGrid T="AttendanceInfo" Items="_events" Hover Filterable="true" Loading="IsLoading" Groupable Dense>
             <Columns>
                 @* <PropertyColumn Property="x => x.Game" Title="Game" Grouping="true"/> *@
-                <TemplateColumn T="AttendanceInfo" Groupable="false" Sortable="false" Filterable="false" >
+                <TemplateColumn T="AttendanceInfo" Groupable="false" Sortable="false" Filterable="false">
                     <CellTemplate>
                         <MudIcon Icon="@context.Item.Icon" Color="Color.Primary" Size="Size.Small"/>
                     </CellTemplate>
@@ -70,7 +70,7 @@
     private int _totalMoonstone;
     private int _usedMoonstone;
     private int _availableMoonstone;
-    
+
     static readonly Dictionary<LetterState, (string Tooltip, Color Color)> LetterTooltip = new()
     {
         { LetterState.NotStarted, ("You have not started the letter for this event", Color.Warning) },
@@ -84,8 +84,9 @@
     {
         { "PreEvent", Icons.Material.Filled.Rsvp },
         { "PostEvent", Icons.Material.Filled.Email },
+        { "BetweenEvent", Icons.Material.Filled.ShoppingCart },
     };
-    
+
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     private class AttendanceInfo
     {
@@ -132,12 +133,12 @@
         {
             foreach (var name in @event.LetterTemplates)
             {
-                // TODO -- if not IsOpen then change LetterState.NotStarted or LetterState.Draft to LetterState.Locked
+    // TODO -- if not IsOpen then change LetterState.NotStarted or LetterState.Draft to LetterState.Locked
                 yield return letters.FirstOrDefault(x => x.EventId == @event.EventId && x.Name == name.Name)
                              ?? new Letter() { Name = name.Name, State = name.IsOpen ? LetterState.NotStarted : LetterState.Locked };
             }
         }
-        
+
         _events = attendances
             .Select(attendance =>
             {

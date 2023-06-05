@@ -53,6 +53,7 @@
                         <MudSelect T="string" @bind-Value="@context.Item.Name">
                             <MudSelectItem T="string" Value="@("PreEvent")">Pre-event</MudSelectItem>
                             <MudSelectItem T="string" Value="@("PostEvent")">Post-event</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("BetweenEvent")">Between-events</MudSelectItem>
                         </MudSelect>
                     </EditTemplate>
                 </PropertyColumn>
@@ -231,7 +232,11 @@
 
     private void AddLetter()
     {
-        var name = _letters.Any(x => x.Name == "PreEvent") ? "PostEvent" : "PreEvent";
+        var name = _letters.All(x => x.Name != "PreEvent")
+            ? "PreEvent"
+            : _letters.All(x => x.Name != "PostEvent")
+                ? "PostEvent"
+                : "BetweenEvent";
         _letters.Add(new EventLetter()
         {
             Name = name,

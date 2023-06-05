@@ -11,7 +11,7 @@
         <ItemTemplate>
             <MudStack Spacing="0">
                 <MudText Typo="Typo.body1">@context.Value.Name</MudText>
-                <MudText Typo="Typo.body2"> @string.Join(", ", context.Value.Emails.Select(x => x.Email))</MudText>
+                <MudText Typo="Typo.body2">@string.Join(", ", context.Value.Emails.Select(x => x.Email))</MudText>
             </MudStack>
         </ItemTemplate>
     </MudSelectExtended>
@@ -27,16 +27,25 @@
             </EditTemplate>
         </PropertyColumn>
         <PropertyColumn Property="x => x.Moonstone" IsEditable="true"/>
+        <PropertyColumn Property="x => x.Paid" IsEditable="true"/>
+        <PropertyColumn Property="x => x.Expected" IsEditable="true"/>
+        <PropertyColumn Property="x => x.PreEvent" IsEditable="false" SortBy="@(attendance => attendance.PreEvent?.State)">
+            <CellTemplate>
+                @DisplayLetter(context.Item.PreEvent)
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.PostEvent" IsEditable="false" SortBy="@(attendance => attendance.PostEvent?.State)">
+            <CellTemplate>
+                @DisplayLetter(context.Item.PostEvent)
+            </CellTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.BetweenEvent" IsEditable="false" SortBy="@(attendance => attendance.BetweenEvent?.State)">
+            <CellTemplate>
+                @DisplayLetter(context.Item.BetweenEvent)
+            </CellTemplate>
+        </PropertyColumn>
         <TemplateColumn CellClass="d-flex justify-end" Sortable="false" IsEditable="false">
             <CellTemplate>
-                @foreach (Letter letter in context.Item.Letters)
-                {
-                    var style = LetterTooltip[letter.State];
-                    var icon = LetterIcon[letter.Name];
-                    <MudTooltip Text="@style.Tooltip">
-                        <MudIconButton Size="Size.Medium" Color="style.Color" Icon="@icon" OnClick="async () => await ShowLetter(letter)"/>
-                    </MudTooltip>
-                }
                 <MudIconButton Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Filled.Save" Disabled="@(!context.Item.Changed)" OnClick="async () => await AttendanceUpdate(context.Item)"/>
             </CellTemplate>
         </TemplateColumn>
@@ -48,29 +57,52 @@
     [Parameter]
     public EventsAndLetters EventsAndLetters { get; set; } = default!;
 
+    RenderFragment? DisplayLetter(Letter? letter)
+    {
+        if (letter == null)
+            return null;
+
+        var style = LetterTooltip[letter.State];
+        var icon = LetterIcon[letter.Name];
+        var showBadge = letter.State is LetterState.Submitted;
+        return
+            @<MudTooltip Text="@style.Tooltip">
+                <MudBadge Visible="@showBadge" Color="Color.Error" Icon="@Icons.Material.Filled.Warning" Bordered Overlap Origin="Origin.CenterRight" Elevation="1">
+                    <MudButton Size="Size.Medium" IconColor="style.Color" StartIcon="@icon" OnClick="async () => await ShowLetter(letter)">
+                        @letter.State
+                    </MudButton>
+                </MudBadge>
+            </MudTooltip>;
+    }
+
     private class Attendance
     {
         public string AccountId { get; set; } = default!;
         public string Name { get; set; } = default!;
         public bool Attended { get; set; }
         public int? Moonstone { get; set; }
+        public decimal? Paid { get; set; }
+        public decimal? Expected { get; set; }
         public string[] CharacterIds { get; set; } = Array.Empty<string>();
         public bool Changed { get; set; }
-        public Letter[] Letters { get; set; } = Array.Empty<Letter>();
+        public Letter? PreEvent { get; set; }
+        public Letter? PostEvent { get; set; }
+        public Letter? BetweenEvent { get; set; }
     }
 
     static readonly Dictionary<LetterState, (string Tooltip, Color Color)> LetterTooltip = new()
     {
-        { LetterState.NotStarted, ("You have not started the letter for this event", Color.Warning) },
-        { LetterState.Draft, ("You have not submitted this letter yet", Color.Warning) },
-        { LetterState.Submitted, ("Your event letter has been submitted and is waiting for approval", Color.Tertiary) },
-        { LetterState.Approved, ("Your event letter has been approved", Color.Success) },
+        { LetterState.NotStarted, ("Not started", Color.Warning) },
+        { LetterState.Draft, ("Draft", Color.Warning) },
+        { LetterState.Submitted, ("Submitted", Color.Success) },
+        { LetterState.Approved, ("Approved", Color.Success) },
     };
 
     static readonly Dictionary<string, string> LetterIcon = new()
     {
         { "PreEvent", Icons.Material.Filled.Rsvp },
         { "PostEvent", Icons.Material.Filled.Email },
+        { "BetweenEvent", Icons.Material.Filled.ShoppingCart },
     };
 
     private List<EventComponent> _components = new();
@@ -99,22 +131,33 @@
         var attendances = await LandingService.Admin.GetEventAttendances(_event.EventId);
         _attendances.AddRange(attendances.Select(attendance =>
         {
+            var letters = letterLookup.Remove(attendance.AccountId, out var letterArray) ? letterArray : Array.Empty<Letter>();
             return new Attendance()
             {
                 AccountId = attendance.AccountId,
                 Name = names.GetValueOrDefault(attendance.AccountId)?.Name ?? "No Name Set",
                 Attended = true,
                 Moonstone = attendance.MwFifth?.Moonstone ?? 0,
+                Paid = attendance.ProvidedPayment,
+                Expected = attendance.ExpectedPayment,
                 CharacterIds = attendance.MwFifth?.CharacterIds ?? Array.Empty<string>(),
-                Letters = letterLookup.Remove(attendance.AccountId, out var letters) ? letters : Array.Empty<Letter>()
+                PreEvent = letters.FirstOrDefault(x => x.Name == "PreEvent"),
+                PostEvent = letters.FirstOrDefault(x => x.Name == "PostEvent"),
+                BetweenEvent = letters.FirstOrDefault(x => x.Name == "BetweenEvent"),
             };
         }));
-        _attendances.AddRange(letterLookup.Select(letter => new Attendance()
+        _attendances.AddRange(letterLookup.Select(letter =>
         {
-            AccountId = letter.Key,
-            Name = names.GetValueOrDefault(letter.Key)?.Name ?? "No Name Set",
-            Attended = false,
-            Letters = letter.Value
+            var letters = letter.Value;
+            return new Attendance()
+            {
+                AccountId = letter.Key,
+                Name = names.GetValueOrDefault(letter.Key)?.Name ?? "No Name Set",
+                Attended = false,
+                PreEvent = letters.FirstOrDefault(x => x.Name == "PreEvent"),
+                PostEvent = letters.FirstOrDefault(x => x.Name == "PostEvent"),
+                BetweenEvent = letters.FirstOrDefault(x => x.Name == "BetweenEvent"),
+            };
         }));
 
         _isSaving = false;
@@ -148,7 +191,10 @@
     {
         await SafeActionAsync(async () =>
         {
-            await LandingService.Admin.SetEventAttendance(_event.EventId, item.AccountId, item.Attended, item.Moonstone, Array.Empty<string>());
+            await LandingService.Admin.SetEventAttendance(
+                _event.EventId, item.AccountId, item.Attended,
+                item.Moonstone, item.Paid, item.Expected,
+                Array.Empty<string>());
             item.Changed = false;
         });
     }
@@ -178,10 +224,12 @@
                 Moonstone = 0,
                 Name = player.Name ?? "No Name Set",
                 AccountId = player.AccountId,
+                Paid = null,
+                Expected = null,
                 Changed = false
             };
 
-            await LandingService.Admin.SetEventAttendance(_event.EventId, item.AccountId, item.Attended, item.Moonstone, Array.Empty<string>());
+            await LandingService.Admin.SetEventAttendance(_event.EventId, item.AccountId, item.Attended, item.Moonstone, item.Paid, item.Expected, Array.Empty<string>());
 
             _attendances.Add(item);
 
@@ -214,6 +262,13 @@
             { nameof(LetterDialog.Admin), true }
         };
         await DialogService.ShowAsync<LetterDialog>(EventsAndLetters.Accounts[letter.AccountId].Name, parameters, options);
+    }
+
+    private object? SortLetter<T>(T item)
+    {
+        if (item is Letter letter)
+            return letter.State;
+        return null;
     }
 
 }

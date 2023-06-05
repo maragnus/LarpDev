@@ -76,7 +76,8 @@ public interface IAdminService
     Task DeleteEvent(string eventId);
 
     [ApiPost("events/{eventId}/attendance/{accountId}"), ApiAuthenticated(AccountRoles.AdminAccess)]
-    Task SetEventAttendance(string eventId, string accountId, bool attended, int? moonstone, string[] characterIds);
+    Task SetEventAttendance(string eventId, string accountId, bool attended, int? moonstone, decimal? paid,
+        decimal? expected, string[] characterIds);
 
     [ApiGet("accounts/names")]
     Task<Dictionary<string, AccountName>> GetAccountNames();
@@ -97,7 +98,7 @@ public interface IAdminService
     [ApiGet("data/export/occupations"), ApiAuthenticated(AccountRoles.AccountAdmin)]
     [ApiContentType("application/json")]
     Task<IFileInfo> ExportOccupations();
-    
+
     [ApiGet("letters/events/{eventId}/export"), ApiAuthenticated(AccountRoles.AccountAdmin)]
     [ApiContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")]
     Task<IFileInfo> ExportLetters(string eventId);
@@ -164,17 +165,19 @@ public interface IAdminService
 
     [ApiPost("accounts/{accountId}/notes/preregistration"), ApiAuthenticated(AccountRoles.AdminAccess)]
     Task SetAccountPreregistrationNotes(string accountId, string? notes);
-    
+
     [ApiPost("accounts/{accountId}/notes/admin"), ApiAuthenticated(AccountRoles.AdminAccess)]
     Task SetAccountAdminNotes(string accountId, string? notes);
-    
+
     [ApiGet("events/{eventId}/notes"), ApiAuthenticated(AccountRoles.AdminAccess)]
     Task<PreregistrationNotes> GetEventNotes(string eventId);
 
     [ApiPost("accounts/{accountId}/uninvite"), ApiAuthenticated(AccountRoles.AccountAdmin)]
     Task UninviteAccount(string accountId);
+
     [ApiPost("accounts/{accountId}/archive"), ApiAuthenticated(AccountRoles.AccountAdmin)]
     Task ArchiveAccount(string accountId);
+
     [ApiPost("accounts/{accountId}/restore"), ApiAuthenticated(AccountRoles.AccountAdmin)]
     Task RestoreAccount(string accountId);
 
@@ -186,7 +189,7 @@ public interface IAdminService
 
     [ApiDelete("data/characters/unused"), ApiAuthenticated(AccountRoles.AccountAdmin)]
     Task DeleteCharactersUnused();
-    
+
     [ApiPost("mw5e/occupations"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
     Task SaveOccupations(Occupation[] occupations);
 
@@ -201,7 +204,7 @@ public interface IAdminService
 
     [ApiPost("mw5e/disadvantages"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
     Task SaveDisadvantages(Vantage[] vantages);
-    
+
     [ApiPost("mw5e/chapters"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
     Task SaveChapters(HomeChapter[] chapters);
 

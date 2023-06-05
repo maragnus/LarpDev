@@ -27,13 +27,16 @@
     private bool IsAdminPath(string uri) =>
         (new Uri(uri)).AbsolutePath.StartsWith(AdminPath);
 
+    private bool IsHome(string uri) =>
+        (new Uri(uri)).AbsolutePath == "/";
+
     private bool IsAdminDashboard(string uri) =>
         (new Uri(uri)).AbsolutePath == AdminPath;
 
     private void UpdateLocation(string uri)
     {
         _isAdminSection = IsAdminPath(uri);
-        _isDrawerOpen = IsAdminDashboard(uri);
+        _isDrawerOpen = IsAdminDashboard(uri) || IsHome(uri);
         StateHasChanged();
     }
 
