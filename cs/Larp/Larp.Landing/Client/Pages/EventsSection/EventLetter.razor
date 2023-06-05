@@ -56,10 +56,28 @@
                     <MudRating T="int" ReadOnly="ReadOnly" MaxValue="10" SelectedValue="@(GetField<int>(field.Name))" SelectedValueChanged="value => SetInt(field.Name, value)"/>
                     break;
                 case LetterFieldType.Text:
-                    <MudTextField T="string?" ReadOnly="ReadOnly" Variant="Variant.Outlined" Value="@(GetField<string?>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
+                    @if (ReadOnly)
+                    {
+                        <MudField T="string?" Variant="Variant.Outlined" Style="white-space: pre-wrap">
+                            @(GetField<string?>(field.Name))
+                        </MudField>
+                    }
+                    else
+                    {
+                        <MudTextField T="string?" ReadOnly="ReadOnly" Variant="Variant.Outlined" Value="@(GetField<string?>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
+                    }
                     break;
                 case LetterFieldType.TextBlock:
-                    <MudTextField T="string?" ReadOnly="ReadOnly" Variant="Variant.Outlined" Lines="4" Value="@(GetField<string?>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
+                    @if (ReadOnly)
+                    {
+                        <MudField T="string?" Variant="Variant.Outlined" Style="white-space: pre-wrap">
+                            @(GetField<string?>(field.Name))
+                        </MudField>
+                    }
+                    else
+                    {
+                        <MudTextField T="string?" ReadOnly="ReadOnly" Variant="Variant.Outlined" Lines="4" Value="@(GetField<string?>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
+                    }
                     break;
                 case LetterFieldType.Selection:
                     <MudSelectExtended T="string?" ReadOnly="ReadOnly" Clearable="@(!ReadOnly)" Variant="Variant.Outlined" ItemCollection="(ICollection<string?>)field.Options" Value="@(GetField<string>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
@@ -152,7 +170,7 @@
     protected override async Task OnSafeParametersSetAsync()
     {
         var characters = await LandingService.Service.GetCharacterNames();
-        _characters = characters.Values.Select(x=>(string?)x ?? "No Name Set").ToArray();
+        _characters = characters.Values.Select(x => (string?)x ?? "No Name Set").ToArray();
     }
 
     protected override void OnParametersSet()
