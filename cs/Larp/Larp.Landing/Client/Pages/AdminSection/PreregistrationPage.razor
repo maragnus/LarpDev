@@ -71,7 +71,7 @@
 </tr>
 </thead>
 <tbody>
-@foreach (var player in _notes.Attendees.OrderBy(x => x.Name))
+@foreach (var player in _notes.Attendees.OrderBy(IsPCing).ThenBy(x => x.Name))
 {
     var fields = player.PreEventLetter?.Fields ?? new Dictionary<string, string>();
 
@@ -100,7 +100,7 @@
 
     var isPcing = fields.GetValueOrDefault(FieldRoles, "").Contains("(PC)");
     var isNpcing = fields.GetValueOrDefault(FieldRoles, "").Contains("(NPC)");
-    
+
     var pcingList =
         from component in _notes.Event.Components
         join attending in GetList(FieldPcing) on component.Name equals attending
@@ -117,7 +117,7 @@
         .OrderBy(x => x.Name)
         .Select((attendee, i) => (i, attendee))
         .ToList();
-    
+
     if (!isPcing)
         sheets.Clear();
 
@@ -153,7 +153,7 @@
         var playerName = $"{@player.Name} {(string.IsNullOrEmpty(player.Age) ? "" : $"({@player.Age})")}";
         var isPlot = GetBool(FieldPlot);
         var waiverTag = index == 0 ? waiver : "";
-        
+
         <tr style="page-break-inside: avoid">
             @if (index == 0)
             {
@@ -276,6 +276,14 @@
     [Parameter]
     public string EventId { get; set; } = default!;
 
+    private int IsPCing(PlayerAttendee attendance)
+    {
+        var roles = attendance.PreEventLetter?.Fields?.GetValueOrDefault(FieldRoles, "");
+        if (roles != null && roles.Contains("(PC)"))
+            return 0;
+        return 1;
+    }
+
     protected override async Task OnParametersSetAsync()
     {
         _notes = await LandingService.Admin.GetEventNotes(EventId);
@@ -303,7 +311,7 @@
         const string FieldPlot = "plot";
         const string FieldCharacters = "characters";
         const string FieldRoles = "roles";
-    
+
     private async Task Print()
     {
         await Js.InvokeVoidAsync("printPage");
