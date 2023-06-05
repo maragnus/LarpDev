@@ -147,6 +147,9 @@ public class AdminService : IAdminService
     public async Task RejectLetter(string letterId) =>
         await _letterManager.Reject(letterId, _account.AccountId);
 
+    public async Task UnapproveLetter(string letterId) =>
+        await _letterManager.Unapprove(letterId, _account.AccountId);
+
     public async Task<Letter[]> GetSubmittedLetters() =>
         await _letterManager.GetByState(LetterState.Submitted);
 

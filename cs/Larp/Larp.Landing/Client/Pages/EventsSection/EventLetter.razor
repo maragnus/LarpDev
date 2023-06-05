@@ -35,9 +35,22 @@
         break;
     case LetterState.Submitted when Admin:
         <MudAlert Severity="@Severity.Warning" Class="@(@"pa-4 mt-4")">
-            This letter is in <strong>submitted</strong> status and is waiting for your approval.<br/>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Approval" OnClick="@Approve">Approve</MudButton>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Cancel" OnClick="@Reject">Reject</MudButton>
+            <MudStack Spacing="4">
+                <div>This letter is in <strong>submitted</strong> status and is waiting for your approval.</div>
+                <div>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Approval" OnClick="@Approve">Approve</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Cancel" OnClick="@Reject">Reject</MudButton>
+                </div>
+            </MudStack>
+
+        </MudAlert>
+        break;
+    case LetterState.Approved when Admin:
+        <MudAlert Severity="@Severity.Info" Class="@(@"pa-4 mt-4")">
+            <MudStack Spacing="4">
+                <div>This letter has been approved!</div>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Cancel" OnClick="@Unapprove">Undo Approve</MudButton>
+            </MudStack>
         </MudAlert>
         break;
 }
@@ -65,7 +78,7 @@
                     }
                     else
                     {
-                        <MudTextField T="string?" ReadOnly="ReadOnly" Variant="Variant.Outlined" Value="@(GetField<string?>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
+                        <MudTextField T="string?" Variant="Variant.Outlined" Value="@(GetField<string?>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
                     }
                     break;
                 case LetterFieldType.TextBlock:
@@ -77,7 +90,7 @@
                     }
                     else
                     {
-                        <MudTextField T="string?" ReadOnly="ReadOnly" Variant="Variant.Outlined" Lines="4" Value="@(GetField<string?>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
+                        <MudTextFieldExtended T="string?" Variant="Variant.Outlined" Lines="4" DebounceInterval="1" OnDebounceIntervalElapsed="value => SetString(field.Name, value)" AutoSize Value="@(GetField<string?>(field.Name))" ValueChanged="value => SetString(field.Name, value)"/>
                     }
                     break;
                 case LetterFieldType.Selection:
@@ -204,7 +217,7 @@
         if (string.IsNullOrWhiteSpace(value))
             Letter.Fields.Remove(fieldName);
         else
-            Letter.Fields[fieldName] = value.Trim();
+            Letter.Fields[fieldName] = value;
     }
 
     private void SetInt(string fieldName, int? value)
@@ -245,7 +258,16 @@
         await SafeActionAsync(async () =>
         {
             await LandingService.Admin.RejectLetter(Letter.LetterId);
-            Letter.State = LetterState.Approved;
+            Letter.State = LetterState.Draft;
+        });
+    }
+
+    private async Task Unapprove()
+    {
+        await SafeActionAsync(async () =>
+        {
+            await LandingService.Admin.UnapproveLetter(Letter.LetterId);
+            Letter.State = LetterState.Submitted;
         });
     }
 

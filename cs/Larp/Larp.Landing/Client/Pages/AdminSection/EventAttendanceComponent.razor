@@ -27,8 +27,22 @@
             </EditTemplate>
         </PropertyColumn>
         <PropertyColumn Property="x => x.Moonstone" IsEditable="true"/>
-        <PropertyColumn Property="x => x.Paid" IsEditable="true"/>
-        <PropertyColumn Property="x => x.Expected" IsEditable="true"/>
+        <PropertyColumn Property="x => x.Paid" IsEditable="true">
+            <EditTemplate>
+                <MudTextField T="decimal?" Variant="Variant.Outlined" Margin="Margin.Dense"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AttachMoney"
+                              Value="context.Item.Paid" Format="0.00"
+                              ValueChanged="value => { context.Item.Paid = value; context.Item.Changed = true; }"/>
+            </EditTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Expected" IsEditable="true">
+            <EditTemplate>
+                <MudTextField T="decimal?" Variant="Variant.Outlined" Margin="Margin.Dense"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AttachMoney"
+                              Value="context.Item.Expected" Format="0.00"
+                              ValueChanged="value => { context.Item.Expected = value; context.Item.Changed = true; }"/>
+            </EditTemplate>
+        </PropertyColumn>
         <PropertyColumn Property="x => x.PreEvent" IsEditable="false" SortBy="@(attendance => attendance.PreEvent?.State)">
             <CellTemplate>
                 @DisplayLetter(context.Item.PreEvent)

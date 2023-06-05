@@ -133,6 +133,9 @@ public interface IAdminService
     [ApiPost("letters/{letterId}/reject"), ApiAuthenticated(AccountRoles.AccountAdmin)]
     Task RejectLetter(string letterId);
 
+    [ApiPost("letters/{letterId}/unapprove"), ApiAuthenticated(AccountRoles.AccountAdmin)]
+    Task UnapproveLetter(string letterId);
+
     [ApiGet("letters/submitted"), ApiAuthenticated(AccountRoles.AccountAdmin)]
     Task<Letter[]> GetSubmittedLetters();
 

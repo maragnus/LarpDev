@@ -79,6 +79,16 @@ public class LetterManager
         await _larpContext.Letters.UpdateOneAsync(l => l.LetterId == letterId, update);
     }
 
+    public async Task Unapprove(string letterId, string accountAccountId)
+    {
+        var update = Builders<Letter>.Update
+            .Set(x => x.ApprovedOn, null)
+            .Set(x => x.ApprovedBy, null)
+            .Set(x => x.State, LetterState.Submitted);
+
+        await _larpContext.Letters.UpdateOneAsync(l => l.LetterId == letterId, update);
+    }
+
     public async Task<LetterTemplate> GetTemplate(string templateId) =>
         await _larpContext.LetterTemplates.FindOneAsync(x => x.LetterTemplateId == templateId)
         ?? throw new ResourceNotFoundException();
@@ -163,17 +173,17 @@ public class LetterManager
                 .Find(x => x.AccountId == accountId)
                 .Project(x => new AccountName
                 {
-                    AccountId = x.AccountId, 
+                    AccountId = x.AccountId,
                     State = x.State,
                     Name = x.Name
                 })
                 .FirstOrDefaultAsync();
-        
+
         var @event =
             await _larpContext.Events
                 .Find(x => x.EventId == eventId)
                 .FirstOrDefaultAsync();
-        
+
         var templateId =
             @event.LetterTemplates
                 .FirstOrDefault(x => x.Name == letterName)
