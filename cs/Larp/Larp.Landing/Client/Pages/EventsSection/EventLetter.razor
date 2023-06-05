@@ -37,6 +37,7 @@
         <MudAlert Severity="@Severity.Warning" Class="@(@"pa-4 mt-4")">
             This letter is in <strong>submitted</strong> status and is waiting for your approval.<br/>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Approval" OnClick="@Approve">Approve</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Cancel" OnClick="@Reject">Reject</MudButton>
         </MudAlert>
         break;
 }
@@ -235,6 +236,15 @@
         await SafeActionAsync(async () =>
         {
             await LandingService.Admin.ApproveLetter(Letter.LetterId);
+            Letter.State = LetterState.Approved;
+        });
+    }
+
+    private async Task Reject()
+    {
+        await SafeActionAsync(async () =>
+        {
+            await LandingService.Admin.RejectLetter(Letter.LetterId);
             Letter.State = LetterState.Approved;
         });
     }
