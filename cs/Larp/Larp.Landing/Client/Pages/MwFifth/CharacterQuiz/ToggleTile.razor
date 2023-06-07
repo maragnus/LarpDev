@@ -1,8 +1,11 @@
 @implements IAsyncDisposable
+@inherits MudComponentBase
 
-<MudButton OnClick="Toggle"
-           Variant="_isSelected ? Variant.Filled : Variant.Outlined"
-           Color="_isSelected ? Color.Primary : Color.Default">
+<MudButton
+    @key="@Value"
+    OnClick="Toggle"
+    Variant="_isSelected ? Variant.Filled : Variant.Outlined"
+    Color="_isSelected ? Color.Primary : Color.Default">
     <MudStack Class="pa-2" Style="text-align: left">
         <MudStack Row Spacing="4">
             @if (!string.IsNullOrEmpty(Icon))
@@ -50,8 +53,15 @@
     [Parameter]
     public EventCallback<MouseEventArgs> Clicked { get; set; }
 
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Value ??= Guid.NewGuid().ToString();
+    }
+
     protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
         if (ToggleTileGroup is not null)
             await ToggleTileGroup.AddAsync(this);
     }

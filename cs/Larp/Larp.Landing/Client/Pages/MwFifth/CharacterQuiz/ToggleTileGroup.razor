@@ -37,15 +37,13 @@
     }
 
     [Parameter]
-    public EventCallback<string?> SelectedValueChanged { get; set; }
-
-    [Parameter]
     public string[] SelectedValues
     {
         get => _selectedValues.Order().ToArray();
         set
         {
             var values = value.ToHashSet();
+            _selectedValues = values;
             foreach (var tile in _tiles)
             {
                 if (tile.Value is null) continue;
@@ -54,6 +52,9 @@
             StateHasChanged();
         }
     }
+
+    [Parameter]
+    public EventCallback<string?> SelectedValueChanged { get; set; }
 
     [Parameter]
     public EventCallback<string[]> SelectedValuesChanged { get; set; }
@@ -66,12 +67,15 @@
         return Task.CompletedTask;
     }
 
-    public Task RemoveAsync(ToggleTile tile)
+    public async Task RemoveAsync(ToggleTile tile)
     {
+        Console.WriteLine($"Removed {tile.Title} = {tile.IsSelected} - {string.Join(", ", _selectedValues)}");
         _tiles.Remove(tile);
-        if (tile.Value != null && tile.IsSelected)
+        if (tile is { IsSelected: true,Value: not null })
+        {
             _selectedValues.Remove(tile.Value);
-        return Task.CompletedTask;
+            await NotifySelectionAsync();
+        }
     }
 
     internal async Task OnTileClickedAsync(ToggleTile tile)

@@ -18,7 +18,7 @@
             <MudText Typo="Typo.h6" Style="grid-column: 1/-1;">@category.Key</MudText>
             @foreach (var activity in category)
             {
-                <ToggleTile Title="@activity.Title" Value="@activity.Name">
+                <ToggleTile @key="activity.Name" Title="@activity.Title" Value="@activity.Name">
                     <MudText Typo="Typo.body1">@activity.Description</MudText>
                 </ToggleTile>
             }
@@ -33,23 +33,25 @@
     {
         new("Combat", "melee", "Up close", "Fight with melee weapons, such as daggers, swords, polearms."),
         new("Combat", "ranged", "At a distance", "Fight with ranged weapons and spells, such as bow, crossbow, spell packets, spoken words"),
-        new("Combat", "dagger", "Daggers", "Fight with a dagger", "melee"),
         new("Combat", "one-handed", "One-handed Melee", "Fight with a short sword, hammer, etc.", "melee"),
         new("Combat", "two-handed", "Two-handed Melee", "Fight with a two-handed axe, sword, polearm, staff, etc.", "melee"),
-        new("Combat", " ", "Dual-wielder", "Fight with two-weapons, such an axe in each hand", "melee"),
-        new("Combat", "bow", "Bows", "Fight with a bow, hand crossbow, throwing axes, javelins, etc.", "ranged"),
-        new("Combat", "spells", "Magic", "Fight with a magic with spell packets or spoken words.", "ranged"),
+        new("Combat", "dual-wield", "Dual-wielder", "Fight with two-weapons, such an axe in each hand", "melee"),
+        new("Combat", "bow", "Bows", "Fight with a bow, hand crossbow, etc.", "ranged"),
+        new("Combat", "thrown", "Throwing", "Fight with throwing axes, javelins, etc.", "ranged"),
+        new("Combat", "caster", "Magic", "Fight with a magic using spell packets or spoken words.", "ranged"),
+        new("Combat", "wizard", "Enhanced Magic", "Enhanced magic abilities with more mana and wearing armor", "caster"),
         new("Combat", "heal-self", "Heal Self", "Heal your hit points during battle"),
         new("Combat", "tank", "Extra Hit Points", "Have extra hit points"),
         new("Combat", "armored", "Wear Armor", "Gain hit points from wearing armor pieces"),
         new("Support", "buffer", "Buff Combat", "Boost other players by enhancing armor or combat bonuses"),
-        new("Support", "healer", "Heal Others", "Heal hit points or repair armor of other players"),
-        new("Support", "assistant", "Crafting Assist", "Help others craft items"),
-        new("Support", "teacher", "Teach Skills", "Teach your skills to other players"),
-        new("Downtime", "duty", "Perform Duty", "Some professions are humbler than others, and have tasks to perform that although necessary, may not be glamorous. You gain a Renew after completing the task."),
-        new("Downtime", "livery", "Wear Livery", "While wearing a certain manner of dress, or the colors and heraldry of your sponsor. You gain 1 extra Hit Point while wearing your Livery."),
-        new("Downtime", "leadership", "Leadership", "Leader over a group of people. You gain two \"Heal 2 by Gesture\" per Renew."),
+        new("Support", "healer", "Heal Others", "Heal hit points or repair armor of other players (See Also: Livery)"),
+        new("Support", "renew", "Renew Others", "Renew yourself and others (See Also: Duty)"),
         new("Downtime", "crafter", "Crafting", "Craft items with resources, such as metal"),
+        new("Downtime", "assistant", "Crafting Assist", "Help others craft items"),
+        new("Downtime", "teacher", "Teach Skills", "Teach your skills to other players"),
+        new("Downtime", "duty", "Perform Duty", "Role-play a duty to renew yourself and others", "renew"),
+        new("Downtime", "livery", "Wear Livery", "Wear occupation-specific items and gain +1 Hit Point", "tank"),
+        new("Downtime", "leadership", "Leadership", "Leader over a group of people and get gain \"Heal 2 by Gesture\"", "healer"),
         new("Crafting", "apothecary", "Apothecary", "Create health kits, blade poison, and even cure maims", "crafter", "buffer", "healer"),
         new("Crafting", "armstraining", "Armstraining", "Boost other player combat abilities through role-play training", "crafter", "buffer"),
         new("Crafting", "bardic-voice", "Bardic Voice", "Boost other players, charm creatures through role-play performances", "crafter", "buffer"),

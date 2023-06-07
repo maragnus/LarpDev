@@ -25,54 +25,46 @@
             <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Book" Color="Color.Info" OnClick="Clarify">Clarify</MudButton>
         </MudButtonGroup>
     </MudStack>
-    @(string.Join(", ", _activities))
-    <MudTimeline TimelineOrientation="TimelineOrientation.Vertical" TimelinePosition="TimelinePosition.Left" @bind-SelectedIndex="_step">
-        <MudTimelineItem Variant="Variant.Filled" Color="Color.Primary">
+
+    @if (_step == 0)
+    {
+        <MudPaper Elevation="1" Class="pa-4">
             <MudStack Spacing="4">
                 <MudStack Row Spacing="4">
                     <MudIcon Color="Color.Primary" Icon="@Icons.Material.Filled.MyLocation" Size="Size.Medium"/>
                     <MudText Color="Color.Primary" Typo="Typo.button">Where you'll play</MudText>
                 </MudStack>
-                @if (_step == 0)
-                {
-                    <MudPaper Elevation="1" Class="pa-4">
-                        <HomeChapterHat @bind-HomeChapter="_homeChapter"/>
-                        @NavButtons()
-                    </MudPaper>
-                }
+                <HomeChapterHat @bind-HomeChapter="_homeChapter"/>
+                @NavButtons()
             </MudStack>
-        </MudTimelineItem>
-        <MudTimelineItem Variant="Variant.Filled" Color="Color.Secondary">
+        </MudPaper>
+    }
+    @if (_step == 1)
+    {
+        <MudPaper Elevation="1" Class="pa-4">
             <MudStack Spacing="4">
                 <MudStack Row Spacing="4">
                     <MudIcon Color="Color.Secondary" Icon="@Icons.Material.Filled.SportsHandball" Size="Size.Medium"/>
                     <MudText Color="Color.Secondary" Typo="Typo.button">How you'll play</MudText>
                 </MudStack>
-                @if (_step == 1)
-                {
-                    <MudPaper Elevation="1" Class="pa-4">
-                        <ActivitiesHat HomeChapter="@_homeChapter" @bind-Activities="_activities"/>
-                        @NavButtons()
-                    </MudPaper>
-                }
+                <ActivitiesHat HomeChapter="@_homeChapter" @bind-Activities="_activities"/>
+                @NavButtons()
             </MudStack>
-        </MudTimelineItem>
-        <MudTimelineItem Variant="Variant.Filled" Color="Color.Tertiary">
+        </MudPaper>
+    }
+    @if (_step == 2)
+    {
+        <MudPaper Elevation="1" Class="pa-4">
             <MudStack Spacing="4">
                 <MudStack Row Spacing="4">
                     <MudIcon Color="Color.Tertiary" Icon="@Icons.Material.Filled.Reviews" Size="Size.Medium"/>
                     <MudText Color="Color.Tertiary" Typo="Typo.button">Get ready to play</MudText>
                 </MudStack>
-                @if (_step == 2)
-                {
-                    <MudPaper Elevation="1" Class="pa-4">
-                        <ReviewHat HomeChapter="@_homeChapter" Activities="_activities"/>
-                        @NavButtons()
-                    </MudPaper>
-                }
+                <ReviewHat HomeChapter="@_homeChapter" Activities="_activities"/>
+                @NavButtons()
             </MudStack>
-        </MudTimelineItem>
-    </MudTimeline>
+        </MudPaper>
+    }
 </MudContainer>
 
 @code {
