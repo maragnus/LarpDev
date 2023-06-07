@@ -1,0 +1,117 @@
+@page "/characters/mw5e/sortinghat"
+@inject LandingService LandingService
+@using Larp.Landing.Client.Pages.MwFifth.Components
+@using Larp.Landing.Client.Pages.MwFifth.SortingHat
+@inherits LarpPage
+
+<PageHeader>Sorting Hat</PageHeader>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="pa-4">
+
+    @if (_isClarifyOpen)
+    {
+        <MudDrawer @bind-Open="_isClarifyOpen" Anchor="Anchor.Right" Elevation="2" Variant="DrawerVariant.Temporary" Width="256">
+            <MudStack Spacing="4" Class="pa-4">
+                <MudText Typo="Typo.h6">Clarify</MudText>
+                <Clarify @bind-Topic="@_clarifyTopic"/>
+            </MudStack>
+        </MudDrawer>
+    }
+
+    <MudStack Row Spacing="4" Justify="Justify.SpaceBetween">
+        <MudText Typo="Typo.h6"><MudIcon Icon="@Icons.Material.Filled.FilterVintage" Size="Size.Medium"/> Sorting Hat</MudText>
+        <MudButtonGroup OverrideStyles="false">
+            <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.ArrowBack" Color="Color.Warning" Disabled="_step == 0" OnClick="Back">Back</MudButton>
+            <MudButton Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.ArrowForward" Color="Color.Success" Disabled="_step >= StepCount - 1" OnClick="Next">Next</MudButton>
+            <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Book" Color="Color.Info" OnClick="Clarify">Clarify</MudButton>
+        </MudButtonGroup>
+    </MudStack>
+    @(string.Join(", ", _activities))
+    <MudTimeline TimelineOrientation="TimelineOrientation.Vertical" TimelinePosition="TimelinePosition.Left" @bind-SelectedIndex="_step">
+        <MudTimelineItem Variant="Variant.Filled" Color="Color.Primary">
+            <MudStack Spacing="4">
+                <MudStack Row Spacing="4">
+                    <MudIcon Color="Color.Primary" Icon="@Icons.Material.Filled.MyLocation" Size="Size.Medium"/>
+                    <MudText Color="Color.Primary" Typo="Typo.button">Where you'll play</MudText>
+                </MudStack>
+                @if (_step == 0)
+                {
+                    <MudPaper Elevation="1" Class="pa-4">
+                        <HomeChapterHat @bind-HomeChapter="_homeChapter"/>
+                        @NavButtons()
+                    </MudPaper>
+                }
+            </MudStack>
+        </MudTimelineItem>
+        <MudTimelineItem Variant="Variant.Filled" Color="Color.Secondary">
+            <MudStack Spacing="4">
+                <MudStack Row Spacing="4">
+                    <MudIcon Color="Color.Secondary" Icon="@Icons.Material.Filled.SportsHandball" Size="Size.Medium"/>
+                    <MudText Color="Color.Secondary" Typo="Typo.button">How you'll play</MudText>
+                </MudStack>
+                @if (_step == 1)
+                {
+                    <MudPaper Elevation="1" Class="pa-4">
+                        <ActivitiesHat HomeChapter="@_homeChapter" @bind-Activities="_activities"/>
+                        @NavButtons()
+                    </MudPaper>
+                }
+            </MudStack>
+        </MudTimelineItem>
+        <MudTimelineItem Variant="Variant.Filled" Color="Color.Tertiary">
+            <MudStack Spacing="4">
+                <MudStack Row Spacing="4">
+                    <MudIcon Color="Color.Tertiary" Icon="@Icons.Material.Filled.Reviews" Size="Size.Medium"/>
+                    <MudText Color="Color.Tertiary" Typo="Typo.button">Get ready to play</MudText>
+                </MudStack>
+                @if (_step == 2)
+                {
+                    <MudPaper Elevation="1" Class="pa-4">
+                        <ReviewHat HomeChapter="@_homeChapter" Activities="_activities"/>
+                        @NavButtons()
+                    </MudPaper>
+                }
+            </MudStack>
+        </MudTimelineItem>
+    </MudTimeline>
+</MudContainer>
+
+@code {
+        const int StepCount = 3;
+
+    private bool _isClarifyOpen;
+    private string? _clarifyTopic;
+    private int _step;
+    private string? _homeChapter;
+    private string[] _activities = Array.Empty<string>();
+
+    private RenderFragment NavButtons() =>
+        @<MudButtonGroup OverrideStyles="false" Class="mt-4">
+            @if (_step > 0)
+            {
+                <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.ArrowBack" Color="Color.Warning" Disabled="_step == 0" OnClick="Back">Back</MudButton>
+            }
+            @if (_step < StepCount - 1)
+            {
+                <MudButton Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.ArrowForward" Color="Color.Success" Disabled="_step >= StepCount - 1" OnClick="Next">Next</MudButton>
+            }
+        </MudButtonGroup>;
+
+    private void Clarify()
+    {
+        _isClarifyOpen = !_isClarifyOpen;
+    }
+
+    private void Back()
+    {
+        _step = Math.Max(0, _step - 1);
+        StateHasChanged();
+    }
+
+    private void Next()
+    {
+        _step = Math.Min(StepCount, _step + 1);
+        StateHasChanged();
+    }
+
+}

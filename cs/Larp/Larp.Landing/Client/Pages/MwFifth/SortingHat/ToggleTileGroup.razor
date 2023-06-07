@@ -1,0 +1,128 @@
+@implements IDisposable
+
+<CascadingValue IsFixed="true" Value="this">
+    <div style="@($"display: grid; gap: 1em; grid-template-columns: repeat(auto-fill, minmax({MinTileWidth}px, 1fr));")">
+        @ChildContent
+    </div>
+</CascadingValue>
+
+@code {
+
+    [Parameter]
+    public int MinTileWidth { get; set; } = 250;
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public bool MultiSelection { get; set; }
+
+    private readonly HashSet<ToggleTile> _tiles = new();
+    private HashSet<string> _selectedValues = new();
+    private bool _disposed;
+    private string[] _lastSelectedValues = Array.Empty<string>();
+
+    [Parameter]
+    public string? SelectedValue
+    {
+        get => _selectedValues.FirstOrDefault();
+        set
+        {
+            if (value == SelectedValue) return;
+            _selectedValues.Clear();
+            if (value is not null)
+                _selectedValues.Add(value);
+            StateHasChanged();
+        }
+    }
+
+    [Parameter]
+    public EventCallback<string?> SelectedValueChanged { get; set; }
+
+    [Parameter]
+    public string[] SelectedValues
+    {
+        get => _selectedValues.Order().ToArray();
+        set
+        {
+            var values = value.ToHashSet();
+            foreach (var tile in _tiles)
+            {
+                if (tile.Value is null) continue;
+                tile.IsSelected = values.Contains(tile.Value);
+            }
+            StateHasChanged();
+        }
+    }
+
+    [Parameter]
+    public EventCallback<string[]> SelectedValuesChanged { get; set; }
+
+    public Task AddAsync(ToggleTile tile)
+    {
+        _tiles.Add(tile);
+        if (tile.Value != null && _selectedValues.Contains(tile.Value))
+            tile.IsSelected = true;
+        return Task.CompletedTask;
+    }
+
+    public Task RemoveAsync(ToggleTile tile)
+    {
+        _tiles.Remove(tile);
+        if (tile.Value != null && tile.IsSelected)
+            _selectedValues.Remove(tile.Value);
+        return Task.CompletedTask;
+    }
+
+    internal async Task OnTileClickedAsync(ToggleTile tile)
+    {
+        if (_disposed) return;
+
+        if (MultiSelection)
+        {
+            tile.IsSelected = !tile.IsSelected;
+        }
+        else
+        {
+            if (tile.IsSelected)
+            {
+                tile.IsSelected = false;
+            }
+            else
+            {
+                foreach (var otherTile in _tiles.Where(t => t.IsSelected))
+                    otherTile.IsSelected = false;
+                tile.IsSelected = true;
+            }
+        }
+        await UpdateSelectionValues();
+    }
+
+    private async Task UpdateSelectionValues()
+    {
+        var values = _tiles
+            .Where(x => x is { IsSelected: true, Value: not null })
+            .Select(x => x.Value!)
+            .ToHashSet();
+
+        if (values.SequenceEqual(_selectedValues))
+            return;
+
+        _selectedValues = values;
+        await NotifySelectionAsync();
+    }
+
+    private async Task NotifySelectionAsync()
+    {
+        if (_disposed)
+            return;
+        if (_selectedValues.SetEquals(_lastSelectedValues))
+            return;
+        _lastSelectedValues = _selectedValues.ToArray();
+        await SelectedValueChanged.InvokeAsync(SelectedValue);
+        await SelectedValuesChanged.InvokeAsync(SelectedValues);
+        StateHasChanged();
+    }
+
+    public void Dispose() => _disposed = true;
+}

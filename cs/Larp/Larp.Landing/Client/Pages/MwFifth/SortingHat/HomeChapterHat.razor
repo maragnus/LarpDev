@@ -1,0 +1,127 @@
+<MudStack Spacing="4">
+    <MudText Typo="Typo.body1">Choose your character's <strong>home chapter</strong> from the list below.</MudText>
+    <MudText Typo="Typo.body1">While you can play your character at any location, many special abilities only take affect while playing at their <strong>home chapter</strong>.</MudText>
+    <ToggleTileGroup @bind-SelectedValue="HomeChapter" MinTileWidth="350">
+        <ToggleTile Icon="@Icons.Material.Filled.LocationOn" Title="Burgundar" Value="burgundar">
+            <MudText Typo="Typo.subtitle2">45 Upton Road, Harrison, Maine (West of Oxford)</MudText>
+            <MudText Typo="Typo.subtitle2">Season typically from June through October, 3-day events played Friday, Saturday, Sunday.</MudText>
+            <MudText Typo="Typo.body1" Class="pt-4">
+                <strong>Site features</strong>
+            </MudText>
+            <MudText Typo="Typo.body2">
+                <ul style="list-style: none" class="mt-2">
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Map"/> 40 acres</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.LocalParking"/> Parking available</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.FamilyRestroom"/> Two pit-latrine outhouses</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Bed"/> On-site tent camping</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Terrain"/> Relatively flat terrain</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.SocialDistance"/> Short walks from town</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Forest"/> Heavily wooded</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.OutdoorGrill"/> Potluck on Saturday dinner</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.House"/> Town, fire pit, permanent structures</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.RunCircle"/> Field for epic battles</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Lightbulb"/> Electrically lit at night</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Tv"/> Upgrades by Maine Cabin Masters (715)</li>
+                </ul>
+            </MudText>
+            <MudText Typo="Typo.body1" Class="pt-4">
+                <strong>Playing at the site</strong>
+            </MudText>
+            <MudText Typo="Typo.body2">
+                <ul class="mt-2">
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.People"/> Game Masters: Carrie Johnson, Levi Smith, Ralph Plumpton</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Shield"/> Large battles</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.House"/> Player-owned structures</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Book"/> Chapter exclusive lore</li>
+                </ul>
+            </MudText>
+        </ToggleTile>
+        <ToggleTile Icon="@Icons.Material.Filled.LocationOn" Title="The Keep" Value="keep">
+            <MudText Typo="Typo.subtitle2">42 Stalkers Way, Jefferson, Maine (East of Augusta)</MudText>
+            <MudText Typo="Typo.subtitle2">Season typically from July through September, 3-day events played Friday, Saturday, Sunday.</MudText>
+            <MudText Typo="Typo.body1" Class="pt-4">
+                <strong>Site features</strong>
+            </MudText>
+            <MudText Typo="Typo.body2">
+                <ul style="list-style: none" class="mt-2">
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Map"/> 80 acres</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.LocalParking"/> Parking available</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.FamilyRestroom"/> One pit-latrine outhouses</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Bed"/> On-site tenting and bunkhouse</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Terrain"/> Hilly terrain</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.SocialDistance"/> Lots of hiking</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Forest"/> Heavily wooded</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.OutdoorGrill"/> Potluck on Saturday dinner</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.House"/> Town, fire pit, permanent structures</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Fort"/> Walkable town wall</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.RunCircle"/> Field for epic battles</li>
+                </ul>
+            </MudText>
+            <MudText Typo="Typo.body1" Class="pt-4">
+                <strong>Playing at the site</strong>
+            </MudText>
+            <MudText Typo="Typo.body2">
+                <ul class="mt-2">
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.People"/> Game Masters: Brandin Turner, Dan Johnston</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Shield"/> Large town sieges</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.House"/> Player-owned structures</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Book"/> Chapter exclusive lore</li>
+                </ul>
+            </MudText>
+        </ToggleTile>
+        <ToggleTile Icon="@Icons.Material.Filled.LocationOn" Title="Novgorod (Winter)" Value="novgorod">
+            <MudText Typo="Typo.subtitle2">45 Upton Road, Harrison, Maine (West of Oxford)</MudText>
+            <MudText Typo="Typo.subtitle2" Class="pt-4">Season is from December through March<br/>1-day events played on Saturday.</MudText>
+            <MudText Typo="Typo.body1" Class="pt-4">
+                <strong>Site features</strong>
+            </MudText>
+            <MudText Typo="Typo.body2">
+                <ul style="list-style: none" class="mt-2">
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.SevereCold"/> Single-day, Winter events</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Map"/> 40 acres</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.LocalParking"/> Parking available</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.FamilyRestroom"/> Two pit-latrine outhouses</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Terrain"/> Relatively flat, snowy terrain</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.SocialDistance"/> Short walks from town</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Forest"/> Heavily wooded</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.EmojiFoodBeverage"/> Hot food/drinks all day</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.House"/> Town, fire pit, permanent structures</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.RunCircle"/> Field for epic battles</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Lightbulb"/> Electrically lit at night</li>
+                </ul>
+            </MudText>
+            <MudText Typo="Typo.body1" Class="pt-4">
+                <strong>Playing at the site</strong>
+            </MudText>
+            <MudText Typo="Typo.body2">
+                <ul class="mt-2">
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.People"/> Game Masters: Ty Guerin, Zach Plugge</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Shield"/> Large battles</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.House"/> Player-owned structures</li>
+                    <li><MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Book"/> Chapter exclusive lore</li>
+                </ul>
+            </MudText>
+        </ToggleTile>
+    </ToggleTileGroup>
+</MudStack>
+
+@code {
+    private string _homeChapter = "";
+
+    [Parameter]
+    public string HomeChapter
+    {
+        get => _homeChapter;
+        set
+        {
+            if (_homeChapter == value) return;
+            _homeChapter = value ?? "";
+            HomeChapterChanged.InvokeAsync(_homeChapter);
+            StateHasChanged();
+        }
+    }
+
+    [Parameter]
+    public EventCallback<string> HomeChapterChanged { get; set; }
+
+}

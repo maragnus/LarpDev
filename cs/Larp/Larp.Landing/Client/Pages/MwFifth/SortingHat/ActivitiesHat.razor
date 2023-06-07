@@ -1,0 +1,91 @@
+@if (string.IsNullOrEmpty(HomeChapter))
+{
+    <MudAlert Severity="Severity.Error">
+        You must select a home chapter first.<br/><br/>
+        Several occupations and abilities are Chapter-specific.
+    </MudAlert>
+    return;
+}
+<MudStack Spacing="4">
+
+    <MudText Typo="Typo.body1">How would you like to play this character?</MudText>
+    <MudText Typo="Typo.body1">Choose as many activities as you like below and we'll help your choose your Gifts and Occupation.</MudText>
+    @string.Join(", ", Activities)
+    <ToggleTileGroup @bind-SelectedValues="Activities" MultiSelection>
+        @foreach (var category in _activities.Where(a => a.CheckPrerequisites(_selected)).GroupBy(activity => activity.Category))
+        {
+            <MudDivider Style="grid-column: 1/-1;"/>
+            <MudText Typo="Typo.h6" Style="grid-column: 1/-1;">@category.Key</MudText>
+            @foreach (var activity in category)
+            {
+                <ToggleTile Title="@activity.Title" Value="@activity.Name">
+                    <MudText Typo="Typo.body1">@activity.Description</MudText>
+                </ToggleTile>
+            }
+        }
+
+    </ToggleTileGroup>
+</MudStack>
+
+@code {
+
+    private Activity[] _activities =
+    {
+        new("Combat", "melee", "Up close", "Fight with melee weapons, such as daggers, swords, polearms."),
+        new("Combat", "ranged", "At a distance", "Fight with ranged weapons and spells, such as bow, crossbow, spell packets, spoken words"),
+        new("Combat", "dagger", "Daggers", "Fight with a dagger", "melee"),
+        new("Combat", "one-handed", "One-handed Melee", "Fight with a short sword, hammer, etc.", "melee"),
+        new("Combat", "two-handed", "Two-handed Melee", "Fight with a two-handed axe, sword, polearm, staff, etc.", "melee"),
+        new("Combat", " ", "Dual-wielder", "Fight with two-weapons, such an axe in each hand", "melee"),
+        new("Combat", "bow", "Bows", "Fight with a bow, hand crossbow, throwing axes, javelins, etc.", "ranged"),
+        new("Combat", "spells", "Magic", "Fight with a magic with spell packets or spoken words.", "ranged"),
+        new("Combat", "heal-self", "Heal Self", "Heal your hit points during battle"),
+        new("Combat", "tank", "Extra Hit Points", "Have extra hit points"),
+        new("Combat", "armored", "Wear Armor", "Gain hit points from wearing armor pieces"),
+        new("Support", "buffer", "Buff Combat", "Boost other players by enhancing armor or combat bonuses"),
+        new("Support", "healer", "Heal Others", "Heal hit points or repair armor of other players"),
+        new("Support", "assistant", "Crafting Assist", "Help others craft items"),
+        new("Support", "teacher", "Teach Skills", "Teach your skills to other players"),
+        new("Downtime", "duty", "Perform Duty", "Some professions are humbler than others, and have tasks to perform that although necessary, may not be glamorous. You gain a Renew after completing the task."),
+        new("Downtime", "livery", "Wear Livery", "While wearing a certain manner of dress, or the colors and heraldry of your sponsor. You gain 1 extra Hit Point while wearing your Livery."),
+        new("Downtime", "leadership", "Leadership", "Leader over a group of people. You gain two \"Heal 2 by Gesture\" per Renew."),
+        new("Downtime", "crafter", "Crafting", "Craft items with resources, such as metal"),
+        new("Crafting", "apothecary", "Apothecary", "Create health kits, blade poison, and even cure maims", "crafter", "buffer", "healer"),
+        new("Crafting", "armstraining", "Armstraining", "Boost other player combat abilities through role-play training", "crafter", "buffer"),
+        new("Crafting", "bardic-voice", "Bardic Voice", "Boost other players, charm creatures through role-play performances", "crafter", "buffer"),
+        new("Crafting", "cooking", "Cooking", "Boost, heal, reward, and poison players with food", "crafter", "buffer", "healer"),
+        new("Crafting", "metalworking", "Metalworking", "Repair and enhance items with metal, craft \"2 Crushing\" arrows/bolts", "crafter", "buffer"),
+        new("Crafting", "poisoner", "Poisoner", "Create weapon enhancing poisons and other deadly items", "crafter", "buffer"),
+        new("Crafting", "scribe", "Scribe", "Invite NPCs, record prayers, reward players with Moonstone through role-play", "crafter"),
+        new("Crafting", "sewing", "Sewing", "Enhance cloaks, construct healing items, make secret pockets, and Renew yourself and one other", "crafter", "buffer"),
+        new("Crafting", "woodworking", "Woodworking", "Craft fire arrows, strengthen shields, provide splints for Maims, and Renew yourself and three others by repairing the town", "crafter", "buffer", "healer"),
+    };
+
+    private HashSet<string> _selected = new();
+
+    record Activity(string Category, string Name, string Title, string Description, params string[] Prerequisites)
+    {
+        public bool CheckPrerequisites(HashSet<string> selected) =>
+            Prerequisites.Length == 0 || Prerequisites.Any(selected.Contains);
+    }
+
+    [Parameter]
+    public string? HomeChapter { get; set; }
+
+    [Parameter]
+    public string[] Activities
+    {
+        get => _selected.ToArray();
+        set
+        {
+            if (_selected.SetEquals(value)) return;
+            _selected = new HashSet<string>(value);
+            ActivitiesChanged.InvokeAsync(value);
+            StateHasChanged();
+        }
+    }
+
+    [Parameter]
+    public EventCallback<string[]> ActivitiesChanged { get; set; }
+
+}

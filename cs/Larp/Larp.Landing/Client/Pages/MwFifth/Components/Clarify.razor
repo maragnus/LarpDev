@@ -1,0 +1,38 @@
+<MudStack Spacing="4">
+    <MudTextField T="string"
+                  @bind-Value="Topic"
+                  AutoFocus Variant="Variant.Outlined" Clearable DebounceInterval="1" OnDebounceIntervalElapsed="TopicChanged" Margin="Margin.Dense"
+                  Adornment="Adornment.End" AdornmentColor="Color.Primary" AdornmentIcon="@Icons.Material.Filled.Search" OnAdornmentClick="Search"/>
+
+    <MudPaper Elevation="1" Class="pa-4">
+        No search results
+    </MudPaper>
+</MudStack>
+
+@code {
+    private string _topic = "";
+
+    [Parameter]
+    public string Topic
+    {
+        get => _topic;
+        set
+        {
+            if (_topic == value) return;
+            _topic = value ?? "";
+            TopicChanged.InvokeAsync(_topic);
+            Search();
+        }
+    }
+
+    [Parameter]
+    public EventCallback<string> TopicChanged { get; set; }
+
+    private Task Search()
+    {
+        StateHasChanged();
+
+        return Task.CompletedTask;
+    }
+
+}

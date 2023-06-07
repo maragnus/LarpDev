@@ -1,0 +1,74 @@
+@implements IAsyncDisposable
+
+<MudButton OnClick="Toggle"
+           Variant="_isSelected ? Variant.Filled : Variant.Outlined"
+           Color="_isSelected ? Color.Primary : Color.Default">
+    <MudStack Class="pa-2" Style="text-align: left">
+        <MudStack Row Spacing="4">
+            @if (!string.IsNullOrEmpty(Icon))
+            {
+                <MudIcon Icon="@Icon" Size="Size.Large"/>
+            }
+            <MudText Typo="Typo.h5">@Title</MudText>
+        </MudStack>
+        <div style="text-align: left">
+            @ChildContent
+        </div>
+    </MudStack>
+</MudButton>
+
+@code {
+    private bool _isSelected;
+
+    [CascadingParameter]
+    private ToggleTileGroup? ToggleTileGroup { get; set; }
+
+    [Parameter]
+    public string Title { get; set; } = "";
+
+    [Parameter]
+    public string? Icon { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public string? Value { get; set; }
+
+    [Parameter]
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set
+        {
+            if (value == _isSelected) return;
+            _isSelected = value;
+            StateHasChanged();
+        }
+    }
+
+    [Parameter]
+    public EventCallback<MouseEventArgs> Clicked { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (ToggleTileGroup is not null)
+            await ToggleTileGroup.AddAsync(this);
+    }
+
+    private async Task Toggle()
+    {
+        if (ToggleTileGroup is not null)
+            await ToggleTileGroup.OnTileClickedAsync(this);
+
+        if (Clicked.HasDelegate)
+            await Clicked.InvokeAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (ToggleTileGroup is not null)
+            await ToggleTileGroup.RemoveAsync(this);
+    }
+
+}

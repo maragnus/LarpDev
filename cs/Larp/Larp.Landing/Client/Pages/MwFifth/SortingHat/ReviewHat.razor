@@ -1,0 +1,222 @@
+@inject LandingService LandingService
+
+<MudStack Spacing="4">
+    <div>Playing at @HomeChapter</div>
+    <div>Activities @string.Join(", ", Activities)</div>
+    <MudStack Spacing="4">
+        @foreach (var suggestion in _suggestions)
+        {
+            @suggestion.Render()
+        }
+    </MudStack>
+</MudStack>
+
+@code {
+    private List<Suggestion> _suggestions = new();
+    private List<AbilityItem> _abilities = default!;
+    private List<SkillItem> _skills = default!;
+    private List<SkillDefinition> _skillDefinitions = default!;
+
+    [Parameter]
+    public string? HomeChapter { get; set; }
+
+    [Parameter]
+    public string[] Activities { get; set; } = Array.Empty<string>();
+
+    record AbilityItem(string Gift, int Rank, string Ability);
+
+    record SkillItem(string Occupation, string Skill);
+
+    class SuggestAbility : Suggestion
+    {
+        private readonly string _gift;
+        private readonly AbilityItem[] _abilities;
+
+        public SuggestAbility(string gift, AbilityItem[] abilities, string reason)
+            : base(reason)
+        {
+            _gift = gift;
+            _abilities = abilities;
+        }
+
+        public override RenderFragment? Render()
+        {
+            return @<div>
+                       <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.FitnessCenter"/>
+                       <strong>@_gift</strong> provides
+                       <span>
+                           @for (var i = 0; i < _abilities.Length; i++)
+                           {
+                               if (i > 0)
+                               {
+                                   <span>, </span>
+                               }
+                               <span><strong>@_abilities[i].Ability</strong> (rank @_abilities[i].Rank)</span>
+                           }
+                       </span> @Reason
+                   </div>;
+        }
+    }
+
+    class SuggestOccupation : Suggestion
+    {
+        private readonly string _occupation;
+        private readonly string _skill;
+
+        public SuggestOccupation(string occupation, string skill, string reason) : base(reason)
+        {
+            _occupation = occupation;
+            _skill = skill;
+        }
+
+        public override RenderFragment? Render()
+        {
+            return @<div>
+                       <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Work"/>
+                       Occupation <strong>@_occupation</strong> provides <strong>@_skill</strong> @Reason
+                   </div>;
+        }
+    }
+
+    class SuggestSkill : Suggestion
+    {
+        private readonly string _skill;
+        private readonly SkillDefinition _definition;
+
+        public SuggestSkill(string skill, SkillDefinition definition, string reason) : base(reason)
+        {
+            _skill = skill;
+            _definition = definition;
+        }
+
+        public override RenderFragment? Render()
+        {
+            return
+                @<RenderFragment>
+                    @switch (_definition.Class)
+                    {
+                        case SkillClass.Minor:
+                            <div>
+                                <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Blind"/>
+                                Skill <strong>@_skill</strong> can be selected by taking the <strong>Talent: Minor 1</strong> Advantage @Reason
+                            </div>
+                            break;
+                        case SkillClass.Standard:
+                            <div>
+                                <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Blind"/>
+                                Skill <strong>@_skill</strong> can be selected by taking the <strong>Talent: Standard 2</strong> Advantage @Reason
+                            </div>
+                            break;
+                        case SkillClass.Major:
+                            <div>
+                                <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Blind"/>
+                                Skill <strong>@_skill</strong> can be selected by taking the <strong>Talent: Major 3</strong> Advantage @Reason
+                            </div>
+                            break;
+                    }
+                    @if (_definition.Purchasable != SkillPurchasable.Unavailable)
+                    {
+                        <div>
+                            <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Handyman"/>
+                            Skill <strong>@_skill</strong> can be purchased for <strong>@_definition.CostPerPurchase Moonstone</strong> @Reason
+                        </div>
+                    }
+                </RenderFragment>;
+        }
+    }
+
+    abstract class Suggestion
+    {
+        protected string Reason { get; }
+
+        protected Suggestion(string reason)
+        {
+            Reason = reason;
+        }
+
+        public abstract RenderFragment? Render();
+    }
+
+    protected override void OnInitialized()
+    {
+        var gameState = LandingService.MwFifthGameState;
+
+        _skillDefinitions = gameState.Skills.ToList();
+
+        _abilities =
+            gameState.Gifts.SelectMany(gift =>
+                gift.Ranks.SelectMany(rank =>
+                    rank.Abilities.Select(ability =>
+                        new AbilityItem(gift.Title, rank.Rank, ability.Name))))
+                .ToList();
+
+        _skills =
+            gameState.Occupations
+                .Where(occupation => occupation.IsChapter(HomeChapter))
+                .SelectMany(occupation =>
+                    occupation.Skills.Select(skill =>
+                        new SkillItem(occupation.Name, skill)))
+                .ToList();
+    }
+
+
+    protected override void OnParametersSet()
+    {
+        var activities = Activities.ToHashSet();
+
+
+        _suggestions.Clear();
+
+        if (activities.Contains("melee"))
+        {
+            SuggestAbility("Use of Arms", "allows the use of melee weapons");
+            if (activities.Contains("dual-wield"))
+            {
+                SuggestAbility("Florentine", "allows the use of two weapons, one no longer than 24");
+                SuggestAbility("Two Weapons", "allows the use of two weapons, one no longer than 46");
+            }
+        }
+
+        if (activities.Contains("tank"))
+        {
+            SuggestAbility("Toughness", "to increase your Hit Points by 1 per ability rank");
+            SuggestAbility("Extra Hit Point", "to increase your Hit Points by 1");
+            SuggestSkill("Toughness", "to increase your Hit Points by 1");
+        }
+
+
+        if (activities.Contains("ranged"))
+        {
+            SuggestAbility("Use Hand Crossbow", "to use hand crossbow");
+            SuggestAbility("Use Bows", "to use bows");
+        }
+
+        if (activities.Contains("apothecary")) SuggestSkill("Apothecary", "");
+        if (activities.Contains("armstraining")) SuggestSkill("Armstraining", "");
+        if (activities.Contains("bardic-voice")) SuggestSkill("Bardic Voice", "");
+        if (activities.Contains("apothecary")) SuggestSkill("Cooking", "");
+        if (activities.Contains("metalworking")) SuggestSkill("Metalworking", "");
+        if (activities.Contains("poisoner")) SuggestSkill("Poisoner", "");
+        if (activities.Contains("scribe")) SuggestSkill("Scribe", "");
+        if (activities.Contains("sewing")) SuggestSkill("Sewing", "");
+        if (activities.Contains("woodworking")) SuggestSkill("Woodworking", "");
+
+        void SuggestAbility(string abilityName, string reason)
+        {
+            foreach (var ability in _abilities.Where(a => a.Ability == abilityName).GroupBy(a => a.Gift))
+                _suggestions.Add(new SuggestAbility(ability.Key, ability.ToArray(), reason));
+        }
+
+        void SuggestSkill(string skillName, string reason)
+        {
+            foreach (var skill in _skills.Where(a => a.Skill.StartsWith(skillName)))
+                _suggestions.Add(new SuggestOccupation(skill.Occupation, skill.Skill, reason));
+
+            var skillDefinition = _skillDefinitions.FirstOrDefault(skill => skill.Name == skillName);
+            if (skillDefinition != null)
+                _suggestions.Add(new SuggestSkill(skillName, skillDefinition, reason));
+        }
+    }
+
+
+}
