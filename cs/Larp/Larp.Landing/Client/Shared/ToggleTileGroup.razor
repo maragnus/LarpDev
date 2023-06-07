@@ -69,7 +69,6 @@
 
     public async Task RemoveAsync(ToggleTile tile)
     {
-        Console.WriteLine($"Removed {tile.Title} = {tile.IsSelected} - {string.Join(", ", _selectedValues)}");
         _tiles.Remove(tile);
         if (tile is { IsSelected: true,Value: not null })
         {

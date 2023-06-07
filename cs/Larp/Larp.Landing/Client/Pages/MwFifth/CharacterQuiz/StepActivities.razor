@@ -10,7 +10,6 @@
 
     <MudText Typo="Typo.body1">How would you like to play this character?</MudText>
     <MudText Typo="Typo.body1">Choose as many activities as you like below and we'll help your choose your Gifts and Occupation.</MudText>
-    @string.Join(", ", Activities)
     <ToggleTileGroup @bind-SelectedValues="Activities" MultiSelection>
         @foreach (var category in _activities.Where(a => a.CheckPrerequisites(_selected)).GroupBy(activity => activity.Category))
         {
