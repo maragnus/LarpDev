@@ -1,4 +1,5 @@
 @using Larp.Common
+@using Larp.Landing.Shared
 @using Larp.Landing.Shared.MwFifth
 @code {
 
@@ -24,6 +25,7 @@
     private CharacterSkill[] _skills = Array.Empty<CharacterSkill>();
     private Dictionary<string, string> _properties = new();
     private Dictionary<string, int> _skillRanks = new();
+    private string[] _attributes;
 
     protected override void OnParametersSet()
     {
@@ -76,6 +78,13 @@
             .ToDictionary(
                 group => group.Key,
                 group => Math.Max(1, group.Sum(skill => skill.Rank)));
+
+        var attributes = Character.Abilities.ToList();
+        if (!string.IsNullOrEmpty(Character.ChosenElement))
+        {
+            attributes.Add($"Passion Element: {Character.ChosenElement.ToTitleCase()}");
+        }
+        _attributes = attributes.Order().ToArray();
 
         CalculateHitPointBonus();
 
@@ -178,7 +187,7 @@
     <MudItem xs="@(Print ? 4 : FullLayout ? 6 : 12)" sm="@(Print ? 4 : FullLayout ? 4 : 6)" Style="page-break-inside: avoid">
         <div class="list-container">
             <div class="list-header">Attributes</div>
-            @foreach (var name in Character.Abilities)
+            @foreach (var name in _attributes)
             {
                 <div class="list-item">@name</div>
             }
