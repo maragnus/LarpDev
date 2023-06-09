@@ -32,6 +32,12 @@ public enum SkillPurchase
 [PublicAPI]
 public class CharacterSkill
 {
+    public string Name { get; set; } = default!;
+    public int Rank { get; set; }
+    public string Title => Rank == 0 ? Name : $"{Name} {Rank}";
+    public SkillPurchase Type { get; set; }
+    public int? Purchases { get; set; }
+
     public static CharacterSkill FromTitle(string title, SkillPurchase type)
     {
         var (name, rank) = Utility.SplitNameAndRank(title);
@@ -43,17 +49,15 @@ public class CharacterSkill
             Type = type
         };
     }
-
-    public string Name { get; set; } = default!;
-    public int Rank { get; set; }
-    public string Title => Rank == 0 ? Name : $"{Name} {Rank}";
-    public SkillPurchase Type { get; set; }
-    public int? Purchases { get; set; }
 }
 
 [PublicAPI]
 public class CharacterVantage
 {
+    public string Name { get; set; } = default!;
+    public int Rank { get; set; }
+    public string Title => Rank == 0 ? Name : $"{Name} {Rank}";
+
     public static CharacterVantage FromTitle(string title)
     {
         var (name, rank) = Utility.SplitNameAndRank(title);
@@ -64,10 +68,6 @@ public class CharacterVantage
             Rank = rank
         };
     }
-
-    public string Name { get; set; } = default!;
-    public int Rank { get; set; }
-    public string Title => Rank == 0 ? Name : $"{Name} {Rank}";
 
     public void Deconstruct(out string name, out int rank)
     {
@@ -99,10 +99,6 @@ public class ChangeSummary
 
 public class MoonstoneInfo
 {
-    public int Total { get; set; }
-    public int Used { get; set; }
-    public int Available { get; set; }
-
     public MoonstoneInfo()
     {
     }
@@ -113,6 +109,10 @@ public class MoonstoneInfo
         Used = moonstoneUsed;
         Available = moonstoneTotal - moonstoneUsed;
     }
+
+    public int Total { get; set; }
+    public int Used { get; set; }
+    public int Available { get; set; }
 }
 
 [PublicAPI]
@@ -154,6 +154,9 @@ public class Character
 [PublicAPI]
 public class CharacterRevision
 {
+    private static HashSet<string> _skipProperties = new()
+        { nameof(ChangeSummary), nameof(State), nameof(RevisionId), nameof(PreviousRevisionId), nameof(AccountId) };
+
     [BsonId, BsonRepresentation(BsonType.ObjectId)]
     public string RevisionId { get; set; } = default!;
 
@@ -204,6 +207,7 @@ public class CharacterRevision
     public CharacterVantage[] Disadvantages { get; set; } = Array.Empty<CharacterVantage>();
     public string[] Spells { get; set; } = Array.Empty<string>();
     public string[] FlavorTraits { get; set; } = Array.Empty<string>();
+    public string? ChosenElement { get; set; }
     public string? UnusualFeatures { get; set; }
     public string? Cures { get; set; }
     public string? Documents { get; set; }
@@ -239,11 +243,6 @@ public class CharacterRevision
             Level,
             State);
 
-    private static HashSet<string> _skipProperties = new()
-        { nameof(ChangeSummary), nameof(State), nameof(RevisionId), nameof(PreviousRevisionId), nameof(AccountId) };
-
-    private record ChangeMap(string[] Added, string[] Removed);
-
     private static bool Summarize<T>(IEnumerable<T> oldList, IEnumerable<T> newList, Func<T, string> transformer,
         out string[] oldItems, out string[] newItems)
     {
@@ -277,7 +276,8 @@ public class CharacterRevision
                 {
                     var oldSkillsFiltered = oldSkills.Where(x => x.Type == type);
                     var newSkillsFiltered = newSkills.Where(x => x.Type == type);
-                    if (Summarize(oldSkillsFiltered, newSkillsFiltered, x => x.Title, out var oldItems, out var newItems))
+                    if (Summarize(oldSkillsFiltered, newSkillsFiltered, x => x.Title, out var oldItems,
+                            out var newItems))
                         result.Add($"{property.Name} ({type})", new ChangeSummary(oldItems, newItems));
                 }
             }
@@ -302,4 +302,6 @@ public class CharacterRevision
             .Select(group => new NameRank(group.Key, group.Sum(skill => skill.Rank)))
             .ToArray();
     }
+
+    private record ChangeMap(string[] Added, string[] Removed);
 }

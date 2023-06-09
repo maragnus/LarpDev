@@ -239,6 +239,7 @@
         GroupBuilder("caster", "Magic user", suggestions =>
         {
             suggestions.AddRange(SuggestAbility("Sorcery"));
+            suggestions.AddRange(SuggestAbility("Summoning"));
             if (activities.Contains("wizard"))
             {
                 suggestions.AddRange(SuggestSkill("Increased Mana"));

@@ -364,6 +364,9 @@ public class CharacterBuilder
     [DependsOn(nameof(PopulateSpells), nameof(Wisdom))]
     public bool HasWisdomSpells { get; private set; }
 
+    [DependsOn(nameof(PopulateSpells), nameof(Passion))]
+    public bool HasChosenElement { get; private set; }
+
     [DependsOn(nameof(PopulateSpells), nameof(Wisdom), nameof(Occupation), nameof(NoOccupation))]
     public bool HasBardicSpells { get; private set; }
 
@@ -405,6 +408,9 @@ public class CharacterBuilder
         nameof(PurchasedSkills), nameof(ChosenSpells))]
     public bool IsSpellsValid { get; private set; }
 
+    [DependsOn(nameof(PopulateSpells), nameof(ChosenElement))]
+    public bool IsChosenElementValid { get; private set; }
+
     [DependsOn(nameof(PopulateSpells), nameof(Wisdom), nameof(Occupation), nameof(NoOccupation))]
     public bool HasSpells { get; private set; }
 
@@ -430,9 +436,17 @@ public class CharacterBuilder
 
     public bool IsValid =>
         IsHistoryValid && IsOccupationValid && IsGiftsValid && IsSpellsValid && IsHomelandValid && IsReligionValid &&
-        IsNameValid && IsVantagesValid && IsAgeGroupValid && IsSpellsValid && IsChosenSkillsValid && IsHomeChapterValid;
+        IsNameValid && IsVantagesValid && IsAgeGroupValid && IsSpellsValid && IsChosenSkillsValid &&
+        IsHomeChapterValid &&
+        IsChosenElementValid;
 
     public bool IsNewCharacter => Revision.PreviousRevisionId == null;
+
+    public string? ChosenElement
+    {
+        get => Revision.ChosenElement;
+        set => Set(x => x.ChosenElement = value);
+    }
 
     public string? RevisionReviewerNotes
     {
@@ -704,6 +718,8 @@ public class CharacterBuilder
 
     private void PopulateSpells()
     {
+        HasChosenElement = Revision.Passion > 0;
+        IsChosenElementValid = !string.IsNullOrEmpty(ChosenElement);
         HasWisdomSpells = Revision.Wisdom > 0;
         HasBardicSpells = HasWisdomSpells && HasSkill("Bardic Magic");
         HasDivineSpells = HasWisdomSpells && HasSkill("Divine Spells");

@@ -127,11 +127,11 @@
                 () => true,
                 () => _revision.HasSkills || _revision.HasTalents),
             new(
-                "Spells",
+                "Magic",
                 @<StepSpells Character="_revision"/>,
                 @<MudIcon Icon="@Icons.Material.Outlined.Book"/>,
-                () => _revision.IsSpellsValid,
-                () => _revision.HasWisdomSpells),
+                () => _revision.IsSpellsValid && _revision.IsChosenElementValid,
+                () => _revision.HasWisdomSpells || _revision.HasChosenElement),
             new(
                 "Advantages",
                 @<StepVantages Character="_revision"/>,

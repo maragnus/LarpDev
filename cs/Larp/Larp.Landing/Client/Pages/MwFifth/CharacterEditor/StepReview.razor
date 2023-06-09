@@ -63,6 +63,11 @@ else if (!Character.IsHomelandValid)
     <MudAlert Severity="Severity.Warning">You must make a religion select or select no religion</MudAlert>
 }
 
+@if (!Character.IsChosenElementValid)
+{
+    <MudAlert Severity="Severity.Warning">You must select your Chosen Element for the Gift of Passion.</MudAlert>
+}
+
 @if (!Character.IsSpellsValid)
 {
     <MudAlert Severity="Severity.Warning">You must select one spell for each level in Wisdom. You have @Character.ChosenSpells.Length spells selected and need to have @Character.Wisdom spells selected.</MudAlert>

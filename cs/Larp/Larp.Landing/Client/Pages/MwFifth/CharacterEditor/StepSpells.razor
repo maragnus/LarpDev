@@ -1,46 +1,64 @@
 @using Larp.Landing.Shared.MwFifth
-<MudText Typo="Typo.h6">Select your spells for the Gift of Wisdom</MudText>
-<MudText Typo="Typo.body2">You must select one spell per level in Wisdom</MudText>
-
-<StepDivider/>
-
-@if (Character.HasBardicSpells)
+@if (Character.HasChosenElement)
 {
-    <MudAlert Severity="Severity.Info">Your Bardic Magic spells will be added automatically.</MudAlert>
+    <MudText Typo="Typo.h6">Select your chosen Element for the Gift of Passion</MudText>
+    <MudText Typo="Typo.body2">This element will be used for Summoning and Elemental Storm</MudText>
+
+    <StepDivider/>
+
+    <MudSelect T="string?" Label="Chosen Element" @bind-Value="@Character.ChosenElement" Clearable Variant="Variant.Outlined">
+        <MudSelectItem Value="@("air")">Air</MudSelectItem>
+        <MudSelectItem Value="@("earth")">Earth</MudSelectItem>
+        <MudSelectItem Value="@("fire")">Fire</MudSelectItem>
+        <MudSelectItem Value="@("water")">Water</MudSelectItem>
+    </MudSelect>
     <StepDivider/>
 }
-
-@if (Character.HasDivineSpells)
+@if (Character.HasWisdomSpells)
 {
-    <MudAlert Severity="Severity.Info">Your Divine spells will be added automatically.</MudAlert>
-    <StepDivider/>
-}
+    <MudText Typo="Typo.h6">Select your spells for the Gift of Wisdom</MudText>
+    <MudText Typo="Typo.body2">You must select at least one spell per level in Wisdom</MudText>
 
-@if (Character.HasOccupationalSpells)
-{
-    <MudAlert Severity="Severity.Info">Your @Character.Occupation Occupational spells will be added automatically.</MudAlert>
     <StepDivider/>
-}
 
-@if (Character.IsNewCharacter && Character.ChosenSpells.Length != Character.Wisdom)
-{
-    <MudAlert Severity="Severity.Warning">You need to select a number of spells equal to your Wisdom. You have selected @Character.ChosenSpells.Length spells and need to have @Character.Wisdom spells.</MudAlert>
-    <StepDivider/>
-}
-else if (!Character.IsNewCharacter && Character.ChosenSpells.Length < Character.Wisdom)
-{
-    <MudAlert Severity="Severity.Warning">You need to select at least as many spells as your Wisdom. You have selected @Character.ChosenSpells.Length spells and need to have at least @Character.Wisdom spells.</MudAlert>
-    <StepDivider/>
-}
+    @if (Character.HasBardicSpells)
+    {
+        <MudAlert Severity="Severity.Info">Your Bardic Magic spells will be added automatically.</MudAlert>
+        <StepDivider/>
+    }
 
-<MudPaper>
-    <MudListExtended MultiSelection T="string?" Clickable SelectedValues="Character.ChosenSpells" SelectedValuesChanged="SelectionChanged">
-        @foreach (var spell in Character.AllWisdomSpells)
-        {
-            <MudListItemExtended T="string?" Value="@spell.Name" Text="@spell.Name" SecondaryText="@spell.Effect"/>
-        }
-    </MudListExtended>
-</MudPaper>
+    @if (Character.HasDivineSpells)
+    {
+        <MudAlert Severity="Severity.Info">Your Divine spells will be added automatically.</MudAlert>
+        <StepDivider/>
+    }
+
+    @if (Character.HasOccupationalSpells)
+    {
+        <MudAlert Severity="Severity.Info">Your @Character.Occupation Occupational spells will be added automatically.</MudAlert>
+        <StepDivider/>
+    }
+
+    @if (Character.IsNewCharacter && Character.ChosenSpells.Length != Character.Wisdom)
+    {
+        <MudAlert Severity="Severity.Warning">You need to select a number of spells equal to your Wisdom. You have selected @Character.ChosenSpells.Length spells and need to have @Character.Wisdom spells.</MudAlert>
+        <StepDivider/>
+    }
+    else if (!Character.IsNewCharacter && Character.ChosenSpells.Length < Character.Wisdom)
+    {
+        <MudAlert Severity="Severity.Warning">You need to select at least as many spells as your Wisdom. You have selected @Character.ChosenSpells.Length spells and need to have at least @Character.Wisdom spells.</MudAlert>
+        <StepDivider/>
+    }
+
+    <MudPaper>
+        <MudListExtended MultiSelection T="string?" Clickable SelectedValues="Character.ChosenSpells" SelectedValuesChanged="SelectionChanged">
+            @foreach (var spell in Character.AllWisdomSpells)
+            {
+                <MudListItemExtended T="string?" Value="@spell.Name" Text="@spell.Name" SecondaryText="@spell.Effect"/>
+            }
+        </MudListExtended>
+    </MudPaper>
+}
 
 @code {
 
