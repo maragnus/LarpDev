@@ -719,7 +719,7 @@ public class CharacterBuilder
     private void PopulateSpells()
     {
         HasChosenElement = Revision.Passion > 0;
-        IsChosenElementValid = !string.IsNullOrEmpty(ChosenElement);
+        IsChosenElementValid = !HasChosenElement || !string.IsNullOrEmpty(ChosenElement);
         HasWisdomSpells = Revision.Wisdom > 0;
         HasBardicSpells = HasWisdomSpells && HasSkill("Bardic Magic");
         HasDivineSpells = HasWisdomSpells && HasSkill("Divine Spells");
