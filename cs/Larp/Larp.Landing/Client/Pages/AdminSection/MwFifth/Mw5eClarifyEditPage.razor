@@ -1,0 +1,130 @@
+﻿@page "/admin/mw5e/terms"
+@using System.ComponentModel.DataAnnotations
+@inherits LarpPage
+@inject LandingService LandingService
+
+<AdminLayout Title="Mystwood 5e Terms">
+    <MudStack Spacing="4">
+        <MudButtonGroup OverrideStyles="false">
+            <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="Add" Color="Color.Primary" Variant="Variant.Filled">Add Disadvantage</MudButton>
+        </MudButtonGroup>
+
+        <MudDataGrid Loading="IsLoading" T="ClarifyTermItem" Items="_terms" ReadOnly="false" EditTrigger="DataGridEditTrigger.OnRowClick" EditMode="DataGridEditMode.Cell" CommittedItemChanges="Changed">
+            <NoRecordsContent>
+                <MudText Typo="Typo.caption">No terms</MudText>
+            </NoRecordsContent>
+            <Columns>
+                <PropertyColumn Property="x => x.Name" Title="Name" IsEditable/>
+                <PropertyColumn Property="x => x.Summary" Title="Summary" IsEditable/>
+                <PropertyColumn Property="x => x.Description" Title="Description" IsEditable/>
+                <TemplateColumn Sortable="false" IsEditable="false">
+                    <CellTemplate>
+                        <MudIconButton Disabled="@context.Item.Saved" Size="Size.Small" Color="Color.Secondary" Icon="@Icons.Material.Filled.Save" OnClick="async () => await Save(context.Item)"/>
+                        <MudIconButton Size="Size.Small" Color="Color.Secondary" Icon="@Icons.Material.Filled.DeleteForever" OnClick="async () => await Delete(context.Item)"/>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid>
+
+        <MudButtonGroup OverrideStyles="false">
+            <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="Add" Color="Color.Primary" Variant="Variant.Filled">Add Term</MudButton>
+            <MudButton Disabled="@_terms.All(term => term.Saved)" StartIcon="@Icons.Material.Filled.Save" OnClick="SaveAll" Color="Color.Secondary" Variant="Variant.Filled">Save All Changes</MudButton>
+        </MudButtonGroup>
+    </MudStack>
+</AdminLayout>
+
+@code {
+    private readonly List<ClarifyTermItem> _terms = new();
+
+    public class ClarifyTermItem
+    {
+        [Required]
+        public string? Name { get; set; }
+
+        public string? Summary { get; set; }
+        public string? Description { get; set; }
+        public bool Saved { get; set; }
+        public bool New { get; set; }
+        public string? SavedName { get; set; }
+
+        public ClarifyTermItem()
+        {
+            Name = "New Item";
+            Saved = false;
+            New = true;
+        }
+
+        public ClarifyTermItem(ClarifyTerm term)
+        {
+            Name = term.Name;
+            Summary = term.Summary;
+            Description = term.Description;
+            Saved = true;
+            SavedName = term.Name;
+            New = false;
+        }
+    }
+
+    protected override async Task OnSafeInitializedAsync()
+    {
+        _terms.Clear();
+        var terms = await LandingService.MwFifth.GetTerms();
+        _terms.AddRange(terms.Select(term => new ClarifyTermItem(term)));
+    }
+
+    private void Add()
+    {
+        _terms.Add(new ClarifyTermItem());
+    }
+
+    private async Task Save(ClarifyTermItem term)
+    {
+        if (string.IsNullOrEmpty(term.Name)) return;
+        await SafeActionAsync(async () =>
+        {
+            await LandingService.Admin.SetTerm(term.Name, term.Summary, term.Description);
+            term.Saved = true;
+            term.New = false;
+            term.SavedName = term.Name;
+        });
+    }
+
+    private async Task SaveAll()
+    {
+        await SafeActionAsync(async () =>
+        {
+            foreach (var term in _terms)
+            {
+                if (string.IsNullOrEmpty(term.Name)) continue;
+                ;
+                await LandingService.Admin.SetTerm(term.Name, term.Summary, term.Description);
+                term.Saved = true;
+                term.New = false;
+                term.SavedName = term.Name;
+            }
+
+            await OnSafeInitializedAsync();
+        });
+    }
+
+    private void Changed(ClarifyTermItem term)
+    {
+        term.Saved = false;
+    }
+
+    private async Task Delete(ClarifyTermItem term)
+    {
+        _terms.Remove(term);
+
+        if (string.IsNullOrEmpty(term.Name)) return;
+
+        if (term.New) return;
+        await SafeActionAsync(async () =>
+        {
+            await LandingService.Admin.DeleteTerm(term.Name);
+            term.Saved = true;
+            await OnSafeInitializedAsync();
+        });
+    }
+
+}

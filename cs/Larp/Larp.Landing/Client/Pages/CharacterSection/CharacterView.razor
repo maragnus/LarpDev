@@ -1,5 +1,4 @@
 @page "/characters/{gameName}/{characterId}"
-
 @using Larp.Landing.Client.Pages.MwFifth
 
 <PageHeader>Character Sheet</PageHeader>
@@ -7,14 +6,16 @@
 <MudContainer MaxWidth="MaxWidth.Medium">
     @if (GameName == "mw5e")
     {
-        <MwFifthCharacter CharacterId="@CharacterId" FullLayout/>
+        <MwFifthCharacter CharacterId="@CharacterId" FullLayout Clarify/>
     }
 </MudContainer>
 
 @code {
+
     [Parameter]
     public string? GameName { get; set; }
-    
+
     [Parameter]
     public string? CharacterId { get; set; }
+
 }

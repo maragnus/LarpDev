@@ -1,17 +1,20 @@
 ﻿using Larp.Data.MwFifth;
 using Larp.Landing.Shared.MwFifth;
+using MongoDB.Driver;
 
 namespace Larp.Landing.Server.Services;
 
 public class MwFifthServiceServer : IMwFifthService
 {
-    private readonly MwFifthCharacterManager _manager;
     private readonly Account _account;
+    private readonly LarpContext _larpContext;
+    private readonly MwFifthCharacterManager _manager;
     private readonly MwFifthGameContext _mwFifth;
 
     public MwFifthServiceServer(MwFifthCharacterManager manager, IUserSession userSession, LarpContext larpContext)
     {
         _manager = manager;
+        _larpContext = larpContext;
         _mwFifth = larpContext.MwFifthGame;
         _account = userSession.Account!;
     }
@@ -38,4 +41,13 @@ public class MwFifthServiceServer : IMwFifthService
 
     public async Task DeleteCharacter(string characterId) =>
         await _manager.Delete(characterId, _account, false);
+
+    public async Task<ClarifyTerm[]> GetTerms()
+    {
+        var gameId = await _larpContext.GetGameIdByName(GameState.GameName);
+        return (await _larpContext.ClarifyTerms
+                .Find(term => term.GameId == gameId)
+                .ToListAsync())
+            .ToArray();
+    }
 }

@@ -1,5 +1,5 @@
-@using Larp.Landing.Shared.MwFifth
 @inject LandingService LandingService
+@using Larp.Landing.Shared.MwFifth
 @inherits LarpPage
 
 @code {
@@ -11,12 +11,16 @@
     public bool Print { get; set; }
 
     [Parameter]
+    public bool Clarify { get; set; }
+
+    [Parameter]
     public bool FullLayout { get; set; }
 
     private Game _game = new();
     private GameState _gameState = default!;
     private CharacterBuilder _character = default!;
     private string? _chapterEmail;
+    private ClarifyTerm[] _terms = Array.Empty<ClarifyTerm>();
 
     protected override async Task OnSafeParametersSetAsync()
     {
@@ -24,6 +28,11 @@
 
         _character = new CharacterBuilder(character, _gameState, Logger);
         _chapterEmail = _character.GetHomeChapter()?.Email ?? _game.Email;
+    }
+
+    protected override async Task OnSafeInitializedAsync()
+    {
+        _terms = await LandingService.MwFifth.GetTerms();
     }
 
     protected override void OnInitialized()
@@ -55,12 +64,10 @@
 
     private void PrintSheet()
     {
-        NavigationManager.NavigateTo($"/characters/mw5e/{CharacterId}/print");
+        NavigationManager.NavigateTo($"/characters/mw5e/{CharacterId}/print?clarify={Clarify}");
     }
 
 }
-
-<StepDivider/>
 
 @if (IsLoading)
 {
@@ -73,37 +80,39 @@
     return;
 }
 
-@if (!Print)
-{
-    switch (_character.Revision.State)
+<div class="no-print">
+    @if (!Print)
     {
-        case CharacterState.Draft:
-            <MudButton Color="@Color.Error" OnClick="@DeleteDraft" Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.DeleteForever">Delete Draft</MudButton>
-            <StepDivider/>
-            break;
+        <MudStack Row Spacing="4" Class="my-4">
+            @switch (_character.Revision.State)
+            {
+                case CharacterState.Draft:
+                    <MudButton Color="@Color.Error" OnClick="@DeleteDraft" Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.DeleteForever">Delete Draft</MudButton>
+                    break;
 
-        case CharacterState.Live:
-            <MudButton Color="@Color.Secondary" OnClick="@PrintSheet" Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Print">Print</MudButton>
-            <MudButton Color="@Color.Primary" OnClick="@CreateDraft" Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Edit">Draft Changes</MudButton>
-            <StepDivider/>
-            break;
+                case CharacterState.Live:
+                    <MudButton Color="@Color.Secondary" OnClick="@PrintSheet" Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Print">Print</MudButton>
+                    <MudButton Color="@Color.Primary" OnClick="@CreateDraft" Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Edit">Draft Changes</MudButton>
+                    break;
 
-        case CharacterState.Review:
-            <MudAlert Severity="Severity.Info">
-                <MudStack Spacing="4">
-                    <div>
-                        This draft is currently <strong>waiting for the Game Masters to review</strong>.
-                    </div>
-                    <div>
-                        Once your draft is approved, it will be Live and can be printed. If the Game Master has any questions, they'll reach out to you.
-                    </div>
-                    <div>
-                        If you have questions, please contact the chapter via email at <a href="mailto:@_chapterEmail?subject=Question+about+@_character.CharacterName">@_chapterEmail</a>.
-                    </div>
-                </MudStack>
-            </MudAlert>
-            <StepDivider/>
-            break;
+                case CharacterState.Review:
+                    <MudAlert Severity="Severity.Info">
+                        <MudStack Spacing="4">
+                            <div>
+                                This draft is currently <strong>waiting for the Game Masters to review</strong>.
+                            </div>
+                            <div>
+                                Once your draft is approved, it will be Live and can be printed. If the Game Master has any questions, they'll reach out to you.
+                            </div>
+                            <div>
+                                If you have questions, please contact the chapter via email at <a href="mailto:@_chapterEmail?subject=Question+about+@_character.CharacterName">@_chapterEmail</a>.
+                            </div>
+                        </MudStack>
+                    </MudAlert>
+                    break;
+            }
+            <MudSwitch T="bool" @bind-Checked="Clarify" Color="Color.Tertiary" UnCheckedColor="Color.Secondary" ThumbIconColor="Color.Info" ThumbIcon="@Icons.Material.Filled.Info">Clarify</MudSwitch>
+        </MudStack>
     }
-}
-<CharacterSheet Character="_character" FullLayout="FullLayout" Print="Print"/>
+</div>
+<CharacterSheet Character="_character" Terms="_terms" FullLayout="FullLayout" Print="Print" Clarify="Clarify"/>

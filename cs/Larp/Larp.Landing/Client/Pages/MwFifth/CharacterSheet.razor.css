@@ -4,6 +4,10 @@
     padding-right: 1em
 }
 
+.print-sheet {
+    print-color-adjust: exact;
+}
+
 .character-title {
     font-size: 1.75em
 }
@@ -101,6 +105,12 @@
 .list-item {
     padding: 0.25em 0.5em;
     font-weight: bold
+}
+
+.list-item .clarify {
+    font-weight: normal;
+    font-style: italic;
+    color: #777;
 }
 
 .list-text {

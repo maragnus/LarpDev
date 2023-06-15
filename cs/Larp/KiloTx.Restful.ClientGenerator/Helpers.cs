@@ -37,13 +37,20 @@ internal static class Helpers
 
     internal static IEnumerable<string> GetUsings(ISymbol? symbol)
     {
-        if (symbol?.ContainingNamespace == null) yield break;
+        if (symbol is IArrayTypeSymbol array)
+        {
+            foreach (var namespaceName in GetUsings(array.ElementType))
+                yield return namespaceName;
+            yield break;
+        }
+
+        if (symbol is null or { ContainingNamespace: null }) yield break;
 
         yield return symbol.ContainingNamespace.ToDisplayString();
 
-        if (symbol is not INamedTypeSymbol { IsGenericType: true } genericType) yield break;
+        if (symbol is not INamedTypeSymbol { IsGenericType: true } type) yield break;
 
-        foreach (var namespaceName in genericType.TypeArguments.SelectMany(GetUsings))
+        foreach (var namespaceName in type.TypeArguments.SelectMany(GetUsings))
             yield return namespaceName;
     }
 

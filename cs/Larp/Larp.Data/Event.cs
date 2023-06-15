@@ -37,6 +37,7 @@ public class Event
     [BsonId, BsonRepresentation(BsonType.ObjectId)]
     public string EventId { get; set; } = default!;
 
+    [BsonRepresentation(BsonType.ObjectId)]
     public string GameId { get; set; } = default!;
 
     [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]

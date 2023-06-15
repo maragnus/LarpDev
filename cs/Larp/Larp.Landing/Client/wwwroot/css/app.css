@@ -3,7 +3,13 @@ html, body {
 }
 
 @media print {
-    .no-print { display: none !important; }
+    .no-print {
+        display: none !important;
+    }
+
+    .mud-main-content {
+        padding: 0 !important;
+    }
 }
 
 @media screen {

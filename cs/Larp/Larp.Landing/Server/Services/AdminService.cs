@@ -468,6 +468,27 @@ public class AdminService : IAdminService
         await UpdateGameState(nameof(GameState.Religions), religions);
     }
 
+    public async Task SetTerm(string name, string? summary, string? description)
+    {
+        var gameId = await _db.GetGameIdByName(GameState.GameName);
+
+        await _db.ClarifyTerms.UpdateOneAsync(
+            term => term.Name == name && term.GameId == gameId,
+            Builders<ClarifyTerm>.Update
+                .SetOnInsert(term => term.Name, name)
+                .SetOnInsert(term => term.GameId, gameId)
+                .Set(term => term.Summary, summary)
+                .Set(term => term.Description, description),
+            new UpdateOptions { IsUpsert = true });
+    }
+
+    public async Task DeleteTerm(string name)
+    {
+        var gameId = await _db.GetGameIdByName(GameState.GameName);
+
+        await _db.ClarifyTerms.DeleteOneAsync(term => term.Name == name && term.GameId == gameId);
+    }
+
     public async Task<EventAttendance[]> GetAccountAttendances(string accountId) =>
         await _eventManager.GetAccountAttendances(accountId);
 

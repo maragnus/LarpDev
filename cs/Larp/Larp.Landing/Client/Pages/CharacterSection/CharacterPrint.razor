@@ -1,18 +1,40 @@
 @page "/characters/{gameName}/{characterId}/print"
-
+@using Microsoft.AspNetCore.WebUtilities
 @using Larp.Landing.Client.Pages.MwFifth
+@inject IJSRuntime Js
+@inject NavigationManager NavigationManager
 
 <PageHeader>Character Sheet</PageHeader>
 
 @if (GameName == "mw5e")
 {
-    <MwFifthCharacter CharacterId="@CharacterId" Print FullLayout />
+    <MwFifthCharacter CharacterId="@CharacterId" Print FullLayout Clarify="Clarify"/>
 }
 
 @code {
+
     [Parameter]
     public string? GameName { get; set; }
-    
+
     [Parameter]
     public string? CharacterId { get; set; }
+
+    [Parameter]
+    public bool Clarify { get; set; }
+
+    protected override void OnInitialized()
+    {
+        var uri = new Uri(NavigationManager.Uri);
+        var query = QueryHelpers.ParseQuery(uri.Query);
+        var clarify = query.TryGetValue("clarify", out var values) && bool.TryParse(values, out var value) && value;
+        Clarify = clarify;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        await Task.Delay(TimeSpan.FromSeconds(1));
+        await Js.InvokeVoidAsyncIgnoreErrors("printPage");
+    }
+
 }

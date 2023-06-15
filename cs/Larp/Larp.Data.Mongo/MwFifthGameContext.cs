@@ -26,16 +26,16 @@ public class MwFifthGameContext
     {
         _cache.Remove(GameStateCacheName);
     }
-    
+
     public async ValueTask<GameState> GetGameState()
     {
         if (_cache.TryGetValue(GameStateCacheName, out GameState? gameState))
             return gameState!;
 
-        var bson = await _gameStates.
-            Find(x => x["Name"] == GameState.GameName)
+        var bson = await _gameStates
+            .Find(x => x["Name"] == GameState.GameName)
             .FirstAsync();
-        
+
         bson.Remove("_id");
         var json = bson.ToJson();
         return _cache.Set(GameStateCacheName, System.Text.Json.JsonSerializer.Deserialize<GameState>(json)!);

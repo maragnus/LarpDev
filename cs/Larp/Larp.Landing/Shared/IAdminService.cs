@@ -213,6 +213,12 @@ public interface IAdminService
 
     [ApiPost("mw5e/religions"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
     Task SaveReligions(Religion[] religions);
+
+    [ApiPost("mw5e/terms"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    Task SetTerm(string name, string? summary, string? description);
+
+    [ApiDelete("mw5e/terms"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    Task DeleteTerm(string name);
 }
 
 public class Dashboard

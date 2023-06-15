@@ -1,10 +1,14 @@
 @using Larp.Common
 @using Larp.Landing.Shared
 @using Larp.Landing.Shared.MwFifth
+@using System.Text.RegularExpressions
 @code {
 
     [Parameter]
     public CharacterBuilder Character { get; set; } = default!;
+
+    [Parameter]
+    public ClarifyTerm[]? Terms { get; set; }
 
     [Parameter]
     public bool FullLayout { get; set; }
@@ -14,6 +18,9 @@
 
     [Parameter]
     public bool Admin { get; set; }
+
+    [Parameter]
+    public bool Clarify { get; set; }
 
     private (string Name, int Value)[] _gifts = Array.Empty<(string, int)>();
     private string? _homeChapter;
@@ -25,16 +32,16 @@
     private CharacterSkill[] _skills = Array.Empty<CharacterSkill>();
     private Dictionary<string, string> _properties = new();
     private Dictionary<string, int> _skillRanks = new();
-    private string[] _attributes;
+    private string[] _attributes = Array.Empty<string>();
+    private Dictionary<string, string> _terms = new();
 
     protected override void OnParametersSet()
     {
-        OnInitialized();
-        StateHasChanged();
-    }
+        _terms = Terms?
+            .Where(term => !string.IsNullOrEmpty(term.Summary))
+            .ToDictionary(term => term.Name, term => term.Summary!)
+                 ?? new Dictionary<string, string>();
 
-    protected override void OnInitialized()
-    {
         _qrCode = $"https://larp.maragnus.com/cs/{Character.Revision.RevisionId}";
 
         _gifts = new[]
@@ -128,6 +135,21 @@
         }
     }
 
+    RenderFragment? ClarifyTerm(string name)
+    {
+        if (!Clarify) return null;
+
+        if (_terms.TryGetValue(name, out var summary))
+            return @<div class="clarify">@summary</div>;
+
+        name = Regex.Replace(name, @"\W([\dIVX]+)$", "", RegexOptions.Compiled);
+
+        if (_terms.TryGetValue(name, out summary))
+            return @<div class="clarify">@summary</div>;
+
+        return null;
+    }
+
 }
 
 @if (Print)
@@ -189,7 +211,10 @@
             <div class="list-header">Abilities</div>
             @foreach (var name in _attributes)
             {
-                <div class="list-item">@name</div>
+                <div class="list-item">
+                    @name
+                    @ClarifyTerm(name)
+                </div>
             }
         </div>
     </MudItem>
@@ -213,7 +238,10 @@
             {
                 @foreach (var name in _aggregateSkills)
                 {
-                    <div class="list-item">@name</div>
+                    <div class="list-item">
+                        @name
+                        @ClarifyTerm(name)
+                    </div>
                 }
             }
         </div>
@@ -226,7 +254,10 @@
                     <div class="list-header">Advantages</div>
                     @foreach (var (name, rank) in Character.Advantages)
                     {
-                        <div class="list-item">@rank @name</div>
+                        <div class="list-item">
+                            @rank @name
+                            @ClarifyTerm(name)
+                        </div>
                     }
                 </div>
                 <div class="list-container" style="height: auto; flex-grow: 1">
@@ -234,13 +265,16 @@
 
                     @foreach (var (name, rank) in Character.Disadvantages)
                     {
-                        <div class="list-item">@rank @name</div>
+                        <div class="list-item">
+                            @rank @name
+                            @ClarifyTerm(name)
+                        </div>
                     }
                 </div>
             </div>
         </MudItem>
     }
-    <MudItem xs="@(Print ? 4 : FullLayout ? 6 : 12)" sm="6" Style="page-break-inside: avoid">
+    <MudItem xs="@(Print ? 4 : 12)" sm="@(Print ? 4 : FullLayout ? 6 : 12)" Style="page-break-inside: avoid">
         <div class="list-container">
             <div class="list-header">Unusual Features</div>
             <div class="list-text">
@@ -248,7 +282,7 @@
             </div>
         </div>
     </MudItem>
-    <MudItem xs="@(Print ? 4 : FullLayout ? 6 : 12)" sm="6" Style="page-break-inside: avoid">
+    <MudItem xs="@(Print ? 4 : 12)" sm="@(Print ? 4 : FullLayout ? 6 : 12)" Style="page-break-inside: avoid">
         <div class="list-container">
             <div class="list-header">Cures</div>
             <div class="list-text">
@@ -256,7 +290,7 @@
             </div>
         </div>
     </MudItem>
-    <MudItem xs="12" sm="@(Print ? 4 : FullLayout ? 6 : 12)" Style="page-break-inside: avoid">
+    <MudItem xs="@(Print ? 4 : 12)" sm="@(Print ? 4 : 12)" Style="page-break-inside: avoid">
         <div class="list-container">
             <div class="list-header">Documents</div>
             <div class="list-text">
@@ -264,7 +298,7 @@
             </div>
         </div>
     </MudItem>
-    <MudItem xs="12" sm="@(Print ? 4 : FullLayout ? 6 : 12)" Style="page-break-inside: avoid">
+    <MudItem xs="12" Style="page-break-inside: avoid">
         <div></div>
     </MudItem>
     @if (!Print)

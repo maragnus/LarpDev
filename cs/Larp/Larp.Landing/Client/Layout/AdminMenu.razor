@@ -10,7 +10,7 @@
     private void LandingServiceOnAuthenticatedChanged(object? sender, EventArgs e) =>
         StateHasChanged();
 
-    public void Dispose()=>
+    public void Dispose() =>
         LandingService.AuthenticatedChanged -= LandingServiceOnAuthenticatedChanged;
 }
 
@@ -43,6 +43,7 @@
             <MudNavLink Href="/admin/mw5e/disadvantages" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Blind">Disadvantages</MudNavLink>
             <MudNavLink Href="/admin/mw5e/chapters" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Home">Chapters</MudNavLink>
             <MudNavLink Href="/admin/mw5e/religions" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.GroupWork">Religions</MudNavLink>
+            <MudNavLink Href="/admin/mw5e/terms" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Book">Terms</MudNavLink>
         </MudNavGroup>
     }
     @if (LandingService.IsInRole(AccountRole.AccountAdmin))

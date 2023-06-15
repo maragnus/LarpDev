@@ -28,6 +28,7 @@ public class LarpContext
         Attendances = database.GetCollection<Attendance>(nameof(Attendances));
         Events = database.GetCollection<Event>(nameof(Events));
         Games = database.GetCollection<Game>(nameof(Games));
+        ClarifyTerms = database.GetCollection<ClarifyTerm>(nameof(ClarifyTerms));
         Sessions = database.GetCollection<Session>(nameof(Sessions));
         GameStates = database.GetCollection<BsonDocument>(nameof(GameStates));
         Letters = database.GetCollection<Letter>(nameof(Letters));
@@ -47,12 +48,29 @@ public class LarpContext
     public IMongoCollection<BsonDocument> GameStates { get; }
     public IMongoCollection<Letter> Letters { get; }
     public IMongoCollection<LetterTemplate> LetterTemplates { get; }
+    public IMongoCollection<ClarifyTerm> ClarifyTerms { get; set; }
 
     public async Task Migrate()
     {
         await FixAccounts();
+        await FixEvents();
         await CreateIndices();
     }
+
+    private async Task FixEvents()
+    {
+        var gameId = await GetGameIdByName(GameState.GameName);
+        await Events.UpdateManyAsync(
+            _ => true,
+            Builders<Event>.Update.Set(x => x.GameId, gameId),
+            new UpdateOptions { BypassDocumentValidation = true });
+    }
+
+    public async ValueTask<string> GetGameIdByName(string gameName) =>
+        await Games
+            .Find(game => game.Name == gameName)
+            .Project(game => game.Id)
+            .FirstAsync();
 
     private async Task FixAccounts()
     {
@@ -94,6 +112,13 @@ public class LarpContext
         {
             new CreateIndexModel<CharacterRevision>(Builders<CharacterRevision>.IndexKeys.Ascending(x => x.AccountId)),
             new CreateIndexModel<CharacterRevision>(Builders<CharacterRevision>.IndexKeys.Ascending(x => x.CharacterId))
+        });
+
+        await ClarifyTerms.Indexes.CreateManyAsync(new[]
+        {
+            new CreateIndexModel<ClarifyTerm>(Builders<ClarifyTerm>.IndexKeys.Ascending(x => x.GameId)
+                .Ascending(x => x.Name)),
+            new CreateIndexModel<ClarifyTerm>(Builders<ClarifyTerm>.IndexKeys.Ascending(x => x.Name)),
         });
     }
 
