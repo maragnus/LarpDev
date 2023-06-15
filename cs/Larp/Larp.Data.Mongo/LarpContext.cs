@@ -53,17 +53,7 @@ public class LarpContext
     public async Task Migrate()
     {
         await FixAccounts();
-        await FixEvents();
         await CreateIndices();
-    }
-
-    private async Task FixEvents()
-    {
-        var gameId = await GetGameIdByName(GameState.GameName);
-        await Events.UpdateManyAsync(
-            _ => true,
-            Builders<Event>.Update.Set(x => x.GameId, gameId),
-            new UpdateOptions { BypassDocumentValidation = true });
     }
 
     public async ValueTask<string> GetGameIdByName(string gameName) =>
