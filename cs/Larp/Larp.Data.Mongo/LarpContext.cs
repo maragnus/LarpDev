@@ -52,7 +52,6 @@ public class LarpContext
 
     public async Task Migrate()
     {
-        await FixAccounts();
         await CreateIndices();
     }
 
@@ -62,28 +61,23 @@ public class LarpContext
             .Project(game => game.Id)
             .FirstAsync();
 
-    private async Task FixAccounts()
-    {
-        var accounts = await Accounts.Find(_ => true).ToListAsync();
-
-        foreach (var account in accounts.Where(account =>
-                     account.Emails.Any(email => email.NormalizedEmail.Contains("@gmail.com"))))
-        {
-            foreach (var email in account.Emails)
-            {
-                email.NormalizedEmail = AccountEmail.NormalizeEmail(email.Email);
-            }
-
-            await Accounts.UpdateOneAsync(a => a.AccountId == account.AccountId,
-                Builders<Account>.Update.Set(a => a.Emails, account.Emails));
-        }
-    }
-
     private async Task CreateIndices()
     {
+        await Accounts.Indexes.CreateManyAsync(new[]
+        {
+            new CreateIndexModel<Account>(Builders<Account>.IndexKeys.Ascending("Emails.NormalizedEmail")),
+            new CreateIndexModel<Account>(Builders<Account>.IndexKeys.Ascending(x => x.State)),
+        });
+
         await Sessions.Indexes.CreateManyAsync(new[]
         {
             new CreateIndexModel<Session>(Builders<Session>.IndexKeys.Ascending(x => x.AccountId)),
+        });
+
+        await Letters.Indexes.CreateManyAsync(new[]
+        {
+            new CreateIndexModel<Letter>(Builders<Letter>.IndexKeys.Ascending(x => x.AccountId)),
+            new CreateIndexModel<Letter>(Builders<Letter>.IndexKeys.Ascending(x => x.EventId)),
         });
 
         await Attendances.Indexes.CreateManyAsync(new[]
@@ -94,12 +88,13 @@ public class LarpContext
 
         await MwFifthGame.Characters.Indexes.CreateManyAsync(new[]
         {
-            new CreateIndexModel<Character>(Builders<Character>.IndexKeys.Ascending(x => x.AccountId)),
-            new CreateIndexModel<Character>(Builders<Character>.IndexKeys.Ascending(x => x.CharacterId)),
+            new CreateIndexModel<Character>(Builders<Character>.IndexKeys.Ascending(x => x.State)),
+            new CreateIndexModel<Character>(Builders<Character>.IndexKeys.Ascending(x => x.AccountId))
         });
 
         await MwFifthGame.CharacterRevisions.Indexes.CreateManyAsync(new[]
         {
+            new CreateIndexModel<CharacterRevision>(Builders<CharacterRevision>.IndexKeys.Ascending(x => x.State)),
             new CreateIndexModel<CharacterRevision>(Builders<CharacterRevision>.IndexKeys.Ascending(x => x.AccountId)),
             new CreateIndexModel<CharacterRevision>(Builders<CharacterRevision>.IndexKeys.Ascending(x => x.CharacterId))
         });
