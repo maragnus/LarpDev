@@ -23,13 +23,28 @@
         <PropertyColumn Property="x => x.Name" IsEditable="false"/>
         <PropertyColumn Property="x => x.Attended" IsEditable="true">
             <EditTemplate>
-                <MudSwitch Checked="@context.Item.Attended" Color="Color.Success" UnCheckedColor="Color.Error" CheckedChanged="(bool value) => { context.Item.Attended = value; context.Item.Changed = true; }"/>
+                <MudSwitch Checked="@context.Item.Attended" Color="Color.Success" UnCheckedColor="Color.Error" CheckedChanged="(bool value) => { context.Item.Attended = value; context.Item.Changed = true; StateHasChanged(); }"/>
             </EditTemplate>
         </PropertyColumn>
-        <PropertyColumn Property="x => x.Moonstone" IsEditable="true"/>
+        <PropertyColumn Property="x => x.Moonstone1" IsEditable="true">
+            <EditTemplate>
+                <MudTextField T="int?" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="!context.Item.Attended"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.FilterVintage"
+                              Value="context.Item.Moonstone1" Format="0"
+                              ValueChanged="value => { context.Item.Moonstone1 = value; context.Item.Changed = true; }"/>
+            </EditTemplate>
+        </PropertyColumn>
+        <PropertyColumn Property="x => x.Moonstone2" IsEditable="true">
+            <EditTemplate>
+                <MudTextField T="int?" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="!context.Item.Attended"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.FilterVintage"
+                              Value="context.Item.Moonstone2" Format="0"
+                              ValueChanged="value => { context.Item.Moonstone2 = value; context.Item.Changed = true; }"/>
+            </EditTemplate>
+        </PropertyColumn>
         <PropertyColumn Property="x => x.Paid" IsEditable="true">
             <EditTemplate>
-                <MudTextField T="decimal?" Variant="Variant.Outlined" Margin="Margin.Dense"
+                <MudTextField T="decimal?" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="!context.Item.Attended"
                               Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AttachMoney"
                               Value="context.Item.Paid" Format="0.00"
                               ValueChanged="value => { context.Item.Paid = value; context.Item.Changed = true; }"/>
@@ -37,7 +52,7 @@
         </PropertyColumn>
         <PropertyColumn Property="x => x.Expected" IsEditable="true">
             <EditTemplate>
-                <MudTextField T="decimal?" Variant="Variant.Outlined" Margin="Margin.Dense"
+                <MudTextField T="decimal?" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="!context.Item.Attended"
                               Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AttachMoney"
                               Value="context.Item.Expected" Format="0.00"
                               ValueChanged="value => { context.Item.Expected = value; context.Item.Changed = true; }"/>
@@ -94,7 +109,8 @@
         public string AccountId { get; set; } = default!;
         public string Name { get; set; } = default!;
         public bool Attended { get; set; }
-        public int? Moonstone { get; set; }
+        public int? Moonstone1 { get; set; }
+        public int? Moonstone2 { get; set; }
         public decimal? Paid { get; set; }
         public decimal? Expected { get; set; }
         public string[] CharacterIds { get; set; } = Array.Empty<string>();
@@ -151,7 +167,8 @@
                 AccountId = attendance.AccountId,
                 Name = names.GetValueOrDefault(attendance.AccountId)?.Name ?? "No Name Set",
                 Attended = true,
-                Moonstone = attendance.MwFifth?.Moonstone ?? 0,
+                Moonstone1 = attendance.MwFifth?.Moonstone ?? 0,
+                Moonstone2 = attendance.MwFifth?.PostMoonstone ?? 0,
                 Paid = attendance.ProvidedPayment,
                 Expected = attendance.ExpectedPayment,
                 CharacterIds = attendance.MwFifth?.CharacterIds ?? Array.Empty<string>(),
@@ -207,7 +224,7 @@
         {
             await LandingService.Admin.SetEventAttendance(
                 _event.EventId, item.AccountId, item.Attended,
-                item.Moonstone, item.Paid, item.Expected,
+                item.Moonstone1, item.Moonstone2, item.Paid, item.Expected,
                 Array.Empty<string>());
             item.Changed = false;
         });
@@ -235,7 +252,8 @@
             var item = new Attendance
             {
                 Attended = true,
-                Moonstone = 0,
+                Moonstone1 = 0,
+                Moonstone2 = 0,
                 Name = player.Name ?? "No Name Set",
                 AccountId = player.AccountId,
                 Paid = null,
@@ -243,7 +261,7 @@
                 Changed = false
             };
 
-            await LandingService.Admin.SetEventAttendance(_event.EventId, item.AccountId, item.Attended, item.Moonstone, item.Paid, item.Expected, Array.Empty<string>());
+            await LandingService.Admin.SetEventAttendance(_event.EventId, item.AccountId, item.Attended, item.Moonstone1, item.Moonstone2, item.Paid, item.Expected, Array.Empty<string>());
 
             _attendances.Add(item);
 

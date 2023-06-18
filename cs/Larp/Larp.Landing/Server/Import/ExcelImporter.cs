@@ -205,7 +205,7 @@ public class ExcelImporter
                         // Id = ObjectId.GenerateNewId().ToString(),
                         EventId = @event.EventId,
                         AccountId = account.AccountId,
-                        MwFifth = new MwFifthAttendance() { Moonstone = moonstone }
+                        MwFifth = new MwFifthAttendance() { Moonstone = moonstone, PostMoonstone = 0 }
                     }) { IsUpsert = true };
                 attendances.Add(attendance);
             }

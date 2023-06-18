@@ -149,7 +149,9 @@
                     EventTitle = attendance.Event.Title ?? "No Title",
                     EventType = attendance.Event.EventType ?? "No Type",
                     When = attendance.Event.Date,
-                    MwFifthMoonstone = attendance.MwFifth?.Moonstone.ToString() ?? "N/A",
+                    MwFifthMoonstone = (
+                        (attendance.MwFifth?.Moonstone ?? 0)
+                        + (attendance.MwFifth?.PostMoonstone ?? 0)).ToString(),
                     MwFifthCharacters = characters.TryFromKeys(attendance.MwFifth?.CharacterIds),
                     Letters = GetLetters(attendance.Event, attendance.Letters).ToArray(),
                     EventId = attendance.EventId

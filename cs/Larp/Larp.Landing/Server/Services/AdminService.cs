@@ -89,7 +89,8 @@ public class AdminService : IAdminService
         foreach (var attendance in attendances)
         {
             await SetEventAttendance(attendance.EventId, toAccountId, true,
-                attendance.MwFifth?.Moonstone, attendance.ProvidedPayment, attendance.ExpectedPayment,
+                attendance.MwFifth?.Moonstone, attendance.MwFifth?.PostMoonstone,
+                attendance.ProvidedPayment, attendance.ExpectedPayment,
                 attendance.MwFifth?.CharacterIds ?? Array.Empty<string>());
         }
 
@@ -517,9 +518,12 @@ public class AdminService : IAdminService
         await _eventManager.DeleteEvent(eventId);
     }
 
-    public async Task SetEventAttendance(string eventId, string accountId, bool attended, int? moonstone,
+    public async Task SetEventAttendance(
+        string eventId, string accountId, bool attended,
+        int? moonstone1, int? moonstone2,
         decimal? paid, decimal? expected, string[] characterIds) =>
-        await _eventManager.SetEventAttendance(eventId, accountId, attended, moonstone, paid, expected, characterIds);
+        await _eventManager.SetEventAttendance(eventId, accountId, attended, moonstone1, moonstone2, paid, expected,
+            characterIds);
 
     public async Task<Attendance[]> GetEventAttendances(string eventId) =>
         await _eventManager.GetEventAttendances(eventId);

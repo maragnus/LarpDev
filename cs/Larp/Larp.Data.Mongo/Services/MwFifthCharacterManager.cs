@@ -105,7 +105,9 @@ public class MwFifthCharacterManager
             .SumAsync(character => character.UsedMoonstone);
         var moonstoneTotal = await this._larpContext.Attendances.AsQueryable()
             .Where(attendance => attendance.AccountId == accountId && attendance.MwFifth != null)
-            .SumAsync(attendance => attendance.MwFifth!.Moonstone ?? 0);
+            .SumAsync(attendance =>
+                (attendance.MwFifth!.Moonstone ?? 0)
+                + (attendance.MwFifth!.PostMoonstone ?? 0));
 
         return new MoonstoneInfo(moonstoneTotal, moonstoneUsed);
     }
@@ -351,7 +353,9 @@ public class MwFifthCharacterManager
             .SumAsync(character => character.UsedMoonstone);
         var moonstoneTotal = await this._larpContext.Attendances.AsQueryable()
             .Where(attendance => attendance.AccountId == accountId && attendance.MwFifth != null)
-            .SumAsync(attendance => attendance.MwFifth!.Moonstone ?? 0);
+            .SumAsync(attendance =>
+                (attendance.MwFifth!.Moonstone ?? 0) +
+                (attendance.MwFifth!.PostMoonstone ?? 0));
         await _userManager.UpdateUserAccount(accountId, update => update
             .Set(x => x.MwFifthMoonstone, moonstoneTotal)
             .Set(x => x.MwFifthUsedMoonstone, moonstoneUsed));
@@ -374,7 +378,7 @@ public class MwFifthCharacterManager
             .ToDictionary(x => x.AccountId);
 
         var totalMoonstone = (await _larpContext.Attendances.AsQueryable()
-                .Where(x => x.MwFifth != null && x.MwFifth.Moonstone != null)
+                .Where(x => x.MwFifth != null && (x.MwFifth.Moonstone != null || x.MwFifth.PostMoonstone != null))
                 .Join(
                     _larpContext.Accounts.AsQueryable(),
                     x => x.AccountId,
@@ -384,7 +388,9 @@ public class MwFifthCharacterManager
                 .Select(x => new
                 {
                     AccountId = x.Key,
-                    NewMoonstone = x.Sum(y => y.attendance.MwFifth!.Moonstone)
+                    NewMoonstone =
+                        x.Sum(y => y.attendance.MwFifth!.Moonstone) +
+                        x.Sum(y => y.attendance.MwFifth!.PostMoonstone)
                 })
                 .ToListAsync())
             .ToDictionary(x => x.AccountId);

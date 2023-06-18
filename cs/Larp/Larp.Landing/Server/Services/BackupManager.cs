@@ -11,9 +11,9 @@ namespace Larp.Landing.Server.Services;
 
 public class BackupManager
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<BackupManager> _logger;
     private readonly LarpContext _larpContext;
+    private readonly ILogger<BackupManager> _logger;
+    private readonly IServiceProvider _serviceProvider;
 
     public BackupManager(IServiceProvider serviceProvider, ILogger<BackupManager> logger, LarpContext larpContext)
     {
@@ -167,7 +167,8 @@ public class BackupManager
                 foreach (var attendance in attendances.GetValueOrDefault(@event.EventId) ?? Array.Empty<Attendance>())
                 {
                     var player = players[attendance.AccountId];
-                    moonstonesSheet.Cells[player.ImportId ?? 0, column].Value = @attendance.MwFifth?.Moonstone;
+                    moonstonesSheet.Cells[player.ImportId ?? 0, column].Value =
+                        @attendance.MwFifth?.Moonstone + attendance.MwFifth.PostMoonstone;
                 }
 
                 column++;
@@ -226,7 +227,8 @@ public class BackupManager
             {
                 PlayerId = p.AccountId,
                 PlayerName = accountNames.TryGetValue(p.AccountId, out var player) ? player.Name : "No Name Set",
-                p.MwFifth?.Moonstone
+                p.MwFifth?.Moonstone,
+                p.MwFifth?.PostMoonstone
             }), true, TableStyles.Light6);
         }
 

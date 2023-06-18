@@ -110,8 +110,8 @@ public class EventManager
         await _larpContext.Events.DeleteOneAsync(x => x.EventId == eventId);
     }
 
-    public async Task SetEventAttendance(string eventId, string accountId, bool attended, int? moonstone,
-        decimal? paid, decimal? expected, string[] characterIds)
+    public async Task SetEventAttendance(string eventId, string accountId, bool attended, int? moonstone1,
+        int? moonstone2, decimal? paid, decimal? expected, string[] characterIds)
     {
         if (!attended)
         {
@@ -120,14 +120,15 @@ public class EventManager
         }
 
         var update = Builders<Attendance>.Update
-            .Set(x => x.EventId, eventId)
-            .Set(x => x.AccountId, accountId)
+            .SetOnInsert(x => x.EventId, eventId)
+            .SetOnInsert(x => x.AccountId, accountId)
             .Set(x => x.ProvidedPayment, paid)
             .Set(x => x.ExpectedPayment, expected)
             .Set(x => x.MwFifth,
                 new MwFifthAttendance
                 {
-                    Moonstone = moonstone,
+                    Moonstone = moonstone1,
+                    PostMoonstone = moonstone2,
                     CharacterIds = characterIds
                 });
         var upsert = new UpdateOptions() { IsUpsert = true };
@@ -218,7 +219,11 @@ public class EventManager
                 .ToListAsync();
 
         // Clear admin-only info
-        attendances.ForEach(x => x.Event.PreregistrationNotes = default);
+        attendances.ForEach(x =>
+        {
+            x.Event.PreregistrationNotes = default;
+            x.Event.AdminNotes = default;
+        });
 
         return attendances
             .Select(x => new EventAttendance(

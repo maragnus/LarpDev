@@ -20,7 +20,8 @@
                 <PropertyColumn Property="x => x.When" Title="Date" Format="ddd, MMM d, yyyy" Groupable="false"/>
                 <PropertyColumn Property="x => x.EventTitle" Title="Title" Groupable="false"/>
                 <PropertyColumn Property="x => x.EventType" Title="Type"/>
-                <PropertyColumn Property="x => x.MwFifthMoonstone" Title="Moonstone" Groupable="false"/>
+                <PropertyColumn Property="x => x.MwFifthMoonstone1" Title="Moonstone (Game)" Groupable="false"/>
+                <PropertyColumn Property="x => x.MwFifthMoonstone2" Title="Moonstone (Post)" Groupable="false"/>
                 <TemplateColumn T="AttendanceInfo" Sortable="false" Filterable="false" Groupable="false">
                     <CellTemplate>
                         @foreach (var letter in context.Item.Letters)
@@ -51,7 +52,9 @@
     {
         public IEnumerable<string> MwFifthCharacters { get; init; } = Array.Empty<string>();
 
-        public string MwFifthMoonstone { get; init; } = default!;
+        public string MwFifthMoonstone1 { get; init; } = default!;
+
+        public string MwFifthMoonstone2 { get; init; } = default!;
 
         public DateOnly When { get; init; }
 
@@ -111,7 +114,8 @@
                     EventTitle = attendance.Event.Title ?? "No Title",
                     EventType = attendance.Event.EventType ?? "No Type",
                     When = attendance.Event.Date,
-                    MwFifthMoonstone = attendance.MwFifth?.Moonstone.ToString() ?? "N/A",
+                    MwFifthMoonstone1 = attendance.MwFifth?.Moonstone.ToString() ?? "N/A",
+                    MwFifthMoonstone2 = attendance.MwFifth?.PostMoonstone.ToString() ?? "N/A",
                     Letters = GetLetters(attendance.Event, attendance.Letters).ToArray(),
                     EventId = attendance.EventId
                 };
