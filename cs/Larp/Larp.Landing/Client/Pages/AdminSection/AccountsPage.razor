@@ -1,6 +1,7 @@
 @page "/admin/accounts"
 @inherits LarpPage
 @inject LandingService LandingService
+@inject IJSRuntime Js
 
 <PageHeader>Account Manager</PageHeader>
 
@@ -13,7 +14,11 @@
         </EditForm>
     </div>
 
-    <MudDataGrid T="Account" Items="_accounts" RowClick="RowClick" Dense Hover Loading="IsLoading">
+    <MudDataGrid T="Account" Items="_accounts" Dense Hover Loading="IsLoading" Class="d-flex flex-column mud-height-full pa-1">
+        <NoRecordsContent>
+            <MudText Typo="Typo.h6">Loading...</MudText>
+            <MudProgressLinear Indeterminate Size="Size.Large"/>
+        </NoRecordsContent>
         <Columns>
             <PropertyColumn Property="x => x.Name" Title="Name"/>
             <TemplateColumn T="Account">
@@ -36,9 +41,22 @@
             <PropertyColumn Property="x => x.Phone" Title="Phone" Hidden/>
             <PropertyColumn Property="x => x.Location" Title="Location" Hidden/>
             <PropertyColumn Property="x => x.Age" Title="Age"/>
-            <PropertyColumn Property="x => x.MwFifthMoonstone" Title="Moonstone"/>
-            <PropertyColumn Property="x => x.MwFifthUsedMoonstone" Title="UsedMoonstone"/>
+            <PropertyColumn Property="x => x.MwFifthMoonstone" Title="MS Total"/>
+            <PropertyColumn Property="x => x.MwFifthUsedMoonstone" Title="MS Spent"/>
+            <PropertyColumn Property="x => x.AttendanceCount" Title="Attendances"/>
             <PropertyColumn Property="x => x.AttachmentCount" Title="Attachments"/>
+            <PropertyColumn Property="x => x.CharacterCount" Title="Characters"/>
+            <PropertyColumn Property="x => x.CitationCount" Title="Citations"/>
+            <TemplateColumn T="Account" Sortable="false" StickyRight>
+                <CellTemplate>
+                    <MudStack Row>
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.OpenInBrowser" Color="Color.Primary" OnClick="@(() => Open(context.Item))"/>
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.OpenInNew" Color="Color.Primary" OnClick="@(async () => await OpenInNew(context.Item))"/>
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Attachment" Color="Color.Primary" OnClick="@(async () => await OpenAttachments(context.Item))"/>
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Notes" Color="Color.Primary" OnClick="@(async () => await OpenCitations(context.Item))"/>
+                    </MudStack>
+                </CellTemplate>
+            </TemplateColumn>
         </Columns>
     </MudDataGrid>
 
@@ -78,11 +96,6 @@
         StateHasChanged();
     }
 
-    private void RowClick(DataGridRowClickEventArgs<Account> item)
-    {
-        NavigationManager.NavigateTo("/admin/accounts/" + item.Item.AccountId);
-    }
-
     private async Task AddAdmin()
     {
         var dialog = await DialogService.ShowAsync<AddAdminDialog>("Add Administrator");
@@ -92,6 +105,26 @@
             NavigationManager.NavigateTo($"/admin/accounts/{stringResult.Value}");
         else
             await DialogService.ShowMessageBox("Adding Administrator", stringResult.ErrorMessage);
+    }
+
+    private void Open(Account account)
+    {
+        NavigationManager.NavigateTo("/admin/accounts/" + account.AccountId);
+    }
+
+    private async Task OpenInNew(Account account)
+    {
+        await Js.InvokeVoidAsync("open", CancellationToken.None, $"/admin/accounts/{account.AccountId}");
+    }
+
+    private async Task OpenAttachments(Account account)
+    {
+        await Js.InvokeVoidAsync("open", CancellationToken.None, $"/admin/accounts/{account.AccountId}/attachments");
+    }
+
+    private async Task OpenCitations(Account account)
+    {
+        await Js.InvokeVoidAsync("open", CancellationToken.None, $"/admin/accounts/{account.AccountId}/citations");
     }
 
 }

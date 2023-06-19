@@ -61,7 +61,7 @@ public class ExcelImporter
         await ProcessPlayers(workbook.Worksheets["Players"]);
         await ProcessCharacters(workbook.Worksheets["Characters"]);
         await ProcessEvents(workbook.Worksheets["Moonstones"]);
-        await _characterManager.UpdateMoonstone();
+        await MwFifthCharacterManager.UpdateMoonstone(_larpContext);
 
         return new ExcelImportResult();
     }

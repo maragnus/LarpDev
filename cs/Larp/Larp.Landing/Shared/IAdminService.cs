@@ -219,6 +219,9 @@ public interface IAdminService
 
     [ApiDelete("mw5e/terms"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
     Task DeleteTerm(string name);
+
+    [ApiPost("accounts/{accountId}/citations"), ApiAuthenticated(AccountRoles.AdminAccess)]
+    Task<Citation[]> GetCitations(string accountId);
 }
 
 public class Dashboard

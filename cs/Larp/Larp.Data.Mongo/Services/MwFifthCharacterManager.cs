@@ -40,6 +40,14 @@ public class MwFifthCharacterManager
         var revisionResult = await _mwFifth.CharacterRevisions.UpdateManyAsync(x => x.CharacterId == characterId,
             Builders<CharacterRevision>.Update.Set(x => x.AccountId, newAccountId));
 
+        var oldAccount = await _mwFifth.Characters
+            .Find(c => c.CharacterId == characterId)
+            .Project(c => c.AccountId)
+            .FirstAsync();
+
+        await UpdateMoonstone(oldAccount);
+        await UpdateMoonstone(newAccountId);
+
         _logger.LogInformation(
             "Moved Character {CharacterId} to Account {AccountId}: {CharacterCount} characters, {RevisionCount} revisions",
             characterId, newAccountId, characterResult.ModifiedCount, revisionResult.ModifiedCount);
@@ -53,6 +61,9 @@ public class MwFifthCharacterManager
             Builders<CharacterRevision>.Update.Set(x => x.AccountId, newAccountId));
         await _mwFifth.CharacterRevisions.UpdateManyAsync(x => x.ApprovedBy == oldAccountId,
             Builders<CharacterRevision>.Update.Set(x => x.ApprovedBy, newAccountId));
+
+        await UpdateMoonstone(oldAccountId);
+        await UpdateMoonstone(newAccountId);
 
         _logger.LogInformation(
             "Moved Characters from Account {FromAccountId} to Account {ToAccountId}: {CharacterCount} characters, {RevisionCount} revisions",
@@ -278,6 +289,16 @@ public class MwFifthCharacterManager
         revision.CharacterId = saved.Revision.CharacterId;
 
         await _mwFifth.CharacterRevisions.ReplaceOneAsync(x => x.RevisionId == revision.RevisionId, revision);
+        await UpdateCharacterCount(revision.AccountId);
+    }
+
+    private async Task UpdateCharacterCount(string accountId)
+    {
+        var characterCount = (int)await _larpContext.MwFifthGame.Characters
+            .Find(c => c.AccountId == accountId && c.State == CharacterState.Live)
+            .CountDocumentsAsync();
+        await _userManager.UpdateUserAccount(accountId, update => update
+            .Set(x => x.CharacterCount, characterCount));
     }
 
     public async Task<CharacterAndRevision> GetNew(Account account)
@@ -356,15 +377,19 @@ public class MwFifthCharacterManager
             .SumAsync(attendance =>
                 (attendance.MwFifth!.Moonstone ?? 0) +
                 (attendance.MwFifth!.PostMoonstone ?? 0));
+        var characterCount = (int)await _larpContext.MwFifthGame.Characters
+            .Find(c => c.AccountId == accountId && c.State == CharacterState.Live)
+            .CountDocumentsAsync();
         await _userManager.UpdateUserAccount(accountId, update => update
             .Set(x => x.MwFifthMoonstone, moonstoneTotal)
-            .Set(x => x.MwFifthUsedMoonstone, moonstoneUsed));
+            .Set(x => x.MwFifthUsedMoonstone, moonstoneUsed)
+            .Set(x => x.CharacterCount, characterCount));
     }
 
-    public async Task UpdateMoonstone()
+    public static async Task UpdateMoonstone(LarpContext larpContext)
     {
-        var usedMoonstone = (await _larpContext.Accounts.AsQueryable()
-                .Join(_larpContext.MwFifthGame.Characters,
+        var usedMoonstone = (await larpContext.Accounts.AsQueryable()
+                .Join(larpContext.MwFifthGame.Characters,
                     x => x.AccountId,
                     x => x.AccountId,
                     (account, character) => new { account, character })
@@ -377,10 +402,10 @@ public class MwFifthCharacterManager
                 .ToListAsync())
             .ToDictionary(x => x.AccountId);
 
-        var totalMoonstone = (await _larpContext.Attendances.AsQueryable()
+        var totalMoonstone = (await larpContext.Attendances.AsQueryable()
                 .Where(x => x.MwFifth != null && (x.MwFifth.Moonstone != null || x.MwFifth.PostMoonstone != null))
                 .Join(
-                    _larpContext.Accounts.AsQueryable(),
+                    larpContext.Accounts.AsQueryable(),
                     x => x.AccountId,
                     x => x.AccountId,
                     (attendance, account) => new { attendance, account })
@@ -395,8 +420,25 @@ public class MwFifthCharacterManager
                 .ToListAsync())
             .ToDictionary(x => x.AccountId);
 
+        var characters = (await larpContext.MwFifthGame.Characters.AsQueryable()
+                .Where(x => x.State == CharacterState.Live)
+                .Join(
+                    larpContext.Accounts.AsQueryable(),
+                    x => x.AccountId,
+                    x => x.AccountId,
+                    (attendance, account) => new { attendance, account })
+                .GroupBy(x => x.account.AccountId)
+                .Select(x => new
+                {
+                    AccountId = x.Key,
+                    Count = x.Count()
+                })
+                .ToListAsync())
+            .ToDictionary(x => x.AccountId);
+
         var ids = usedMoonstone.Select(x => x.Key)
             .Concat(totalMoonstone.Select(x => x.Key))
+            .Concat(characters.Select(x => x.Key))
             .ToHashSet();
 
         var updates = ids
@@ -404,10 +446,11 @@ public class MwFifthCharacterManager
                 Builders<Account>.Filter.Eq(x => x.AccountId, accountId),
                 Builders<Account>.Update
                     .Set(x => x.MwFifthMoonstone, totalMoonstone.GetValueOrDefault(accountId)?.NewMoonstone)
-                    .Set(x => x.MwFifthUsedMoonstone, usedMoonstone.GetValueOrDefault(accountId)?.UsedMoonstone)))
+                    .Set(x => x.MwFifthUsedMoonstone, usedMoonstone.GetValueOrDefault(accountId)?.UsedMoonstone)
+                    .Set(x => x.CharacterCount, characters.GetValueOrDefault(accountId)?.Count)))
             .ToList();
 
-        await _larpContext.Accounts.BulkWriteAsync(updates);
+        await larpContext.Accounts.BulkWriteAsync(updates);
     }
 
     public async Task<CharacterAccountSummary[]> GetState(CharacterState state)

@@ -35,6 +35,7 @@ public class LarpContext
         LetterTemplates = database.GetCollection<LetterTemplate>(nameof(LetterTemplates));
         MwFifthGame = new MwFifthGameContext(database, cache);
         EventLog = database.GetCollection<BsonDocument>(nameof(EventLog));
+        Citations = database.GetCollection<Citation>(nameof(Citations));
     }
 
     public IMongoCollection<BsonDocument> EventLog { get; }
@@ -48,11 +49,18 @@ public class LarpContext
     public IMongoCollection<BsonDocument> GameStates { get; }
     public IMongoCollection<Letter> Letters { get; }
     public IMongoCollection<LetterTemplate> LetterTemplates { get; }
-    public IMongoCollection<ClarifyTerm> ClarifyTerms { get; set; }
+    public IMongoCollection<ClarifyTerm> ClarifyTerms { get; }
+    public IMongoCollection<Citation> Citations { get; }
 
     public async Task Migrate()
     {
         await CreateIndices();
+        await UpdateMoonstone();
+    }
+
+    private async Task UpdateMoonstone()
+    {
+        await MwFifthCharacterManager.UpdateMoonstone(this);
     }
 
     public async ValueTask<string> GetGameIdByName(string gameName) =>

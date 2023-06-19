@@ -1,0 +1,51 @@
+@page "/admin/accounts/{AccountId}/citations"
+@inherits LarpPage
+
+@inject LandingService LandingService
+
+<AdminLayout Loading="IsLoading" Title="@_title">
+    @foreach (var citation in _citations)
+    {
+        <CitationComponent Citation="citation"
+                           AccountName="@(_names.GetValueOrDefault(citation.AccountId)?.Name)"
+                           AuthorAccountName="@(_names.GetValueOrDefault(citation.AuthorAccountId)?.Name)"
+                           ReadOnly="@(citation.AuthorAccountId != LandingService.Account.AccountId)"/>
+    }
+    <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="AddCitation">Add Citation</MudButton>
+</AdminLayout>
+
+@code {
+
+    [Parameter]
+    public string AccountId { get; set; } = default!;
+
+    private List<Citation> _citations = new();
+    private Dictionary<string, AccountName> _names = new();
+    private string _title = "Citations";
+
+    protected override void OnParametersSet()
+    {
+        _title = "Citations";
+        base.OnParametersSet();
+    }
+
+    protected override async Task OnSafeParametersSetAsync()
+    {
+        _names = await LandingService.Admin.GetAccountNames();
+        _title = $"Citations for: {_names.GetValueOrDefault(AccountId)?.Name ?? "No Name Set"}";
+        _citations.Clear();
+        _citations.AddRange(await LandingService.Admin.GetCitations(AccountId));
+    }
+
+    private void AddCitation()
+    {
+        _citations.Add(new Citation()
+        {
+            AccountId = AccountId,
+            AuthorAccountId = LandingService.Account.AccountId,
+            State = CitationState.Draft,
+            Title = "New Citation"
+        });
+    }
+
+}

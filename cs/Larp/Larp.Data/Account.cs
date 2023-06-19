@@ -37,7 +37,7 @@ public enum AccountState
 }
 
 [PublicAPI]
-public class Account
+public partial class Account
 {
     [BsonId, BsonRepresentation(BsonType.ObjectId)]
     public string AccountId { get; set; } = default!;
@@ -67,6 +67,12 @@ public class Account
 
     public int AttachmentCount { get; set; }
 
+    [BsonIgnore] public int? AttendanceCount { get; set; }
+
+    public int? CharacterCount { get; set; }
+
+    public int? CitationCount { get; set; }
+
     [BsonIgnore]
     public string? PreferredEmail =>
         (Emails.FirstOrDefault(x => x.IsPreferred) ?? Emails.FirstOrDefault(x => x.IsVerified))?.Email;
@@ -78,17 +84,21 @@ public class Account
         && !string.IsNullOrWhiteSpace(Location)
         && !string.IsNullOrWhiteSpace(Phone);
 
+
     public static string? BuildNormalizedPhone(string? phone)
     {
         if (string.IsNullOrWhiteSpace(phone)) return null;
-        var normalizedPhone = Regex.Replace(phone.Trim(), @"[^\d]", "");
+        var normalizedPhone = RegexToNumeric().Replace(phone.Trim(), "");
 
         if (normalizedPhone.Length == 10
-            || (normalizedPhone.Length == 11 && normalizedPhone.StartsWith("1")))
+            || normalizedPhone.Length == 11 && normalizedPhone.StartsWith("1"))
             return normalizedPhone;
 
         return null;
     }
+
+    [GeneratedRegex("[^\\d]")]
+    private static partial Regex RegexToNumeric();
 }
 
 [PublicAPI]

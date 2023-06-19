@@ -43,9 +43,49 @@ public class AdminService : IAdminService
 
     public async Task<Account[]> GetAccounts(AccountState accountState)
     {
+        var attachments = (await _db.AccountAttachments.AsQueryable()
+                .GroupBy(x => x.AccountId)
+                .Select(x => new { x.Key, Count = x.Count() })
+                .ToListAsync())
+            .ToDictionary(x => x.Key, x => x.Count);
+
+        var attendances = (await _db.Attendances.AsQueryable()
+                .Join(_db.Events.AsQueryable(), a => a.EventId, e => e.EventId, (a, e) =>
+                    new
+                    {
+                        Attendance = a,
+                        Event = e
+                    })
+                .Where(x => x.Event.EventType == "Game")
+                .GroupBy(x => x.Attendance.AccountId)
+                .Select(x => new { x.Key, Count = x.Count() })
+                .ToListAsync())
+            .ToDictionary(x => x.Key, x => x.Count);
+
+        var characters = (await _db.MwFifthGame.Characters.AsQueryable()
+                .Where(x => x.State == CharacterState.Live)
+                .GroupBy(x => x.AccountId)
+                .Select(x => new { x.Key, Count = x.Count() })
+                .ToListAsync())
+            .ToDictionary(x => x.Key, x => x.Count);
+
+        var citations = (await _db.Citations.AsQueryable()
+                .Where(x => x.State == CitationState.Open)
+                .GroupBy(x => x.AccountId)
+                .Select(x => new { x.Key, Count = x.Count() })
+                .ToListAsync())
+            .ToDictionary(x => x.Key, x => x.Count);
+
         var accounts = await _db.Accounts
             .Find(account => account.State == accountState)
             .ToListAsync();
+        accounts.ForEach(account =>
+        {
+            account.AttachmentCount = attachments.GetValueOrDefault(account.AccountId);
+            account.AttendanceCount = attendances.GetValueOrDefault(account.AccountId);
+            account.CitationCount = citations.GetValueOrDefault(account.AccountId);
+            account.CharacterCount = characters.GetValueOrDefault(account.AccountId);
+        });
         return accounts.ToArray();
     }
 
@@ -488,6 +528,11 @@ public class AdminService : IAdminService
         var gameId = await _db.GetGameIdByName(GameState.GameName);
 
         await _db.ClarifyTerms.DeleteOneAsync(term => term.Name == name && term.GameId == gameId);
+    }
+
+    public async Task<Citation[]> GetCitations(string accountId)
+    {
+        return await _db.Citations.Find(citation => citation.AccountId == accountId).ToArrayAsync();
     }
 
     public async Task<EventAttendance[]> GetAccountAttendances(string accountId) =>

@@ -1,0 +1,60 @@
+@if (ReadOnly)
+{
+    <MudCard>
+        <MudCardContent>
+            @if (!string.IsNullOrEmpty(Citation.Title))
+            {
+                <MudText Typo="Typo.body1">@Citation.Title</MudText>
+            }
+            <MudText Typo="Typo.body2">@Citation.Description</MudText>
+            <MudText Typo="Typo.subtitle1">@(AuthorAccountName ?? "No Name")</MudText>
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton>Reply</MudButton>
+            <MudButton>Close</MudButton>
+        </MudCardActions>
+    </MudCard>
+}
+else
+{
+    <MudCard>
+        <MudCardContent>
+            <MudGrid>
+                <MudItem sm="6">
+                    <MudTextField @bind-Value="Citation.Title" Label="Title" Variant="Variant.Outlined" AutoFocus/>
+                </MudItem>
+                <MudItem sm="6">
+                    <MudSelect @bind-Value="Citation.Type" Variant="Variant.Outlined">
+                        <MudSelectItem T="string" Value="@("Concern")">Concern</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("Praise")">Praise</MudSelectItem>
+                        <MudSelectItem T="string" Value="@("Discussion")">Discussion</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+                <MudItem sm="12">
+                    <MudTextField @bind-Value="Citation.Description" Label="Description" Lines="6" Variant="Variant.Outlined"/>
+                </MudItem>
+            </MudGrid>
+            <MudText Typo="Typo.subtitle1">@(AuthorAccountName ?? "No Name")</MudText>
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton StartIcon="@Icons.Material.Filled.Save" Color="Color.Success">Save</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.Cancel" Color="Color.Error">Cancel</MudButton>
+        </MudCardActions>
+    </MudCard>
+}
+
+@code {
+
+    [Parameter]
+    public string? AccountName { get; set; }
+
+    [Parameter]
+    public string? AuthorAccountName { get; set; }
+
+    [Parameter]
+    public Citation Citation { get; set; } = default!;
+
+    [Parameter]
+    public bool ReadOnly { get; set; }
+
+}
