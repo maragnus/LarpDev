@@ -39,6 +39,7 @@ builder.Configuration
     services.AddScoped<LetterManager>();
     services.AddScoped<AttachmentManager>();
     services.AddScoped<EventManager>();
+    services.AddScoped<CitationManager>();
 
     // Larp.Data.Seeder
     services.AddScoped<LarpDataSeeder>();

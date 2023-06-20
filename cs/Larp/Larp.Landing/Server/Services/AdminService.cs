@@ -17,6 +17,7 @@ public class AdminService : IAdminService
     private readonly AttachmentManager _attachmentManager;
     private readonly BackupManager _backupManager;
     private readonly MwFifthCharacterManager _characterManager;
+    private readonly CitationManager _citationManager;
     private readonly ISystemClock _clock;
     private readonly LarpContext _db;
     private readonly EventManager _eventManager;
@@ -26,7 +27,7 @@ public class AdminService : IAdminService
 
     public AdminService(LarpContext db, IUserSession userSession,
         MwFifthCharacterManager characterManager, IUserSessionManager userSessionManager,
-        LetterManager letterManager, EventManager eventManager,
+        LetterManager letterManager, EventManager eventManager, CitationManager citationManager,
         AttachmentManager attachmentManager, BackupManager backupManager, ISystemClock clock)
     {
         _db = db;
@@ -34,6 +35,7 @@ public class AdminService : IAdminService
         _userSessionManager = userSessionManager;
         _letterManager = letterManager;
         _eventManager = eventManager;
+        _citationManager = citationManager;
         _attachmentManager = attachmentManager;
         _backupManager = backupManager;
         _clock = clock;
@@ -535,6 +537,16 @@ public class AdminService : IAdminService
         return await _db.Citations.Find(citation => citation.AccountId == accountId).ToArrayAsync();
     }
 
+    public async Task UpdateCitations(Citation citation)
+    {
+        await _citationManager.Save(citation, _account.AccountId);
+    }
+
+    public async Task SetCitationState(string citationId, CitationState state)
+    {
+        await _citationManager.SetState(citationId, state, _account.AccountId);
+    }
+
     public async Task<EventAttendance[]> GetAccountAttendances(string accountId) =>
         await _eventManager.GetAccountAttendances(accountId);
 
@@ -677,7 +689,6 @@ public class AdminService : IAdminService
         var name = string.IsNullOrWhiteSpace(religionName) ? religionTitle : religionName;
         return Regex.Replace(name.ToLowerInvariant(), "[^a-z]", "");
     }
-
 
     private async Task UpdateGameState<TField>(string property, TField items)
     {

@@ -1,17 +1,38 @@
-@if (ReadOnly)
+@if (!_editing)
 {
     <MudCard>
         <MudCardContent>
-            @if (!string.IsNullOrEmpty(Citation.Title))
-            {
-                <MudText Typo="Typo.body1">@Citation.Title</MudText>
-            }
-            <MudText Typo="Typo.body2">@Citation.Description</MudText>
-            <MudText Typo="Typo.subtitle1">@(AuthorAccountName ?? "No Name")</MudText>
+            <MudStack Spacing="4">
+                @if (!string.IsNullOrEmpty(Citation.Title))
+                {
+                    <MudText Typo="Typo.body1">@Citation.Title</MudText>
+                }
+                <MudText Typo="Typo.body2">@Citation.Description</MudText>
+                <MudText Typo="Typo.subtitle1">
+                    <MudIcon Size="Size.Small" Icon="@Icons.Material.TwoTone.Person"/> @(AuthorAccountName ?? "No Name") &#8212;
+                    <MudIcon Size="Size.Small" Icon="@Icons.Material.TwoTone.CalendarToday"/> Created on @Citation.CreatedOn.ToString("MMM d, yyyy") &#8212;
+                    <MudIcon Size="Size.Small" Icon="@Icons.Material.TwoTone.Edit"/> Last Updated on @Citation.ModifiedOn.ToString("MMM d, yyyy")
+                    @if (Citation.ResolvedOn.HasValue)
+                    {
+                        <span>&#8212; <MudIcon Size="Size.Small" Icon="@Icons.Material.TwoTone.Edit"/> Resolved on @Citation.ResolvedOn.Value.ToString("MMM d, yyyy")</span>
+                    }
+                </MudText>
+            </MudStack>
         </MudCardContent>
         <MudCardActions>
-            <MudButton>Reply</MudButton>
-            <MudButton>Close</MudButton>
+            @if (!ReadOnly)
+            {
+                <MudButton StartIcon="@Icons.Material.Filled.Edit" Color="Color.Success" OnClick="Edit">Edit</MudButton>
+            }
+            @if (Citation.State == CitationState.Open)
+            {
+                <MudButton StartIcon="@Icons.Material.Filled.Reply" Color="Color.Info" OnClick="Reply">Reply</MudButton>
+                <MudButton StartIcon="@Icons.Material.Filled.Done" Color="Color.Warning" OnClick="Resolve">Resolve</MudButton>
+            }
+            else if (Citation.State == CitationState.Resolved)
+            {
+                <MudButton StartIcon="@Icons.Material.Filled.Undo" Color="Color.Warning" OnClick="Reopen">Reopen</MudButton>
+            }
         </MudCardActions>
     </MudCard>
 }
@@ -20,30 +41,49 @@ else
     <MudCard>
         <MudCardContent>
             <MudGrid>
-                <MudItem sm="6">
+                <MudItem sm="12">
                     <MudTextField @bind-Value="Citation.Title" Label="Title" Variant="Variant.Outlined" AutoFocus/>
                 </MudItem>
-                <MudItem sm="6">
-                    <MudSelect @bind-Value="Citation.Type" Variant="Variant.Outlined">
-                        <MudSelectItem T="string" Value="@("Concern")">Concern</MudSelectItem>
-                        <MudSelectItem T="string" Value="@("Praise")">Praise</MudSelectItem>
-                        <MudSelectItem T="string" Value="@("Discussion")">Discussion</MudSelectItem>
-                    </MudSelect>
+                <MudItem sm="12">
+                    <MudField Label="Citation Type" Variant="Variant.Outlined">
+                        <MudChipSet T="string" SelectedValues="_selected" SelectedValuesChanged="Callback" Mandatory Filter>
+                            <MudChip Size="Size.Medium" SelectedColor="Color.Primary" Value="@("Concern")" Icon="">Concern</MudChip>
+                            <MudChip Size="Size.Medium" SelectedColor="Color.Primary" Value="@("Praise")">Praise</MudChip>
+                            <MudChip Size="Size.Medium" SelectedColor="Color.Primary" Value="@("Discussion")">Discussion</MudChip>
+                        </MudChipSet>
+                    </MudField>
                 </MudItem>
                 <MudItem sm="12">
                     <MudTextField @bind-Value="Citation.Description" Label="Description" Lines="6" Variant="Variant.Outlined"/>
                 </MudItem>
+                <MudItem sm="12">
+                    <MudText Typo="Typo.subtitle1">
+                        <MudIcon Size="Size.Small" Icon="@Icons.Material.TwoTone.Person"/> @(AuthorAccountName ?? "No Name") &#8212;
+                        <MudIcon Size="Size.Small" Icon="@Icons.Material.TwoTone.CalendarToday"/> Created on @Citation.CreatedOn.ToString("MMM d, yyyy") &#8212;
+                        <MudIcon Size="Size.Small" Icon="@Icons.Material.TwoTone.Edit"/> Last Updated on @Citation.ModifiedOn.ToString("MMM d, yyyy")
+                    </MudText>
+                </MudItem>
             </MudGrid>
-            <MudText Typo="Typo.subtitle1">@(AuthorAccountName ?? "No Name")</MudText>
         </MudCardContent>
         <MudCardActions>
-            <MudButton StartIcon="@Icons.Material.Filled.Save" Color="Color.Success">Save</MudButton>
-            <MudButton StartIcon="@Icons.Material.Filled.Cancel" Color="Color.Error">Cancel</MudButton>
+            @if (Citation.State == CitationState.Draft)
+            {
+                <MudButton StartIcon="@Icons.Material.Filled.Save" Color="Color.Success" OnClick="Save">Add Citation</MudButton>
+                <MudButton StartIcon="@Icons.Material.Filled.Cancel" Color="Color.Error" OnClick="Cancel">Cancel</MudButton>
+            }
+            else
+            {
+                <MudButton StartIcon="@Icons.Material.Filled.Save" Color="Color.Success" OnClick="Save">Save Changes</MudButton>
+                <MudButton StartIcon="@Icons.Material.Filled.Done" Color="Color.Error" OnClick="Cancel">Cancel</MudButton>
+            }
         </MudCardActions>
     </MudCard>
 }
 
 @code {
+        const string DefaultCitationType = "Discussion";
+
+    MudChip? _citationType;
 
     [Parameter]
     public string? AccountName { get; set; }
@@ -55,6 +95,69 @@ else
     public Citation Citation { get; set; } = default!;
 
     [Parameter]
+    public EventCallback<string> Action { get; set; }
+
+    [Parameter]
     public bool ReadOnly { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        _editing = Citation.State == CitationState.Draft;
+        _selected = new List<object> { Citation.Type ?? DefaultCitationType };
+        Citation.Type ??= DefaultCitationType;
+        base.OnParametersSet();
+    }
+
+    private ICollection<object> _selected = new List<object>();
+    private bool _saving;
+    private bool _editing;
+    private Citation? _oldCitation;
+
+    private void Callback(ICollection<object> obj)
+    {
+        _selected.Clear();
+        Citation.Type = obj.FirstOrDefault() as string ?? DefaultCitationType;
+        _selected.Add(Citation.Type);
+    }
+
+    private void Edit()
+    {
+        _oldCitation = new Citation()
+        {
+            Title = Citation.Title,
+            Description = Citation.Description,
+            Type = Citation.Type,
+            ModifiedOn = Citation.ModifiedOn
+        };
+        Citation.ModifiedOn = DateTime.Today;
+        _editing = !ReadOnly;
+    }
+
+    private async Task Cancel()
+    {
+        if (Citation.State == CitationState.Draft)
+        {
+            await Action.InvokeAsync("Cancel");
+            _editing = false;
+            return;
+        }
+
+        Citation.Title = _oldCitation!.Title;
+        Citation.Description = _oldCitation.Description;
+        Citation.Type = _oldCitation.Type;
+        Citation.ModifiedOn = _oldCitation.ModifiedOn;
+        _editing = false;
+    }
+
+    private async Task Save()
+    {
+        _editing = false;
+        await Action.InvokeAsync("Save");
+        StateHasChanged();
+    }
+
+    private async Task Resolve() => await Action.InvokeAsync("Resolve");
+    private async Task Reopen() => await Action.InvokeAsync("Reopen");
+    private async Task Reply() => await Action.InvokeAsync("Reply");
 
 }

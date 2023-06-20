@@ -25,4 +25,10 @@ public class Citation
     public string? Title { get; set; }
 
     public string? Description { get; set; }
+
+    public DateTime CreatedOn { get; set; }
+
+    public DateTime ModifiedOn { get; set; }
+
+    public DateTime? ResolvedOn { get; set; }
 }

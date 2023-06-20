@@ -4,14 +4,21 @@
 @inject LandingService LandingService
 
 <AdminLayout Loading="IsLoading" Title="@_title">
-    @foreach (var citation in _citations)
-    {
-        <CitationComponent Citation="citation"
-                           AccountName="@(_names.GetValueOrDefault(citation.AccountId)?.Name)"
-                           AuthorAccountName="@(_names.GetValueOrDefault(citation.AuthorAccountId)?.Name)"
-                           ReadOnly="@(citation.AuthorAccountId != LandingService.Account.AccountId)"/>
-    }
-    <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="AddCitation">Add Citation</MudButton>
+    <MudStack Spacing="4">
+        @foreach (var citation in _citations)
+        {
+            <CitationComponent
+                @key="@citation.Id"
+                Citation="citation" Action="async (action) => await CitationAction(citation, action)"
+                AccountName="@(_names.GetValueOrDefault(citation.AccountId)?.Name)"
+                AuthorAccountName="@(_names.GetValueOrDefault(citation.AuthorAccountId)?.Name)"
+                ReadOnly="@(citation.AuthorAccountId != LandingService.Account.AccountId)"/>
+        }
+        <MudStack Row Spacing="4">
+            <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="AddCitation" Color="Color.Primary" Variant="Variant.Filled">Add Citation</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.AccountCircle" OnClick="GoToPlayer" Color="Color.Tertiary" Variant="Variant.Filled">Go To Player</MudButton>
+        </MudStack>
+    </MudStack>
 </AdminLayout>
 
 @code {
@@ -19,7 +26,7 @@
     [Parameter]
     public string AccountId { get; set; } = default!;
 
-    private List<Citation> _citations = new();
+    private readonly List<Citation> _citations = new();
     private Dictionary<string, AccountName> _names = new();
     private string _title = "Citations";
 
@@ -44,8 +51,46 @@
             AccountId = AccountId,
             AuthorAccountId = LandingService.Account.AccountId,
             State = CitationState.Draft,
-            Title = "New Citation"
+            Type = "Discussion",
+            Title = "New Citation",
+            CreatedOn = DateTime.Today,
+            ModifiedOn = DateTime.Today,
         });
+    }
+
+    private async Task CitationAction(Citation citation, string action) =>
+        await SafeActionAsync(async () =>
+        {
+            switch (action)
+            {
+                case "Save":
+                    await LandingService.Admin.UpdateCitations(citation);
+                    if (citation.State == CitationState.Draft)
+                        citation.State = CitationState.Open;
+                    break;
+                case "Resolve":
+                    await LandingService.Admin.SetCitationState(citation.Id, CitationState.Resolved);
+                    citation.ResolvedOn = DateTime.Now;
+                    citation.State = CitationState.Resolved;
+                    break;
+                case "Reopen":
+                    await LandingService.Admin.SetCitationState(citation.Id, CitationState.Open);
+                    citation.ResolvedOn = null;
+                    citation.State = CitationState.Open;
+                    break;
+                case "Reply":
+                    await DialogService.ShowMessageBox("Add reply", "Reply has not been implemented yet.");
+                    break;
+                case "Cancel":
+                    _citations.Remove(citation);
+                    break;
+            }
+            StateHasChanged();
+        });
+
+    private void GoToPlayer()
+    {
+        NavigationManager.NavigateTo($"/admin/accounts/{AccountId}");
     }
 
 }

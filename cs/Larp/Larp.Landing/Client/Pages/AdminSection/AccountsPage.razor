@@ -53,7 +53,7 @@
                         <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.OpenInBrowser" Color="Color.Primary" OnClick="@(() => Open(context.Item))"/>
                         <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.OpenInNew" Color="Color.Primary" OnClick="@(async () => await OpenInNew(context.Item))"/>
                         <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Attachment" Color="Color.Primary" OnClick="@(async () => await OpenAttachments(context.Item))"/>
-                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Notes" Color="Color.Primary" OnClick="@(async () => await OpenCitations(context.Item))"/>
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.EditNote" Color="Color.Primary" OnClick="@(async () => await OpenCitations(context.Item))"/>
                     </MudStack>
                 </CellTemplate>
             </TemplateColumn>
