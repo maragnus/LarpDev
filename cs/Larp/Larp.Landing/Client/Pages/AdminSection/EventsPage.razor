@@ -8,9 +8,9 @@
     {
         <MudStack Row Class="pb-4">
             <MudText Typo="Typo.h6" Class="flex-grow-1">@game</MudText>
-            <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" OnClick="() => AddEvent()">Add Event</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" OnClick="AddEvent">Add Event</MudButton>
         </MudStack>
-        <MudDataGrid T="EventInfo" Items="events" Dense Filterable Groupable Hover Loading="IsLoading" RowClick="RowClick" RowsPerPage="50">
+        <MudDataGrid T="EventInfo" Items="events" ReadOnly Dense Filterable Groupable Hover Loading="IsLoading" RowClick="RowClick" RowsPerPage="50">
             <PagerContent>
                 <MudDataGridPager T="EventInfo"/>
             </PagerContent>
@@ -75,7 +75,7 @@
         var games = LandingService.Games
             .ToDictionary(x => x.Value.Id, x => x.Value.Title);
 
-        string GameName(string gameId) =>
+        string GameName(string gameId) => string.IsNullOrEmpty(gameId) ? "" :
             games.TryGetValue(gameId, out var game) ? game ?? "" : "";
 
         _events = (await LandingService.Admin.GetEvents())

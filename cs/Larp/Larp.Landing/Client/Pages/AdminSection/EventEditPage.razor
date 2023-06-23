@@ -1,135 +1,203 @@
 @page "/admin/events/{EventId}"
-@using MudBlazor.Utilities
-@using System.ComponentModel.DataAnnotations
 @inherits LarpPage
+@using System.ComponentModel.DataAnnotations
+@implements IDisposable
 
 @inject LandingService LandingService
 @inject IJSRuntime Js
 
-<NavigationLock ConfirmExternalNavigation OnBeforeInternalNavigation="BeforeNavigation"/>
+<NavigationLock ConfirmExternalNavigation="_hasEventChanges || _hasAttendanceChanges" OnBeforeInternalNavigation="BeforeNavigation"/>
 
-<AdminLayout Loading="IsLoading" Title="Edit Event">
-    <MudStack Spacing="4">
-
-        <MudButtonGroup OverrideStyles="false">
-            <MudButton Color="Color.Success" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" OnClick="Save" Disabled="_hasEventChanges">Save</MudButton>
-            <MudButton Color="Color.Error" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" OnClick="Delete">Delete</MudButton>
-            <MudButton Color="Color.Default" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Download" OnClick="DownloadLetters">Download</MudButton>
-            <MudButton Color="Color.Default" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Print" OnClick="Preregistration">Preregistration</MudButton>
-        </MudButtonGroup>
-        <EditForm T="EventModel" EditContext="_editContext" OnValidSubmit="SubmitEvent">
+<AdminLayout Loading="IsLoading" Saving="IsSaving" Title="Edit Event">
+    <LoadingSkeleton>
+        <MudStack Spacing="4">
+            <MudSkeleton Width="50%" Height="42px"/>
             <MudGrid>
-                <MudItem xs="12" md="6">
-                    <MudTextField T="string?" Label="Title" @bind-Value="@_model.Title" Required Variant="Variant.Outlined"/>
-                </MudItem>
-                <MudItem xs="12" md="6">
-                    <MudTextField T="string?" Label="Location" @bind-Value="@_model.Location" Required Variant="Variant.Outlined"/>
+                <MudItem xs="12" md="4">
+                    <MudSkeleton Width="100%" Height="42px"/>
                 </MudItem>
                 <MudItem xs="12" md="4">
-                    <MudSelectExtended T="string?" Label="Event Type" @bind-Value="@_model.EventType" Required ItemCollection="_eventTypes" Variant="Variant.Outlined"/>
+                    <MudSkeleton Width="100%" Height="42px"/>
                 </MudItem>
                 <MudItem xs="12" md="4">
-                    <MudDatePicker T="DateTime" Label="When" @bind-Date="@_model.Date" Required Variant="Variant.Outlined"/>
+                    <MudSkeleton Width="100%" Height="42px"/>
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <MudSkeleton Width="100%" Height="42px"/>
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <MudSkeleton Width="100%" Height="42px"/>
                 </MudItem>
                 <MudItem xs="6" md="4">
-                    <MudSelect T="bool" Label="Visible" @bind-Value="@_model.Hidden" Variant="Variant.Outlined">
-                        <MudSelectItem T="bool" Value="@true">Hidden</MudSelectItem>
-                        <MudSelectItem T="bool" Value="@false">Visible</MudSelectItem>
-                    </MudSelect>
+                    <MudSkeleton Width="100%" Height="42px"/>
                 </MudItem>
                 <MudItem xs="12" md="12" lg="6">
-                    <MudTextField T="string?" Label="Preregistration Notes" Lines="3" @bind-Value="@_model.PreregistrationNotes" Variant="Variant.Outlined"/>
+                    <MudSkeleton Width="100%" Height="128px"/>
                 </MudItem>
                 <MudItem xs="12" md="12" lg="6">
-                    <MudTextField T="string?" Label="Administrative Notes" Lines="3" @bind-Value="@_model.AdminNotes" Variant="Variant.Outlined"/>
+                    <MudSkeleton Width="100%" Height="128px"/>
                 </MudItem>
                 <MudItem xs="6">
-                    <MudTextField T="int" Label="First Chronicle Cost" @bind-Value="@_model.EventCost" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AttachMoney" Variant="Variant.Outlined"/>
+                    <MudSkeleton Width="100%" Height="42px"/>
                 </MudItem>
                 <MudItem xs="6">
-                    <MudTextField T="int" Label="Additional Chronicle Cost" @bind-Value="@_model.ChronicleCost" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AttachMoney" Variant="Variant.Outlined"/>
+                    <MudSkeleton Width="100%" Height="42px"/>
                 </MudItem>
-
                 <MudItem xs="6" md="4">
                     <MudStack Row Spacing="4">
-                        <MudSelect T="string" Label="Pre-Event Letter" @bind-Value="@_model.PreEventLetter" Clearable>
-                            @foreach (var item in _letterTemplates)
-                            {
-                                <MudSelectItem T="string" Value="@item.Key">@item.Value.Title</MudSelectItem>
-                            }
-                        </MudSelect>
-                        <MudStack Justify="Justify.FlexStart" AlignItems="AlignItems.Start">
-                            <MudText Typo="Typo.caption">Open</MudText>
-                            <MudSwitch Color="Color.Success" UnCheckedColor="Color.Secondary" @bind-Checked="@_model.PreEventLetterOpen"/>
-                        </MudStack>
+                        <MudSkeleton Width="65%" Height="42px"/>
+                        <MudSkeleton Width="25%" Height="42px"/>
                     </MudStack>
                 </MudItem>
                 <MudItem xs="6" md="4">
                     <MudStack Row Spacing="4">
-                        <MudSelect T="string" Label="Post-Event Letter" @bind-Value="@_model.PostEventLetter" Clearable>
-                            @foreach (var item in _letterTemplates)
-                            {
-                                <MudSelectItem T="string" Value="@item.Key">@item.Value.Title</MudSelectItem>
-                            }
-                        </MudSelect>
-                        <MudStack Justify="Justify.FlexStart" AlignItems="AlignItems.Start">
-                            <MudText Typo="Typo.caption">Open</MudText>
-                            <MudSwitch Color="Color.Success" UnCheckedColor="Color.Secondary" @bind-Checked="@_model.PostEventLetterOpen"/>
-                        </MudStack>
+                        <MudSkeleton Width="65%" Height="42px"/>
+                        <MudSkeleton Width="25%" Height="42px"/>
                     </MudStack>
                 </MudItem>
                 <MudItem xs="6" md="4">
                     <MudStack Row Spacing="4">
-                        <MudSelect T="string" Label="Between-Event Letter" @bind-Value="@_model.BetweenEventLetter" Clearable>
-                            @foreach (var item in _letterTemplates)
-                            {
-                                <MudSelectItem T="string" Value="@item.Key">@item.Value.Title</MudSelectItem>
-                            }
-                        </MudSelect>
-                        <MudStack Justify="Justify.FlexStart" AlignItems="AlignItems.Start">
-                            <MudText Typo="Typo.caption">Open</MudText>
-                            <MudSwitch Color="Color.Success" UnCheckedColor="Color.Secondary" @bind-Checked="@_model.BetweenEventLetterOpen"/>
-                        </MudStack>
+                        <MudSkeleton Width="65%" Height="42px"/>
+                        <MudSkeleton Width="25%" Height="42px"/>
                     </MudStack>
                 </MudItem>
             </MudGrid>
-        </EditForm>
-
-        <MudText Typo="Typo.h6">Components</MudText>
-        <MudContainer MaxWidth="MaxWidth.Medium">
-            <MudDataGrid T="EventComponent" Items="_components" EditMode="DataGridEditMode.Cell" ReadOnly="false" Dense FormFieldChanged="ComponentFieldChanged">
-                <Columns>
-                    <PropertyColumn Property="x => x.Id" Title="Preregistration ID" IsEditable/>
-                    <PropertyColumn Property="x => x.Name" Title="Component Name" IsEditable/>
-                    <PropertyColumn Property="x => x.When" Title="When" Format="dddd, MMM d, yyyy" IsEditable>
-                        <EditTemplate>
-                            <MudDatePicker T="DateTime" Required Date="@context.Item.When" DateChanged="date => context.Item.When = date ?? DateTime.Today" Variant="Variant.Outlined"/>
-                        </EditTemplate>
-                    </PropertyColumn>
-                    <PropertyColumn Property="x => x.IsFree" Title="Free" IsEditable>
-                        <EditTemplate>
-                            <MudSwitch T="bool" Required Color="Color.Success" UnCheckedColor="Color.Warning" @bind-Checked="@context.Item.IsFree"/>
-                        </EditTemplate>
-                    </PropertyColumn>
-                    <TemplateColumn T="EventComponent" IsEditable="false">
-                        <CellTemplate>
-                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveComponent(context.Item)"/>
-                        </CellTemplate>
-                    </TemplateColumn>
-                </Columns>
-            </MudDataGrid>
-        </MudContainer>
-        <div>
+            <MudSkeleton Width="50%" Height="42px"/>
+            <MudContainer MaxWidth="MaxWidth.Medium" Style="margin: 0; padding: 0">
+                <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="200px"/>
+            </MudContainer>
+        </MudStack>
+    </LoadingSkeleton>
+    <ChildContent>
+        <MudStack Spacing="4">
             <MudButtonGroup OverrideStyles="false">
-                <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="AddComponent">Add Component</MudButton>
-                <MudButton Color="Color.Tertiary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="AddComponentF123">Add F123</MudButton>
-                <MudButton Color="Color.Tertiary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="AddComponent1">Add Halves</MudButton>
+                <MudButton Color="Color.Success" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" OnClick="Save" Disabled="!_hasEventChanges && !_hasAttendanceChanges">Save</MudButton>
+                <MudButton Color="Color.Error" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" OnClick="Delete">Delete</MudButton>
+                <MudButton Color="Color.Default" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Download" OnClick="DownloadLetters">Download</MudButton>
+                <MudButton Color="Color.Default" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Print" OnClick="Preregistration">Preregistration</MudButton>
             </MudButtonGroup>
-        </div>
+            <EditForm T="EventModel" EditContext="_editContext">
+                <MudGrid>
+                    <MudItem xs="12" md="4">
+                        <MudTextField T="string?" Label="Title" @bind-Value="@_model.Title" For="() => _model.Title" Required Variant="Variant.Outlined"/>
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudTextField T="string?" Label="Location" @bind-Value="@_model.Location" For="() => _model.Location" Required Variant="Variant.Outlined"/>
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudSelect T="string?" Label="Game" @bind-Value="@_model.GameId" For="() => _model.GameId" Variant="Variant.Outlined">
+                            @foreach (var game in _games.Values)
+                            {
+                                <MudSelectItem T="string?" Value="@game.Id">@game.Title</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudSelectExtended T="string?" Label="Event Type" @bind-Value="@_model.EventType" For="() => _model.EventType" Required ItemCollection="_eventTypes" Variant="Variant.Outlined"/>
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudDatePicker T="DateTime" Label="When" @bind-Date="@_model.Date" For="() => _model.Date" Required Variant="Variant.Outlined"/>
+                    </MudItem>
+                    <MudItem xs="6" md="4">
+                        <MudSelect T="bool" Label="Visible" @bind-Value="@_model.Hidden" For="() => _model.Hidden" Variant="Variant.Outlined">
+                            <MudSelectItem T="bool" Value="@true">Hidden</MudSelectItem>
+                            <MudSelectItem T="bool" Value="@false">Visible</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="12" lg="6">
+                        <MudTextField T="string?" Label="Preregistration Notes" Lines="3" @bind-Value="@_model.PreregistrationNotes" For="() => _model.PreregistrationNotes" Variant="Variant.Outlined"/>
+                    </MudItem>
+                    <MudItem xs="12" md="12" lg="6">
+                        <MudTextField T="string?" Label="Administrative Notes" Lines="3" @bind-Value="@_model.AdminNotes" For="() => _model.AdminNotes" Variant="Variant.Outlined"/>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudTextField T="int" Label="First Chronicle Cost" @bind-Value="@_model.EventCost" For="() => _model.EventCost" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AttachMoney" Variant="Variant.Outlined"/>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudTextField T="int" Label="Additional Chronicle Cost" @bind-Value="@_model.ChronicleCost" For="() => _model.ChronicleCost" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AttachMoney" Variant="Variant.Outlined"/>
+                    </MudItem>
 
-        <MudText Typo="Typo.h6">Attendance</MudText>
-        <EventAttendanceComponent @ref="_attendanceComponent" EventsAndLetters="_result" @bind-HasChanges="_hasChanges"/>
-    </MudStack>
+                    <MudItem xs="6" md="4">
+                        <MudStack Row Spacing="4">
+                            <MudSelect T="string" Label="Pre-Event Letter" @bind-Value="@_model.PreEventLetter" For="() => _model.PreEventLetter" Clearable>
+                                @foreach (var item in _letterTemplates)
+                                {
+                                    <MudSelectItem T="string" Value="@item.Key">@item.Value.Title</MudSelectItem>
+                                }
+                            </MudSelect>
+                            <MudStack Justify="Justify.FlexStart" AlignItems="AlignItems.Start">
+                                <MudText Typo="Typo.caption">Open</MudText>
+                                <MudSwitch Color="Color.Success" UnCheckedColor="Color.Secondary" @bind-Checked="@_model.PreEventLetterOpen" For="() => _model.PreEventLetterOpen"/>
+                            </MudStack>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem xs="6" md="4">
+                        <MudStack Row Spacing="4">
+                            <MudSelect T="string" Label="Post-Event Letter" @bind-Value="@_model.PostEventLetter" For="() => _model.PostEventLetter" Clearable>
+                                @foreach (var item in _letterTemplates)
+                                {
+                                    <MudSelectItem T="string" Value="@item.Key">@item.Value.Title</MudSelectItem>
+                                }
+                            </MudSelect>
+                            <MudStack Justify="Justify.FlexStart" AlignItems="AlignItems.Start">
+                                <MudText Typo="Typo.caption">Open</MudText>
+                                <MudSwitch Color="Color.Success" UnCheckedColor="Color.Secondary" @bind-Checked="@_model.PostEventLetterOpen" For="() => _model.PostEventLetterOpen"/>
+                            </MudStack>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem xs="6" md="4">
+                        <MudStack Row Spacing="4">
+                            <MudSelect T="string" Label="Between-Event Letter" @bind-Value="@_model.BetweenEventLetter" For="() => _model.BetweenEventLetter" Clearable>
+                                @foreach (var item in _letterTemplates)
+                                {
+                                    <MudSelectItem T="string" Value="@item.Key">@item.Value.Title</MudSelectItem>
+                                }
+                            </MudSelect>
+                            <MudStack Justify="Justify.FlexStart" AlignItems="AlignItems.Start">
+                                <MudText Typo="Typo.caption">Open</MudText>
+                                <MudSwitch Color="Color.Success" UnCheckedColor="Color.Secondary" @bind-Checked="@_model.BetweenEventLetterOpen" For="() => _model.BetweenEventLetterOpen"/>
+                            </MudStack>
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+            </EditForm>
+
+            <MudText Typo="Typo.h6">Components</MudText>
+            <MudContainer MaxWidth="MaxWidth.Medium" Style="margin: 0; padding: 0">
+                <MudDataGrid T="EventComponent" Items="_components" EditMode="DataGridEditMode.Cell" ReadOnly="false" Dense CommittedItemChanges="ComponentChanged">
+                    <Columns>
+                        <PropertyColumn Property="x => x.Id" Title="Preregistration ID" IsEditable/>
+                        <PropertyColumn Property="x => x.Name" Title="Component Name" IsEditable/>
+                        <PropertyColumn Property="x => x.When" Title="When" Format="dddd, MMM d, yyyy" IsEditable>
+                            <EditTemplate>
+                                <MudDatePicker T="DateTime" Required Date="@context.Item.When" DateChanged="date => { context.Item.When = date ?? DateTime.Today; _hasEventChanges = true; }" Variant="Variant.Outlined"/>
+                            </EditTemplate>
+                        </PropertyColumn>
+                        <PropertyColumn Property="x => x.IsFree" Title="Free" IsEditable>
+                            <EditTemplate>
+                                <MudSwitch T="bool" Required Color="Color.Success" UnCheckedColor="Color.Warning" Checked="@context.Item.IsFree" CheckedChanged="value => {context.Item.IsFree = value; _hasEventChanges = true; }"/>
+                            </EditTemplate>
+                        </PropertyColumn>
+                        <TemplateColumn T="EventComponent" IsEditable="false">
+                            <CellTemplate>
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveComponent(context.Item)"/>
+                            </CellTemplate>
+                        </TemplateColumn>
+                    </Columns>
+                </MudDataGrid>
+            </MudContainer>
+            <div>
+                <MudButtonGroup OverrideStyles="false">
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="AddComponent">Add Component</MudButton>
+                    <MudButton Color="Color.Tertiary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="AddComponentF123">Add F123</MudButton>
+                    <MudButton Color="Color.Tertiary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" OnClick="AddComponent1">Add Halves</MudButton>
+                </MudButtonGroup>
+            </div>
+
+            <MudText Typo="Typo.h6">Attendance</MudText>
+            <EventAttendanceComponent @ref="_attendanceComponent" EventsAndLetters="_result" @bind-HasChanges="_hasAttendanceChanges"/>
+        </MudStack>
+    </ChildContent>
 </AdminLayout>
 
 @code {
@@ -147,6 +215,9 @@
         _editContext.OnFieldChanged += FieldChanged;
     }
 
+    public void Dispose() =>
+        _editContext.OnFieldChanged -= FieldChanged;
+
     public class EventModel
     {
         [Required]
@@ -160,6 +231,9 @@
 
         [Required]
         public DateTime? Date { get; set; }
+
+        [Required]
+        public string? GameId { get; set; }
 
         public bool Hidden { get; set; }
 
@@ -177,11 +251,12 @@
         public bool PostEventLetterOpen { get; set; }
         public bool BetweenEventLetterOpen { get; set; }
 
-        public void Load(Event e)
+        public void LoadFrom(Event e)
         {
             Title = e.Title;
             Location = e.Location;
             EventType = e.EventType;
+            GameId = e.GameId;
             Date = e.Date.ToDateTime(TimeOnly.MinValue);
             Hidden = e.IsHidden;
             PreregistrationNotes = e.PreregistrationNotes;
@@ -197,6 +272,45 @@
             var betweenEvent = e.LetterTemplates.FirstOrDefault(letter => letter.Name == "BetweenEvent");
             BetweenEventLetter = betweenEvent?.LetterTemplateId;
             BetweenEventLetterOpen = betweenEvent?.IsOpen ?? false;
+        }
+
+        public Event Save()
+        {
+            var e = new Event()
+            {
+                Title = Title,
+                Location = Location,
+                EventType = EventType,
+                GameId = GameId!,
+                Date = DateOnly.FromDateTime(Date ?? DateTime.Today),
+                IsHidden = Hidden,
+                PreregistrationNotes = PreregistrationNotes,
+                AdminNotes = AdminNotes,
+                EventCost = EventCost,
+                ChronicleCost = ChronicleCost
+            };
+
+            var letters = e.LetterTemplates.ToList();
+            SaveLetter(letters, "PreEvent", PreEventLetter, PreEventLetterOpen);
+            SaveLetter(letters, "PostEvent", PostEventLetter, PostEventLetterOpen);
+            SaveLetter(letters, "BetweenEvent", BetweenEventLetter, BetweenEventLetterOpen);
+
+            return e;
+        }
+
+        private static void SaveLetter(List<EventLetter> letters, string letterName, string? templateId, bool isOpen)
+        {
+            if (string.IsNullOrEmpty(templateId))
+            {
+                letters.RemoveAll(letter => letter.Name == letterName);
+                return;
+            }
+
+            var letter = letters.FirstOrDefault(letter => letter.Name == letterName);
+            if (letter == null)
+                letters.Add(letter = new EventLetter { Name = letterName });
+            letter.LetterTemplateId = templateId;
+            letter.IsOpen = isOpen;
         }
     }
 
@@ -216,24 +330,22 @@
         };
     }
 
-    private Event _event = default!;
     private List<EventComponent> _components = new();
-    private List<EventLetter> _letters = new();
     private readonly string[] _eventTypes = { "Game", "Workday", "Subscription", "Contest", "Other" };
-    private DateTime _date;
     private Dictionary<string, LetterTemplate> _letterTemplates = default!;
     private EventsAndLetters _result = default!;
     private EventAttendanceComponent? _attendanceComponent;
-    private bool _hasChanges;
+    private bool _hasAttendanceChanges;
     private bool _hasEventChanges;
+    private IReadOnlyDictionary<string, Game> _games = default!;
 
     protected override async Task OnSafeParametersSetAsync()
     {
+        _games = LandingService.Games;
+
         _result = await LandingService.Admin.GetEventLetters(EventId);
-        _event = _result.Events.Values.First();
-        _date = _event.Date.ToDateTime(TimeOnly.MinValue);
-        _letters = new List<EventLetter>(_event.LetterTemplates);
-        _components = _event.Components
+        var @event = _result.Events.Values.First();
+        _components = @event.Components
             .Select(x => new EventComponent
             {
                 Id = x.ComponentId,
@@ -243,14 +355,12 @@
             })
             .ToList();
 
-        _model.Load(_event);
+        _model.LoadFrom(@event);
+        _editContext.MarkAsUnmodified();
     }
 
-    private void FieldChanged(object? sender, FieldChangedEventArgs e)
-    {
+    private void FieldChanged(object? sender, FieldChangedEventArgs e) =>
         _hasEventChanges = true;
-        StateHasChanged();
-    }
 
     protected override async Task OnSafeInitializedAsync()
     {
@@ -260,7 +370,7 @@
 
     private async Task BeforeNavigation(LocationChangingContext arg)
     {
-        if (!_hasChanges && !_editContext.IsModified()) return;
+        if (!_hasAttendanceChanges && !_editContext.IsModified()) return;
 
         var response = await DialogService.ShowMessageBox("Unsaved Changes", "You have unsaved changes. Are you sure you want to leave without saving?", "Yes, Save", "No, Discard Changes", "Cancel, Continue Working");
         switch (response)
@@ -270,7 +380,6 @@
                 break;
             case true:
                 await Save();
-                await _attendanceComponent.SaveAll();
                 break;
             case false:
                 break;
@@ -279,23 +388,17 @@
 
     private async Task Save()
     {
-        await SubmitEvent(_editContext!);
-    }
-
-    private async Task SubmitEvent(EditContext obj)
-    {
-        await LoadingActionAsync(async () =>
+        await SavingActionAsync(async () =>
         {
-            _event.Date = DateOnly.FromDateTime(_date);
-            _event.LetterTemplates = _letters.DistinctBy(x => x.Name)
-                .ToArray();
-            _event.Components = _components
+            var e = _model.Save();
+            e.Components = _components
                 .Select(x => x.ToComponent())
                 .ToArray();
-            await LandingService.Admin.SaveEvent(EventId, _event);
+            await LandingService.Admin.SaveEvent(EventId, e);
             _editContext.MarkAsUnmodified();
             _hasEventChanges = false;
             StateHasChanged();
+            await _attendanceComponent.Save();
         });
     }
 
@@ -325,52 +428,39 @@
 
     private void AddComponent()
     {
-        _components.Add(new EventComponent() { Id = "C", Name = "New Component", When = _date });
+        var date = _model.Date ?? DateTime.Today;
+        _components.Add(new EventComponent() { Id = "C", Name = "New Component", When = date });
+        _hasEventChanges = true;
     }
 
     private void AddComponentF123()
     {
-        _components.Add(new EventComponent() { Id = "F", Name = "Friday", When = _date, IsFree = true });
-        _components.Add(new EventComponent() { Id = "1", Name = "Chronicle 1", When = _date.AddDays(1) });
-        _components.Add(new EventComponent() { Id = "2", Name = "Chronicle 2", When = _date.AddDays(1) });
-        _components.Add(new EventComponent() { Id = "3", Name = "Chronicle 3", When = _date.AddDays(2) });
+        var date = _model.Date ?? DateTime.Today;
+        _components.Add(new EventComponent() { Id = "F", Name = "Friday", When = date, IsFree = true });
+        _components.Add(new EventComponent() { Id = "1", Name = "Chronicle 1", When = date.AddDays(1) });
+        _components.Add(new EventComponent() { Id = "2", Name = "Chronicle 2", When = date.AddDays(1) });
+        _components.Add(new EventComponent() { Id = "3", Name = "Chronicle 3", When = date.AddDays(2) });
+        _hasEventChanges = true;
     }
 
     private void AddComponent1()
     {
-        _components.Add(new EventComponent() { Id = "1", Name = "First Half", When = _date });
-        _components.Add(new EventComponent() { Id = "2", Name = "Second Half", When = _date });
+        var date = _model.Date ?? DateTime.Today;
+        _components.Add(new EventComponent() { Id = "1", Name = "First Half", When = date });
+        _components.Add(new EventComponent() { Id = "2", Name = "Second Half", When = date });
+        _hasEventChanges = true;
     }
 
-    private void RemoveComponent(EventComponent contextItem) =>
+    private void RemoveComponent(EventComponent contextItem)
+    {
         _components.Remove(contextItem);
-
-    private void AddLetter()
-    {
-        var name = _letters.All(x => x.Name != "PreEvent")
-            ? "PreEvent"
-            : _letters.All(x => x.Name != "PostEvent")
-                ? "PostEvent"
-                : "BetweenEvent";
-        _letters.Add(new EventLetter()
-        {
-            Name = name,
-            LetterTemplateId = _letterTemplates.First().Key,
-            IsOpen = false
-        });
+        _hasEventChanges = true;
     }
 
-    private void RemoveLetter(EventLetter contextItem) =>
-        _letters.Remove(contextItem);
-
-    private void Preregistration()
-    {
+    private void Preregistration() =>
         NavigationManager.NavigateTo($"/admin/events/{EventId}/preregistration");
-    }
 
-    private Task ComponentFieldChanged(FormFieldChangedEventArgs arg)
-    {
-        throw new NotImplementedException();
-    }
+    private void ComponentChanged(EventComponent arg) =>
+        _hasEventChanges = true;
 
 }

@@ -5,7 +5,7 @@
 
 <PageHeader>Account Manager</PageHeader>
 
-<AdminLayout Title="Manage Accounts">
+<AdminLayout Title="Manage Accounts" Loading="IsLoading">
     <div class="pa-2 mb-4">
         <EditForm Model="_search" OnSubmit="Search">
             <MudStack Row Justify="Justify.Center" AlignItems="AlignItems.Start">
@@ -14,11 +14,7 @@
         </EditForm>
     </div>
 
-    <MudDataGrid T="Account" Items="_accounts" Dense Hover Loading="IsLoading" Class="d-flex flex-column mud-height-full pa-1">
-        <NoRecordsContent>
-            <MudText Typo="Typo.h6">Loading...</MudText>
-            <MudProgressLinear Indeterminate Size="Size.Large"/>
-        </NoRecordsContent>
+    <MudDataGrid T="Account" Items="_accounts" Dense Hover Class="d-flex flex-column mud-height-full pa-1">
         <Columns>
             <PropertyColumn Property="x => x.Name" Title="Name"/>
             <TemplateColumn T="Account">

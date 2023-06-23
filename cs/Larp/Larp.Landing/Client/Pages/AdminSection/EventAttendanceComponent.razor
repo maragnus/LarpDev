@@ -16,15 +16,14 @@
             </MudStack>
         </ItemTemplate>
     </MudSelectExtended>
-    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Success" Disabled="@(!_saveAllNeeded || _isSaving)" OnClick="SaveAll">Save All Changes</MudButton>
 </MudStack>
 
-<MudDataGrid T="Attendance" Items="_attendances" ReadOnly="false" Hover EditMode="DataGridEditMode.Cell" Bordered Dense CommittedItemChanges="AttendanceUpdated" Loading="_isSaving">
+<MudDataGrid T="Attendance" Items="_attendances" ReadOnly="false" Hover EditMode="DataGridEditMode.Cell" Bordered Dense CommittedItemChanges="AttendanceChanged" Loading="_isSaving">
     <Columns>
         <PropertyColumn Property="x => x.Name" IsEditable="false"/>
         <PropertyColumn Property="x => x.Attended" IsEditable="true">
             <EditTemplate>
-                <MudSwitch Checked="@context.Item.Attended" Color="Color.Success" UnCheckedColor="Color.Error" CheckedChanged="async (bool value) => { context.Item.Attended = value; context.Item.Changed = true; await UpdateSaveAllNeeded(); StateHasChanged(); }"/>
+                <MudSwitch Checked="@context.Item.Attended" Color="Color.Success" UnCheckedColor="Color.Error" CheckedChanged="async (bool value) => { context.Item.Attended = value; context.Item.Changed = true; await UpdateSaveAllNeeded(); }"/>
             </EditTemplate>
         </PropertyColumn>
         <PropertyColumn Property="x => x.Moonstone1" IsEditable="true">
@@ -32,7 +31,7 @@
                 <MudNumericField T="int?" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="!context.Item.Attended"
                                  Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.FilterVintage"
                                  Value="context.Item.Moonstone1"
-                                 ValueChanged="value => { context.Item.Moonstone1 = value; context.Item.Changed = true; }"/>
+                                 ValueChanged="async value => { context.Item.Moonstone1 = value; context.Item.Changed = true; await UpdateSaveAllNeeded(); }"/>
             </EditTemplate>
         </PropertyColumn>
         <PropertyColumn Property="x => x.Moonstone2" IsEditable="true">
@@ -40,7 +39,7 @@
                 <MudNumericField T="int?" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="!context.Item.Attended"
                                  Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.FilterVintage"
                                  Value="context.Item.Moonstone2"
-                                 ValueChanged="value => { context.Item.Moonstone2 = value; context.Item.Changed = true; }"/>
+                                 ValueChanged="async value => { context.Item.Moonstone2 = value; context.Item.Changed = true; await UpdateSaveAllNeeded(); }"/>
             </EditTemplate>
         </PropertyColumn>
         <PropertyColumn Property="x => x.Paid" IsEditable="true">
@@ -48,7 +47,7 @@
                 <MudTextField T="decimal?" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="!context.Item.Attended"
                               Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AttachMoney"
                               Value="context.Item.Paid" Format="0.00"
-                              ValueChanged="value => { context.Item.Paid = value; context.Item.Changed = true; }"/>
+                              ValueChanged="async value => { context.Item.Paid = value; context.Item.Changed = true; await UpdateSaveAllNeeded(); }"/>
             </EditTemplate>
         </PropertyColumn>
         <PropertyColumn Property="x => x.Expected" IsEditable="true">
@@ -56,7 +55,7 @@
                 <MudTextField T="decimal?" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="!context.Item.Attended"
                               Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AttachMoney"
                               Value="context.Item.Expected" Format="0.00"
-                              ValueChanged="value => { context.Item.Expected = value; context.Item.Changed = true; }"/>
+                              ValueChanged="async value => { context.Item.Expected = value; context.Item.Changed = true; await UpdateSaveAllNeeded();}"/>
             </EditTemplate>
         </PropertyColumn>
         <PropertyColumn Property="x => x.PreEvent" IsEditable="false" SortBy="@(attendance => attendance.PreEvent?.State)">
@@ -76,7 +75,7 @@
         </PropertyColumn>
         <TemplateColumn CellClass="d-flex justify-end" Sortable="false" IsEditable="false" StickyRight>
             <CellTemplate>
-                <MudIconButton Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Filled.Save" Disabled="@(!context.Item.Changed)" OnClick="async () => await AttendanceUpdate(context.Item)"/>
+                <MudIconButton Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Filled.Save" Disabled="@(!context.Item.Changed)" OnClick="async () => await SaveAttendance(context.Item)"/>
                 <MudTooltip Text="Open this player in a new window">
                     <MudIconButton Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Filled.OpenInNew" OnClick="async () => await OpenAccount(context.Item)"/>
                 </MudTooltip>
@@ -148,7 +147,6 @@
     private List<EventComponent> _components = new();
     private readonly List<Attendance> _attendances = new();
     private MudSelectExtended<AccountName>? _addPlayerComponent;
-    private bool _saveAllNeeded;
     private bool _isSaving = true;
     private AccountName[] _accountNames = Array.Empty<AccountName>();
     private Event _event = default!;
@@ -208,31 +206,6 @@
         accountName.Name?.Contains(query, StringComparison.InvariantCultureIgnoreCase) == true
         || accountName.Emails.Any(email => email.Email.Contains(query, StringComparison.InvariantCultureIgnoreCase));
 
-    public async Task SaveAll()
-    {
-        _isSaving = true;
-        StateHasChanged();
-        await SafeActionAsync(async () =>
-        {
-            await Parallel.ForEachAsync(
-                _attendances.Where(x => x.Changed),
-                new ParallelOptions { MaxDegreeOfParallelism = 4 },
-                async (attendance, _) => { await AttendanceUpdate(attendance); });
-            await UpdateSaveAllNeeded();
-        });
-        _isSaving = false;
-    }
-
-    private async Task UpdateSaveAllNeeded()
-    {
-        _saveAllNeeded = _attendances.Any(x => x.Changed);
-        if (HasChanges != _saveAllNeeded)
-        {
-            HasChanges = _saveAllNeeded;
-            await HasChangesChanged.InvokeAsync(_saveAllNeeded);
-        }
-    }
-
     private async Task SaveAttendance(Attendance item)
     {
         await SafeActionAsync(async () =>
@@ -243,12 +216,33 @@
                 Array.Empty<string>());
             item.Changed = false;
         });
+        await UpdateSaveAllNeeded();
     }
 
-    private async Task AttendanceUpdate(Attendance item)
+    public async Task Save()
     {
-        await SaveAttendance(item);
+        _isSaving = true;
+        StateHasChanged();
+        await SafeActionAsync(async () =>
+        {
+            await Parallel.ForEachAsync(
+                _attendances.Where(x => x.Changed),
+                new ParallelOptions { MaxDegreeOfParallelism = 4 },
+                async (attendance, _) => { await SaveAttendance(attendance); });
+        });
+        _isSaving = false;
         await UpdateSaveAllNeeded();
+    }
+
+    private async Task UpdateSaveAllNeeded()
+    {
+        var hasChanges = _attendances.Any(x => x.Changed);
+        if (HasChanges != hasChanges)
+        {
+            HasChanges = hasChanges;
+            await HasChangesChanged.InvokeAsync(hasChanges);
+            StateHasChanged();
+        }
     }
 
     private async Task OpenAccount(Attendance item)
@@ -290,10 +284,15 @@
         });
     }
 
-    private void AttendanceUpdated(Attendance obj)
+    private async Task AttendanceChanged(Attendance obj)
     {
         obj.Changed = true;
-        _saveAllNeeded = true;
+        if (!HasChanges)
+        {
+            HasChanges = true;
+            await HasChangesChanged.InvokeAsync(HasChanges);
+            StateHasChanged();
+        }
     }
 
     private async Task ShowLetter(Letter? letter)

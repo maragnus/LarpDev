@@ -12,6 +12,7 @@ public class LarpPage : ComponentBase
     [Inject] protected ILogger<LarpPage> Logger { get; set; } = default!;
 
     protected bool IsLoading { get; set; } = true;
+    protected bool IsSaving { get; set; } = false;
     protected bool IsInitialized { get; set; }
 
     protected virtual Task OnSafeParametersSetAsync()
@@ -101,6 +102,34 @@ public class LarpPage : ComponentBase
         }
     }
 
+    protected async Task<bool> SavingActionAsync(
+        Func<Task> action)
+    {
+        IsSaving = true;
+        StateHasChanged();
+        try
+        {
+            while (true)
+            {
+                try
+                {
+                    await action();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    if (await PromptForRetry(ex) == true) continue;
+                    return false;
+                }
+            }
+        }
+        finally
+        {
+            IsSaving = false;
+            StateHasChanged();
+        }
+    }
+
     protected async Task<bool> SafeActionAsync(
         Func<Task> action)
     {
@@ -118,8 +147,8 @@ public class LarpPage : ComponentBase
             }
         }
     }
-    
-    
+
+
     protected async Task<bool> SafeActionAsync(
         Func<Task> action, Func<Exception, Task> onFailure)
     {
@@ -138,8 +167,8 @@ public class LarpPage : ComponentBase
             }
         }
     }
-    
-    
+
+
     protected async Task<bool> SafeActionAsync(
         Func<Task> action, Action<Exception> onFailure)
     {
@@ -168,14 +197,18 @@ public class LarpPage : ComponentBase
             switch (httpRequestException.StatusCode)
             {
                 case HttpStatusCode.Unauthorized:
-                    await DialogService.ShowMessageBox("Not Logged In", "You must be logged in to access this area", "Login");
+                    await DialogService.ShowMessageBox("Not Logged In", "You must be logged in to access this area",
+                        "Login");
                     NavigationManager.NavigateTo("/login");
                     return false;
-                case HttpStatusCode.Forbidden: 
-                    await DialogService.ShowMessageBox("Admin Role Needed", "You do not have access to this area", "Ok");
+                case HttpStatusCode.Forbidden:
+                    await DialogService.ShowMessageBox("Admin Role Needed", "You do not have access to this area",
+                        "Ok");
                     return false;
                 case null:
-                    return await DialogService.ShowMessageBox("Server Error", "There was an issue contacting the server. Check your internet connection and try again.", "Retry", "Cancel");
+                    return await DialogService.ShowMessageBox("Server Error",
+                        "There was an issue contacting the server. Check your internet connection and try again.",
+                        "Retry", "Cancel");
                 default:
                     return await DialogService.ShowMessageBox("Server Error", ex.Message, "Retry", "Cancel");
             }

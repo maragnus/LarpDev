@@ -168,7 +168,7 @@ public class BackupManager
                 {
                     var player = players[attendance.AccountId];
                     moonstonesSheet.Cells[player.ImportId ?? 0, column].Value =
-                        @attendance.MwFifth?.Moonstone + attendance.MwFifth.PostMoonstone;
+                        (attendance.MwFifth?.Moonstone ?? 0) + (attendance.MwFifth?.PostMoonstone ?? 0);
                 }
 
                 column++;

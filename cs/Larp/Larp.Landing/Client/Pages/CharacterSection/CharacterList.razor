@@ -74,6 +74,10 @@
                         Icon="@Icons.Material.Filled.Add"
                         Value="@($"/characters/{game.Name}/new")"
                         Text="@($"Draft a new {game.Title} character")"/>
+                    <MudListItem
+                        Icon="@Icons.Material.Filled.Help"
+                        Value="@($"/characters/{game.Name}/quiz")"
+                        Text="@($"Help creating a {game.Title} character")"/>
                 }
             </MudList>
         }

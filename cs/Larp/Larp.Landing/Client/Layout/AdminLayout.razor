@@ -11,22 +11,40 @@
     [Parameter]
     public bool Loading { get; set; }
 
+    [Parameter]
+    public RenderFragment? LoadingSkeleton { get; set; }
+
+    [Parameter]
+    public bool Saving { get; set; }
+
 }
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4 relative">
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="my-4 relative">
     @if (Title != null)
     {
         <MudText Typo="Typo.h6" Class="mb-4">@Title</MudText>
     }
     @if (Loading)
     {
-        <MudOverlay DarkBackground Absolute Visible>
-            <MudText Typo="Typo.h6">Loading...</MudText>
-            <MudProgressCircular Indeterminate Size="Size.Large"/>
-        </MudOverlay>
+        @LoadingSkeleton
     }
     else
     {
         @ChildContent
     }
 </MudContainer>
+
+@if (Loading || Saving)
+{
+    <MudOverlay DarkBackground Absolute LockScroll Visible Style="position: fixed">
+        @if (Loading)
+        {
+            <MudText Color="Color.Primary" Typo="Typo.h6">Loading...</MudText>
+        }
+        else if (Saving)
+        {
+            <MudText Color="Color.Primary" Typo="Typo.h6">Saving...</MudText>
+        }
+        <MudProgressCircular Color="Color.Primary" Indeterminate Size="Size.Large"/>
+    </MudOverlay>
+}

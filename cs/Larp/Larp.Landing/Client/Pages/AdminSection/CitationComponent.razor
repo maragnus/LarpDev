@@ -83,8 +83,6 @@ else
 @code {
         const string DefaultCitationType = "Discussion";
 
-    MudChip? _citationType;
-
     [Parameter]
     public string? AccountName { get; set; }
 
@@ -109,7 +107,6 @@ else
     }
 
     private ICollection<object> _selected = new List<object>();
-    private bool _saving;
     private bool _editing;
     private Citation? _oldCitation;
 
