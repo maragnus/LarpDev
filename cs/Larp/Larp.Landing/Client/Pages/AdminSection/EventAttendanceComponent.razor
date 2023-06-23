@@ -1,5 +1,6 @@
 @inherits LarpPage
 
+@inject IJSRuntime Js
 @inject LandingService LandingService
 
 <MudStack Row AlignItems="AlignItems.Center">
@@ -23,23 +24,23 @@
         <PropertyColumn Property="x => x.Name" IsEditable="false"/>
         <PropertyColumn Property="x => x.Attended" IsEditable="true">
             <EditTemplate>
-                <MudSwitch Checked="@context.Item.Attended" Color="Color.Success" UnCheckedColor="Color.Error" CheckedChanged="(bool value) => { context.Item.Attended = value; context.Item.Changed = true; StateHasChanged(); }"/>
+                <MudSwitch Checked="@context.Item.Attended" Color="Color.Success" UnCheckedColor="Color.Error" CheckedChanged="async (bool value) => { context.Item.Attended = value; context.Item.Changed = true; await UpdateSaveAllNeeded(); StateHasChanged(); }"/>
             </EditTemplate>
         </PropertyColumn>
         <PropertyColumn Property="x => x.Moonstone1" IsEditable="true">
             <EditTemplate>
-                <MudTextField T="int?" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="!context.Item.Attended"
-                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.FilterVintage"
-                              Value="context.Item.Moonstone1" Format="0"
-                              ValueChanged="value => { context.Item.Moonstone1 = value; context.Item.Changed = true; }"/>
+                <MudNumericField T="int?" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="!context.Item.Attended"
+                                 Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.FilterVintage"
+                                 Value="context.Item.Moonstone1"
+                                 ValueChanged="value => { context.Item.Moonstone1 = value; context.Item.Changed = true; }"/>
             </EditTemplate>
         </PropertyColumn>
         <PropertyColumn Property="x => x.Moonstone2" IsEditable="true">
             <EditTemplate>
-                <MudTextField T="int?" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="!context.Item.Attended"
-                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.FilterVintage"
-                              Value="context.Item.Moonstone2" Format="0"
-                              ValueChanged="value => { context.Item.Moonstone2 = value; context.Item.Changed = true; }"/>
+                <MudNumericField T="int?" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="!context.Item.Attended"
+                                 Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.FilterVintage"
+                                 Value="context.Item.Moonstone2"
+                                 ValueChanged="value => { context.Item.Moonstone2 = value; context.Item.Changed = true; }"/>
             </EditTemplate>
         </PropertyColumn>
         <PropertyColumn Property="x => x.Paid" IsEditable="true">
@@ -73,9 +74,12 @@
                 @DisplayLetter(context.Item.BetweenEvent)
             </CellTemplate>
         </PropertyColumn>
-        <TemplateColumn CellClass="d-flex justify-end" Sortable="false" IsEditable="false">
+        <TemplateColumn CellClass="d-flex justify-end" Sortable="false" IsEditable="false" StickyRight>
             <CellTemplate>
                 <MudIconButton Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Filled.Save" Disabled="@(!context.Item.Changed)" OnClick="async () => await AttendanceUpdate(context.Item)"/>
+                <MudTooltip Text="Open this player in a new window">
+                    <MudIconButton Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Filled.OpenInNew" OnClick="async () => await OpenAccount(context.Item)"/>
+                </MudTooltip>
             </CellTemplate>
         </TemplateColumn>
     </Columns>
@@ -85,6 +89,12 @@
 
     [Parameter]
     public EventsAndLetters EventsAndLetters { get; set; } = default!;
+
+    [Parameter]
+    public bool HasChanges { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> HasChangesChanged { get; set; }
 
     RenderFragment? DisplayLetter(Letter? letter)
     {
@@ -198,7 +208,7 @@
         accountName.Name?.Contains(query, StringComparison.InvariantCultureIgnoreCase) == true
         || accountName.Emails.Any(email => email.Email.Contains(query, StringComparison.InvariantCultureIgnoreCase));
 
-    private async Task SaveAll()
+    public async Task SaveAll()
     {
         _isSaving = true;
         StateHasChanged();
@@ -208,14 +218,19 @@
                 _attendances.Where(x => x.Changed),
                 new ParallelOptions { MaxDegreeOfParallelism = 4 },
                 async (attendance, _) => { await AttendanceUpdate(attendance); });
-            UpdateSaveAllNeeded();
+            await UpdateSaveAllNeeded();
         });
         _isSaving = false;
     }
 
-    private void UpdateSaveAllNeeded()
+    private async Task UpdateSaveAllNeeded()
     {
         _saveAllNeeded = _attendances.Any(x => x.Changed);
+        if (HasChanges != _saveAllNeeded)
+        {
+            HasChanges = _saveAllNeeded;
+            await HasChangesChanged.InvokeAsync(_saveAllNeeded);
+        }
     }
 
     private async Task SaveAttendance(Attendance item)
@@ -233,7 +248,12 @@
     private async Task AttendanceUpdate(Attendance item)
     {
         await SaveAttendance(item);
-        UpdateSaveAllNeeded();
+        await UpdateSaveAllNeeded();
+    }
+
+    private async Task OpenAccount(Attendance item)
+    {
+        await Js.InvokeVoidAsync("open", CancellationToken.None, $"/admin/accounts/{item.AccountId}");
     }
 
     private async Task AddAccountChanged(AccountName player)
