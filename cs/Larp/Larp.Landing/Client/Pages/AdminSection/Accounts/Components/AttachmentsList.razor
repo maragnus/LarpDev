@@ -42,13 +42,14 @@
 </MudPaper>
 
 @code {
+
     [Parameter]
     public string AccountId { get; set; } = default!;
 
     private Dictionary<string, AccountName> _accountNames = new();
 
     private AccountAttachment[] _attachments = Array.Empty<AccountAttachment>();
-    
+
     private string GetName(string accountId) => _accountNames.GetValueOrDefault(accountId)?.Name ?? "No Name Set";
 
     protected override async Task OnSafeParametersSetAsync()
@@ -56,7 +57,7 @@
         _attachments = await LandingService.Admin.GetAccountAttachments(AccountId);
         _accountNames = await LandingService.Admin.GetAccountNames();
     }
-    
+
     private async Task Download(AccountAttachment attachment)
     {
         await SafeActionAsync(async () =>
@@ -67,4 +68,5 @@
             await Js.InvokeVoidAsync("downloadFileFromStream", attachment.FileName ?? "file", streamRef);
         });
     }
+
 }

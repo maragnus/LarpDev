@@ -20,10 +20,10 @@
 {
     [Parameter]
     public Account Account { get; set; } = default!;
-    
+
     [Parameter]
     public Func<Task>? RefreshFunc { get; set; }
-    
+
     private bool _savingRoles;
 
     private async Task SetRole(AccountRole role, bool hasRole)

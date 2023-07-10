@@ -28,13 +28,23 @@
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.5" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.5" PrivateAssets="all" />
         <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0"/>
-        <PackageReference Include="MudBlazor" Version="6.2.2" />
-        <PackageReference Include="PSC.Blazor.Components.BrowserDetect" Version="1.0.11" />
+        <PackageReference Include="MudBlazor" Version="6.2.2"/>
+        <PackageReference Include="PSC.Blazor.Components.BrowserDetect" Version="1.0.11"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Client.RestClient\Larp.Landing.Client.RestClient.csproj" />
-        <ProjectReference Include="..\Shared\Larp.Landing.Shared.csproj" />
+        <ProjectReference Include="..\Client.RestClient\Larp.Landing.Client.RestClient.csproj"/>
+        <ProjectReference Include="..\Shared\Larp.Landing.Shared.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <AdditionalFiles Include="Pages\AdminSection\Accounts\Components\AttachmentsList.razor"/>
+        <AdditionalFiles Include="Pages\AdminSection\Accounts\Components\AttendanceList.razor"/>
+        <AdditionalFiles Include="Pages\AdminSection\Accounts\Components\CharacterList.razor"/>
+        <AdditionalFiles Include="Pages\AdminSection\Accounts\Components\EmailEditor.razor"/>
+        <AdditionalFiles Include="Pages\AdminSection\Accounts\Components\NotesEditor.razor"/>
+        <AdditionalFiles Include="Pages\AdminSection\Accounts\Components\ProfileEditor.razor"/>
+        <AdditionalFiles Include="Pages\AdminSection\Accounts\Components\RoleEditor.razor"/>
     </ItemGroup>
 
 </Project>

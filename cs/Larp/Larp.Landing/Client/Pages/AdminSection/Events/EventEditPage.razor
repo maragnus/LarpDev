@@ -1,6 +1,7 @@
 @page "/admin/events/{EventId}"
 @inherits LarpPage
 @using System.ComponentModel.DataAnnotations
+@using System.Text.Json
 @implements IDisposable
 
 @inject LandingService LandingService
@@ -263,15 +264,18 @@
             AdminNotes = e.AdminNotes;
             EventCost = e.EventCost;
             ChronicleCost = e.ChronicleCost;
-            var preEvent = e.LetterTemplates.FirstOrDefault(letter => letter.Name == "PreEvent");
+            var preEvent = e.LetterTemplates.FirstOrDefault(letter => letter.Name == LetterNames.PreEvent);
             PreEventLetter = preEvent?.LetterTemplateId;
             PreEventLetterOpen = preEvent?.IsOpen ?? false;
-            var postEvent = e.LetterTemplates.FirstOrDefault(letter => letter.Name == "PostEvent");
+            var postEvent = e.LetterTemplates.FirstOrDefault(letter => letter.Name == LetterNames.PostEvent);
             PostEventLetter = postEvent?.LetterTemplateId;
             PostEventLetterOpen = postEvent?.IsOpen ?? false;
-            var betweenEvent = e.LetterTemplates.FirstOrDefault(letter => letter.Name == "BetweenEvent");
+            var betweenEvent = e.LetterTemplates.FirstOrDefault(letter => letter.Name == LetterNames.BetweenEvent);
             BetweenEventLetter = betweenEvent?.LetterTemplateId;
             BetweenEventLetterOpen = betweenEvent?.IsOpen ?? false;
+
+            Console.WriteLine(JsonSerializer.Serialize(e));
+            Console.WriteLine(JsonSerializer.Serialize(this));
         }
 
         public Event Save()
@@ -291,9 +295,10 @@
             };
 
             var letters = e.LetterTemplates.ToList();
-            SaveLetter(letters, "PreEvent", PreEventLetter, PreEventLetterOpen);
-            SaveLetter(letters, "PostEvent", PostEventLetter, PostEventLetterOpen);
-            SaveLetter(letters, "BetweenEvent", BetweenEventLetter, BetweenEventLetterOpen);
+            SaveLetter(letters, LetterNames.PreEvent, PreEventLetter, PreEventLetterOpen);
+            SaveLetter(letters, LetterNames.PostEvent, PostEventLetter, PostEventLetterOpen);
+            SaveLetter(letters, LetterNames.BetweenEvent, BetweenEventLetter, BetweenEventLetterOpen);
+            e.LetterTemplates = letters.ToArray();
 
             return e;
         }

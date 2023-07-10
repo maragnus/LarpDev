@@ -289,8 +289,9 @@ public class AdminService : IAdminService
                 LetterId = id,
                 AccountId = attendee.AccountId,
                 State = LetterState.Approved,
-                Name = "PreEvent",
-                TemplateId = ev.LetterTemplates.FirstOrDefault(x => x.Name == "PreEvent")?.LetterTemplateId ?? "",
+                Name = LetterNames.PreEvent,
+                TemplateId = ev.LetterTemplates.FirstOrDefault(x => x.Name == LetterNames.PreEvent)?.LetterTemplateId ??
+                             "",
                 Fields =
                 {
                     { "pcing", string.Join(",", ev.Components.Select(x => x.Name)) },
@@ -302,7 +303,7 @@ public class AdminService : IAdminService
         var attendees = new List<PlayerAttendee>();
         foreach (var (_, letter) in info.Letters)
         {
-            if (letter.Name != "PreEvent") continue;
+            if (letter.Name != LetterNames.PreEvent) continue;
             var account = accounts.GetValueOrDefault(letter.AccountId);
             var characters = accountCharacters[letter.AccountId].ToList();
             var attendee = new PlayerAttendee

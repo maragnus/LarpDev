@@ -39,7 +39,7 @@
     {
         var uninvited = LandingService.Admin.GetAccounts(AccountState.Uninvited);
         var archived = LandingService.Admin.GetAccounts(AccountState.Archived);
-        
+
         _allAccounts = (await uninvited).Concat(await archived).ToArray();
     }
 

@@ -9,6 +9,13 @@ public enum EventList
     Past
 }
 
+public static class LetterNames
+{
+    public const string PreEvent = nameof(PreEvent);
+    public const string PostEvent = nameof(PostEvent);
+    public const string BetweenEvent = nameof(BetweenEvent);
+}
+
 [PublicAPI]
 public class EventComponent
 {
