@@ -1,7 +1,4 @@
-#/bin/sh
-set -e
-
-DOCKERFILE="$(dirname "$0")/../Dockerfile"
+DOCKERFILE=(Join-Path $PSScriptRoot "../Dockerfile")
 
 docker build -t larpdev -f $DOCKERFILE .
 docker network create larpdev-net

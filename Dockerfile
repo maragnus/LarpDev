@@ -1,8 +1,9 @@
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 EXPOSE 80
 EXPOSE 443
-ARG LARPDATA__CONNECTIONSTRING
-ARG LARPDATA__DATABASE
+ARG APP_UID
+ARG MONGO_URL
+ARG MONGO_DB
 WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
@@ -40,4 +41,7 @@ FROM base AS final
 WORKDIR /app
 COPY --from=build /src/publish .
 ENV ASPNETCORE_URLS http://+:80
+ENV LARPDATA__CONNECTIONSTRING $MONGO_URL
+ENV LARPDATA__DATABASE $MONGO_DB
+USER $APP_UID
 ENTRYPOINT ["dotnet", "Larp.Landing.Server.dll"]
