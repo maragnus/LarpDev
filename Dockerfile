@@ -24,6 +24,7 @@ COPY \
   ["cs/Larp/Larp.Data/Larp.Data.csproj", "cs/Larp/Larp.Data/Larp.Data.csproj"] \
   ["cs/Larp/Larp.Landing/Client.RestClient/Larp.Landing.Client.RestClient.csproj", "cs/Larp/Larp.Landing/Client.RestClient/Larp.Landing.Client.RestClient.csproj"] \
   ["cs/Larp/Larp.Landing/Client/Larp.Landing.Client.csproj", "cs/Larp/Larp.Landing/Client/Larp.Landing.Client.csproj"] \
+  ["cs/Larp/Larp.Landing/Client/Larp.Landing.Client.RestClient.csproj", "cs/Larp/Larp.Landing/Client/Larp.Landing.Client.RestClient.csproj"] \
   ["cs/Larp/Larp.Landing/Server/Larp.Landing.Server.csproj", "cs/Larp/Larp.Landing/Server/Larp.Landing.Server.csproj"] \
   ["cs/Larp/Larp.Landing/Shared/Larp.Landing.Shared.csproj", "cs/Larp/Larp.Landing/Shared/Larp.Landing.Shared.csproj"] \
   ["cs/Larp/Larp.Notify/Larp.Notify.csproj", "cs/Larp/Larp.Notify/Larp.Notify.csproj"] \
