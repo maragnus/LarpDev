@@ -1,6 +1,9 @@
 @page "/admin/data"
 @inherits LarpPage
 @inject IJSRuntime Js
+@inject LandingService LandingService
+
+<PageHeader Container>Import/Export Data</PageHeader>
 
 @code {
     private StringResult? _sendResult;
@@ -82,7 +85,7 @@
             await Js.InvokeVoidAsync("downloadFileFromStream", "Mw5eOccupations.json", streamRef);
         });
     }
-    
+
     private async Task Reseed()
     {
         var answer = await DialogService.ShowMessageBox("Reseed Game Data", "Are you sure you want to do this? Any custom changes to the game data will be lost.", "Yes, Reseed", "No, Don't Do Anything");
@@ -98,8 +101,6 @@
     }
 
 }
-
-@inject LandingService LandingService
 
 <AdminLayout Title="Import/Export Data">
     <MudPaper Class="mb-4 pa-4">

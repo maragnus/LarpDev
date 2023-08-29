@@ -1,5 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject LandingService LandingService
+@inject IJSRuntime JsRuntime
+
 <CascadingValue Value="@_pageInfo">
     <MudLayout>
         <LayoutHeader/>
@@ -24,6 +26,11 @@
     };
 
     private bool _isLoaded;
+
+    protected override void OnInitialized()
+    {
+        _pageInfo.PageInfoChanged += async (_, _) => { await JsRuntime.InvokeVoidAsync("pageInfoChanged", _pageInfo.Container); };
+    }
 
     protected override async Task OnInitializedAsync()
     {

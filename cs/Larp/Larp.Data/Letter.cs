@@ -155,5 +155,5 @@ public class Letter
     public string? ApprovedBy { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public Dictionary<string, string> Fields { get; } = new();
+    public Dictionary<string, string> Fields { get; set; } = new();
 }

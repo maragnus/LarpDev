@@ -1,7 +1,10 @@
 @page "/admin/accounts/{AccountId}/citations"
+@using Larp.Landing.Client.Pages.AdminSection.Accounts.Components
 @inherits LarpPage
 
 @inject LandingService LandingService
+
+<PageHeader Container>@_title</PageHeader>
 
 <AdminLayout Loading="IsLoading" Title="@_title">
     <MudStack Spacing="4">

@@ -4,7 +4,7 @@
 
 @inject LandingService LandingService
 
-<PageHeader>Account Manager</PageHeader>
+<PageHeader Container>Account Manager</PageHeader>
 
 @if (_account == null)
 {
@@ -22,9 +22,12 @@
             <MudTooltip Text="Attach files and images to this account">
                 <MudButton Color="Color.Tertiary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Attachment" OnClick="Attachments">Attachments</MudButton>
             </MudTooltip>
-            <MudTooltip Text="View discussions, complaints, and complements">
-                <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.EditNote" OnClick="Citations">Citations</MudButton>
-            </MudTooltip>
+            @if (LandingService.IsInRole(AccountRole.CitationAccess))
+            {
+                <MudTooltip Text="View discussions, complaints, and complements">
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.EditNote" OnClick="Citations">Citations</MudButton>
+                </MudTooltip>
+            }
             @if (_account.State == AccountState.Active)
             {
                 <MudTooltip Text="Disinvitation blocks the character from signing in and notifies them when they attempt to log in that they can no longer access the site">
@@ -44,6 +47,10 @@
 
         <ProfileEditor Account="_account" RefreshFunc="RefreshAccount"/>
         <NotesEditor Account="_account" RefreshFunc="RefreshAccount"/>
+        @if (LandingService.IsInRole(AccountRole.CitationAccess))
+        {
+            <CitationList AccountId="@AccountId"/>
+        }
         <EmailEditor Account="_account" RefreshFunc="RefreshAccount"/>
         <RoleEditor Account="_account" RefreshFunc="RefreshAccount"/>
         <CharacterList AccountId="@AccountId"/>

@@ -3,7 +3,9 @@
 
 @inject LandingService LandingService
 
-<AdminLayout Title="Letter Templates" Loading="IsLoading">
+<PageHeader Container>Edit Letter Template</PageHeader>
+
+<AdminLayout Title="Edit Letter Template" Loading="IsLoading">
     <MudStack Spacing="4" Class="relative">
         <MudOverlay DarkBackground Absolute Visible="_saving">
             <MudText Typo="Typo.h6">Loading...</MudText>

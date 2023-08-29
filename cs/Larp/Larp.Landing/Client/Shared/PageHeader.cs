@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Rendering;
 
 namespace Larp.Landing.Client.Shared;
-
-using Microsoft.AspNetCore.Components.Rendering;
-using Microsoft.AspNetCore.Components.Sections;
 
 public sealed class PageHeader : ComponentBase
 {
@@ -12,12 +10,12 @@ public sealed class PageHeader : ComponentBase
     /// </summary>
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
-    
-    [Parameter]
-    public bool Print { get; set; }
 
-    [CascadingParameter]
-    public PageInfo? PageInfo { get; set; }
+    [Parameter] public bool Print { get; set; }
+
+    [Parameter] public bool Container { get; set; }
+
+    [CascadingParameter] public PageInfo? PageInfo { get; set; }
 
     /// <inheritdoc/>
     protected override void BuildRenderTree(RenderTreeBuilder builder)
@@ -26,5 +24,6 @@ public sealed class PageHeader : ComponentBase
             return;
 
         PageInfo.HeaderText = ChildContent;
+        PageInfo.Container = Container;
     }
 }

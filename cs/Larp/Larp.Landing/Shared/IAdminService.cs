@@ -220,13 +220,13 @@ public interface IAdminService
     [ApiDelete("mw5e/terms"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
     Task DeleteTerm(string name);
 
-    [ApiGet("accounts/{accountId}/citations"), ApiAuthenticated(AccountRoles.AdminAccess)]
+    [ApiGet("accounts/{accountId}/citations"), ApiAuthenticated(AccountRoles.CitationAccess)]
     Task<Citation[]> GetCitations(string accountId);
 
-    [ApiPost("citations"), ApiAuthenticated(AccountRoles.AdminAccess)]
+    [ApiPost("citations"), ApiAuthenticated(AccountRoles.CitationAccess)]
     Task UpdateCitations(Citation citation);
 
-    [ApiPost("citations/{citationId}"), ApiAuthenticated(AccountRoles.AdminAccess)]
+    [ApiPost("citations/{citationId}"), ApiAuthenticated(AccountRoles.CitationAccess)]
     Task SetCitationState(string citationId, CitationState state);
 }
 

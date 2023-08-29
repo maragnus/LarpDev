@@ -1,0 +1,54 @@
+﻿@inherits LarpPage
+
+@inject LandingService LandingService
+
+<MudPaper Class="pa-4 relative">
+    <MudStack Spacing="4">
+        <MudText Typo="Typo.h6">Citations</MudText>
+
+        <MudDataGrid T="Citation" Items="_citations" Elevation="0" Bordered="false" RowClick="RowClick" Dense Groupable Hover Loading="IsLoading">
+            <NoRecordsContent>
+                <MudText Typo="Typo.caption">This account has no citations</MudText>
+            </NoRecordsContent>
+            <Columns>
+                <TemplateColumn T="Citation" Title="Title">
+                    <CellTemplate>
+                        <MudStack Row>
+                            <MudTooltip Text="@context.Item.Type">
+                                @GetIcon(context.Item.Type, Size.Medium)
+                            </MudTooltip>
+                            @(string.IsNullOrWhiteSpace(context.Item.Title) ? "Untitled Citation" : context.Item.Title)
+                        </MudStack>
+                    </CellTemplate>
+                </TemplateColumn>
+                <PropertyColumn Property="x => x.CreatedOn" Title="Created"/>
+            </Columns>
+        </MudDataGrid>
+    </MudStack>
+</MudPaper>
+
+@code
+{
+    [Parameter]
+    public string AccountId { get; set; } = default!;
+
+    private RenderFragment GetIcon(string? type, Size size) => type switch {
+        "Concern" => @<MudIcon Icon="@Icons.Material.TwoTone.Warning" Color="Color.Warning" Size="@size"/>,
+        "Praise" => @<MudIcon Icon="@Icons.Material.TwoTone.ThumbUp" Color="Color.Success" Size="@size"/>,
+        "Discussion" => @<MudIcon Icon="@Icons.Material.TwoTone.ChatBubble" Color="Color.Info" Size="@size"/>,
+        _ => @<MudIcon Icon="@Icons.Material.TwoTone.StickyNote2" Color="Color.Info" Size="@size"/>,
+        };
+
+    private Citation[]? _citations;
+
+    protected override async Task OnSafeParametersSetAsync()
+    {
+        var citations = await LandingService.Admin.GetCitations(AccountId);
+        _citations = citations.Where(c => c.State == CitationState.Open).ToArray();
+    }
+
+    private void RowClick(DataGridRowClickEventArgs<Citation> obj)
+    {
+        NavigationManager.NavigateTo($"/admin/accounts/{AccountId}/citations");
+    }
+}

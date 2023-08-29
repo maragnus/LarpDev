@@ -76,7 +76,11 @@ public class UserSessionManager : IUserSessionManager
             Created = DateTimeOffset.Now,
             IsSuperAdmin = isSuperAdmin, // Super Admin regains their credentials each time they log in
             Roles = isSuperAdmin
-                ? new[] { AccountRole.AccountAdmin, AccountRole.AdminAccess, AccountRole.MwFifthGameMaster }
+                ? new[]
+                {
+                    AccountRole.AccountAdmin, AccountRole.AdminAccess, AccountRole.MwFifthGameMaster,
+                    AccountRole.CitationAccess
+                }
                 : Array.Empty<AccountRole>(),
             Emails =
             {

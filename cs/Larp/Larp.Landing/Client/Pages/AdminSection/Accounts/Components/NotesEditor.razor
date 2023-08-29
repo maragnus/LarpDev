@@ -5,10 +5,40 @@
 <MudPaper Class="pa-4">
     <MudStack Spacing="4">
         <MudText Typo="Typo.h6" Class="mb-4">Notes</MudText>
-        <MudTextField T="string?" Variant="Variant.Outlined" Lines="2" Label="Preregistration Notes" @bind-Value="@Account.MwFifthPreregistrationNotes" Disabled="_savingNotes"
-                      Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Save" AdornmentColor="Color.Success" OnAdornmentClick="SaveNotes"/>
-        <MudTextField T="string?" Variant="Variant.Outlined" Lines="2" Label="Administrative Notes" @bind-Value="@Account.AdminNotes" Disabled="_savingNotes"
-                      Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Save" AdornmentColor="Color.Success" OnAdornmentClick="SaveNotes"/>
+        @if (!_isEditing)
+        {
+            @if (string.IsNullOrWhiteSpace(Account.MwFifthPreregistrationNotes) && string.IsNullOrWhiteSpace(Account.AdminNotes))
+            {
+                <MudText Typo="Typo.body1">This account has no notes</MudText>
+            }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(Account.MwFifthPreregistrationNotes))
+                {
+                    <MudField Label="Preregistration Notes">
+                        @StringOrDefault(Account.MwFifthPreregistrationNotes, "No preregistration notes")
+                    </MudField>
+                }
+                if (!string.IsNullOrWhiteSpace(Account.AdminNotes))
+                {
+                    <MudField Label="Administrative Notes">
+                        @StringOrDefault(Account.AdminNotes, "No admin notes")
+                    </MudField>
+                }
+            }
+            <div>
+                <MudButton StartIcon="@Icons.Material.Filled.Edit" Color="Color.Warning" Variant="Variant.Filled" OnClick="EditNotes">Edit Notes</MudButton>
+            </div>
+        }
+        else
+        {
+            <MudTextField T="string?" Variant="Variant.Outlined" Lines="2" Label="Preregistration Notes" @bind-Value="@Account.MwFifthPreregistrationNotes" Disabled="_savingNotes"/>
+            <MudTextField T="string?" Variant="Variant.Outlined" Lines="2" Label="Administrative Notes" @bind-Value="@Account.AdminNotes" Disabled="_savingNotes"/>
+            <MudButtonGroup OverrideStyles="false">
+                <MudButton StartIcon="@Icons.Material.Filled.Save" Color="Color.Success" Variant="Variant.Filled" OnClick="SaveNotes">Save Notes</MudButton>
+                <MudButton StartIcon="@Icons.Material.Filled.Cancel" Color="Color.Error" Variant="Variant.Filled" OnClick="Cancel">Cancel</MudButton>
+            </MudButtonGroup>
+        }
     </MudStack>
 </MudPaper>
 
@@ -21,6 +51,10 @@
     public Func<Task>? RefreshFunc { get; set; }
 
     private bool _savingNotes;
+    private bool _isEditing;
+
+    private string StringOrDefault(string? value, string defaultValue) =>
+        string.IsNullOrWhiteSpace(value) ? defaultValue : value;
 
     private async Task SaveNotes()
     {
@@ -30,6 +64,26 @@
             StateHasChanged();
             await LandingService.Admin.SetAccountPreregistrationNotes(Account.AccountId, Account.MwFifthPreregistrationNotes);
             await LandingService.Admin.SetAccountAdminNotes(Account.AccountId, Account.AdminNotes);
+            _isEditing = false;
+        });
+        _savingNotes = false;
+    }
+
+    private void EditNotes()
+    {
+        _isEditing = true;
+    }
+
+    private async Task Cancel()
+    {
+        await SafeActionAsync(async () =>
+        {
+            _savingNotes = true;
+            StateHasChanged();
+            var account = await LandingService.Admin.GetAccount(Account.AccountId);
+            Account.MwFifthPreregistrationNotes = account.MwFifthPreregistrationNotes;
+            Account.AdminNotes = account.AdminNotes;
+            _isEditing = false;
         });
         _savingNotes = false;
     }

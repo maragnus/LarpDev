@@ -1,4 +1,3 @@
-@using Larp.Landing.Client.Pages.Profile
 @inject NavigationManager NavigationManager
 @page "/profile"
 
@@ -10,11 +9,11 @@
 
 <MudContainer MaxWidth="MaxWidth.Small" Class="pt-8">
 
-    <ProfileEditor/>
+    <ProfileEditorComponent/>
 
-    <EmailsEditor/>
+    <EmailsEditorComponent/>
 
-    <MudPaper Class="pa-2 mb-2" >
+    <MudPaper Class="pa-2 mb-2">
         <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Logout" Color="Color.Warning" OnClick="Logout">Logout</MudButton>
     </MudPaper>
 

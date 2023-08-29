@@ -1,10 +1,10 @@
 @page "/admin"
-@inherits LarpPage
 @using Larp.Landing.Shared
+@inherits LarpPage
 
 @inject LandingService LandingService
 
-<PageHeader>Administration Section</PageHeader>
+<PageHeader Container>Administration Section</PageHeader>
 
 <AdminLayout Loading="_dashboard == null" Title="Dashboard">
     <MudGrid>
@@ -52,7 +52,7 @@
 </AdminLayout>
 
 @code {
-    
+
     private Dashboard? _dashboard;
 
     protected override async Task OnSafeInitializedAsync()

@@ -53,6 +53,13 @@
         window.openInNew = async (url) => {
             window.open(url, "_blank");
         }
+        window.pageInfoChanged = async (container) => {
+            if (container) {
+                document.body.style.backgroundColor = "beige";
+            } else {
+                document.body.style.backgroundColor = "white";
+            }
+        }
     </script>
 </body>
 

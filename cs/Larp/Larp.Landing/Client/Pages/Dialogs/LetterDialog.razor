@@ -1,8 +1,7 @@
 @using Larp.Landing.Client.Pages.EventsSection
-
 <MudDialog T="string?">
     <DialogContent>
-        <EventLetter Event="Event" Letter="Letter" Template="Template" ReadOnly="ReadOnly" Admin="Admin"/>
+        <EventLetterComponent Event="Event" Letter="Letter" Template="Template" ReadOnly="ReadOnly" Admin="Admin"/>
     </DialogContent>
     <DialogActions>
         <MudButton Color="Color.Default" Variant="Variant.Filled" OnClick="Close">Close</MudButton>

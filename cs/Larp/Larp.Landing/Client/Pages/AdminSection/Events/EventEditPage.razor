@@ -7,6 +7,8 @@
 @inject LandingService LandingService
 @inject IJSRuntime Js
 
+<PageHeader>Edit Event</PageHeader>
+
 <NavigationLock ConfirmExternalNavigation="_hasEventChanges || _hasAttendanceChanges" OnBeforeInternalNavigation="BeforeNavigation"/>
 
 <AdminLayout Loading="IsLoading" Saving="IsSaving" Title="Edit Event">

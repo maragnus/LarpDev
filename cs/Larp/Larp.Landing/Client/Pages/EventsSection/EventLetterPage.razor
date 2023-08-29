@@ -2,7 +2,7 @@
 @inject LandingService LandingService
 @inherits LarpPage
 
-<PageHeader>Event Letter</PageHeader>
+<PageHeader Container>Event Letter</PageHeader>
 
 @if (IsLoading)
 {
@@ -27,7 +27,7 @@
         </div>
     }
 
-    <EventLetter Letter="_letter" Template="_template" Event="_event" ReadOnly="_isReadOnly" Admin="false"/>
+    <EventLetterComponent Letter="_letter" Template="_template" Event="_event" ReadOnly="_isReadOnly" Admin="false"/>
 
     @if (_letter.State is LetterState.Draft or LetterState.NotStarted)
     {

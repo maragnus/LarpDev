@@ -7,7 +7,8 @@ public enum AccountRole
 {
     AdminAccess,
     AccountAdmin,
-    MwFifthGameMaster
+    MwFifthGameMaster,
+    CitationAccess
 }
 
 public static class AccountRoles
@@ -15,6 +16,7 @@ public static class AccountRoles
     public const string AdminAccess = nameof(AccountRole.AdminAccess);
     public const string AccountAdmin = nameof(AccountRole.AccountAdmin);
     public const string MwFifthGameMaster = nameof(AccountRole.MwFifthGameMaster);
+    public const string CitationAccess = nameof(AccountRole.CitationAccess);
 }
 
 [PublicAPI]
