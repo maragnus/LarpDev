@@ -14,10 +14,12 @@
                 AuthorAccountName="@(_names.GetValueOrDefault(citation.AuthorAccountId)?.Name)"
                 ReadOnly="@(citation.AuthorAccountId != LandingService.Account.AccountId)"/>
         }
-        <MudStack Row Spacing="4">
-            <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="AddCitation" Color="Color.Primary" Variant="Variant.Filled">Add Citation</MudButton>
-            <MudButton StartIcon="@Icons.Material.Filled.AccountCircle" OnClick="GoToPlayer" Color="Color.Tertiary" Variant="Variant.Filled">Go To Player</MudButton>
-        </MudStack>
+        <div class="no-print">
+            <MudStack Row Spacing="4" Class="mt-4">
+                <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="AddCitation" Color="Color.Primary" Variant="Variant.Filled">Add Citation</MudButton>
+                <MudButton StartIcon="@Icons.Material.Filled.AccountCircle" OnClick="GoToPlayer" Color="Color.Tertiary" Variant="Variant.Filled">Go To Player</MudButton>
+            </MudStack>
+        </div>
     </MudStack>
 </AdminLayout>
 

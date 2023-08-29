@@ -1,17 +1,20 @@
-@if (!_editing)
-{
-    <MudCard>
+<MudCard Style="background-color: beige">
+    @if (!_editing)
+    {
         <MudCardContent>
             <MudStack Spacing="4">
-                @if (!string.IsNullOrEmpty(Citation.Title))
-                {
-                    <MudText Typo="Typo.body1">@Citation.Title</MudText>
-                }
-                <MudText Typo="Typo.body2">@Citation.Description</MudText>
-                <MudText Typo="Typo.subtitle1">
-                    <MudIcon Size="Size.Small" Icon="@Icons.Material.TwoTone.Person"/> @(AuthorAccountName ?? "No Name") &#8212;
-                    <MudIcon Size="Size.Small" Icon="@Icons.Material.TwoTone.CalendarToday"/> Created on @Citation.CreatedOn.ToString("MMM d, yyyy") &#8212;
-                    <MudIcon Size="Size.Small" Icon="@Icons.Material.TwoTone.Edit"/> Last Updated on @Citation.ModifiedOn.ToString("MMM d, yyyy")
+                <MudStack Row Justify="Justify.FlexStart">
+                    <MudTooltip Text="@Citation.Type">@GetIcon(Size.Medium)</MudTooltip>
+                    @if (!string.IsNullOrEmpty(Citation.Title))
+                    {
+                        <MudText Typo="Typo.subtitle1" Style="font-weight: bold">@Citation.Title</MudText>
+                    }
+                </MudStack>
+                <MudText Typo="Typo.body1">@Citation.Description</MudText>
+                <MudText Typo="Typo.body2">
+                    <MudIcon Size="Size.Small" Icon="@Icons.Material.TwoTone.Person" Style="font-size: inherit"/> @(AuthorAccountName ?? "No Name") &#8212;
+                    <MudIcon Size="Size.Small" Icon="@Icons.Material.TwoTone.CalendarToday" Style="font-size: inherit"/> Created on @Citation.CreatedOn.ToString("MMM d, yyyy") &#8212;
+                    <MudIcon Size="Size.Small" Icon="@Icons.Material.TwoTone.Edit" Style="font-size: inherit"/> Last Updated on @Citation.ModifiedOn.ToString("MMM d, yyyy")
                     @if (Citation.ResolvedOn.HasValue)
                     {
                         <span>&#8212; <MudIcon Size="Size.Small" Icon="@Icons.Material.TwoTone.Edit"/> Resolved on @Citation.ResolvedOn.Value.ToString("MMM d, yyyy")</span>
@@ -19,7 +22,7 @@
                 </MudText>
             </MudStack>
         </MudCardContent>
-        <MudCardActions>
+        <MudCardActions Class="no-print">
             @if (!ReadOnly)
             {
                 <MudButton StartIcon="@Icons.Material.Filled.Edit" Color="Color.Success" OnClick="Edit">Edit</MudButton>
@@ -34,15 +37,16 @@
                 <MudButton StartIcon="@Icons.Material.Filled.Undo" Color="Color.Warning" OnClick="Reopen">Reopen</MudButton>
             }
         </MudCardActions>
-    </MudCard>
-}
-else
-{
-    <MudCard>
-        <MudCardContent>
+    }
+    else
+    {
+        <MudCardContent Class="no-print">
             <MudGrid>
                 <MudItem sm="12">
-                    <MudTextField @bind-Value="Citation.Title" Label="Title" Variant="Variant.Outlined" AutoFocus/>
+                    <MudStack Row>
+                        <MudTooltip Text="@Citation.Type">@GetIcon(Size.Large)</MudTooltip>
+                        <MudTextField @bind-Value="Citation.Title" Label="Title" Variant="Variant.Outlined" AutoFocus/>
+                    </MudStack>
                 </MudItem>
                 <MudItem sm="12">
                     <MudField Label="Citation Type" Variant="Variant.Outlined">
@@ -57,28 +61,32 @@ else
                     <MudTextField @bind-Value="Citation.Description" Label="Description" Lines="6" Variant="Variant.Outlined"/>
                 </MudItem>
                 <MudItem sm="12">
-                    <MudText Typo="Typo.subtitle1">
-                        <MudIcon Size="Size.Small" Icon="@Icons.Material.TwoTone.Person"/> @(AuthorAccountName ?? "No Name") &#8212;
-                        <MudIcon Size="Size.Small" Icon="@Icons.Material.TwoTone.CalendarToday"/> Created on @Citation.CreatedOn.ToString("MMM d, yyyy") &#8212;
-                        <MudIcon Size="Size.Small" Icon="@Icons.Material.TwoTone.Edit"/> Last Updated on @Citation.ModifiedOn.ToString("MMM d, yyyy")
+                    <MudText Typo="Typo.body2">
+                        <MudIcon Size="Size.Small" Icon="@Icons.Material.TwoTone.Person" Style="font-size: inherit"/> @(AuthorAccountName ?? "No Name") &#8212;
+                        <MudIcon Size="Size.Small" Icon="@Icons.Material.TwoTone.CalendarToday" Style="font-size: inherit"/> Created on @Citation.CreatedOn.ToString("MMM d, yyyy") &#8212;
+                        <MudIcon Size="Size.Small" Icon="@Icons.Material.TwoTone.Edit" Style="font-size: inherit"/> Last Updated on @Citation.ModifiedOn.ToString("MMM d, yyyy")
                     </MudText>
                 </MudItem>
             </MudGrid>
         </MudCardContent>
-        <MudCardActions>
+        <MudCardActions Class="no-print">
             @if (Citation.State == CitationState.Draft)
             {
-                <MudButton StartIcon="@Icons.Material.Filled.Save" Color="Color.Success" OnClick="Save">Add Citation</MudButton>
-                <MudButton StartIcon="@Icons.Material.Filled.Cancel" Color="Color.Error" OnClick="Cancel">Cancel</MudButton>
+                <MudButtonGroup OverrideStyles="false">
+                    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Success" OnClick="Save">Save New Citation</MudButton>
+                    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Cancel" Color="Color.Error" OnClick="Cancel">Cancel</MudButton>
+                </MudButtonGroup>
             }
             else
             {
-                <MudButton StartIcon="@Icons.Material.Filled.Save" Color="Color.Success" OnClick="Save">Save Changes</MudButton>
-                <MudButton StartIcon="@Icons.Material.Filled.Done" Color="Color.Error" OnClick="Cancel">Cancel</MudButton>
+                <MudButtonGroup OverrideStyles="false">
+                    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Success" OnClick="Save">Save Changes</MudButton>
+                    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Done" Color="Color.Error" OnClick="Cancel">Cancel</MudButton>
+                </MudButtonGroup>
             }
         </MudCardActions>
-    </MudCard>
-}
+    }
+</MudCard>
 
 @code {
         const string DefaultCitationType = "Discussion";
@@ -97,6 +105,13 @@ else
 
     [Parameter]
     public bool ReadOnly { get; set; }
+
+    private RenderFragment GetIcon(Size size) => Citation.Type switch {
+        "Concern" => @<MudIcon Icon="@Icons.Material.TwoTone.Warning" Color="Color.Warning" Size="@size"/>,
+        "Praise" => @<MudIcon Icon="@Icons.Material.TwoTone.ThumbUp" Color="Color.Success" Size="@size"/>,
+        "Discussion" => @<MudIcon Icon="@Icons.Material.TwoTone.ChatBubble" Color="Color.Info" Size="@size"/>,
+        _ => @<MudIcon Icon="@Icons.Material.TwoTone.StickyNote2" Color="Color.Info" Size="@size"/>,
+        };
 
     protected override void OnParametersSet()
     {
