@@ -47,6 +47,7 @@ public class LetterFieldCondition
 
 public class LetterField
 {
+    private const StringComparison Sc = StringComparison.InvariantCultureIgnoreCase;
     public string Name { get; set; } = default!;
 
     public string? Title { get; set; }
@@ -58,8 +59,6 @@ public class LetterField
     public List<string> Options { get; set; } = new();
 
     [BsonIgnoreIfNull] public LetterFieldCondition? Conditional { get; set; }
-
-    private const StringComparison Sc = StringComparison.InvariantCultureIgnoreCase;
 
     public bool ShowField(Dictionary<string, string> fields)
     {
@@ -145,10 +144,10 @@ public class Letter
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public DateTimeOffset? StartedOn { get; set; }
-    
+
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public DateTimeOffset? SubmittedOn { get; set; }
-    
+
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public DateTimeOffset? ApprovedOn { get; set; }
 
@@ -156,5 +155,5 @@ public class Letter
     public string? ApprovedBy { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public Dictionary<string, string> Fields { get; set; } = new();
+    public Dictionary<string, string> Fields { get; } = new();
 }

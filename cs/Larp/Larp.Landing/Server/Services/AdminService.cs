@@ -283,7 +283,7 @@ public class AdminService : IAdminService
         {
             if (info.Letters.Any(x => x.Value.AccountId == attendee.AccountId)) continue;
 
-            var id = ObjectId.GenerateNewId().ToString();
+            var id = LarpContext.GenerateNewId();
             info.Letters.Add(id, new Letter
             {
                 LetterId = id,
@@ -378,7 +378,7 @@ public class AdminService : IAdminService
                 .Append("] ")
                 .Append(log[nameof(LogEvent.Type)].AsString)
                 .Append(" (")
-                .Append(names.GetValueOrDefault(log[nameof(LogEvent.ActorAccountId)].AsObjectId.ToString())?.Name ??
+                .Append(names.GetValueOrDefault(log[nameof(LogEvent.ActorAccountId)].AsObjectId.ToString()!)?.Name ??
                         "Unknown Account")
                 .Append(") ");
 
@@ -392,7 +392,7 @@ public class AdminService : IAdminService
             {
                 if (element.Name.EndsWith("AccountId") && element.Value.IsObjectId)
                 {
-                    var account = names.GetValueOrDefault(element.Value.AsObjectId.ToString());
+                    var account = names.GetValueOrDefault(element.Value.AsObjectId.ToString()!);
                     if (account == null) log[element.Name] = "Invalid Account";
                     else log[element.Name] = account.Name ?? "No Name Set";
                 }

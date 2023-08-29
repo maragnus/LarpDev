@@ -71,7 +71,7 @@ public class UserSessionManager : IUserSessionManager
 
         var account = new Account
         {
-            AccountId = ObjectId.GenerateNewId().ToString(),
+            AccountId = LarpContext.GenerateNewId(),
             State = AccountState.Active,
             Created = DateTimeOffset.Now,
             IsSuperAdmin = isSuperAdmin, // Super Admin regains their credentials each time they log in
@@ -113,7 +113,7 @@ public class UserSessionManager : IUserSessionManager
                 DestroyedOn = null,
                 ExpiresOn = _clock.UtcNow + _options.UserSessionDuration,
                 ActivatedOn = null,
-                SessionId = ObjectId.GenerateNewId().ToString(),
+                SessionId = LarpContext.GenerateNewId(),
                 IsAuthenticated = false // Set to true after Token is received
             };
 
@@ -358,7 +358,7 @@ public class UserSessionManager : IUserSessionManager
 
         var account = new Account
         {
-            AccountId = ObjectId.GenerateNewId().ToString(),
+            AccountId = LarpContext.GenerateNewId(),
             State = AccountState.Active,
             Name = fullName,
             Emails =

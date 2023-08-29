@@ -29,7 +29,7 @@ public class CitationManager
     {
         await _larpContext.Citations.InsertOneAsync(new Citation()
         {
-            Id = ObjectId.GenerateNewId().ToString(),
+            Id = LarpContext.GenerateNewId(),
             AccountId = citation.AccountId,
             AuthorAccountId = authorAccountId,
             Title = citation.Title,

@@ -3,7 +3,6 @@ using System.Text.RegularExpressions;
 using Larp.Data.MwFifth;
 using Larp.Landing.Shared.MwFifth;
 using Microsoft.Extensions.Logging.Abstractions;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using OfficeOpenXml;
 
@@ -15,7 +14,6 @@ public class ExcelImportResult
 
 public class ExcelImporter
 {
-    private readonly MwFifthCharacterManager _characterManager;
     private readonly LarpContext _larpContext;
     private readonly ILogger<ExcelImporter> _logger;
     private Dictionary<int, Character> _characters = default!;
@@ -26,12 +24,10 @@ public class ExcelImporter
     private DateTimeOffset _now;
     private Dictionary<int, Account> _players = default!;
 
-    public ExcelImporter(LarpContext larpContext, ILogger<ExcelImporter> logger,
-        MwFifthCharacterManager characterManager)
+    public ExcelImporter(LarpContext larpContext, ILogger<ExcelImporter> logger)
     {
         _larpContext = larpContext;
         _logger = logger;
-        _characterManager = characterManager;
     }
 
     public async Task<ExcelImportResult> Import(string fileName)
@@ -109,7 +105,7 @@ public class ExcelImporter
 
                 @event = new Event()
                 {
-                    EventId = ObjectId.GenerateNewId().ToString(),
+                    EventId = LarpContext.GenerateNewId(),
                     Date = date,
                     ImportId = eventName,
                     Title = eventName,
@@ -202,7 +198,7 @@ public class ExcelImporter
                         Builders<Attendance>.Filter.Eq(x => x.EventId, @event.EventId)
                     ), new Attendance()
                     {
-                        // Id = ObjectId.GenerateNewId().ToString(),
+                        // Id = LarpContext.GenerateNewId(),
                         EventId = @event.EventId,
                         AccountId = account.AccountId,
                         MwFifth = new MwFifthAttendance() { Moonstone = moonstone, PostMoonstone = 0 }
@@ -241,7 +237,7 @@ public class ExcelImporter
 
             var account = new Account
             {
-                AccountId = ObjectId.GenerateNewId().ToString(),
+                AccountId = LarpContext.GenerateNewId(),
                 State = AccountState.Active,
                 ImportId = importId,
                 Created = _now,
@@ -304,7 +300,7 @@ public class ExcelImporter
 
             var character = new Character
             {
-                CharacterId = ObjectId.GenerateNewId().ToString(),
+                CharacterId = LarpContext.GenerateNewId(),
                 ImportId = importId,
                 AccountId = account.AccountId,
                 CharacterName = characterName,
@@ -350,7 +346,7 @@ public class ExcelImporter
 
             var revision = new CharacterRevision
             {
-                RevisionId = ObjectId.GenerateNewId().ToString(),
+                RevisionId = LarpContext.GenerateNewId(),
                 AccountId = account.AccountId,
                 CharacterId = character.CharacterId,
                 State = CharacterState.Live,

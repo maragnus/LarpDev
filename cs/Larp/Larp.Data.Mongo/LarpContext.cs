@@ -117,7 +117,7 @@ public class LarpContext
 
     public async Task LogEvent(string actorAccountId, string? actorSessionId, LogEvent logEvent)
     {
-        logEvent.LogEventId = ObjectId.GenerateNewId().ToString();
+        logEvent.LogEventId = LarpContext.GenerateNewId();
         logEvent.ActorAccountId = actorAccountId;
         logEvent.ActorSessionId = actorSessionId;
         logEvent.ActedOn = DateTimeOffset.Now;
@@ -127,10 +127,12 @@ public class LarpContext
     public async Task LogEvent<TLogEvent>(string actorAccountId, string? actorSessionId, TLogEvent logEvent)
         where TLogEvent : LogEvent
     {
-        logEvent.LogEventId = ObjectId.GenerateNewId().ToString();
+        logEvent.LogEventId = LarpContext.GenerateNewId();
         logEvent.ActorAccountId = actorAccountId;
         logEvent.ActorSessionId = actorSessionId;
         logEvent.ActedOn = DateTimeOffset.Now;
         await EventLog.InsertOneAsync(logEvent.ToBsonDocument());
     }
+
+    public static string GenerateNewId() => ObjectId.GenerateNewId().ToString()!;
 }

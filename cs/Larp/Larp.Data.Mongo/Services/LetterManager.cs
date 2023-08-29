@@ -13,7 +13,7 @@ public class LetterManager
     {
         var letter = new Letter
         {
-            LetterId = ObjectId.GenerateNewId().ToString(),
+            LetterId = LarpContext.GenerateNewId(),
             AccountId = accountId,
             EventId = eventId,
             Name = letterName,
@@ -97,7 +97,7 @@ public class LetterManager
     {
         var template = new LetterTemplate()
         {
-            LetterTemplateId = ObjectId.GenerateNewId().ToString(),
+            LetterTemplateId = LarpContext.GenerateNewId(),
             Name = "new-template",
             Title = "New Template",
             Fields = Array.Empty<LetterField>()

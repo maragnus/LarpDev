@@ -96,7 +96,6 @@
             foreach (var term in _terms)
             {
                 if (string.IsNullOrEmpty(term.Name)) continue;
-                ;
                 await LandingService.Admin.SetTerm(term.Name, term.Summary, term.Description);
                 term.Saved = true;
                 term.New = false;

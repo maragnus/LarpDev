@@ -115,6 +115,7 @@
         set
         {
             if (_homeChapter == value) return;
+    // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
             _homeChapter = value ?? "";
             HomeChapterChanged.InvokeAsync(_homeChapter);
             StateHasChanged();

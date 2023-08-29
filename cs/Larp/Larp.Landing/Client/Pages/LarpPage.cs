@@ -12,7 +12,7 @@ public class LarpPage : ComponentBase
     [Inject] protected ILogger<LarpPage> Logger { get; set; } = default!;
 
     protected bool IsLoading { get; set; } = true;
-    protected bool IsSaving { get; set; } = false;
+    protected bool IsSaving { get; set; }
     protected bool IsInitialized { get; set; }
 
     protected virtual Task OnSafeParametersSetAsync()

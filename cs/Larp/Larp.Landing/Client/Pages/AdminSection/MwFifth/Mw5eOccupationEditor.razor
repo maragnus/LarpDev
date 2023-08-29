@@ -6,7 +6,7 @@
         <MudTextField Label="Name" Value="@Occupation.Name" ValueChanged="UpdateName" T="string" Variant="Variant.Outlined"/>
     </MudItem>
     <MudItem xs="12" md="4">
-        <MudSelectExtended Label="Type" @bind-Value="@Occupation.Type" ItemCollection="(ICollection<OccupationType>)_types" T="OccupationType" Variant="Variant.Outlined"/>
+        <MudSelectExtended Label="Type" @bind-Value="@Occupation.Type" ItemCollection="_types" T="OccupationType" Variant="Variant.Outlined"/>
     </MudItem>
     <MudItem xs="12" md="4">
         <MudSelectExtended Label="Chapters" SelectedValues="@(Occupation.Chapters ?? Array.Empty<string>())" ItemCollection="(ICollection<string>)HomeChapters" MultiSelection SelectedValuesChanged="UpdateChapters" T="string" Variant="Variant.Outlined"/>
@@ -39,7 +39,7 @@
     <MudItem xs="12">
         @foreach (var choice in Occupation.Choices ?? Array.Empty<SkillChoice>())
         {
-            <SkillChoiceEditor Choice="choice" Skills="_skills" />
+            <SkillChoiceEditor Choice="choice" Skills="_skills"/>
         }
         <MudButton OnClick="AddChoice" Class="mt-4" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.QuestionMark" Color="Color.Primary">Add Choice</MudButton>
         <MudButton OnClick="RemoveChoice" Class="mt-4" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" Disabled="Occupation.Choices == null || Occupation.Choices.Length == 0" Color="Color.Primary">Remove Choice</MudButton>
@@ -142,12 +142,15 @@
 
     private void AddChoice()
     {
-        var newChoice = new [] { new SkillChoice()
+        var newChoice = new[]
         {
-            Count = 1,
-            Choices = Array.Empty<string>()
-        } };
-        
+            new SkillChoice()
+            {
+                Count = 1,
+                Choices = Array.Empty<string>()
+            }
+        };
+
         if (Occupation.Choices == null)
             Occupation.Choices = newChoice;
         else
@@ -173,7 +176,7 @@
                     name = match.Groups[1].Value;
                     description = match.Groups[2].Value;
                 }
-                
+
                 if (name.StartsWith("Duty"))
                     SetDuty(description);
                 else if (name == "Livery")

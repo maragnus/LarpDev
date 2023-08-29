@@ -4,9 +4,9 @@ namespace Larp.Data.Mongo.Services;
 
 public class AttachmentManager
 {
+    private readonly IImageModifier _imageModifier;
     private readonly LarpContext _larpContext;
     private readonly ILogger<AttachmentManager> _logger;
-    private readonly IImageModifier _imageModifier;
 
     public AttachmentManager(LarpContext larpContext, ILogger<AttachmentManager> logger, IImageModifier imageModifier)
     {
@@ -53,8 +53,8 @@ public class AttachmentManager
         string uploaderAccountId)
     {
         var bytes = new byte[data.Length];
-        var _ = await data.ReadAsync(bytes);
-        var id = ObjectId.GenerateNewId().ToString();
+        _ = await data.ReadAsync(bytes);
+        var id = LarpContext.GenerateNewId();
         var attachment = new AccountAttachment()
         {
             AttachmentId = id,

@@ -149,7 +149,7 @@ public class EventManager
 
     public async Task<Event> DraftEvent()
     {
-        var id = ObjectId.GenerateNewId().ToString();
+        var id = LarpContext.GenerateNewId();
         var e = new Event()
         {
             EventId = id,

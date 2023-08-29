@@ -1,5 +1,4 @@
 ﻿using Larp.Data.Mongo;
-using MongoDB.Bson;
 
 namespace Larp.Data.TestFixture;
 
@@ -16,7 +15,7 @@ public class TestDataHelper
     {
         var account = new Account
         {
-            AccountId = ObjectId.GenerateNewId().ToString(),
+            AccountId = LarpContext.GenerateNewId(),
             State = AccountState.Active,
             Name = name,
             Emails =

@@ -72,7 +72,7 @@
 
         await SafeActionAsync(async () =>
         {
-            await LandingService.Admin.UpdateAccount(Account.AccountId, Account!.Name, Account.Location, Account.Phone, Account.BirthDate, Account.Notes, Account.DiscountPercent);
+            await LandingService.Admin.UpdateAccount(Account.AccountId, Account.Name, Account.Location, Account.Phone, Account.BirthDate, Account.Notes, Account.DiscountPercent);
             _changed = false;
             if (RefreshFunc != null)
                 await RefreshFunc();

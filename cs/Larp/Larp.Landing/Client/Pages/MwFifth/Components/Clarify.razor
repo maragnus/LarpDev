@@ -19,6 +19,7 @@
         set
         {
             if (_topic == value) return;
+    // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
             _topic = value ?? "";
             TopicChanged.InvokeAsync(_topic);
             Search();

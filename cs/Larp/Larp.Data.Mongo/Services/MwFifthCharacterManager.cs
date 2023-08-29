@@ -241,7 +241,7 @@ public class MwFifthCharacterManager
 
         // Create new draft
         revision.PreviousRevisionId = revision.RevisionId;
-        revision.RevisionId = ObjectId.GenerateNewId().ToString();
+        revision.RevisionId = LarpContext.GenerateNewId();
         revision.State = CharacterState.Draft;
         revision.RevisionPlayerNotes = null;
         revision.RevisionReviewerNotes = null;
@@ -306,7 +306,7 @@ public class MwFifthCharacterManager
         var now = DateTime.UtcNow;
         var character = new Character
         {
-            CharacterId = ObjectId.GenerateNewId().ToString(),
+            CharacterId = LarpContext.GenerateNewId(),
             AccountId = account.AccountId,
             CreatedOn = now,
             State = CharacterState.Draft
@@ -314,7 +314,7 @@ public class MwFifthCharacterManager
 
         var revision = new CharacterRevision
         {
-            RevisionId = ObjectId.GenerateNewId().ToString(),
+            RevisionId = LarpContext.GenerateNewId(),
             AccountId = account.AccountId,
             State = CharacterState.Draft,
             CharacterId = character.CharacterId,

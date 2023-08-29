@@ -95,7 +95,7 @@
 
         CalculateHitPointBonus();
 
-        AdjustProperty("Mana", "Increased Mana", false, (value, rank) => value += rank);
+        AdjustProperty("Mana", "Increased Mana", false, (value, rank) => value + rank);
         AdjustProperty("Battle Endurance per Renew", "Improved Battle Endurance", false, (value, _) => value + 1);
         AdjustProperty("Elemental Bursts per Renew", "Improved Burst Casting", false, (value, _) => value + 1);
         AdjustProperty("Elemental Storms per Renew", "Improved Storm Casting", false, (value, _) => value + 1);
