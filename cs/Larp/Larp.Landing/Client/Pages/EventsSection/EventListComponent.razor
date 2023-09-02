@@ -40,14 +40,17 @@
         <MudStack Spacing="4">
             @if (!string.IsNullOrWhiteSpace(context.Item.Location))
             {
-                <MudText>@context.Item.Location</MudText>
+                <MudStack Row AlignItems="AlignItems.Center">
+                    <MudIcon Color="Color.Primary" Size="Size.Small" Style="font-size: inherit" Icon="@Icons.Material.Filled.LocationOn"/>
+                    <MudText>@context.Item.Location</MudText>
+                </MudStack>
             }
-            <MudDataGrid T="ComponentInfo" Items="context.Item.Components" Elevation="0" Dense SortMode="SortMode.None" Loading="IsLoading">
-                <Columns>
-                    <PropertyColumn Property="x => x.When" Title="Date" Format="dddd, MMM d, yyyy"/>
-                    <PropertyColumn Property="x => x.Title" Title="Title"/>
-                </Columns>
-            </MudDataGrid>
+            <MudChipSet ReadOnly>
+                @foreach (var component in context.Item.Components)
+                {
+                    <MudChip Size="Size.Small">@component.Title (@component.When.ToString("ddd, MMM d"))</MudChip>
+                }
+            </MudChipSet>
         </MudStack>
     </ChildRowContent>
 </MudDataGrid>

@@ -18,7 +18,7 @@
             <MudStack Spacing="0">
                 <MudText Typo="Typo.h4" Align="Align.Center" Style="color: white; margin: 0;  white-space: nowrap">Welcome to @LandingService.ServiceName!</MudText>
                 <MudText Typo="Typo.body1" Align="Align.Left" Style="color: #fff">
-                    Visit the <a style="color: #ada" href="http://mystwood.org/">Mystwood</a> homepage for more information.
+                    Visit the <a style="color: #ada" href="http://mystwood.org/" target="_blank" rel="bookmark">Mystwood</a> homepage for more information.
                 </MudText>
             </MudStack>
         </MudStack>
@@ -61,6 +61,9 @@
                                         <MudText Typo="Typo.subtitle1">
                                             <strong>@ev.Title</strong>
                                         </MudText>
+                                        <MudText Typo="Typo.subtitle2" Color="Color.Surface">
+                                            <em>@When(ev.Date)</em>
+                                        </MudText>
                                         @switch (prereg?.State)
                                         {
                                             case null:
@@ -85,7 +88,7 @@
                                             <MudText>@ev.Location</MudText>
                                         </MudStack>
                                     }
-                                    <MudChipSet>
+                                    <MudChipSet ReadOnly>
                                         @foreach (var component in ev.Components)
                                         {
                                             <MudChip Size="Size.Small">@component.Name (@component.Date.ToString("ddd, MMM d"))</MudChip>
@@ -115,6 +118,9 @@
                                         <MudText Typo="Typo.subtitle1">
                                             <strong>@ev.Title</strong>
                                         </MudText>
+                                        <MudText Typo="Typo.subtitle2" Color="Color.Surface">
+                                            <em>@When(ev.Date)</em>
+                                        </MudText>
                                         @switch (pel?.State)
                                         {
                                             case null:
@@ -139,7 +145,7 @@
                                             <MudText>@ev.Location</MudText>
                                         </MudStack>
                                     }
-                                    <MudChipSet>
+                                    <MudChipSet ReadOnly>
                                         @foreach (var component in ev.Components)
                                         {
                                             <MudChip Size="Size.Small">@component.Name (@component.Date.ToString("ddd, MMM d"))</MudChip>
@@ -172,6 +178,17 @@
     private AccountDashboard _dashboard = new();
     private Event[] _upcomingEvents = Array.Empty<Event>();
     private Event[] _pelEvents = Array.Empty<Event>();
+
+    private string When(DateOnly date)
+    {
+        var now = DateOnly.FromDateTime(DateTime.Today);
+        var diff = date.DayNumber - now.DayNumber;
+        return diff switch {
+            0 => "today",
+            < 0 => $"{-diff} days ago",
+            > 0 =>  $"in {diff} days"
+            };
+    }
 
     protected override async Task OnSafeInitializedAsync()
     {
