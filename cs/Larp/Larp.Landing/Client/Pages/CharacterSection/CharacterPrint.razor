@@ -1,4 +1,4 @@
-@page "/characters/{gameName}/{characterId}/print"
+@page "/characters/{gameName}/{CharacterId}/print"
 @using Microsoft.AspNetCore.WebUtilities
 @using Larp.Landing.Client.Pages.MwFifth
 @inject IJSRuntime Js
@@ -33,7 +33,7 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
-        await Task.Delay(TimeSpan.FromSeconds(1));
+        await Task.Delay(TimeSpan.FromSeconds(10));
         await Js.InvokeVoidAsyncIgnoreErrors("printPage");
     }
 

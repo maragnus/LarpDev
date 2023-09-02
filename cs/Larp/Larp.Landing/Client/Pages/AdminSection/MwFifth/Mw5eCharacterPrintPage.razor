@@ -1,0 +1,49 @@
+@page "/admin/mw5e/characters/{CharacterId}/print"
+@using Larp.Landing.Shared.MwFifth
+@using Larp.Landing.Client.Pages.MwFifth
+@inherits LarpPage
+@inject LandingService LandingService
+
+<PageHeader>@_character.CharacterName</PageHeader>
+
+@if (IsLoading || _characterBuilder == null)
+{
+    <MudAlert Severity="@Severity.Normal">Loading... <MudProgressLinear Indeterminate/></MudAlert>
+    return;
+}
+
+<CharacterSheet Character="_characterBuilder" Admin Print Clarify/>
+
+@code {
+
+    [Parameter]
+    public string CharacterId { get; set; } = default!;
+
+    Character _character = new Character();
+    CharacterBuilder? _characterBuilder;
+
+    private CharacterRevision[] _revisions = Array.Empty<CharacterRevision>();
+    private MoonstoneInfo _moonstone = new();
+    private int _moonstoneUsed;
+    private int _newMoonstoneCost;
+
+    protected override async Task OnSafeParametersSetAsync()
+    {
+        var character = await LandingService.Admin.GetMwFifthCharacter(CharacterId);
+        _character = character.Character;
+        _characterBuilder = new CharacterBuilder(character, LandingService.MwFifthGameState, Logger);
+        _moonstone = character.Moonstone;
+        _moonstoneUsed = character.Revision.GiftMoonstone + character.Revision.SkillMoonstone;
+        _newMoonstoneCost = _moonstoneUsed - character.Character.UsedMoonstone;
+    }
+
+    protected override async Task OnSafeInitializedAsync()
+    {
+        var character = await LandingService.Admin.GetMwFifthCharacter(CharacterId);
+        _characterBuilder = new CharacterBuilder(character, LandingService.MwFifthGameState, Logger);
+        var revisions = await LandingService.Admin.GetMwFifthCharacterRevisions(CharacterId);
+        _revisions = revisions.CharacterRevisions;
+        Array.Reverse(_revisions);
+    }
+
+}

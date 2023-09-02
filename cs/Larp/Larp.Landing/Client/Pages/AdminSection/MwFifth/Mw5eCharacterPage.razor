@@ -1,8 +1,7 @@
 @page "/admin/mw5e/characters/{CharacterId}"
-@inherits LarpPage
-
-@using Larp.Landing.Client.Pages.MwFifth
 @using Larp.Landing.Shared.MwFifth
+@using Larp.Landing.Client.Pages.MwFifth
+@inherits LarpPage
 @inject LandingService LandingService
 
 <PageHeader>Mystwood 5e Characters</PageHeader>
@@ -25,6 +24,7 @@
             <MudButton StartIcon="@Icons.Material.Filled.Undo" OnClick="Reject" Variant="Variant.Filled" Color="Color.Error">Reject</MudButton>
         }
         <MudButton StartIcon="@Icons.Material.Filled.Undo" OnClick="Move" Variant="Variant.Filled" Color="Color.Secondary">Move</MudButton>
+        <MudButton StartIcon="@Icons.Material.Filled.Print" OnClick="PrintCharacter" Variant="Variant.Filled" Color="Color.Primary">Print</MudButton>
     </MudButtonGroup>
 
     @if (IsLoading || _characterBuilder == null)
@@ -222,6 +222,11 @@
     private void GoToAccount()
     {
         NavigationManager.NavigateTo($"/admin/accounts/{_characterBuilder?.Revision.AccountId}");
+    }
+
+    private void PrintCharacter()
+    {
+        NavigationManager.NavigateTo($"/admin/mw5e/characters/{CharacterId}/print");
     }
 
     private void EditCharacter()
