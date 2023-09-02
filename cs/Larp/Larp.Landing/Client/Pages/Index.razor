@@ -16,7 +16,7 @@
         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
             <img src="/tree-white.webp" style="height: 5em; width: 5em;" alt="Mystwood Tree Logo"/>
             <MudStack Spacing="0">
-                <MudText Typo="Typo.h4" Align="Align.Center" Style="color: white; margin: 0;  white-space: nowrap">Welcome to @LandingService.ServiceName!</MudText>
+                <MudText Typo="Typo.h5" Align="Align.Center" Style="color: white; margin: 0">Welcome to @LandingService.ServiceName!</MudText>
                 <MudText Typo="Typo.body1" Align="Align.Left" Style="color: #fff">
                     Visit the <a style="color: #ada" href="http://mystwood.org/" target="_blank" rel="bookmark">Mystwood</a> homepage for more information.
                 </MudText>
@@ -195,7 +195,15 @@
         try
         {
             _dashboard = await LandingService.GetAccountDashboard();
-            _upcomingEvents = _dashboard.Events.Values.Where(e => e.IsPreEventOpen()).ToArray();
+
+    // Next two events with Prereg open
+            _upcomingEvents = _dashboard.Events.Values
+                .OrderBy(e => e.Date)
+                .Where(e => e.IsPreEventOpen())
+                .Take(2)
+                .ToArray();
+
+    // All events with Prereg submitted but no PEL approved
             _pelEvents = _dashboard.Events.Values
                 .Where(e => e.IsPostEventOpen()) // PEL is open
                 .Where(e => _dashboard.Letters.Any(l => // Player has a prereg 
