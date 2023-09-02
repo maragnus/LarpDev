@@ -159,6 +159,68 @@
     </MudPaper>
 }
 
+<MudPaper Elevation="2" Class="pa-4 my-4" style="text-align: center">
+    <MudTimeline TimelineOrientation="TimelineOrientation.Horizontal" TimelineAlign="TimelineAlign.Default" TimelinePosition="TimelinePosition.Top" Class="ma-0 pa-0">
+        <MudTimelineItem Size="Size.Medium" Color="Color.Tertiary">
+            <ItemDot>
+                <MudIcon Icon="@Icons.Material.Filled.Edit" Size="Size.Medium"/>
+            </ItemDot>
+            <ItemContent>
+                @if (Letter.StartedOn.HasValue)
+                {
+                    <div title="@Letter.StartedOn.Value.ToString("h:mm tt - dddd, MMMM d, yyyy")">
+                        Started on <br/>
+                        @Letter.StartedOn.Value.ToString("ddd, MMM d")
+                    </div>
+                }
+                else
+                {
+                    <div>Not started</div>
+                }
+            </ItemContent>
+        </MudTimelineItem>
+
+        <MudTimelineItem Size="Size.Medium" Color="Color.Primary">
+            <ItemDot>
+                <MudIcon Icon="@Icons.Material.Filled.Send" Size="Size.Medium"/>
+            </ItemDot>
+            <ItemContent>
+                @if (Letter.SubmittedOn.HasValue)
+                {
+                    <div title="@Letter.SubmittedOn.Value.ToString("h:mm tt - dddd, MMMM d, yyyy")">
+                        Submitted on<br/>
+                        @Letter.SubmittedOn.Value.ToString("ddd, MMM d")
+                    </div>
+                }
+                else
+                {
+                    <div>Not submitted</div>
+                }
+            </ItemContent>
+        </MudTimelineItem>
+
+        <MudTimelineItem Size="Size.Medium" Color="Color.Secondary">
+            <ItemDot>
+                <MudIcon Icon="@Icons.Material.Filled.Verified" Size="Size.Medium"/>
+            </ItemDot>
+            <ItemContent>
+                @if (Letter.ApprovedOn.HasValue)
+                {
+                    <div title="@Letter.ApprovedOn.Value.ToString("h:mm tt - dddd, MMMM d, yyyy")">
+                        Approved on<br/>
+                        @Letter.ApprovedOn.Value.ToString("ddd, MMM d") by<br/>
+                        <MudIcon Size="Size.Small" Style="font-size: inherit" Icon="@Icons.Material.Filled.AccountCircle"/> ApprovedBy
+                    </div>
+                }
+                else
+                {
+                    <div>Not approved</div>
+                }
+            </ItemContent>
+        </MudTimelineItem>
+    </MudTimeline>
+</MudPaper>
+
 @code {
 
     [Parameter]
