@@ -162,6 +162,13 @@ public static class MapApiExtensions
             httpContext.Response.StatusCode = 403; // Forbidden
             await httpContext.Response.WriteAsync(ex.ToString());
         }
+        catch (ResourceUnauthorizedException ex)
+        {
+            // 403 Forbidden is the status code to return when a client has valid credentials but not enough privileges to perform an action on a resource.
+            logger.LogWarning(ex, "Unauthenticated request is denied: {Uri}", httpContext.Request.Path);
+            httpContext.Response.StatusCode = 403; // Forbidden
+            await httpContext.Response.WriteAsync(ex.ToString());
+        }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error rendering {Uri}: {Message}", httpContext.Request.Path, ex.Message);

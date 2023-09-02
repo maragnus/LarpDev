@@ -14,7 +14,7 @@ public interface ILandingService
 
     [ApiPost("auth/logout")]
     Task<Result> Logout();
-    
+
     [ApiPost("auth/validate"), ApiAuthenticated]
     Task<Result> Validate();
 
@@ -39,30 +39,33 @@ public interface ILandingService
     [ApiPost("account"), ApiAuthenticated]
     Task AccountUpdate(string? fullName, string? location, string? phone, string? allergies, DateOnly? birthDate);
 
+    [ApiGet("dashboard")]
+    Task<AccountDashboard> GetDashboard();
+
     [ApiGet("events")]
     Task<EventsAndLetters> GetEvents(EventList list);
-    
+
     [ApiGet("larp/characters/names"), ApiAuthenticated]
-    Task<Dictionary<string,string>> GetCharacterNames();
+    Task<Dictionary<string, string>> GetCharacterNames();
 
     [ApiGet("events/attendance"), ApiAuthenticated]
     Task<EventAttendance[]> GetAttendance();
 
     [ApiPost("letters/new"), ApiAuthenticated]
     Task<Letter> DraftLetter(string eventId, string letterName);
-    
+
     [ApiGet("letters/{letterId}"), ApiAuthenticated]
     Task<Letter> GetLetter(string letterId);
-    
+
     [ApiPost("letters/{letterId}"), ApiAuthenticated]
     Task SaveLetter(string letterId, Letter letter);
 
     [ApiGet("letters/events/{eventId}/{letterName}"), ApiAuthenticated]
     Task<EventsAndLetters> GetEventLetter(string eventId, string letterName);
-    
+
     [ApiGet("attachments/{attachmentId}/{fileName}")]
     Task<IFileInfo> GetAttachment(string attachmentId, string fileName);
-    
+
     [ApiGet("attachments/thumbnails/{attachmentId}/{fileName}")]
     Task<IFileInfo> GetAttachmentThumbnail(string attachmentId, string fileName);
 }

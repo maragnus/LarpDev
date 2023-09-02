@@ -1,4 +1,6 @@
 ﻿@page "/"
+@using Larp.Landing.Shared
+@inherits LarpPage
 @inject LandingService LandingService
 <PageHeader>@LandingService.ServiceName</PageHeader>
 
@@ -10,43 +12,189 @@
 </style>
 
 <MudContainer MaxWidth="MaxWidth.Small" Class="index">
-    <MudText Typo="Typo.h4" Align="Align.Center" Style="color: white">Welcome to @LandingService.ServiceName!</MudText>
-
-    <MudPaper Elevation="2" Style="background-color: rgba(255, 255, 255, 0.25); margin: 4em 0; padding: 2em">
-        <MudText Typo="Typo.body1" Align="Align.Center" Style="color: #fff" Class="links">
-            Check the menu to 
-            @if (!LandingService.IsAuthenticated)
-            {
-                <span><a href="/login">sign in</a>, </span>
-            }
-            access your <a href="/characters">characters</a>, check <a href="/events">upcoming events</a>, fill out <a href="/events/past">post event letter</a>, or <a href="/clarify">clarify</a> game terminology!<br/>
-        </MudText>
-    </MudPaper>
-
-    <MudPaper Elevation="2" Style="background-color: rgba(255, 255, 255, 0.25); margin: 4em 0; padding: 2em">
-        <MudStack Row Justify="Justify.Center" Class="links">
-            <img src="/tree-white.webp" style="height: 4em; width: auto" alt="Myswood Tree Logo"/>
-            <div>
-            <MudText Typo="Typo.h6" Align="Align.Left" Style="color: #fff">
-                   Mystwood
-            </MudText>
-            <MudText Typo="Typo.body1" Align="Align.Left" Style="color: #fff">
-                Visit the <a href="http://mystwood.org/">Mystwood</a> homepage for more information.
-            </MudText>
-            </div>
+    <MudStack Spacing="4">
+        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+            <img src="/tree-white.webp" style="height: 5em; width: 5em;" alt="Mystwood Tree Logo"/>
+            <MudStack Spacing="0">
+                <MudText Typo="Typo.h4" Align="Align.Center" Style="color: white; margin: 0;  white-space: nowrap">Welcome to @LandingService.ServiceName!</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Left" Style="color: #fff">
+                    Visit the <a style="color: #ada" href="http://mystwood.org/">Mystwood</a> homepage for more information.
+                </MudText>
+            </MudStack>
         </MudStack>
-    </MudPaper>
 
-    <MudText Typo="Typo.body2" Align="Align.Center" Style="color: #ccc;">Revision <Revision/></MudText>
-    <MudStack Row Spacing="4">
-        <MudTooltip Text="@($"{LandingService.ServiceName} is open source developed by Josh Brown. Please feel free to participate in its development.")">
-            <MudButton Style="white-space: nowrap" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.GitHub" Variant="Variant.Filled" Href="https://github.com/maragnus/LarpDev">@LandingService.ServiceName</MudButton>
-        </MudTooltip>
-        <MudButton Style="white-space: nowrap"  Color="Color.Secondary" StartIcon="@Icons.Custom.Brands.GitHub" Variant="Variant.Filled" Href="https://github.com/maragnus/LarpDev/issues/new">Report an issue</MudButton>
-        <MudButton Style="white-space: nowrap"  Color="Color.Tertiary" StartIcon="@Icons.Custom.Brands.MicrosoftVisualStudio" Variant="Variant.Filled" Href="https://dotnet.microsoft.com/en-us/apps/aspnet/web-apps/blazor">Made with Blazor</MudButton>
+        @if (_dashboard.AvailableMoonstone.HasValue && _dashboard.TotalMoonstone.HasValue)
+        {
+            <MudStack Spacing="4">
+                <MudStack Row AlignItems="AlignItems.Start" Justify="Justify.SpaceEvenly" Class="my-4">
+                    <MudTooltip Text="Total amount Moonstone you have earned">
+                        <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                            <MudAvatar Color="Color.Primary">@_dashboard.TotalMoonstone</MudAvatar>
+                            <MudText Style="color: #fff" Align="Align.Center" Typo="Typo.caption">Total<br/>Moonstone</MudText>
+                        </MudStack>
+                    </MudTooltip>
+                    <MudTooltip Text="The amount of moonstone you have available available">
+                        <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                            <MudAvatar Color="Color.Success">@_dashboard.AvailableMoonstone</MudAvatar>
+                            <MudText Style="color: #fff" Align="Align.Center" Typo="Typo.caption">Available<br/>Moonstone</MudText>
+                        </MudStack>
+                    </MudTooltip>
+                </MudStack>
+            </MudStack>
+        }
+
+        <MudStack Spacing="4">
+            @if (_upcomingEvents.Length > 0)
+            {
+                <MudText Typo="Typo.h6" Style="color: #fff">Upcoming Events</MudText>
+                <MudStack Spacing="4">
+                    @foreach (var ev in _upcomingEvents)
+                    {
+                        var prereg = _dashboard.Letters.Values
+                            .FirstOrDefault(l => l.EventId == ev.EventId && l.Name == LetterNames.PreEvent);
+                        var preregUrl = () => NavigationManager.NavigateTo($"/events/{ev.EventId}/letter/{LetterNames.PreEvent}");
+
+                        <MudCard>
+                            <MudCardContent>
+                                <MudStack Spacing="0">
+                                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                                        <MudText Typo="Typo.subtitle1">
+                                            <strong>@ev.Title</strong>
+                                        </MudText>
+                                        @switch (prereg?.State)
+                                        {
+                                            case null:
+                                            case LetterState.NotStarted:
+                                            case LetterState.Draft:
+                                                <MudChip Color="Color.Error" Icon="@Icons.Material.Filled.QuestionMark" Size="Size.Small" OnClick="preregUrl">RSVP</MudChip>
+                                                break;
+
+                                            case LetterState.Submitted:
+                                                <MudChip Color="@Color.Warning" Icon="@Icons.Material.Filled.ManageSearch" Size="@Size.Small" OnClick="preregUrl">Prereg Submitted</MudChip>
+                                                break;
+
+                                            case LetterState.Approved:
+                                                <MudChip Color="@Color.Success" Icon="@Icons.Material.Filled.Check" Size="@Size.Small" OnClick="preregUrl">Prereg Approved</MudChip>
+                                                break;
+                                        }
+                                    </MudStack>
+                                    @if (!string.IsNullOrWhiteSpace(ev.Location))
+                                    {
+                                        <MudStack Row AlignItems="AlignItems.Center">
+                                            <MudIcon Color="Color.Primary" Size="Size.Small" Style="font-size: inherit" Icon="@Icons.Material.Filled.LocationOn"/>
+                                            <MudText>@ev.Location</MudText>
+                                        </MudStack>
+                                    }
+                                    <MudChipSet>
+                                        @foreach (var component in ev.Components)
+                                        {
+                                            <MudChip Size="Size.Small">@component.Name (@component.Date.ToString("ddd, MMM d"))</MudChip>
+                                        }
+                                    </MudChipSet>
+                                </MudStack>
+                            </MudCardContent>
+                        </MudCard>
+                    }
+                </MudStack>
+            }
+
+            @if (_pelEvents.Length > 0)
+            {
+                <MudText Typo="Typo.h6" Style="color: #fff">PEL Status</MudText>
+                <MudStack Spacing="4">
+                    @foreach (var ev in _pelEvents)
+                    {
+                        var pel = _dashboard.Letters.Values
+                            .FirstOrDefault(l => l.EventId == ev.EventId && l.Name == LetterNames.PostEvent);
+                        var pelUrl = () => NavigationManager.NavigateTo($"/events/{ev.EventId}/letter/{LetterNames.PostEvent}");
+
+                        <MudCard>
+                            <MudCardContent>
+                                <MudStack Spacing="0">
+                                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                                        <MudText Typo="Typo.subtitle1">
+                                            <strong>@ev.Title</strong>
+                                        </MudText>
+                                        @switch (pel?.State)
+                                        {
+                                            case null:
+                                            case LetterState.NotStarted:
+                                            case LetterState.Draft:
+                                                <MudChip Color="Color.Error" Icon="@Icons.Material.Filled.QuestionMark" Size="Size.Small" OnClick="pelUrl">PEL Not Started</MudChip>
+                                                break;
+
+                                            case LetterState.Submitted:
+                                                <MudChip Color="@Color.Warning" Icon="@Icons.Material.Filled.ManageSearch" Size="@Size.Small" OnClick="pelUrl">PEL Submitted</MudChip>
+                                                break;
+
+                                            case LetterState.Approved:
+                                                <MudChip Color="@Color.Success" Icon="@Icons.Material.Filled.Check" Size="@Size.Small" OnClick="pelUrl">PEL Approved</MudChip>
+                                                break;
+                                        }
+                                    </MudStack>
+                                    @if (!string.IsNullOrWhiteSpace(ev.Location))
+                                    {
+                                        <MudStack Row AlignItems="AlignItems.Center">
+                                            <MudIcon Color="Color.Primary" Size="Size.Small" Style="font-size: inherit" Icon="@Icons.Material.Filled.LocationOn"/>
+                                            <MudText>@ev.Location</MudText>
+                                        </MudStack>
+                                    }
+                                    <MudChipSet>
+                                        @foreach (var component in ev.Components)
+                                        {
+                                            <MudChip Size="Size.Small">@component.Name (@component.Date.ToString("ddd, MMM d"))</MudChip>
+                                        }
+                                    </MudChipSet>
+                                </MudStack>
+                            </MudCardContent>
+                        </MudCard>
+                    }
+                </MudStack>
+            }
+        </MudStack>
+
+        <MudText Typo="Typo.body2" Align="Align.Center" Style="color: #ccc;">Revision <Revision/></MudText>
+        <MudStack Row Spacing="4" Justify="Justify.SpaceBetween">
+            <MudTooltip Text="@($"{LandingService.ServiceName} is open source and developed by Josh Brown. Please feel free to participate in its development.")">
+                <MudButton Style="white-space: nowrap" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.GitHub" Variant="Variant.Filled" Href="https://github.com/maragnus/LarpDev" Target="_blank">@LandingService.ServiceName</MudButton>
+            </MudTooltip>
+            <MudButton Style="white-space: nowrap" Color="Color.Secondary" StartIcon="@Icons.Custom.Brands.GitHub" Variant="Variant.Filled" Href="https://github.com/maragnus/LarpDev/issues/new" Target="_blank">Report issue</MudButton>
+        </MudStack>
+        <MudStack Row Spacing="4" Justify="Justify.SpaceBetween" Class="mb-4">
+            <MudButton Style="white-space: nowrap" Color="Color.Warning" StartIcon="@Icons.Material.Filled.PhotoCamera" Variant="Variant.Filled" Href="https://www.facebook.com/bryce.clark.14268" Target="_blank">Photo by Bryce Clark</MudButton>
+            <MudButton Style="white-space: nowrap" Color="Color.Tertiary" StartIcon="@Icons.Custom.Brands.MicrosoftVisualStudio" Variant="Variant.Filled" Href="https://dotnet.microsoft.com/en-us/apps/aspnet/web-apps/blazor" Target="_blank">Made w/ Blazor</MudButton>
+        </MudStack>
     </MudStack>
-    
-    <MudPaper Class="links" Style="color: #ffffff; background-color: rgba(255, 255, 255, 0.25); margin: 4em 0; padding: 2em">
-        This is under heavy development. If you're getting errors, click <a href="/reset">Reset</a> to log out.
-    </MudPaper>
 </MudContainer>
+
+@code
+{
+    private AccountDashboard? _dashboard = null;
+    private Event[] _upcomingEvents = Array.Empty<Event>();
+    private Event[] _pelEvents = Array.Empty<Event>();
+
+    protected override async Task OnSafeInitializedAsync()
+    {
+        try
+        {
+            _dashboard = await LandingService.GetAccountDashboard();
+            _upcomingEvents = _dashboard.Events.Values.Where(e => e.IsPreEventOpen()).ToArray();
+            _pelEvents = _dashboard.Events.Values
+                .Where(e => e.IsPostEventOpen()) // PEL is open
+                .Where(e => _dashboard.Letters.Any(l => // Player has a prereg 
+                    l.Value.EventId != e.EventId
+                    || l.Value.Name != LetterNames.PreEvent))
+                .Where(e => _dashboard.Letters.All(l => // Player PEL not approved 
+                    l.Value.EventId != e.EventId
+                    || l.Value.Name != LetterNames.PostEvent
+                    || l.Value.State != LetterState.Approved))
+                .ToArray();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to load summary");
+        }
+    }
+
+    private void GoTo(string pelUrl) => NavigationManager.NavigateTo(pelUrl);
+}

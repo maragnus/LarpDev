@@ -179,8 +179,9 @@ public class EventManager
 
         var filter = list switch
         {
-            EventList.Past => Builders<Event>.Filter.Where(x => x.Date <= now.AddDays(4) && !x.IsHidden),
-            EventList.Upcoming => Builders<Event>.Filter.Where(x => x.Date >= now.AddDays(-4) && !x.IsHidden),
+            EventList.Past => Builders<Event>.Filter.Where(x => !x.IsHidden && x.Date <= now.AddDays(4)),
+            EventList.Upcoming => Builders<Event>.Filter.Where(x => !x.IsHidden && x.Date >= now.AddDays(-4)),
+            EventList.Dashboard => Builders<Event>.Filter.Where(x => !x.IsHidden && x.Date >= now.AddMonths(-6)),
             _ => throw new ArgumentOutOfRangeException(nameof(list), list, null)
         };
 

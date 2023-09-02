@@ -22,13 +22,13 @@ public class LandingService
 {
     public const string ServiceName = "Mystwood Tavern";
 
-    private readonly DataCacheService _dataCache;
-    private readonly ILogger<LandingService> _logger;
-    private readonly ILocalStorageService _localStorage;
-    private readonly HttpClientFactory _httpClientFactory;
-
     private const int GameStateUpdateFrequencyHours = 4;
     private const string SessionIdKey = "SessionId";
+
+    private readonly DataCacheService _dataCache;
+    private readonly HttpClientFactory _httpClientFactory;
+    private readonly ILocalStorageService _localStorage;
+    private readonly ILogger<LandingService> _logger;
 
     public LandingService(ILandingService landing,
         IAdminService admin,
@@ -53,15 +53,15 @@ public class LandingService
     public ILandingService Service { get; }
     public IMwFifthService MwFifth { get; }
     public bool IsAuthenticated { get; private set; }
-    public event EventHandler? AuthenticatedChanged;
-    public async Task<CharacterSummary[]> GetCharacters() => await Service.GetCharacters();
     public BrowserInfo? BrowserInfo { get; private set; }
     public string? LocationName { get; private set; }
     public Account? Account { get; private set; }
 
     public Game MwFifthGame => Games[GameState.GameName];
     public GameState MwFifthGameState { get; private set; } = default!;
-    
+    public event EventHandler? AuthenticatedChanged;
+    public async Task<CharacterSummary[]> GetCharacters() => await Service.GetCharacters();
+
     private async Task GetMwFifthGameState()
     {
         MwFifthGameState = await _dataCache.CacheGameState<GameState>(GameState.GameName,
@@ -149,7 +149,7 @@ public class LandingService
             $"{info.BrowserName} on {info.OSName} {info.OSVersion} {info.DeviceModel} {info.DeviceType}"
                 .Replace("  ", " ").Trim();
     }
-    
+
     public async Task Reset()
     {
         await Logout(true);
@@ -187,4 +187,7 @@ public class LandingService
 
     public bool IsInRole(AccountRole role) =>
         Account?.Roles?.Contains(role) == true;
+
+    public async Task<AccountDashboard> GetAccountDashboard() =>
+        await Service.GetDashboard();
 }

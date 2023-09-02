@@ -6,7 +6,8 @@ namespace Larp.Data;
 public enum EventList
 {
     Upcoming,
-    Past
+    Past,
+    Dashboard
 }
 
 public static class LetterNames
@@ -124,54 +125,4 @@ public class Event
 
         return result;
     }
-}
-
-[PublicAPI]
-public class EventAttendance : Attendance
-{
-    public EventAttendance()
-    {
-    }
-
-    public EventAttendance(Attendance attendance, Event @event, Letter[] letters)
-    {
-        Id = attendance.Id;
-        AccountId = attendance.AccountId;
-        MwFifth = attendance.MwFifth;
-        EventId = attendance.EventId;
-        Event = @event;
-        Letters = letters;
-    }
-
-    public Event Event { get; set; } = default!;
-    public Letter[] Letters { get; set; } = Array.Empty<Letter>();
-}
-
-[PublicAPI]
-public class Attendance
-{
-    [BsonId, BsonRepresentation(BsonType.ObjectId)]
-    public string Id { get; set; } = default!;
-
-    [BsonRepresentation(BsonType.ObjectId)]
-    public string EventId { get; set; } = default!;
-
-    [BsonRepresentation(BsonType.ObjectId)]
-    public string AccountId { get; set; } = default!;
-
-    [BsonIgnoreIfNull] public decimal? ProvidedPayment { get; set; }
-
-    [BsonIgnoreIfNull] public decimal? ExpectedPayment { get; set; }
-
-    public MwFifthAttendance? MwFifth { get; set; }
-}
-
-public class MwFifthAttendance
-{
-    public int? Moonstone { get; set; }
-
-    public int? PostMoonstone { get; set; }
-
-    [BsonRepresentation(BsonType.ObjectId)]
-    public string[] CharacterIds { get; set; } = Array.Empty<string>();
 }

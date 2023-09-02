@@ -6,12 +6,11 @@ namespace Larp.Landing.Server.Services;
 public class LandingServiceServer : ILandingService
 {
     private readonly LarpContext _db;
-    private readonly IUserSessionManager _userSessionManager;
-    private readonly IUserSession _userSession;
-    private readonly INotifyService _notifyService;
-    private readonly LetterManager _letterManager;
     private readonly EventManager _eventManager;
-    private readonly string _accountId;
+    private readonly LetterManager _letterManager;
+    private readonly INotifyService _notifyService;
+    private readonly IUserSession _userSession;
+    private readonly IUserSessionManager _userSessionManager;
 
     public LandingServiceServer(LarpContext db, IUserSessionManager userSessionManager, IUserSession userSession,
         INotifyService notifyService, LetterManager letterManager, EventManager eventManager)
@@ -22,8 +21,11 @@ public class LandingServiceServer : ILandingService
         _notifyService = notifyService;
         _letterManager = letterManager;
         _eventManager = eventManager;
-        _accountId = userSession.AccountId!;
     }
+
+    private string AccountId =>
+        _userSession.AccountId
+        ?? throw new ResourceUnauthorizedException();
 
     public async Task<Result> Login(string email, string deviceName)
     {
@@ -54,19 +56,6 @@ public class LandingServiceServer : ILandingService
         return StringResult.Success(sessionId);
     }
 
-    private async Task GrantAdminRoles(string accountId)
-    {
-        await _userSessionManager.UpdateUserAccount(accountId,
-            x =>
-                x.Set(y => y.Roles,
-                    new[]
-                    {
-                        AccountRole.AccountAdmin,
-                        AccountRole.AdminAccess,
-                        AccountRole.MwFifthGameMaster
-                    }));
-    }
-
     public async Task<Result> Validate()
     {
         var result = await _userSessionManager.ValidateUserSession(_userSession.SessionId);
@@ -89,7 +78,7 @@ public class LandingServiceServer : ILandingService
     {
         var gameState = await _db.MwFifthGame.GetGameState();
         var characters = await _db.MwFifthGame.CharacterRevisions
-            .Find(x => x.State != CharacterState.Archived && x.AccountId == _userSession.AccountId!)
+            .Find(x => x.State != CharacterState.Archived && x.AccountId == AccountId!)
             .ToListAsync();
         return characters.Select(x => x.ToSummary(gameState)).ToArray();
     }
@@ -101,7 +90,7 @@ public class LandingServiceServer : ILandingService
         {
             AccountId = account.AccountId,
             Emails = account.Emails,
-            Location =account.Location,
+            Location = account.Location,
             Name = account.Name,
             Notes = account.Notes,
             BirthDate = account.BirthDate,
@@ -114,18 +103,18 @@ public class LandingServiceServer : ILandingService
     }
 
     public async Task AccountEmailAdd(string email) =>
-        await _userSessionManager.AddEmailAddress(_userSession.AccountId!, email);
+        await _userSessionManager.AddEmailAddress(AccountId!, email);
 
     public async Task AccountEmailRemove(string email) =>
-        await _userSessionManager.RemoveEmailAddress(_userSession.AccountId!, email);
+        await _userSessionManager.RemoveEmailAddress(AccountId!, email);
 
     public async Task AccountEmailPreferred(string email) =>
-        await _userSessionManager.PreferEmailAddress(_userSession.AccountId!, email);
+        await _userSessionManager.PreferEmailAddress(AccountId!, email);
 
     public async Task AccountUpdate(string? fullName, string? location, string? phone, string? allergies,
         DateOnly? birthDate)
     {
-        await _userSessionManager.UpdateUserAccount(_userSession.AccountId!, builder => builder
+        await _userSessionManager.UpdateUserAccount(AccountId!, builder => builder
             .Set(x => x.Name, fullName)
             .Set(x => x.Location, location)
             .Set(x => x.Phone, phone)
@@ -135,13 +124,39 @@ public class LandingServiceServer : ILandingService
         );
     }
 
+    public async Task<AccountDashboard> GetDashboard()
+    {
+        if (_userSession.AccountId != null)
+        {
+            var characters = await GetDashboardCharacters();
+            var events = await _eventManager.GetEvents(EventList.Dashboard, AccountId);
+
+            return new AccountDashboard()
+            {
+                Characters = characters.ToDictionary(cs => cs.Id),
+                Events = events.Events,
+                Letters = events.Letters,
+                AvailableMoonstone = _userSession.Account!.MwFifthMoonstone - _userSession.Account.MwFifthUsedMoonstone,
+                TotalMoonstone = _userSession.Account.MwFifthMoonstone
+            };
+        }
+        else
+        {
+            var events = await _eventManager.GetEvents(EventList.Upcoming, null);
+            return new AccountDashboard()
+            {
+                Events = events.Events
+            };
+        }
+    }
+
     public async Task<EventsAndLetters> GetEvents(EventList list) =>
-        await _eventManager.GetEvents(list, _userSession.AccountId);
+        await _eventManager.GetEvents(list, _userSession.AccountId); // Nullable, don't throw exception
 
     public async Task<Dictionary<string, string>> GetCharacterNames()
     {
         var characters = await _db.MwFifthGame.CharacterRevisions
-            .Find(character => character.AccountId == _userSession.AccountId && character.State == CharacterState.Live)
+            .Find(character => character.AccountId == AccountId && character.State == CharacterState.Live)
             .Project(character => new { character.CharacterId, character.CharacterName })
             .ToListAsync();
         return characters
@@ -151,25 +166,22 @@ public class LandingServiceServer : ILandingService
     }
 
     public async Task<EventAttendance[]> GetAttendance() =>
-        await _eventManager.GetAccountAttendances(_accountId);
+        await _eventManager.GetAccountAttendances(AccountId);
 
     public async Task<Letter> DraftLetter(string eventId, string letterName) =>
-        await _letterManager.Draft(_accountId, eventId, letterName);
-
-    public async Task<Letter[]> GetLetters() =>
-        await _letterManager.GetAll(_accountId);
+        await _letterManager.Draft(AccountId, eventId, letterName);
 
     public async Task<Letter> GetLetter(string letterId) =>
-        await _letterManager.Get(letterId, _accountId, isAdmin: false);
+        await _letterManager.Get(letterId, AccountId, isAdmin: false);
 
     public async Task SaveLetter(string letterId, Letter letter)
     {
         letter.LetterId = letterId;
-        await _letterManager.Save(letter, _accountId);
+        await _letterManager.Save(letter, AccountId);
     }
 
     public async Task<EventsAndLetters> GetEventLetter(string eventId, string letterName) =>
-        await _letterManager.GetEventLetter(_accountId, eventId, letterName);
+        await _letterManager.GetEventLetter(AccountId, eventId, letterName);
 
     public async Task<IFileInfo> GetAttachment(string attachmentId, string fileName)
     {
@@ -209,6 +221,31 @@ public class LandingServiceServer : ILandingService
         return new DownloadFileInfo(new MemoryStream(file.ThumbnailData), file.ThumbnailFileName ?? "file",
             file.ThumbnailData.Length);
     }
+
+    private async Task GrantAdminRoles(string accountId)
+    {
+        await _userSessionManager.UpdateUserAccount(accountId,
+            x =>
+                x.Set(y => y.Roles,
+                    new[]
+                    {
+                        AccountRole.AccountAdmin,
+                        AccountRole.AdminAccess,
+                        AccountRole.MwFifthGameMaster
+                    }));
+    }
+
+    public async Task<CharacterSummary[]> GetDashboardCharacters()
+    {
+        var gameState = await _db.MwFifthGame.GetGameState();
+        var characters = await _db.MwFifthGame.CharacterRevisions
+            .Find(x => x.State == CharacterState.Draft || x.State == CharacterState.Review && x.AccountId == AccountId)
+            .ToListAsync();
+        return characters.Select(x => x.ToSummary(gameState)).ToArray();
+    }
+
+    public async Task<Letter[]> GetLetters() =>
+        await _letterManager.GetAll(AccountId);
 }
 
 public class DownloadFileInfo : IFileInfo
