@@ -41,8 +41,17 @@ RUN dotnet publish cs/Larp/Larp.Landing/Server/Larp.Landing.Server.csproj -c Rel
 FROM base AS final
 WORKDIR /app
 COPY --from=build /src/publish .
+
+# Application Configuration
 ENV ASPNETCORE_URLS http://+:80
 ENV LARPDATA__CONNECTIONSTRING $MONGO_URL
 ENV LARPDATA__DATABASE $MONGO_DB
+
+# Garbage Collection: Server mode, Concurrent, 256 MB limit, 0-9 Conservation Strategy
+ENV DOTNET_gcServer 1
+ENV DOTNET_gcConcurrent 1
+ENV DOTNET_GCHeapHardLimit 0x10000000
+ENV DOTNET_GCConserveMemory 5
+
 USER $APP_UID
 ENTRYPOINT ["dotnet", "Larp.Landing.Server.dll"]

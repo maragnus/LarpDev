@@ -96,4 +96,7 @@ app.MapMethods("/api/{*path}",
 app.MapRazorPages();
 app.MapFallbackToFile("index.html");
 
+GC.Collect();
+GC.WaitForPendingFinalizers();
+
 app.Run();
