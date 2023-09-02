@@ -6,6 +6,11 @@
 <PageHeader Container>Account Manager</PageHeader>
 
 <AdminLayout Title="Manage Accounts" Loading="IsLoading">
+    <MudButtonGroup OverrideStyles="false">
+        <MudButton Class="mt-4" Color="Color.Warning" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.SupervisedUserCircle" OnClick="AddAdmin">Add Admin Account</MudButton>
+        <MudButton Class="mt-4" Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.AccountCircle" OnClick="AddAccount">Add Player Account</MudButton>
+    </MudButtonGroup>
+
     <div class="pa-2 mb-4">
         <EditForm Model="_search" OnSubmit="Search">
             <MudStack Row Justify="Justify.Center" AlignItems="AlignItems.Start">
@@ -56,7 +61,10 @@
         </Columns>
     </MudDataGrid>
 
-    <MudButton Class="mt-4" Color="Color.Warning" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.SupervisedUserCircle" OnClick="AddAdmin">Add Admin</MudButton>
+    <MudButtonGroup OverrideStyles="false">
+        <MudButton Class="mt-4" Color="Color.Warning" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.SupervisedUserCircle" OnClick="AddAdmin">Add Admin Account</MudButton>
+        <MudButton Class="mt-4" Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.AccountCircle" OnClick="AddAccount">Add Player Account</MudButton>
+    </MudButtonGroup>
 </AdminLayout>
 
 @code {
@@ -103,6 +111,17 @@
             NavigationManager.NavigateTo($"/admin/accounts/{stringResult.Value}");
         else
             await DialogService.ShowMessageBox("Adding Administrator", stringResult.ErrorMessage);
+    }
+
+    private async Task AddAccount()
+    {
+        var dialog = await DialogService.ShowAsync<AddAccountDialog>("Add Account");
+        var result = await dialog.Result;
+        var stringResult = (StringResult)result.Data;
+        if (stringResult.IsSuccess)
+            await OnSafeInitializedAsync();
+        else
+            await DialogService.ShowMessageBox("Adding Account", stringResult.ErrorMessage);
     }
 
     private void Open(Account account)

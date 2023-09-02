@@ -32,6 +32,9 @@ public interface IAdminService
     [ApiPost("accounts/admin"), ApiAuthenticated(AccountRoles.AccountAdmin)]
     Task<StringResult> AddAdminAccount(string fullName, string emailAddress);
 
+    [ApiPost("accounts/add"), ApiAuthenticated(AccountRoles.AccountAdmin)]
+    Task<StringResult> AddAccount(string fullName, string emailAddress);
+
     [ApiGet("mw5e/characters"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
     Task<CharacterAccountSummary[]> GetMwFifthCharacters(CharacterState state);
 

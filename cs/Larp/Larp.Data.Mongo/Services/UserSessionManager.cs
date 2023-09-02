@@ -33,7 +33,7 @@ public interface IUserSessionManager
     Task AddAccountRole(string accountId, AccountRole role);
     Task RemoveAccountRole(string accountId, AccountRole role);
     Task<Account?> FindByEmail(string email);
-    Task<string> AddAdminAccount(string fullName, string emailAddress);
+    Task<string> AddAccount(string fullName, string emailAddress, params AccountRole[] roles);
 }
 
 public class UserSessionManager : IUserSessionManager
@@ -354,29 +354,36 @@ public class UserSessionManager : IUserSessionManager
             .FirstOrDefaultAsync();
     }
 
-    public async Task<string> AddAdminAccount(string fullName, string emailAddress)
+    public async Task<string> AddAccount(string fullName, string? emailAddress, AccountRole[]? roles = null)
     {
-        var result = await FindByEmail(emailAddress);
-        if (result != null)
-            throw new BadRequestException($"User {result.Name} exists with email {emailAddress}");
+        if (!string.IsNullOrWhiteSpace(emailAddress))
+        {
+            var result = await FindByEmail(emailAddress);
+            if (result != null)
+                throw new BadRequestException($"User {result.Name} exists with email {emailAddress}");
+        }
 
         var account = new Account
         {
             AccountId = LarpContext.GenerateNewId(),
             State = AccountState.Active,
             Name = fullName,
-            Emails =
-            {
+            Roles = roles ?? Array.Empty<AccountRole>(),
+            Created = DateTimeOffset.Now
+        };
+
+        if (!string.IsNullOrWhiteSpace(emailAddress))
+        {
+            account.Emails.Add(
                 new AccountEmail()
                 {
                     Email = emailAddress,
                     NormalizedEmail = AccountEmail.NormalizeEmail(emailAddress),
                     IsPreferred = true
                 }
-            },
-            Roles = new[] { AccountRole.AdminAccess },
-            Created = DateTimeOffset.Now
-        };
+            );
+        }
+
         await _larpContext.Accounts.InsertOneAsync(account);
         return account.AccountId;
     }

@@ -608,8 +608,29 @@ public class AdminService : IAdminService
 
     public async Task<StringResult> AddAdminAccount(string fullName, string emailAddress)
     {
-        await Log(new AddAdminLogEvent { FullName = fullName, EmailAddress = emailAddress });
-        return StringResult.Success(await _userSessionManager.AddAdminAccount(fullName, emailAddress));
+        try
+        {
+            await Log(new AddAdminLogEvent { FullName = fullName, EmailAddress = emailAddress });
+            return StringResult.Success(
+                await _userSessionManager.AddAccount(fullName, emailAddress, AccountRole.AdminAccess));
+        }
+        catch (Exception ex)
+        {
+            return StringResult.Failed(ex.Message);
+        }
+    }
+
+    public async Task<StringResult> AddAccount(string fullName, string emailAddress)
+    {
+        try
+        {
+            await Log(new AddAdminLogEvent { FullName = fullName, EmailAddress = emailAddress });
+            return StringResult.Success(await _userSessionManager.AddAccount(fullName, emailAddress));
+        }
+        catch (Exception ex)
+        {
+            return StringResult.Failed(ex.Message);
+        }
     }
 
     public async Task<CharacterAccountSummary[]> GetMwFifthCharacters(CharacterState state) =>

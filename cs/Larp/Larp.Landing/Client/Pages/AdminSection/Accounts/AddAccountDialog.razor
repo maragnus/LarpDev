@@ -3,7 +3,7 @@
 
 <MudDialog>
     <DialogContent>
-        <MudText Typo="Typo.body2">This will create a new account and grant Admin Access role. You can edit this account after you save and add additional roles as necessary.</MudText>
+        <MudText Typo="Typo.body2">This will create a new account.</MudText>
         <EditForm T="Form" EditContext="_editContext" OnValidSubmit="Save">
             <DataAnnotationsValidator/>
             <MudGrid Class="my-4">
@@ -17,7 +17,7 @@
         </EditForm>
     </DialogContent>
     <DialogActions>
-        <MudButton Color="Color.Success" OnClick="Save" StartIcon="@Icons.Material.Filled.SupervisedUserCircle" Variant="Variant.Filled">Add User</MudButton>
+        <MudButton Color="Color.Success" OnClick="Save" StartIcon="@Icons.Material.Filled.AccountCircle" Variant="Variant.Filled">Add User</MudButton>
         <MudButton Color="Color.Error" OnClick="Close" Variant="Variant.Outlined">Cancel</MudButton>
     </DialogActions>
 </MudDialog>
@@ -35,7 +35,7 @@
         [Required]
         public string? FullName { get; set; }
 
-        [Required, EmailAddress]
+        [EmailAddress]
         public string? EmailAddress { get; set; }
     }
 
@@ -53,7 +53,7 @@
 
         try
         {
-            var accountId = await LandingService.Admin.AddAdminAccount(_form.FullName!, _form.EmailAddress!);
+            var accountId = await LandingService.Admin.AddAccount(_form.FullName!, _form.EmailAddress!);
             MudDialog.Close(DialogResult.Ok(accountId));
         }
         catch (Exception ex)
