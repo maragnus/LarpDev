@@ -1,3 +1,4 @@
+using System.Collections;
 using Larp.Common.LifeCycle;
 using Larp.Data.Seeder;
 using Larp.Landing.Server.Import;
@@ -6,6 +7,11 @@ using Larp.Landing.Shared.MwFifth;
 using Larp.Notify;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Internal;
+
+foreach (DictionaryEntry v in Environment.GetEnvironmentVariables())
+{
+    Console.WriteLine($"{v.Key} = {v.Value}");
+}
 
 var builder = WebApplication.CreateBuilder(args);
 
