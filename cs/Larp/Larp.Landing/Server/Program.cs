@@ -8,9 +8,10 @@ using Larp.Notify;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Internal;
 
-foreach (DictionaryEntry v in Environment.GetEnvironmentVariables())
+if (Environment.GetEnvironmentVariable("DUMP_ENV") == "1")
 {
-    Console.WriteLine($"{v.Key} = {v.Value}");
+    foreach (DictionaryEntry v in Environment.GetEnvironmentVariables())
+        Console.WriteLine($"{v.Key} = {v.Value}");
 }
 
 var builder = WebApplication.CreateBuilder(args);
@@ -75,8 +76,6 @@ else
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
-
-app.UseHttpsRedirection();
 
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
