@@ -24,6 +24,9 @@
                             case CharacterState.Draft:
                                 <MudChip Size="Size.Small" Color="@Color.Info">Draft</MudChip>
                                 break;
+                            case CharacterState.Retired:
+                                <MudChip Size="Size.Small" Color="@Color.Error">Retired</MudChip>
+                                break;
                         }
                     </CellTemplate>
                 </TemplateColumn>

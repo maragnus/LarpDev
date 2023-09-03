@@ -23,6 +23,14 @@
             <MudButton StartIcon="@Icons.Material.Filled.Verified" OnClick="Approve" Variant="Variant.Filled" Color="Color.Success">Approve</MudButton>
             <MudButton StartIcon="@Icons.Material.Filled.Undo" OnClick="Reject" Variant="Variant.Filled" Color="Color.Error">Reject</MudButton>
         }
+        @if (_state == CharacterState.Retired)
+        {
+            <MudButton StartIcon="@Icons.Material.Filled.LockOpen" OnClick="Unretire" Variant="Variant.Filled" Color="Color.Error">Unretire</MudButton>
+        }
+        else
+        {
+            <MudButton StartIcon="@Icons.Material.Filled.Lock" OnClick="Retire" Variant="Variant.Filled" Color="Color.Error">Retire</MudButton>
+        }
         <MudButton StartIcon="@Icons.Material.Filled.Undo" OnClick="Move" Variant="Variant.Filled" Color="Color.Secondary">Move</MudButton>
         <MudButton StartIcon="@Icons.Material.Filled.Print" OnClick="PrintCharacter" Variant="Variant.Filled" Color="Color.Primary">Print</MudButton>
     </MudButtonGroup>
@@ -97,6 +105,9 @@
                                         break;
                                     case CharacterState.Draft:
                                         <MudChip Size="Size.Small" Color="@Color.Info">Draft</MudChip>
+                                        break;
+                                    case CharacterState.Retired:
+                                        <MudChip Size="Size.Small" Color="@Color.Error">Retired</MudChip>
                                         break;
                                 }
                             </MudStack>
@@ -184,6 +195,7 @@
         { CharacterState.Review, ("Character sheet is waiting for review", Severity.Warning) },
         { CharacterState.Live, ("Character sheet is live", Severity.Success) },
         { CharacterState.Draft, ("Character sheet is drafting a character revision", Severity.Info) },
+        { CharacterState.Retired, ("Character sheet has been retired", Severity.Error) },
     };
 
     [Parameter]
@@ -251,9 +263,47 @@
 
         await LoadingActionAsync(async () =>
         {
-            var characterId = _characterBuilder!.Revision.RevisionId;
-            await LandingService.Admin.ApproveMwFifthCharacter(characterId);
-            NavigationManager.NavigateTo($"/admin/mw5e/characters/{characterId}");
+            var revisionId = _characterBuilder!.Revision.RevisionId;
+            await LandingService.Admin.ApproveMwFifthCharacter(revisionId);
+            NavigationManager.NavigateTo($"/admin/mw5e/characters/{revisionId}");
+            await OnInitializedAsync();
+            StateHasChanged();
+        });
+    }
+
+    private async Task Retire()
+    {
+        var result = await DialogService.ShowMessageBox(
+            "Retire this character",
+            "Are you sure you want to retire this character? This character can no longer be updated or selecting during registration.",
+            "Yes, Retire",
+            "No, Do Nothing");
+
+        if (result != true) return;
+
+        await LoadingActionAsync(async () =>
+        {
+            var revisionId = _characterBuilder!.Revision.RevisionId;
+            await LandingService.Admin.RetireMwFifthCharacter(revisionId);
+            await OnInitializedAsync();
+            StateHasChanged();
+        });
+    }
+
+    private async Task Unretire()
+    {
+        var result = await DialogService.ShowMessageBox(
+            "Unretire this character",
+            "Are you sure you want to unretire this character? This character will become Live again and can be edited by the player.",
+            "Yes, Unretire",
+            "No, Do Nothing");
+
+        if (result != true) return;
+
+        await LoadingActionAsync(async () =>
+        {
+            var revisionId = _characterBuilder!.Revision.RevisionId;
+            await LandingService.Admin.UnretireMwFifthCharacter(revisionId);
             await OnInitializedAsync();
             StateHasChanged();
         });
@@ -271,9 +321,9 @@
 
         await LoadingActionAsync(async () =>
         {
-            var characterId = _characterBuilder!.Revision.RevisionId;
-            await LandingService.Admin.RejectMwFifthCharacter(characterId, (string?)result.Data);
-            NavigationManager.NavigateTo($"/admin/mw5e/characters/{characterId}");
+            var revisionId = _characterBuilder!.Revision.RevisionId;
+            await LandingService.Admin.RejectMwFifthCharacter(revisionId, (string?)result.Data);
+            NavigationManager.NavigateTo($"/admin/mw5e/characters/{revisionId}");
             await OnInitializedAsync();
         });
     }

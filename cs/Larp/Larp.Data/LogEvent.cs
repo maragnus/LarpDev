@@ -15,8 +15,7 @@ public abstract class LogEvent
     [BsonRepresentation(BsonType.ObjectId)]
     public string? ActorSessionId { get; set; }
 
-    [BsonRepresentation(BsonType.String)]
-    public DateTimeOffset ActedOn { get; set; }
+    [BsonRepresentation(BsonType.String)] public DateTimeOffset ActedOn { get; set; }
 
     public string Type { get; set; }
 }
@@ -31,11 +30,25 @@ public class AccountStateLogEvent : LogEvent
     public string AccountId { get; set; } = default!;
 
     public AccountState AccountState { get; set; }
- 
-    [BsonRepresentation(BsonType.String)]
-    public string AccountStateName => AccountState.ToString();
+
+    [BsonRepresentation(BsonType.String)] public string AccountStateName => AccountState.ToString();
 }
 
+public class CharacterStateLogEvent : LogEvent
+{
+    public CharacterStateLogEvent() : base("Character State")
+    {
+    }
+
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string CharacterId { get; set; } = default!;
+
+    public string? CharacterName { get; set; }
+
+    public CharacterState CharacterState { get; set; }
+
+    [BsonRepresentation(BsonType.String)] public string CharacterStateName => CharacterState.ToString();
+}
 
 public class AccountRoleLogEvent : LogEvent
 {
@@ -48,16 +61,14 @@ public class AccountRoleLogEvent : LogEvent
 
     [BsonIgnoreIfNull, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public AccountRole? AddRole { get; set; }
-    
-    [BsonRepresentation(BsonType.String)]
-    public string? AddRoleName => AddRole?.ToString();
 
-    
+    [BsonRepresentation(BsonType.String)] public string? AddRoleName => AddRole?.ToString();
+
+
     [BsonIgnoreIfNull, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public AccountRole? RemoveRole { get; set; }
 
-    [BsonRepresentation(BsonType.String)]
-    public string? RemoveRoleName => RemoveRole?.ToString();
+    [BsonRepresentation(BsonType.String)] public string? RemoveRoleName => RemoveRole?.ToString();
 }
 
 public class AccountMergeLogEvent : LogEvent
@@ -80,11 +91,9 @@ public class AddAdminLogEvent : LogEvent
     }
 
     public string? FullName { get; set; }
-    
-    public string? EmailAddress { get; set; }
-    
-}
 
+    public string? EmailAddress { get; set; }
+}
 
 public class EventChangeLogEvent : LogEvent
 {
@@ -94,7 +103,7 @@ public class EventChangeLogEvent : LogEvent
 
     [BsonRepresentation(BsonType.ObjectId)]
     public string EventId { get; set; } = default!;
-    
+
     public string? Summary { get; set; }
     public string? ChangeSummary { get; set; }
 }
@@ -106,6 +115,6 @@ public class GameStateLogEvent : LogEvent
     }
 
     public string GameName { get; set; } = default!;
-    
+
     public string? Summary { get; set; }
 }

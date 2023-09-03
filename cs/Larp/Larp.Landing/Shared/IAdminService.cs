@@ -48,20 +48,26 @@ public interface IAdminService
     [ApiGet("mw5e/characters/{characterId}/revisions"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
     Task<CharacterAndRevisions> GetMwFifthCharacterRevisions(string characterId);
 
-    [ApiPost("mw5e/characters/{characterId}/approve"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
-    Task ApproveMwFifthCharacter(string characterId);
+    [ApiPost("mw5e/characters/{revisionId}/approve"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    Task ApproveMwFifthCharacter(string revisionId);
 
-    [ApiPost("mw5e/characters/{characterId}/reject"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
-    Task RejectMwFifthCharacter(string characterId, string? reviewerNotes);
+    [ApiPost("mw5e/characters/{revisionId}/reject"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    Task RejectMwFifthCharacter(string revisionId, string? reviewerNotes);
 
-    [ApiPost("mw5e/characters/{characterId}/revise"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
-    Task<CharacterAndRevision> ReviseMwFifthCharacter(string characterId);
+    [ApiPost("mw5e/characters/{revisionId}/retire"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    Task RetireMwFifthCharacter(string revisionId);
+
+    [ApiPost("mw5e/characters/{revisionId}/unretire"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    Task UnretireMwFifthCharacter(string revisionId);
+
+    [ApiPost("mw5e/characters/{revisionId}/revise"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    Task<CharacterAndRevision> ReviseMwFifthCharacter(string revisionId);
 
     [ApiPost("mw5e/characters"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
     Task SaveMwFifthCharacter(CharacterRevision revision);
 
-    [ApiDelete("mw5e/characters/{characterId}"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
-    Task DeleteMwFifthCharacter(string characterId);
+    [ApiDelete("mw5e/characters/{revisionId}"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    Task DeleteMwFifthCharacter(string revisionId);
 
     [ApiPost("mw5e/characters/{characterId}/move"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
     Task MoveMwFifthCharacter(string characterId, string newAccountId);

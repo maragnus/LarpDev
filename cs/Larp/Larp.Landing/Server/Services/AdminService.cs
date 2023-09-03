@@ -217,20 +217,38 @@ public class AdminService : IAdminService
     public async Task<StringResult> Attach(string accountId, Stream data, string fileName, string mediaType) =>
         await _attachmentManager.Attach(accountId, data, fileName, mediaType, _account.AccountId);
 
-    public async Task ApproveMwFifthCharacter(string characterId) =>
-        await _characterManager.Approve(characterId, _account.AccountId);
+    public async Task ApproveMwFifthCharacter(string revisionId)
+    {
+        await _characterManager.Approve(revisionId, _account.AccountId);
+        await InternalLogCharacterStateChange(revisionId);
+    }
 
-    public async Task RejectMwFifthCharacter(string characterId, string? reviewerNotes) =>
-        await _characterManager.Reject(characterId, reviewerNotes);
+    public async Task RejectMwFifthCharacter(string revisionId, string? reviewerNotes)
+    {
+        await _characterManager.Reject(revisionId, reviewerNotes);
+        await InternalLogCharacterStateChange(revisionId);
+    }
 
-    public async Task<CharacterAndRevision> ReviseMwFifthCharacter(string characterId) =>
-        await _characterManager.GetDraft(characterId, _account, true);
+    public async Task RetireMwFifthCharacter(string revisionId)
+    {
+        await _characterManager.Retire(revisionId, _account.AccountId);
+        await InternalLogCharacterStateChange(revisionId);
+    }
+
+    public async Task UnretireMwFifthCharacter(string revisionId)
+    {
+        await _characterManager.Unretire(revisionId);
+        await InternalLogCharacterStateChange(revisionId);
+    }
+
+    public async Task<CharacterAndRevision> ReviseMwFifthCharacter(string revisionId) =>
+        await _characterManager.GetDraft(revisionId, _account, true);
 
     public async Task SaveMwFifthCharacter(CharacterRevision revision) =>
         await _characterManager.Save(revision, _account, true);
 
-    public async Task DeleteMwFifthCharacter(string characterId) =>
-        await _characterManager.Delete(characterId, _account, true);
+    public async Task DeleteMwFifthCharacter(string revisionId) =>
+        await _characterManager.Delete(revisionId, _account, true);
 
     public async Task MoveMwFifthCharacter(string characterId, string newAccountId) =>
         await _characterManager.Move(characterId, newAccountId);
@@ -681,7 +699,8 @@ public class AdminService : IAdminService
         var gameState = await _db.MwFifthGame.GetGameState();
 
         var list = await _db.MwFifthGame.CharacterRevisions.Find(x =>
-                x.AccountId == accountId && (x.State == CharacterState.Live || x.State == CharacterState.Review))
+                x.AccountId == accountId && (x.State == CharacterState.Live || x.State == CharacterState.Review ||
+                                             x.State == CharacterState.Retired))
             .ToListAsync();
 
         return list.Select(x => x.ToSummary(gameState)).ToArray();
@@ -705,6 +724,16 @@ public class AdminService : IAdminService
 
     public async Task<CharacterAndRevisions> GetMwFifthCharacterRevisions(string characterId) =>
         await _characterManager.GetRevisions(characterId, _account, true);
+
+    private async Task InternalLogCharacterStateChange(string revisionId)
+    {
+        var character = await _characterManager.GetRevision(revisionId, _account, true);
+        await Log(new CharacterStateLogEvent
+        {
+            CharacterId = character.Character.CharacterId, CharacterName = character.Character.CharacterName,
+            CharacterState = character.Character.State
+        });
+    }
 
     private static string NormalizeName(string religionName, string religionTitle)
     {

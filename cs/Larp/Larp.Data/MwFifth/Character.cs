@@ -177,9 +177,13 @@ public class CharacterRevision
     public DateTimeOffset? SubmittedOn { get; set; }
     public DateTimeOffset? ApprovedOn { get; set; }
     public DateTimeOffset? ArchivedOn { get; set; }
+    public DateTimeOffset? RetiredOn { get; set; }
 
     [BsonRepresentation(BsonType.ObjectId)]
     public string? ApprovedBy { get; set; }
+
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string? RetiredBy { get; set; }
 
     public string? CharacterName { get; set; }
     public string? Religion { get; set; }

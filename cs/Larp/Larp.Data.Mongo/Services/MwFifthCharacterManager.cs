@@ -123,11 +123,11 @@ public class MwFifthCharacterManager
         return new MoonstoneInfo(moonstoneTotal, moonstoneUsed);
     }
 
-    public async Task Approve(string characterId, string adminAccountId)
+    public async Task Approve(string revisionId, string adminAccountId)
     {
         var reference =
             await _mwFifth.CharacterRevisions.AsQueryable()
-                .Where(x => x.RevisionId == characterId)
+                .Where(x => x.RevisionId == revisionId)
                 .Select(x => new
                 {
                     x.AccountId,
@@ -152,7 +152,7 @@ public class MwFifthCharacterManager
                     .Set(x => x.UsedMoonstone, reference.GiftMoonstone + reference.SkillMoonstone)
                     .Set(x => x.PreregistrationRevisionNotes, reference.PreregistrationNotes));
 
-        // Mark all (hopefully only one) Live characters are Archive
+        // Mark all (hopefully only one) Live revisions as Archive
         await _mwFifth.CharacterRevisions
             .UpdateOneAsync(x => x.CharacterId == reference.CharacterId && x.State == CharacterState.Live,
                 Builders<CharacterRevision>.Update
@@ -160,7 +160,7 @@ public class MwFifthCharacterManager
                     .Set(x => x.ArchivedOn, DateTime.UtcNow));
 
         await _mwFifth.CharacterRevisions
-            .UpdateOneAsync(x => x.RevisionId == characterId,
+            .UpdateOneAsync(x => x.RevisionId == revisionId,
                 Builders<CharacterRevision>.Update
                     .Set(x => x.State, CharacterState.Live)
                     .Set(x => x.ApprovedOn, DateTime.UtcNow)
@@ -169,11 +169,11 @@ public class MwFifthCharacterManager
         await UpdateMoonstone(reference.AccountId);
     }
 
-    public async Task Reject(string characterId, string? reviewerNotes)
+    public async Task Reject(string revisionId, string? reviewerNotes)
     {
         var reference =
             await _mwFifth.CharacterRevisions.AsQueryable()
-                .Where(x => x.RevisionId == characterId)
+                .Where(x => x.RevisionId == revisionId)
                 .Select(x => new { x.State, UniqueId = x.CharacterId })
                 .FirstOrDefaultAsync()
             ?? throw new ResourceNotFoundException();
@@ -181,12 +181,64 @@ public class MwFifthCharacterManager
         if (reference.State != CharacterState.Review)
             throw new BadRequestException("Character state must be in Review");
 
-        // Mark all (hopefully only one) Live characters are Archive
+        // Mark all (hopefully only one) Live revisions as Archive
         await _mwFifth.CharacterRevisions
             .UpdateOneAsync(x => x.CharacterId == reference.UniqueId && x.State == CharacterState.Review,
                 Builders<CharacterRevision>.Update
                     .Set(x => x.State, CharacterState.Draft)
                     .Set(x => x.RevisionReviewerNotes, reviewerNotes));
+    }
+
+    public async Task Retire(string revisionId, string adminAccountId)
+    {
+        var reference =
+            await _mwFifth.CharacterRevisions.AsQueryable()
+                .Where(x => x.RevisionId == revisionId)
+                .Select(x => new { x.State, x.CharacterId })
+                .FirstOrDefaultAsync()
+            ?? throw new ResourceNotFoundException();
+
+        if (reference.State != CharacterState.Live)
+            throw new BadRequestException("Character state must be Live");
+
+        await _mwFifth.Characters
+            .UpdateOneAsync(x => x.CharacterId == reference.CharacterId,
+                Builders<Character>.Update
+                    .Set(x => x.State, CharacterState.Retired));
+
+        // Mark all (hopefully only one) Live revisions as Retired
+        await _mwFifth.CharacterRevisions
+            .UpdateOneAsync(x => x.CharacterId == reference.CharacterId && x.State == CharacterState.Live,
+                Builders<CharacterRevision>.Update
+                    .Set(x => x.State, CharacterState.Retired)
+                    .Set(x => x.RetiredOn, DateTime.UtcNow)
+                    .Set(x => x.RetiredBy, adminAccountId));
+    }
+
+    public async Task Unretire(string revisionId)
+    {
+        var reference =
+            await _mwFifth.CharacterRevisions.AsQueryable()
+                .Where(x => x.RevisionId == revisionId)
+                .Select(x => new { x.State, x.CharacterId })
+                .FirstOrDefaultAsync()
+            ?? throw new ResourceNotFoundException();
+
+        if (reference.State != CharacterState.Retired)
+            throw new BadRequestException("Character state must be Retired");
+
+        await _mwFifth.Characters
+            .UpdateOneAsync(x => x.CharacterId == reference.CharacterId,
+                Builders<Character>.Update
+                    .Set(x => x.State, CharacterState.Live));
+
+        // Mark all (hopefully only one) Retired revisions as Live
+        await _mwFifth.CharacterRevisions
+            .UpdateOneAsync(x => x.CharacterId == reference.CharacterId && x.State == CharacterState.Retired,
+                Builders<CharacterRevision>.Update
+                    .Set(x => x.State, CharacterState.Live)
+                    .Set(x => x.RetiredOn, null)
+                    .Set(x => x.RetiredBy, null));
     }
 
     public async Task<CharacterAndRevision> GetRevision(string revisionId, Account account, bool isAdmin)
@@ -203,10 +255,10 @@ public class MwFifthCharacterManager
         return new CharacterAndRevision(character, revision, moonstone);
     }
 
-    public async Task<CharacterAndRevision> GetDraft(string? characterId, Account account, bool isAdmin)
+    public async Task<CharacterAndRevision> GetDraft(string? revisionId, Account account, bool isAdmin)
     {
         var reference = await _mwFifth.CharacterRevisions.AsQueryable()
-                            .Where(x => x.RevisionId == characterId)
+                            .Where(x => x.RevisionId == revisionId)
                             .Select(x => new { x.AccountId, UniqueId = x.CharacterId })
                             .FirstOrDefaultAsync()
                         ?? throw new ResourceNotFoundException("CharacterId was not found");
@@ -328,16 +380,16 @@ public class MwFifthCharacterManager
         return new CharacterAndRevision(character, revision, moonstone);
     }
 
-    public async Task Delete(string characterId, Account account, bool isAdmin)
+    public async Task Delete(string revisionId, Account account, bool isAdmin)
     {
-        var character = await GetRevision(characterId, account, isAdmin)
+        var character = await GetRevision(revisionId, account, isAdmin)
                         ?? throw new ResourceNotFoundException();
 
         // User cannot change the state to Live
         if (character.Revision.State is not CharacterState.Draft)
             throw new BadRequestException("Character must be in draft");
 
-        await _mwFifth.CharacterRevisions.DeleteOneAsync(x => x.RevisionId == characterId);
+        await _mwFifth.CharacterRevisions.DeleteOneAsync(x => x.RevisionId == revisionId);
     }
 
     public async Task<CharacterAndRevision> GetLatest(string characterId, Account account, bool isAdmin)
@@ -378,7 +430,8 @@ public class MwFifthCharacterManager
                 (attendance.MwFifth!.Moonstone ?? 0) +
                 (attendance.MwFifth!.PostMoonstone ?? 0));
         var characterCount = (int)await _larpContext.MwFifthGame.Characters
-            .Find(c => c.AccountId == accountId && c.State == CharacterState.Live)
+            .Find(c => c.AccountId == accountId &&
+                       (c.State == CharacterState.Live || c.State == CharacterState.Retired))
             .CountDocumentsAsync();
         await _userManager.UpdateUserAccount(accountId, update => update
             .Set(x => x.MwFifthMoonstone, moonstoneTotal)
@@ -421,7 +474,7 @@ public class MwFifthCharacterManager
             .ToDictionary(x => x.AccountId);
 
         var characters = (await larpContext.MwFifthGame.Characters.AsQueryable()
-                .Where(x => x.State == CharacterState.Live)
+                .Where(x => x.State == CharacterState.Live || x.State == CharacterState.Retired)
                 .Join(
                     larpContext.Accounts.AsQueryable(),
                     x => x.AccountId,

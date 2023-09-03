@@ -40,13 +40,13 @@
 
         if (!Admin && revision.State is not CharacterState.Draft)
         {
-            await DialogService.ShowMessageBox("Unable to Edit Character", "Character must be in a draft status to edit it.");
+            await DialogService.ShowMessageBox("Unable to Edit Character", "Character must be in a Draft status to edit it.");
             return;
         }
 
         if (Admin && revision.State is not CharacterState.Review and not  CharacterState.Draft)
         {
-            await DialogService.ShowMessageBox("Unable to Edit Character", "Character must be in a review or draft status to edit it.");
+            await DialogService.ShowMessageBox("Unable to Edit Character", "Character must be in a Review or Draft status to edit it.");
             return;
         }
 

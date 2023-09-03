@@ -55,6 +55,12 @@
                                 chip = "Submitted for review";
                                 color = Color.Info;
                                 break;
+
+                            case CharacterState.Retired:
+                                uri = $"/characters/{game.Name}/{character.Id}";
+                                chip = "Retired";
+                                color = Color.Error;
+                                break;
                         }
 
                         <MudListItem

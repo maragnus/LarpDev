@@ -30,7 +30,10 @@
 
     protected override async Task OnSafeInitializedAsync()
     {
-        _allItems = await LandingService.Admin.GetMwFifthCharacters(CharacterState.Live);
+        _allItems =
+            (await LandingService.Admin.GetMwFifthCharacters(CharacterState.Live))
+                .Concat(await LandingService.Admin.GetMwFifthCharacters(CharacterState.Retired))
+                .ToArray();
         _items = _allItems;
     }
 
