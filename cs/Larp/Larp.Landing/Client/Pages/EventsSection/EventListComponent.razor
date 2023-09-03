@@ -1,91 +1,87 @@
 @inject LandingService LandingService
 @inherits LarpPage
 
-<MudContainer MaxWidth="MaxWidth.Small">
+<MudOverlay Absolute DarkBackground Visible="IsLoading">
+    <MudProgressCircular Indeterminate/>
+</MudOverlay>
 
-    <MudOverlay Absolute DarkBackground Visible="IsLoading">
-        <MudProgressCircular Indeterminate/>
-    </MudOverlay>
-
-    <MudStack Spacing="4">
-        @foreach (var ev in _events)
-        {
-            <MudCard>
-                <MudCardContent>
-                    <MudStack Spacing="0">
-                        <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
-                            <MudText Typo="Typo.subtitle1">
-                                <MudIcon Icon="@ev.Icon" Color="Color.Primary" Style="font-size: inherit" Class="pr-1"/>
-                                <strong>@ev.Title</strong>
-                            </MudText>
-                            @if (ev.When.DayOfYear > 1)
-                            {
-                                <MudText Typo="Typo.subtitle2" Color="Color.Surface">
-                                    <em>@When(ev.When)</em>
-                                </MudText>
-                            }
-                            @if (LandingService.IsInRole(AccountRole.AdminAccess))
-                            {
-                                <MudIconButton Href="@($"/admin/events/{ev.Id}")" Variant="Variant.Filled" Icon="@Icons.Material.Filled.Edit" Color="Color.Default"/>
-                            }
-                        </MudStack>
+<MudStack Spacing="4">
+    @foreach (var ev in _events)
+    {
+        <MudCard>
+            <MudCardContent>
+                <MudStack Spacing="0">
+                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.subtitle1">
+                            <MudIcon Icon="@ev.Icon" Color="Color.Primary" Style="font-size: inherit" Class="pr-1"/>
+                            <strong>@ev.Title</strong>
+                        </MudText>
                         @if (ev.When.DayOfYear > 1)
                         {
-                            <MudText Typo="Typo.body2">
-                                <MudIcon Color="Color.Primary" Size="Size.Small" Style="font-size: inherit" Icon="@Icons.Material.Filled.CalendarToday" Class="pr-1"/>
-                                @ev.When.ToString("dddd, MMMM d, yyyy")
+                            <MudText Typo="Typo.subtitle2" Color="Color.Surface">
+                                <em>@When(ev.When)</em>
                             </MudText>
                         }
-                        @if (!string.IsNullOrWhiteSpace(ev.Location))
+                        @if (LandingService.IsInRole(AccountRole.AdminAccess))
                         {
-                            <MudText Typo="Typo.body2">
-                                <MudIcon Color="Color.Primary" Size="Size.Small" Style="font-size: inherit" Icon="@Icons.Material.Filled.LocationOn" Class="pr-1"/>
-                                @ev.Location
-                            </MudText>
-                        }
-                        @if (ev.Components.Length > 0)
-                        {
-                            <MudChipSet ReadOnly Class="mt-1">
-                                @foreach (var component in ev.Components)
-                                {
-                                    <MudChip Size="Size.Small">@component.Title (@component.When.ToString("ddd, MMM d"))</MudChip>
-                                }
-                            </MudChipSet>
-                        }
-                        @if (ev.Letters.Length > 0)
-                        {
-                            <MudDivider Class="my-1"/>
-                            <MudChipSet>
-                                @foreach (var letter in ev.Letters)
-                                {
-                                    var isLocked = letter.State == LetterState.Locked;
-                                    var letterInfo = LetterInfo[letter.Name];
-                                    var statusInfo = LetterTooltip[letter.State];
-                                    var eventId = ev.Id;
-                                    var name = letter.Name;
-                                    var action = () => ViewLetter(eventId, name);
-                                    if (isLocked && letter.SubmittedOn.HasValue)
-                                        statusInfo = (statusInfo.Tooltip, Color.Success);
-
-                                    <MudTooltip Text="@statusInfo.Tooltip">
-                                        <MudChip
-                                            Color="@statusInfo.Color"
-                                            Icon="@letterInfo.Icon"
-                                            OnClick="@action"
-                                            Size="Size.Small"
-                                            Disabled="statusInfo.Color == Color.Dark"
-                                            Text="@letterInfo.Label"/>
-                                    </MudTooltip>
-                                }
-                            </MudChipSet>
+                            <MudIconButton Href="@($"/admin/events/{ev.Id}")" Variant="Variant.Filled" Icon="@Icons.Material.Filled.Edit" Color="Color.Default"/>
                         }
                     </MudStack>
-                </MudCardContent>
-            </MudCard>
-        }
-    </MudStack>
+                    @if (ev.When.DayOfYear > 1)
+                    {
+                        <MudText Typo="Typo.body2">
+                            <MudIcon Color="Color.Primary" Size="Size.Small" Style="font-size: inherit" Icon="@Icons.Material.Filled.CalendarToday" Class="pr-1"/>
+                            @ev.When.ToString("dddd, MMMM d, yyyy")
+                        </MudText>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(ev.Location))
+                    {
+                        <MudText Typo="Typo.body2">
+                            <MudIcon Color="Color.Primary" Size="Size.Small" Style="font-size: inherit" Icon="@Icons.Material.Filled.LocationOn" Class="pr-1"/>
+                            @ev.Location
+                        </MudText>
+                    }
+                    @if (ev.Components.Length > 0)
+                    {
+                        <MudChipSet ReadOnly Class="mt-1">
+                            @foreach (var component in ev.Components)
+                            {
+                                <MudChip Size="Size.Small">@component.Title (@component.When.ToString("ddd, MMM d"))</MudChip>
+                            }
+                        </MudChipSet>
+                    }
+                    @if (ev.Letters.Length > 0)
+                    {
+                        <MudDivider Class="my-1"/>
+                        <MudChipSet>
+                            @foreach (var letter in ev.Letters)
+                            {
+                                var isLocked = letter.State == LetterState.Locked;
+                                var letterInfo = LetterInfo[letter.Name];
+                                var statusInfo = LetterTooltip[letter.State];
+                                var eventId = ev.Id;
+                                var name = letter.Name;
+                                var action = () => ViewLetter(eventId, name);
+                                if (isLocked && letter.SubmittedOn.HasValue)
+                                    statusInfo = (statusInfo.Tooltip, Color.Success);
 
-</MudContainer>
+                                <MudTooltip Text="@statusInfo.Tooltip">
+                                    <MudChip
+                                        Color="@statusInfo.Color"
+                                        Icon="@letterInfo.Icon"
+                                        OnClick="@action"
+                                        Size="Size.Small"
+                                        Disabled="statusInfo.Color == Color.Dark"
+                                        Text="@letterInfo.Label"/>
+                                </MudTooltip>
+                            }
+                        </MudChipSet>
+                    }
+                </MudStack>
+            </MudCardContent>
+        </MudCard>
+    }
+</MudStack>
 
 @code {
 
