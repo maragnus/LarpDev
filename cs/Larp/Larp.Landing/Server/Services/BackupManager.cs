@@ -78,7 +78,7 @@ public class BackupManager
                 PreregistrationNotes = p.MwFifthPreregistrationNotes,
                 AdministrativeNotes = p.AdminNotes,
                 TotalMoonstone = p.MwFifthMoonstone,
-                UsedMoonstone = p.MwFifthMoonstone,
+                UsedMoonstone = p.MwFifthUsedMoonstone,
                 UnspentMoonstone = p.MwFifthMoonstone - p.MwFifthUsedMoonstone,
                 Status = p.State.ToString()
             }), true, TableStyles.Light6);

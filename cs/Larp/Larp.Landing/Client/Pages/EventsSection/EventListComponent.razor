@@ -1,61 +1,111 @@
 @inject LandingService LandingService
 @inherits LarpPage
 
-<MudOverlay Absolute DarkBackground Visible="IsLoading">
-    <MudProgressCircular Indeterminate/>
-</MudOverlay>
+<MudContainer MaxWidth="MaxWidth.Small">
 
-<MudDataGrid T="EventInfo" Items="_events" Filterable Groupable Hover Loading="IsLoading" GroupExpanded="true" Dense>
-    <Columns>
-        <HierarchyColumn T="EventInfo" IconSize="Size.Small" ButtonDisabledFunc="@(x => x.Components.Length == 0)"/>
-        <TemplateColumn Groupable="false" Sortable="false" Filterable="false">
-            <CellTemplate>
-                <MudIcon Icon="@context.Item.Icon" Color="Color.Primary" Size="Size.Small"/>
-            </CellTemplate>
-        </TemplateColumn>
-        <PropertyColumn Property="x => x.Game" Title="Game" Hidden="true"/>
-        <PropertyColumn Property="x => x.When" Title="Date" Format="ddd, MMM d, yyyy" Groupable="false"/>
-        <PropertyColumn Property="x => x.Title" Title="Title" Groupable="false"/>
-        <PropertyColumn Property="x => x.Location" Title="Location" Hidden/>
-        <TemplateColumn T="EventInfo" Title="Event Letters" Groupable="false" Filterable="false" Sortable="false">
-            <CellTemplate>
-                <MudStack Row Spacing="4">
-                    @foreach (var letter in context.Item.Letters)
-                    {
-                        var style = LetterTooltip[letter.State];
-                        var icon = LetterIcon[letter.Name];
-                        <MudTooltip Text="@style.Tooltip">
-                            <MudIconButton Disabled="letter.State == LetterState.Locked" Size="Size.Large" Variant="Variant.Filled" Icon="@icon" Color="@style.Color" OnClick="() => ViewLetter(context.Item.Id, letter.Name)"/>
-                        </MudTooltip>
-                    }
-                    @if (LandingService.IsInRole(AccountRole.AdminAccess))
-                    {
-                        <MudIconButton Href="@($"/admin/events/{context.Item.Id}")" Variant="Variant.Filled" Icon="@Icons.Material.Filled.Edit" Color="Color.Default"/>
-                    }
-                </MudStack>
-            </CellTemplate>
-        </TemplateColumn>
-    </Columns>
-    <ChildRowContent>
-        <MudStack Spacing="4">
-            @if (!string.IsNullOrWhiteSpace(context.Item.Location))
-            {
-                <MudStack Row AlignItems="AlignItems.Center">
-                    <MudIcon Color="Color.Primary" Size="Size.Small" Style="font-size: inherit" Icon="@Icons.Material.Filled.LocationOn"/>
-                    <MudText>@context.Item.Location</MudText>
-                </MudStack>
-            }
-            <MudChipSet ReadOnly>
-                @foreach (var component in context.Item.Components)
-                {
-                    <MudChip Size="Size.Small">@component.Title (@component.When.ToString("ddd, MMM d"))</MudChip>
-                }
-            </MudChipSet>
-        </MudStack>
-    </ChildRowContent>
-</MudDataGrid>
+    <MudOverlay Absolute DarkBackground Visible="IsLoading">
+        <MudProgressCircular Indeterminate/>
+    </MudOverlay>
+
+    <MudStack Spacing="4">
+        @foreach (var ev in _events)
+        {
+            <MudCard>
+                <MudCardContent>
+                    <MudStack Spacing="0">
+                        <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                            <MudText Typo="Typo.subtitle1">
+                                <MudIcon Icon="@ev.Icon" Color="Color.Primary" Style="font-size: inherit" Class="pr-1"/>
+                                <strong>@ev.Title</strong>
+                            </MudText>
+                            @if (ev.When.DayOfYear > 1)
+                            {
+                                <MudText Typo="Typo.subtitle2" Color="Color.Surface">
+                                    <em>@When(ev.When)</em>
+                                </MudText>
+                            }
+                            @if (LandingService.IsInRole(AccountRole.AdminAccess))
+                            {
+                                <MudIconButton Href="@($"/admin/events/{ev.Id}")" Variant="Variant.Filled" Icon="@Icons.Material.Filled.Edit" Color="Color.Default"/>
+                            }
+                        </MudStack>
+                        @if (ev.When.DayOfYear > 1)
+                        {
+                            <MudText Typo="Typo.body2">
+                                <MudIcon Color="Color.Primary" Size="Size.Small" Style="font-size: inherit" Icon="@Icons.Material.Filled.CalendarToday" Class="pr-1"/>
+                                @ev.When.ToString("dddd, MMMM d, yyyy")
+                            </MudText>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(ev.Location))
+                        {
+                            <MudText Typo="Typo.body2">
+                                <MudIcon Color="Color.Primary" Size="Size.Small" Style="font-size: inherit" Icon="@Icons.Material.Filled.LocationOn" Class="pr-1"/>
+                                @ev.Location
+                            </MudText>
+                        }
+                        @if (ev.Components.Length > 0)
+                        {
+                            <MudChipSet ReadOnly Class="mt-1">
+                                @foreach (var component in ev.Components)
+                                {
+                                    <MudChip Size="Size.Small">@component.Title (@component.When.ToString("ddd, MMM d"))</MudChip>
+                                }
+                            </MudChipSet>
+                        }
+                        @if (ev.Letters.Length > 0)
+                        {
+                            <MudDivider Class="my-1"/>
+                            <MudChipSet>
+                                @foreach (var letter in ev.Letters)
+                                {
+                                    var isLocked = letter.State == LetterState.Locked;
+                                    var letterInfo = LetterInfo[letter.Name];
+                                    var statusInfo = LetterTooltip[letter.State];
+                                    var eventId = ev.Id;
+                                    var name = letter.Name;
+                                    var action = () => ViewLetter(eventId, name);
+                                    if (isLocked && letter.SubmittedOn.HasValue)
+                                        statusInfo = (statusInfo.Tooltip, Color.Success);
+
+                                    <MudTooltip Text="@statusInfo.Tooltip">
+                                        <MudChip
+                                            Color="@statusInfo.Color"
+                                            Icon="@letterInfo.Icon"
+                                            OnClick="@action"
+                                            Size="Size.Small"
+                                            Disabled="statusInfo.Color == Color.Dark"
+                                            Text="@letterInfo.Label"/>
+                                    </MudTooltip>
+                                }
+                            </MudChipSet>
+                        }
+                    </MudStack>
+                </MudCardContent>
+            </MudCard>
+        }
+    </MudStack>
+
+</MudContainer>
 
 @code {
+
+    private string When(DateOnly date)
+    {
+        var now = DateOnly.FromDateTime(DateTime.Today);
+        var diff = date.DayNumber - now.DayNumber;
+        var unit = "days";
+
+        if (Math.Abs(diff) >= 14)
+        {
+            diff /= 7;
+            unit = "weeks";
+        }
+
+        return diff switch {
+            0 => "today",
+            < 0 => $"{-diff} {unit} ago",
+            > 0 =>  $"in {diff} {unit}" };
+    }
 
     [Parameter]
     public bool Past { get; set; }
@@ -66,16 +116,16 @@
     {
         { LetterState.NotStarted, ("You have not started the letter for this event", Color.Warning) },
         { LetterState.Draft, ("You have not submitted this letter yet", Color.Warning) },
-        { LetterState.Submitted, ("Your event letter has been submitted and is waiting for approval", Color.Tertiary) },
+        { LetterState.Submitted, ("Your event letter has been submitted and is waiting for approval", Color.Primary) },
         { LetterState.Approved, ("Your event letter has been approved", Color.Success) },
-        { LetterState.Locked, ("Letter is currently closed", Color.Success) },
+        { LetterState.Locked, ("Letter is currently closed", Color.Dark) },
     };
 
-    static readonly Dictionary<string, string> LetterIcon = new()
+    static readonly Dictionary<string, (string Icon, string Label)> LetterInfo = new()
     {
-        { LetterNames.PreEvent, Icons.Material.Filled.Rsvp },
-        { LetterNames.PostEvent, Icons.Material.Filled.Email },
-        { LetterNames.BetweenEvent, Icons.Material.Filled.MenuBook },
+        { LetterNames.PreEvent, (Icons.Material.Filled.Rsvp, "Preregistration") },
+        { LetterNames.PostEvent, (Icons.Material.Filled.Email, "Post Event Letter (PEL)") },
+        { LetterNames.BetweenEvent, (Icons.Material.Filled.MenuBook, "Between Event Actions") },
     };
 
     private Dictionary<string, string?> _games = default!;
