@@ -9,7 +9,7 @@ public class LetterManager
         _larpContext = larpContext;
     }
 
-    public async Task<Letter> Draft(string letterTemplateId, string eventId, string accountId, string letterName)
+    private async Task<Letter> Draft(string letterTemplateId, string eventId, string accountId, string letterName)
     {
         var letter = new Letter
         {
@@ -19,15 +19,16 @@ public class LetterManager
             Name = letterName,
             TemplateId = letterTemplateId,
             State = LetterState.NotStarted,
-            StartedOn = DateTimeOffset.Now
+            StartedOn = DateTimeOffset.Now,
+            ChangeLog = new[] { ChangeLog.Log("Draft", LetterState.NotStarted, accountId) }
         };
         await _larpContext.Letters.InsertOneAsync(letter);
         return letter;
     }
 
-    public async Task AdminSave(Letter letter, string accountId)
+    public async Task AdminSave(Letter letter, string adminAccountId)
     {
-        var oldLetter = await Get(letter.LetterId, accountId, isAdmin: true);
+        var oldLetter = await Get(letter.LetterId, adminAccountId, isAdmin: true);
 
         if (letter.State == LetterState.NotStarted)
             letter.State = LetterState.Draft;
@@ -41,6 +42,8 @@ public class LetterManager
 
         if (letter.State == LetterState.Submitted)
             update = update.Set(x => x.SubmittedOn, DateTimeOffset.Now);
+
+        update = update.Push(x => x.ChangeLog, ChangeLog.Log("Admin Save", letter.State, adminAccountId));
 
         await _larpContext.Letters.UpdateOneAsync(l => l.LetterId == letter.LetterId, update);
     }
@@ -68,6 +71,8 @@ public class LetterManager
         if (letter.State == LetterState.Submitted)
             update = update.Set(x => x.SubmittedOn, DateTimeOffset.Now);
 
+        update = update.Push(x => x.ChangeLog, ChangeLog.Log("Save", letter.State, accountId));
+
         await _larpContext.Letters.UpdateOneAsync(l => l.LetterId == letter.LetterId, update);
     }
 
@@ -84,7 +89,8 @@ public class LetterManager
         var update = Builders<Letter>.Update
             .Set(x => x.ApprovedOn, DateTimeOffset.Now)
             .Set(x => x.ApprovedBy, adminAccountId)
-            .Set(x => x.State, LetterState.Approved);
+            .Set(x => x.State, LetterState.Approved)
+            .Push(x => x.ChangeLog, ChangeLog.Log("Approve", LetterState.Approved, adminAccountId));
 
         await _larpContext.Letters.UpdateOneAsync(l => l.LetterId == letterId, update);
     }
@@ -94,17 +100,20 @@ public class LetterManager
         var update = Builders<Letter>.Update
             .Set(x => x.ApprovedOn, null)
             .Set(x => x.ApprovedBy, null)
-            .Set(x => x.State, LetterState.Draft);
+            .Set(x => x.SubmittedOn, null)
+            .Set(x => x.State, LetterState.Draft)
+            .Push(x => x.ChangeLog, ChangeLog.Log("Reject", LetterState.Draft, adminAccountId));
 
         await _larpContext.Letters.UpdateOneAsync(l => l.LetterId == letterId, update);
     }
 
-    public async Task Unapprove(string letterId, string accountAccountId)
+    public async Task Unapprove(string letterId, string adminAccountId)
     {
         var update = Builders<Letter>.Update
             .Set(x => x.ApprovedOn, null)
             .Set(x => x.ApprovedBy, null)
-            .Set(x => x.State, LetterState.Submitted);
+            .Set(x => x.State, LetterState.Submitted)
+            .Push(x => x.ChangeLog, ChangeLog.Log("Unapprove", LetterState.Submitted, adminAccountId));
 
         await _larpContext.Letters.UpdateOneAsync(l => l.LetterId == letterId, update);
     }

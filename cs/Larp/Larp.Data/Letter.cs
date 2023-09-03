@@ -156,4 +156,6 @@ public class Letter
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public Dictionary<string, string> Fields { get; set; } = new();
+
+    public ChangeLog[] ChangeLog { get; set; } = Array.Empty<ChangeLog>();
 }

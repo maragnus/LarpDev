@@ -7,7 +7,7 @@
 @inject LandingService LandingService
 @inject IJSRuntime Js
 
-<PageHeader>Edit Event</PageHeader>
+<PageHeader Container>Edit Event</PageHeader>
 
 <NavigationLock ConfirmExternalNavigation="_hasEventChanges || _hasAttendanceChanges" OnBeforeInternalNavigation="BeforeNavigation"/>
 
@@ -15,56 +15,59 @@
     <LoadingSkeleton>
         <MudStack Spacing="4">
             <MudSkeleton Width="50%" Height="42px"/>
-            <MudGrid>
-                <MudItem xs="12" md="4">
-                    <MudSkeleton Width="100%" Height="42px"/>
-                </MudItem>
-                <MudItem xs="12" md="4">
-                    <MudSkeleton Width="100%" Height="42px"/>
-                </MudItem>
-                <MudItem xs="12" md="4">
-                    <MudSkeleton Width="100%" Height="42px"/>
-                </MudItem>
-                <MudItem xs="12" md="4">
-                    <MudSkeleton Width="100%" Height="42px"/>
-                </MudItem>
-                <MudItem xs="12" md="4">
-                    <MudSkeleton Width="100%" Height="42px"/>
-                </MudItem>
-                <MudItem xs="6" md="4">
-                    <MudSkeleton Width="100%" Height="42px"/>
-                </MudItem>
-                <MudItem xs="12" md="12" lg="6">
-                    <MudSkeleton Width="100%" Height="128px"/>
-                </MudItem>
-                <MudItem xs="12" md="12" lg="6">
-                    <MudSkeleton Width="100%" Height="128px"/>
-                </MudItem>
-                <MudItem xs="6">
-                    <MudSkeleton Width="100%" Height="42px"/>
-                </MudItem>
-                <MudItem xs="6">
-                    <MudSkeleton Width="100%" Height="42px"/>
-                </MudItem>
-                <MudItem xs="6" md="4">
-                    <MudStack Row Spacing="4">
-                        <MudSkeleton Width="65%" Height="42px"/>
-                        <MudSkeleton Width="25%" Height="42px"/>
-                    </MudStack>
-                </MudItem>
-                <MudItem xs="6" md="4">
-                    <MudStack Row Spacing="4">
-                        <MudSkeleton Width="65%" Height="42px"/>
-                        <MudSkeleton Width="25%" Height="42px"/>
-                    </MudStack>
-                </MudItem>
-                <MudItem xs="6" md="4">
-                    <MudStack Row Spacing="4">
-                        <MudSkeleton Width="65%" Height="42px"/>
-                        <MudSkeleton Width="25%" Height="42px"/>
-                    </MudStack>
-                </MudItem>
-            </MudGrid>
+            <MudPaper Elevation="2" Class="pa-4">
+                <MudGrid>
+                    <MudItem xs="12" md="4">
+                        <MudSkeleton Width="100%" Height="42px"/>
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudSkeleton Width="100%" Height="42px"/>
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudSkeleton Width="100%" Height="42px"/>
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudSkeleton Width="100%" Height="42px"/>
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudSkeleton Width="100%" Height="42px"/>
+                    </MudItem>
+                    <MudItem xs="6" md="4">
+                        <MudSkeleton Width="100%" Height="42px"/>
+                    </MudItem>
+                    <MudItem xs="12" md="12" lg="6">
+                        <MudSkeleton Width="100%" Height="128px"/>
+                    </MudItem>
+                    <MudItem xs="12" md="12" lg="6">
+                        <MudSkeleton Width="100%" Height="128px"/>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudSkeleton Width="100%" Height="42px"/>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudSkeleton Width="100%" Height="42px"/>
+                    </MudItem>
+                    <MudItem xs="6" md="4">
+                        <MudStack Row Spacing="4">
+                            <MudSkeleton Width="65%" Height="42px"/>
+                            <MudSkeleton Width="25%" Height="42px"/>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem xs="6" md="4">
+                        <MudStack Row Spacing="4">
+                            <MudSkeleton Width="65%" Height="42px"/>
+                            <MudSkeleton Width="25%" Height="42px"/>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem xs="6" md="4">
+                        <MudStack Row Spacing="4">
+                            <MudSkeleton Width="65%" Height="42px"/>
+                            <MudSkeleton Width="25%" Height="42px"/>
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+
             <MudSkeleton Width="50%" Height="42px"/>
             <MudContainer MaxWidth="MaxWidth.Medium" Style="margin: 0; padding: 0">
                 <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="200px"/>
@@ -79,91 +82,94 @@
                 <MudButton Color="Color.Default" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Download" OnClick="DownloadLetters">Download</MudButton>
                 <MudButton Color="Color.Default" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Print" OnClick="Preregistration">Preregistration</MudButton>
             </MudButtonGroup>
-            <EditForm T="EventModel" EditContext="_editContext">
-                <MudGrid>
-                    <MudItem xs="12" md="4">
-                        <MudTextField T="string?" Label="Title" @bind-Value="@_model.Title" For="() => _model.Title" Required Variant="Variant.Outlined"/>
-                    </MudItem>
-                    <MudItem xs="12" md="4">
-                        <MudTextField T="string?" Label="Location" @bind-Value="@_model.Location" For="() => _model.Location" Required Variant="Variant.Outlined"/>
-                    </MudItem>
-                    <MudItem xs="12" md="4">
-                        <MudSelect T="string?" Label="Game" @bind-Value="@_model.GameId" For="() => _model.GameId" Variant="Variant.Outlined">
-                            @foreach (var game in _games.Values)
-                            {
-                                <MudSelectItem T="string?" Value="@game.Id">@game.Title</MudSelectItem>
-                            }
-                        </MudSelect>
-                    </MudItem>
-                    <MudItem xs="12" md="4">
-                        <MudSelectExtended T="string?" Label="Event Type" @bind-Value="@_model.EventType" For="() => _model.EventType" Required ItemCollection="_eventTypes" Variant="Variant.Outlined"/>
-                    </MudItem>
-                    <MudItem xs="12" md="4">
-                        <MudDatePicker T="DateTime" Label="When" @bind-Date="@_model.Date" For="() => _model.Date" Required Variant="Variant.Outlined"/>
-                    </MudItem>
-                    <MudItem xs="6" md="4">
-                        <MudSelect T="bool" Label="Visible" @bind-Value="@_model.Hidden" For="() => _model.Hidden" Variant="Variant.Outlined">
-                            <MudSelectItem T="bool" Value="@true">Hidden</MudSelectItem>
-                            <MudSelectItem T="bool" Value="@false">Visible</MudSelectItem>
-                        </MudSelect>
-                    </MudItem>
-                    <MudItem xs="12" md="12" lg="6">
-                        <MudTextField T="string?" Label="Preregistration Notes" Lines="3" @bind-Value="@_model.PreregistrationNotes" For="() => _model.PreregistrationNotes" Variant="Variant.Outlined"/>
-                    </MudItem>
-                    <MudItem xs="12" md="12" lg="6">
-                        <MudTextField T="string?" Label="Administrative Notes" Lines="3" @bind-Value="@_model.AdminNotes" For="() => _model.AdminNotes" Variant="Variant.Outlined"/>
-                    </MudItem>
-                    <MudItem xs="6">
-                        <MudTextField T="int" Label="First Chronicle Cost" @bind-Value="@_model.EventCost" For="() => _model.EventCost" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AttachMoney" Variant="Variant.Outlined"/>
-                    </MudItem>
-                    <MudItem xs="6">
-                        <MudTextField T="int" Label="Additional Chronicle Cost" @bind-Value="@_model.ChronicleCost" For="() => _model.ChronicleCost" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AttachMoney" Variant="Variant.Outlined"/>
-                    </MudItem>
+            <MudPaper Elevation="2" Class="pa-4">
 
-                    <MudItem xs="6" md="4">
-                        <MudStack Row Spacing="4">
-                            <MudSelect T="string" Label="Pre-Event Letter" @bind-Value="@_model.PreEventLetter" For="() => _model.PreEventLetter" Clearable>
-                                @foreach (var item in _letterTemplates)
+                <EditForm T="EventModel" EditContext="_editContext">
+                    <MudGrid>
+                        <MudItem xs="12" md="4">
+                            <MudTextField T="string?" Label="Title" @bind-Value="@_model.Title" For="() => _model.Title" Required Variant="Variant.Outlined"/>
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField T="string?" Label="Location" @bind-Value="@_model.Location" For="() => _model.Location" Required Variant="Variant.Outlined"/>
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudSelect T="string?" Label="Game" @bind-Value="@_model.GameId" For="() => _model.GameId" Variant="Variant.Outlined">
+                                @foreach (var game in _games.Values)
                                 {
-                                    <MudSelectItem T="string" Value="@item.Key">@item.Value.Title</MudSelectItem>
+                                    <MudSelectItem T="string?" Value="@game.Id">@game.Title</MudSelectItem>
                                 }
                             </MudSelect>
-                            <MudStack Justify="Justify.FlexStart" AlignItems="AlignItems.Start">
-                                <MudText Typo="Typo.caption">Open</MudText>
-                                <MudSwitch Color="Color.Success" UnCheckedColor="Color.Secondary" @bind-Checked="@_model.PreEventLetterOpen" For="() => _model.PreEventLetterOpen"/>
-                            </MudStack>
-                        </MudStack>
-                    </MudItem>
-                    <MudItem xs="6" md="4">
-                        <MudStack Row Spacing="4">
-                            <MudSelect T="string" Label="Post-Event Letter" @bind-Value="@_model.PostEventLetter" For="() => _model.PostEventLetter" Clearable>
-                                @foreach (var item in _letterTemplates)
-                                {
-                                    <MudSelectItem T="string" Value="@item.Key">@item.Value.Title</MudSelectItem>
-                                }
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudSelectExtended T="string?" Label="Event Type" @bind-Value="@_model.EventType" For="() => _model.EventType" Required ItemCollection="_eventTypes" Variant="Variant.Outlined"/>
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudDatePicker T="DateTime" Label="When" @bind-Date="@_model.Date" For="() => _model.Date" Required Variant="Variant.Outlined"/>
+                        </MudItem>
+                        <MudItem xs="6" md="4">
+                            <MudSelect T="bool" Label="Visible" @bind-Value="@_model.Hidden" For="() => _model.Hidden" Variant="Variant.Outlined">
+                                <MudSelectItem T="bool" Value="@true">Hidden</MudSelectItem>
+                                <MudSelectItem T="bool" Value="@false">Visible</MudSelectItem>
                             </MudSelect>
-                            <MudStack Justify="Justify.FlexStart" AlignItems="AlignItems.Start">
-                                <MudText Typo="Typo.caption">Open</MudText>
-                                <MudSwitch Color="Color.Success" UnCheckedColor="Color.Secondary" @bind-Checked="@_model.PostEventLetterOpen" For="() => _model.PostEventLetterOpen"/>
+                        </MudItem>
+                        <MudItem xs="12" md="12" lg="6">
+                            <MudTextField T="string?" Label="Preregistration Notes" Lines="3" @bind-Value="@_model.PreregistrationNotes" For="() => _model.PreregistrationNotes" Variant="Variant.Outlined"/>
+                        </MudItem>
+                        <MudItem xs="12" md="12" lg="6">
+                            <MudTextField T="string?" Label="Administrative Notes" Lines="3" @bind-Value="@_model.AdminNotes" For="() => _model.AdminNotes" Variant="Variant.Outlined"/>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudTextField T="int" Label="First Chronicle Cost" @bind-Value="@_model.EventCost" For="() => _model.EventCost" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AttachMoney" Variant="Variant.Outlined"/>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudTextField T="int" Label="Additional Chronicle Cost" @bind-Value="@_model.ChronicleCost" For="() => _model.ChronicleCost" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AttachMoney" Variant="Variant.Outlined"/>
+                        </MudItem>
+
+                        <MudItem xs="6" md="4">
+                            <MudStack Row Spacing="4">
+                                <MudSelect T="string" Label="Pre-Event Letter" @bind-Value="@_model.PreEventLetter" For="() => _model.PreEventLetter" Variant="Variant.Outlined" Clearable>
+                                    @foreach (var item in _letterTemplates)
+                                    {
+                                        <MudSelectItem T="string" Value="@item.Key">@item.Value.Title</MudSelectItem>
+                                    }
+                                </MudSelect>
+                                <MudStack Justify="Justify.FlexStart" AlignItems="AlignItems.Start">
+                                    <MudText Typo="Typo.caption">Open</MudText>
+                                    <MudSwitch Color="Color.Success" UnCheckedColor="Color.Secondary" @bind-Checked="@_model.PreEventLetterOpen" For="() => _model.PreEventLetterOpen"/>
+                                </MudStack>
                             </MudStack>
-                        </MudStack>
-                    </MudItem>
-                    <MudItem xs="6" md="4">
-                        <MudStack Row Spacing="4">
-                            <MudSelect T="string" Label="Between-Event Letter" @bind-Value="@_model.BetweenEventLetter" For="() => _model.BetweenEventLetter" Clearable>
-                                @foreach (var item in _letterTemplates)
-                                {
-                                    <MudSelectItem T="string" Value="@item.Key">@item.Value.Title</MudSelectItem>
-                                }
-                            </MudSelect>
-                            <MudStack Justify="Justify.FlexStart" AlignItems="AlignItems.Start">
-                                <MudText Typo="Typo.caption">Open</MudText>
-                                <MudSwitch Color="Color.Success" UnCheckedColor="Color.Secondary" @bind-Checked="@_model.BetweenEventLetterOpen" For="() => _model.BetweenEventLetterOpen"/>
+                        </MudItem>
+                        <MudItem xs="6" md="4">
+                            <MudStack Row Spacing="4">
+                                <MudSelect T="string" Label="Post-Event Letter" @bind-Value="@_model.PostEventLetter" For="() => _model.PostEventLetter" Variant="Variant.Outlined" Clearable>
+                                    @foreach (var item in _letterTemplates)
+                                    {
+                                        <MudSelectItem T="string" Value="@item.Key">@item.Value.Title</MudSelectItem>
+                                    }
+                                </MudSelect>
+                                <MudStack Justify="Justify.FlexStart" AlignItems="AlignItems.Start">
+                                    <MudText Typo="Typo.caption">Open</MudText>
+                                    <MudSwitch Color="Color.Success" UnCheckedColor="Color.Secondary" @bind-Checked="@_model.PostEventLetterOpen" For="() => _model.PostEventLetterOpen"/>
+                                </MudStack>
                             </MudStack>
-                        </MudStack>
-                    </MudItem>
-                </MudGrid>
-            </EditForm>
+                        </MudItem>
+                        <MudItem xs="6" md="4">
+                            <MudStack Row Spacing="4">
+                                <MudSelect T="string" Label="Between-Event Letter" @bind-Value="@_model.BetweenEventLetter" For="() => _model.BetweenEventLetter" Variant="Variant.Outlined" Clearable>
+                                    @foreach (var item in _letterTemplates)
+                                    {
+                                        <MudSelectItem T="string" Value="@item.Key">@item.Value.Title</MudSelectItem>
+                                    }
+                                </MudSelect>
+                                <MudStack Justify="Justify.FlexStart" AlignItems="AlignItems.Start">
+                                    <MudText Typo="Typo.caption">Open</MudText>
+                                    <MudSwitch Color="Color.Success" UnCheckedColor="Color.Secondary" @bind-Checked="@_model.BetweenEventLetterOpen" For="() => _model.BetweenEventLetterOpen"/>
+                                </MudStack>
+                            </MudStack>
+                        </MudItem>
+                    </MudGrid>
+                </EditForm>
+            </MudPaper>
 
             <MudText Typo="Typo.h6">Components</MudText>
             <MudContainer MaxWidth="MaxWidth.Medium" Style="margin: 0; padding: 0">
