@@ -27,7 +27,13 @@
         </div>
     }
 
-    <EventLetterComponent Letter="_letter" Template="_template" Event="_event" ReadOnly="_isReadOnly" Admin="false"/>
+    <EventLetterComponent
+        Letter="_letter"
+        Template="_template"
+        Event="_event"
+        AccountNames="_accountNames"
+        ReadOnly="_isReadOnly"
+        Admin="false"/>
 
     @if (_letter.State is LetterState.Draft or LetterState.NotStarted)
     {
@@ -53,6 +59,7 @@
     LetterTemplate _template = default!;
     bool _isReadOnly;
     Event _event = default!;
+    IDictionary<string, AccountName> _accountNames = default!;
 
     protected override async Task OnSafeParametersSetAsync()
     {
@@ -60,6 +67,7 @@
         _letter = letter.Letters.Values.First();
         _template = letter.LetterTemplates.Values.First();
         _event = letter.Events.Values.First();
+        _accountNames = letter.Accounts;
         _isReadOnly = _letter.State is LetterState.Submitted or LetterState.Approved;
         _isSaving = false;
     }

@@ -1,9 +1,21 @@
 @using Larp.Landing.Client.Pages.EventsSection
+@inject NavigationManager NavigationManager
+
 <MudDialog T="string?">
     <DialogContent>
-        <EventLetterComponent Event="Event" Letter="Letter" Template="Template" ReadOnly="ReadOnly" Admin="Admin"/>
+        <EventLetterComponent
+            Event="Event"
+            Letter="Letter"
+            Template="Template"
+            AccountNames="AccountNames"
+            ReadOnly="ReadOnly"
+            Admin="Admin"/>
     </DialogContent>
     <DialogActions>
+        @if (Admin)
+        {
+            <MudButton Color="Color.Default" Variant="Variant.Filled" OnClick="Edit">Edit</MudButton>
+        }
         <MudButton Color="Color.Default" Variant="Variant.Filled" OnClick="Close">Close</MudButton>
     </DialogActions>
 </MudDialog>
@@ -27,6 +39,12 @@
 
     [Parameter]
     public LetterTemplate Template { get; set; } = default!;
+
+    [Parameter]
+    public Dictionary<string, AccountName> AccountNames { get; set; } = default!;
+
+    void Edit() =>
+        NavigationManager.NavigateTo($"/admin/letters/{Letter.LetterId}");
 
     void Close() => MudDialog.Close(DialogResult.Cancel());
 }

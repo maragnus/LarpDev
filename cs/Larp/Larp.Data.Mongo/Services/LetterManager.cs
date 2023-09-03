@@ -25,6 +25,26 @@ public class LetterManager
         return letter;
     }
 
+    public async Task AdminSave(Letter letter, string accountId)
+    {
+        var oldLetter = await Get(letter.LetterId, accountId, isAdmin: true);
+
+        if (letter.State == LetterState.NotStarted)
+            letter.State = LetterState.Draft;
+
+        var update = Builders<Letter>.Update
+            .Set(x => x.Fields, letter.Fields)
+            .Set(x => x.State, letter.State);
+
+        if (oldLetter.StartedOn == null)
+            update = update.Set(x => x.StartedOn, DateTimeOffset.Now);
+
+        if (letter.State == LetterState.Submitted)
+            update = update.Set(x => x.SubmittedOn, DateTimeOffset.Now);
+
+        await _larpContext.Letters.UpdateOneAsync(l => l.LetterId == letter.LetterId, update);
+    }
+
     public async Task Save(Letter letter, string accountId)
     {
         var oldLetter = await Get(letter.LetterId, accountId, isAdmin: false);
@@ -166,19 +186,48 @@ public class LetterManager
         };
     }
 
-    public async Task<EventsAndLetters> GetEventLetter(string accountId, string eventId, string letterName)
+    public async Task<EventsAndLetters> GetEventLetter(string letterId)
     {
+        var letter =
+            await _larpContext.Letters.Find(l => l.LetterId == letterId).FirstOrDefaultAsync()
+            ?? throw new ResourceNotFoundException();
+
         var accountNameTask =
             _larpContext.Accounts
-                .Find(x => x.AccountId == accountId)
+                .Find(x => x.AccountId == letter.AccountId || x.AccountId == letter.ApprovedBy)
                 .Project(x => new AccountName
                 {
                     AccountId = x.AccountId,
                     State = x.State,
                     Name = x.Name
                 })
+                .ToListAsync();
+
+        var @event =
+            await _larpContext.Events
+                .Find(x => x.EventId == letter.EventId)
                 .FirstOrDefaultAsync();
 
+        var templateId =
+            @event.LetterTemplates
+                .FirstOrDefault(x => x.Name == letter.Name)
+            ?? throw new BadRequestException($"Event {letter.EventId} does not have letter named {letter.Name}");
+
+        var template = await GetTemplate(templateId.LetterTemplateId);
+
+        var accountNames = await accountNameTask;
+        return new EventsAndLetters
+        {
+            Accounts = accountNames.ToDictionary(an => an.AccountId),
+            Events = { { @event.EventId, @event } },
+            Letters = { { letter.LetterId, letter } },
+            LetterTemplates = { { template.LetterTemplateId, template } },
+        };
+    }
+
+
+    public async Task<EventsAndLetters> GetEventLetter(string accountId, string eventId, string letterName)
+    {
         var @event =
             await _larpContext.Events
                 .Find(x => x.EventId == eventId)
@@ -201,10 +250,20 @@ public class LetterManager
 
         var template = await GetTemplate(templateId.LetterTemplateId);
 
-        var accountName = await accountNameTask;
+        var accountNames =
+            await _larpContext.Accounts
+                .Find(x => x.AccountId == letter.AccountId || x.AccountId == letter.ApprovedBy)
+                .Project(x => new AccountName
+                {
+                    AccountId = x.AccountId,
+                    State = x.State,
+                    Name = x.Name
+                })
+                .ToListAsync();
+
         return new EventsAndLetters()
         {
-            Accounts = { { accountName.AccountId, accountName } },
+            Accounts = accountNames.ToDictionary(an => an.AccountId),
             Events = { { @event.EventId, @event } },
             Letters = { { letter.LetterId, letter } },
             LetterTemplates = { { template.LetterTemplateId, template } },

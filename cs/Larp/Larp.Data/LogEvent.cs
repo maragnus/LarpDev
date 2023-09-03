@@ -118,3 +118,12 @@ public class GameStateLogEvent : LogEvent
 
     public string? Summary { get; set; }
 }
+
+public class LetterChangeLogEvent : LogEvent
+{
+    public LetterChangeLogEvent() : base("Letter Changed")
+    {
+    }
+
+    public string LetterId { get; set; } = default!;
+}

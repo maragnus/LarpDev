@@ -237,6 +237,12 @@ public interface IAdminService
 
     [ApiPost("citations/{citationId}"), ApiAuthenticated(AccountRoles.CitationAccess)]
     Task SetCitationState(string citationId, CitationState state);
+
+    [ApiPost("letters/{letterId}"), ApiAuthenticated(AccountRoles.AccountAdmin)]
+    Task SaveLetter(string letterId, Letter letter);
+
+    [ApiGet("letters/{letterId}"), ApiAuthenticated(AccountRoles.AccountAdmin)]
+    Task<EventsAndLetters> GetLetter(string letterId);
 }
 
 public class Dashboard

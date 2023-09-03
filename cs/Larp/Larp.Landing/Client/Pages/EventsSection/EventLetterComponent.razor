@@ -7,6 +7,13 @@
             <MudText Typo="Typo.h6">@Template.Title</MudText>
             <MudChip>@(Letter.State.ToString())</MudChip>
         </MudStack>
+        @if (Admin)
+        {
+            <MudText Typo="Typo.subtitle1">
+                <MudIcon Icon="@Icons.Material.Filled.AccountCircle" Style="font-size: inherit" Color="Color.Primary" Size="Size.Medium"/>
+                @_accountName
+            </MudText>
+        }
         <MudText Typo="Typo.body2">@Event.Title on @Event.Date.ToString("dddd, MMMM dd, yyyy")</MudText>
         @if (!string.IsNullOrWhiteSpace(Template.Description))
         {
@@ -209,7 +216,7 @@
                     <div title="@Letter.ApprovedOn.Value.ToString("h:mm tt - dddd, MMMM d, yyyy")">
                         Approved on<br/>
                         @Letter.ApprovedOn.Value.ToString("ddd, MMM d") by<br/>
-                        <MudIcon Size="Size.Small" Style="font-size: inherit" Icon="@Icons.Material.Filled.AccountCircle"/> ApprovedBy
+                        <MudIcon Size="Size.Small" Style="font-size: inherit" Icon="@Icons.Material.Filled.AccountCircle"/> @_approvedBy
                     </div>
                 }
                 else
@@ -238,8 +245,13 @@
     [Parameter]
     public LetterTemplate Template { get; set; } = default!;
 
+    [Parameter]
+    public IDictionary<string, AccountName> AccountNames { get; set; } = default!;
+
     private string[] _components = Array.Empty<string>();
     private string[] _characters = Array.Empty<string>();
+    private string? _approvedBy;
+    private string? _accountName;
 
     record Character(string Id, string Name);
 
@@ -252,6 +264,14 @@
     protected override void OnParametersSet()
     {
         _components = Event.Components.Select(x => x.Name ?? x.Date.ToString("dddd, MMMM d")).ToArray();
+
+        _accountName =
+            AccountNames.TryGetValue(Letter.AccountId, out var author)
+                ? author.Name
+                : "Unnamed Account";
+
+        if (Letter.ApprovedBy != null && AccountNames.TryGetValue(Letter.ApprovedBy, out var approvedBy))
+            _approvedBy = approvedBy.Name;
     }
 
     private T? GetField<T>(string fieldName)

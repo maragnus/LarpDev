@@ -566,6 +566,15 @@ public class AdminService : IAdminService
         await _citationManager.SetState(citationId, state, _account.AccountId);
     }
 
+    public async Task SaveLetter(string letterId, Letter letter)
+    {
+        await _letterManager.AdminSave(letter, _account.AccountId);
+        await Log(new LetterChangeLogEvent { LetterId = letter.LetterId });
+    }
+
+    public async Task<EventsAndLetters> GetLetter(string letterId) =>
+        await _letterManager.GetEventLetter(letterId);
+
     public async Task<EventAttendance[]> GetAccountAttendances(string accountId) =>
         await _eventManager.GetAccountAttendances(accountId);
 

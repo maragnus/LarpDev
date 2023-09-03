@@ -158,7 +158,8 @@
             { nameof(LetterDialog.Template), _template },
             { nameof(LetterDialog.Letter), new Letter() },
             {
-                nameof(LetterDialog.Event), new Event
+                nameof(LetterDialog.Event),
+                new Event
                 {
                     Title = "Sample Event",
                     Date = now,
@@ -179,8 +180,10 @@
                     }
                 }
             },
-            { nameof(LetterDialog.ReadOnly), false }
-        };
+            { nameof(LetterDialog.ReadOnly), false },
+            { nameof(LetterDialog.AccountNames), new Dictionary<string, AccountName>() }
+        }
+            ;
         await DialogService.ShowAsync<LetterDialog>("Letter Preview", parameters, options);
     }
 

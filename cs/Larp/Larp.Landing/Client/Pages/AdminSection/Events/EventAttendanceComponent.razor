@@ -309,6 +309,7 @@
             { nameof(LetterDialog.Template), _templates[letter.TemplateId] },
             { nameof(LetterDialog.Letter), letter },
             { nameof(LetterDialog.Event), _event },
+            { nameof(LetterDialog.AccountNames), _accountNames.ToDictionary(an => an.AccountId) },
             { nameof(LetterDialog.ReadOnly), true },
             { nameof(LetterDialog.Admin), true }
         };
