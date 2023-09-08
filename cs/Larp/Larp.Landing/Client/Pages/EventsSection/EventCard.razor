@@ -1,0 +1,175 @@
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+@inject LandingService LandingService
+
+<MudCard>
+    <MudCardContent>
+        <MudStack Spacing="0">
+            <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                <MudText Typo="Typo.subtitle1">
+                    <MudIcon Color="Color.Primary" Style="font-size: inherit" Icon="@_icon"/>
+                    <strong>@Item.Event.Title</strong>
+                </MudText>
+                <MudText Typo="Typo.subtitle2" Color="Color.Surface">
+                    <em>@When(Item.Event.Date)</em>
+                </MudText>
+                @Header
+            </MudStack>
+            @if (Item.Event.Date.DayOfYear > 1)
+            {
+                <MudText Typo="Typo.body2">
+                    <MudIcon Color="Color.Primary" Size="Size.Small" Style="font-size: inherit" Icon="@Icons.Material.Filled.CalendarToday" Class="pr-1"/>
+                    @Item.Event.Date.ToString("dddd, MMMM d, yyyy")
+                </MudText>
+            }
+            @if (!string.IsNullOrWhiteSpace(Item.Event.Location))
+            {
+                <MudText Typo="Typo.body2">
+                    <MudIcon Color="Color.Primary" Size="Size.Small" Style="font-size: inherit" Icon="@Icons.Material.Filled.LocationOn" Class="pr-1"/>
+                    <a href="https://www.google.com/maps/search/?api=1&query=@(Uri.EscapeDataString(Item.Event.Location))" target="_blank">
+                        @Item.Event.Location
+                    </a>
+                </MudText>
+            }
+            @if (Item.Event.Components.Length > 0)
+            {
+                <MudChipSet ReadOnly Class="mt-1">
+                    @foreach (var component in Item.Event.Components)
+                    {
+                        <MudChip Size="Size.Small">@component.Name (@component.Date.ToString("ddd, MMM d"))</MudChip>
+                    }
+                </MudChipSet>
+            }
+            @if (!HideLetters && Item.Event.LetterTemplates.Length > 0)
+            {
+                <MudDivider Class="my-1"/>
+                <MudChipSet>
+                    @LetterChip(Item.PreEvent, LetterNames.PreEvent, Icons.Material.Filled.Rsvp, "Preregistration")
+                    @LetterChip(Item.PostEvent, LetterNames.PostEvent, Icons.Material.Filled.Email, "Post Event Letter (PEL)")
+                    @LetterChip(Item.BetweenEvent, LetterNames.BetweenEvent, Icons.Material.Filled.MenuBook, "Between Event Actions")
+                </MudChipSet>
+            }
+            @Footer
+        </MudStack>
+    </MudCardContent>
+</MudCard>
+
+@code {
+
+    [Parameter]
+    public EventAttendanceItem Item { get; set; } = default!;
+
+    [Parameter]
+    public RenderFragment? Header { get; set; }
+
+    [Parameter]
+    public RenderFragment? Footer { get; set; }
+
+    [Parameter]
+    public bool HideLetters { get; set; }
+
+    private RenderFragment? LetterChip(Letter? letter, string name, string icon, string label)
+    {
+        if (letter == null) return null;
+        var isLocked = letter.State == LetterState.Locked;
+        var statusInfo = LetterTooltip[letter.State];
+        var action = async () => await ViewLetter(letter);
+        if (isLocked && letter.SubmittedOn.HasValue)
+            statusInfo = (statusInfo.Tooltip, Color.Success);
+
+        return @<MudTooltip Text="@statusInfo.Tooltip">
+                   <MudChip
+                       Color="@statusInfo.Color"
+                       Icon="@icon"
+                       OnClick="@action"
+                       Size="Size.Small"
+                       Disabled="statusInfo.Color == Color.Dark"
+                       Text="@label"/>
+               </MudTooltip>;
+    }
+
+    static readonly Dictionary<LetterState, (string Tooltip, Color Color)> LetterTooltip = new()
+    {
+        { LetterState.NotStarted, ("You have not started the letter for this event", Color.Warning) },
+        { LetterState.Draft, ("You have not submitted this letter yet", Color.Warning) },
+        { LetterState.Submitted, ("Your event letter has been submitted and is waiting for approval", Color.Primary) },
+        { LetterState.Approved, ("Your event letter has been approved", Color.Success) },
+        { LetterState.Locked, ("Letter is currently closed", Color.Dark) },
+    };
+
+    private string _icon = default!;
+
+    static string GetEventIcon(string? type, string? title)
+    {
+        if (type == null || title == null) return Icons.Material.Filled.Event;
+        if (type.Contains("Subscription", StringComparison.InvariantCultureIgnoreCase))
+            return Icons.Material.Filled.AttachMoney;
+        if (title.Contains("Patreon", StringComparison.InvariantCultureIgnoreCase))
+            return Icons.Material.Filled.AttachMoney;
+        if (title.Contains("Trivia", StringComparison.InvariantCultureIgnoreCase))
+            return Icons.Material.Filled.Celebration;
+        if (type.Contains("Game", StringComparison.InvariantCultureIgnoreCase))
+            return Icons.Material.Filled.SportsHandball;
+        if (type.Contains("Workday", StringComparison.InvariantCultureIgnoreCase))
+            return Icons.Material.Filled.Handyman;
+        if (type.Contains("Contest", StringComparison.InvariantCultureIgnoreCase))
+            return Icons.Material.Filled.Celebration;
+        if (type.Contains("Other", StringComparison.InvariantCultureIgnoreCase))
+            return Icons.Material.Filled.Celebration;
+        return Icons.Material.Filled.AddBox;
+    }
+
+    private string When(DateOnly date)
+    {
+        var now = DateOnly.FromDateTime(DateTime.Today);
+        var diff = date.DayNumber - now.DayNumber;
+        var unit = "days";
+
+        if (Math.Abs(diff) >= 14)
+        {
+            diff /= 7;
+            unit = "weeks";
+        }
+
+        return diff switch {
+            0 => "today",
+            < 0 => $"{-diff} {unit} ago",
+            > 0 =>  $"in {diff} {unit}" };
+    }
+
+    private async Task ViewLetter(Letter letter)
+    {
+        if (letter.State is LetterState.NotStarted or LetterState.Draft)
+            NavigationManager.NavigateTo($"/events/{letter.EventId}/letter/{letter.Name}");
+        else
+            await PreviewLetter(letter);
+    }
+
+    private async Task PreviewLetter(Letter letter)
+    {
+        var template = await LandingService.GetTemplate(
+            Item.Event.LetterTemplates.FirstOrDefault(t => t.Name == letter.Name)?.LetterTemplateId
+            ?? letter.TemplateId);
+
+        var options = new DialogOptions()
+        {
+            CloseOnEscapeKey = true, CloseButton = true, Position = DialogPosition.TopCenter
+        };
+        var parameters = new DialogParameters()
+        {
+            { nameof(LetterDialog.Template), template },
+            { nameof(LetterDialog.Letter), letter },
+            { nameof(LetterDialog.Event), Item.Event },
+            { nameof(LetterDialog.ReadOnly), true },
+            { nameof(LetterDialog.AccountNames), LandingService.AccountNames }
+        };
+
+        await DialogService.ShowAsync<LetterDialog>("Letter", parameters, options);
+    }
+
+    protected override void OnParametersSet()
+    {
+        _icon = GetEventIcon(Item.Event.EventType, Item.Event.Title);
+    }
+
+}

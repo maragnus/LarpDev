@@ -575,7 +575,7 @@ public class AdminService : IAdminService
     public async Task<EventsAndLetters> GetLetter(string letterId) =>
         await _letterManager.GetEventLetter(letterId);
 
-    public async Task<EventAttendance[]> GetAccountAttendances(string accountId) =>
+    public async Task<EventAttendanceList> GetAccountAttendances(string accountId) =>
         await _eventManager.GetAccountAttendances(accountId);
 
     public async Task<EventAndLetters[]> GetEvents() =>

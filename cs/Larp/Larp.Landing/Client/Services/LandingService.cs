@@ -27,6 +27,8 @@ public class LandingService
 
     private readonly DataCacheService _dataCache;
     private readonly HttpClientFactory _httpClientFactory;
+
+    private readonly Dictionary<string, LetterTemplate> _letterTemplates = new();
     private readonly ILocalStorageService _localStorage;
     private readonly ILogger<LandingService> _logger;
 
@@ -59,6 +61,8 @@ public class LandingService
 
     public Game MwFifthGame => Games[GameState.GameName];
     public GameState MwFifthGameState { get; private set; } = default!;
+    public Dictionary<string, AccountName> AccountNames { get; } = new();
+
     public event EventHandler? AuthenticatedChanged;
     public async Task<CharacterSummary[]> GetCharacters() => await Service.GetCharacters();
 
@@ -188,6 +192,24 @@ public class LandingService
     public bool IsInRole(AccountRole role) =>
         Account?.Roles?.Contains(role) == true;
 
-    public async Task<AccountDashboard> GetAccountDashboard() =>
-        await Service.GetDashboard();
+    public async Task<AccountDashboard> GetAccountDashboard() => await Service.GetDashboard();
+
+    public async ValueTask<LetterTemplate> GetTemplate(string letterTemplateId)
+    {
+        if (_letterTemplates.TryGetValue(letterTemplateId, out var template))
+            return template;
+
+        template = await Service.GetLetterTemplate(letterTemplateId);
+        _letterTemplates.Add(letterTemplateId, template);
+        return template;
+    }
+
+    public void UpdateAccountNames(IDictionary<string, AccountName> names) =>
+        UpdateAccountNames(names.Values);
+
+    public void UpdateAccountNames(IEnumerable<AccountName> names)
+    {
+        foreach (var name in names)
+            AccountNames[name.AccountId] = name;
+    }
 }

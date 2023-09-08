@@ -95,7 +95,7 @@ public interface IAdminService
     Task<Attendance[]> GetEventAttendances(string eventId);
 
     [ApiGet("account/{accountId}/attendance"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
-    Task<EventAttendance[]> GetAccountAttendances(string accountId);
+    Task<EventAttendanceList> GetAccountAttendances(string accountId);
 
     [ApiPost("data/import"), ApiAuthenticated(AccountRoles.AccountAdmin)]
     Task<StringResult> Import(Stream data);

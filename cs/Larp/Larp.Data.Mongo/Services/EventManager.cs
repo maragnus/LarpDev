@@ -165,49 +165,83 @@ public class EventManager
         return e;
     }
 
-    public async Task<EventsAndLetters> GetEvents(EventList list, string? accountId)
+    public async Task<EventAttendanceList> GetEvents(EventList list, string? accountId)
     {
         var now = DateOnly.FromDateTime(DateTime.Today);
 
-        var letters = accountId == null
-            ? new Dictionary<string, Letter>()
-            : (await _larpContext.Letters.Find(x => x.AccountId == accountId)
-                .Project(x => new Letter()
-                    { LetterId = x.LetterId, Name = x.Name, EventId = x.EventId, State = x.State })
-                .ToListAsync())
-            .ToDictionary(x => x.LetterId);
+        var id = accountId ?? "";
 
-        var filter = list switch
+        var eventFilter = list switch
         {
+            EventList.All => Builders<Event>.Filter.Empty,
             EventList.Past => Builders<Event>.Filter.Where(x => !x.IsHidden && x.Date <= now.AddDays(4)),
             EventList.Upcoming => Builders<Event>.Filter.Where(x => !x.IsHidden && x.Date >= now.AddDays(-4)),
             EventList.Dashboard => Builders<Event>.Filter.Where(x => !x.IsHidden && x.Date >= now.AddMonths(-6)),
             _ => throw new ArgumentOutOfRangeException(nameof(list), list, null)
         };
 
-        var eventProjection =
-            Builders<Event>.Projection.Exclude(x => x.PreregistrationNotes).Exclude(x => x.AdminNotes);
-        var events = await _larpContext.Events.Find(filter).Project<Event>(eventProjection).ToListAsync();
-        var templateIds = letters.Values.Select(x => x.TemplateId).Distinct().ToList();
-        var templates = await _larpContext.LetterTemplates
-            .Find(template => templateIds.Contains(template.LetterTemplateId)).ToListAsync();
+        var events = await _larpContext.Events
+            .Find(eventFilter)
+            .Project<Event>(Builders<Event>.Projection
+                .Exclude(@event => @event.AdminNotes)
+                .Exclude(@event => @event.PreregistrationNotes))
+            .ToListAsync();
 
-        return new EventsAndLetters()
+        var eventIds = events.Select(@event => @event.EventId).ToArray();
+
+        var attendances =
+            (await _larpContext.Attendances
+                .Find(Builders<Attendance>.Filter.And(
+                    Builders<Attendance>.Filter.Eq(attendance => attendance.AccountId, accountId),
+                    Builders<Attendance>.Filter.In(attendance => attendance.EventId, eventIds)
+                ))
+                .ToListAsync())
+            .ToDictionary(attendance => attendance.EventId);
+
+        var letters =
+            (await _larpContext.Letters
+                .Find(Builders<Letter>.Filter.And(
+                    Builders<Letter>.Filter.Eq(letter => letter.AccountId, accountId),
+                    Builders<Letter>.Filter.In(letter => letter.EventId, eventIds)
+                ))
+                .ToListAsync())
+            .ToDictionary(letter => (letter.EventId, letter.Name));
+
+        var templateIds = events
+            .SelectMany(ev => ev.LetterTemplates)
+            .Select(ev => ev.LetterTemplateId)
+            .Distinct()
+            .ToList();
+
+        var templates =
+            (await _larpContext.LetterTemplates
+                .Find(Builders<LetterTemplate>.Filter.In(template => template.LetterTemplateId, templateIds))
+                .ToListAsync());
+
+        return new EventAttendanceList()
         {
-            Events = events.ToDictionary(x => x.EventId),
-            Accounts = await GetAccountNames(),
-            Letters = letters,
-            LetterTemplates = templates.ToDictionary(x => x.LetterTemplateId)
+            AccountId = accountId,
+            Events = (from @event in events
+                let eventId = @event.EventId
+                select new EventAttendanceItem()
+                {
+                    Event = @event,
+                    Attendance = attendances.GetValueOrDefault(eventId),
+                    PreEvent = letters.GetValueOrDefault((eventId, LetterNames.PreEvent)),
+                    PostEvent = letters.GetValueOrDefault((eventId, LetterNames.PostEvent)),
+                    BetweenEvent = letters.GetValueOrDefault((eventId, LetterNames.BetweenEvent)),
+                }).ToArray(),
+            LetterTemplates = templates.ToDictionary(l => l.LetterTemplateId)
         };
     }
 
-    public async Task<EventAttendance[]> GetAccountAttendances(string accountId)
+    public async Task<EventAttendanceList> GetAccountAttendances(string accountId)
     {
         var letters = (await _larpContext.Letters.AsQueryable()
                 .Where(x => x.AccountId == accountId)
                 .Select(x => new Letter() { EventId = x.EventId, Name = x.Name, State = x.State })
                 .ToListAsync())
-            .ToLookup(x => x.EventId);
+            .ToDictionary(letter => (letter.EventId, letter.Name));
 
         var attendances =
             await _larpContext.Attendances.AsQueryable()
@@ -226,11 +260,24 @@ public class EventManager
             x.Event.AdminNotes = default;
         });
 
-        return attendances
-            .Select(x => new EventAttendance(
-                x.Attedance,
-                x.Event,
-                letters[x.Event.EventId].ToArray()))
-            .ToArray();
+        var templateIds = letters
+            .Select(x => x.Value.TemplateId)
+            .Distinct().ToArray();
+        var templates = await _larpContext.LetterTemplates
+            .Find(template => templateIds.Contains(template.LetterTemplateId)).ToListAsync();
+
+        return new EventAttendanceList
+        {
+            AccountId = accountId,
+            Events = attendances.Select(a => new EventAttendanceItem
+            {
+                Event = a.Event,
+                Attendance = a.Attedance,
+                PreEvent = letters.GetValueOrDefault((a.Event.EventId, LetterNames.PreEvent)),
+                PostEvent = letters.GetValueOrDefault((a.Event.EventId, LetterNames.PostEvent)),
+                BetweenEvent = letters.GetValueOrDefault((a.Event.EventId, LetterNames.BetweenEvent)),
+            }).ToArray(),
+            LetterTemplates = templates.ToDictionary(l => l.LetterTemplateId)
+        };
     }
 }

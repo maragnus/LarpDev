@@ -8,186 +8,37 @@
 <MudStack Spacing="4">
     @foreach (var ev in _events)
     {
-        <MudCard>
-            <MudCardContent>
-                <MudStack Spacing="0">
-                    <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
-                        <MudText Typo="Typo.subtitle1">
-                            <MudIcon Icon="@ev.Icon" Color="Color.Primary" Style="font-size: inherit" Class="pr-1"/>
-                            <strong>@ev.Title</strong>
-                        </MudText>
-                        @if (ev.When.DayOfYear > 1)
-                        {
-                            <MudText Typo="Typo.subtitle2" Color="Color.Surface">
-                                <em>@When(ev.When)</em>
-                            </MudText>
-                        }
-                        @if (LandingService.IsInRole(AccountRole.AdminAccess))
-                        {
-                            <MudIconButton Href="@($"/admin/events/{ev.Id}")" Variant="Variant.Filled" Icon="@Icons.Material.Filled.Edit" Color="Color.Default"/>
-                        }
-                    </MudStack>
-                    @if (ev.When.DayOfYear > 1)
-                    {
-                        <MudText Typo="Typo.body2">
-                            <MudIcon Color="Color.Primary" Size="Size.Small" Style="font-size: inherit" Icon="@Icons.Material.Filled.CalendarToday" Class="pr-1"/>
-                            @ev.When.ToString("dddd, MMMM d, yyyy")
-                        </MudText>
-                    }
-                    @if (!string.IsNullOrWhiteSpace(ev.Location))
-                    {
-                        <MudText Typo="Typo.body2">
-                            <MudIcon Color="Color.Primary" Size="Size.Small" Style="font-size: inherit" Icon="@Icons.Material.Filled.LocationOn" Class="pr-1"/>
-                            @ev.Location
-                        </MudText>
-                    }
-                    @if (ev.Components.Length > 0)
-                    {
-                        <MudChipSet ReadOnly Class="mt-1">
-                            @foreach (var component in ev.Components)
-                            {
-                                <MudChip Size="Size.Small">@component.Title (@component.When.ToString("ddd, MMM d"))</MudChip>
-                            }
-                        </MudChipSet>
-                    }
-                    @if (ev.Letters.Length > 0)
-                    {
-                        <MudDivider Class="my-1"/>
-                        <MudChipSet>
-                            @foreach (var letter in ev.Letters)
-                            {
-                                var isLocked = letter.State == LetterState.Locked;
-                                var letterInfo = LetterInfo[letter.Name];
-                                var statusInfo = LetterTooltip[letter.State];
-                                var eventId = ev.Id;
-                                var name = letter.Name;
-                                var action = () => ViewLetter(eventId, name);
-                                if (isLocked && letter.SubmittedOn.HasValue)
-                                    statusInfo = (statusInfo.Tooltip, Color.Success);
-
-                                <MudTooltip Text="@statusInfo.Tooltip">
-                                    <MudChip
-                                        Color="@statusInfo.Color"
-                                        Icon="@letterInfo.Icon"
-                                        OnClick="@action"
-                                        Size="Size.Small"
-                                        Disabled="statusInfo.Color == Color.Dark"
-                                        Text="@letterInfo.Label"/>
-                                </MudTooltip>
-                            }
-                        </MudChipSet>
-                    }
-                </MudStack>
-            </MudCardContent>
-        </MudCard>
+        <EventCard Item="ev">
+            <Header>
+                @if (LandingService.IsInRole(AccountRole.AdminAccess))
+                {
+                    <MudIconButton Href="@($"/admin/events/{ev.Event.EventId}")" Variant="Variant.Filled" Icon="@Icons.Material.Filled.Edit" Color="Color.Default"/>
+                }
+            </Header>
+        </EventCard>
     }
 </MudStack>
 
 @code {
 
-    private string When(DateOnly date)
-    {
-        var now = DateOnly.FromDateTime(DateTime.Today);
-        var diff = date.DayNumber - now.DayNumber;
-        var unit = "days";
-
-        if (Math.Abs(diff) >= 14)
-        {
-            diff /= 7;
-            unit = "weeks";
-        }
-
-        return diff switch {
-            0 => "today",
-            < 0 => $"{-diff} {unit} ago",
-            > 0 =>  $"in {diff} {unit}" };
-    }
-
     [Parameter]
     public bool Past { get; set; }
 
-    private EventInfo[] _events = Array.Empty<EventInfo>();
-
-    static readonly Dictionary<LetterState, (string Tooltip, Color Color)> LetterTooltip = new()
-    {
-        { LetterState.NotStarted, ("You have not started the letter for this event", Color.Warning) },
-        { LetterState.Draft, ("You have not submitted this letter yet", Color.Warning) },
-        { LetterState.Submitted, ("Your event letter has been submitted and is waiting for approval", Color.Primary) },
-        { LetterState.Approved, ("Your event letter has been approved", Color.Success) },
-        { LetterState.Locked, ("Letter is currently closed", Color.Dark) },
-    };
-
-    static readonly Dictionary<string, (string Icon, string Label)> LetterInfo = new()
-    {
-        { LetterNames.PreEvent, (Icons.Material.Filled.Rsvp, "Preregistration") },
-        { LetterNames.PostEvent, (Icons.Material.Filled.Email, "Post Event Letter (PEL)") },
-        { LetterNames.BetweenEvent, (Icons.Material.Filled.MenuBook, "Between Event Actions") },
-    };
+    private EventAttendanceItem[] _events = Array.Empty<EventAttendanceItem>();
 
     private Dictionary<string, string?> _games = default!;
 
     record ComponentInfo(string Title, DateOnly When);
 
-    record EventInfo(
-        string Id, string Game, string Title, string Location,
-        string Icon, DateOnly When, ComponentInfo[] Components, Letter[] Letters)
-    {
-        public EventInfo(string game, Event e, Letter[] letters)
-            : this(e.EventId,
-                game,
-                e.Title ?? "Untitled",
-                e.Location ?? "",
-                GetEventIcon(e.EventType, e.Title),
-                e.Date,
-                e.Components
-                    .Select(c =>
-                        new ComponentInfo(c.Name ?? "Untitled", c.Date))
-                    .ToArray(),
-                GetLetters(e, letters).ToArray())
-        {
-        }
-
-        private static IEnumerable<Letter> GetLetters(Event @event, Letter[] letters)
-        {
-            foreach (var name in @event.LetterTemplates)
-            {
-                yield return letters.FirstOrDefault(x => x.EventId == @event.EventId && x.Name == name.Name)
-                             ?? new Letter() { Name = name.Name, State = name.IsOpen ? LetterState.NotStarted : LetterState.Locked };
-            }
-        }
-    }
-
-    static string GetEventIcon(string? type, string? title)
-    {
-        if (type == null || title == null) return Icons.Material.Filled.Event;
-        if (type.Contains("Subscription", StringComparison.InvariantCultureIgnoreCase))
-            return Icons.Material.Filled.AttachMoney;
-        if (title.Contains("Patreon", StringComparison.InvariantCultureIgnoreCase))
-            return Icons.Material.Filled.AttachMoney;
-        if (title.Contains("Trivia", StringComparison.InvariantCultureIgnoreCase))
-            return Icons.Material.Filled.Celebration;
-        if (type.Contains("Game", StringComparison.InvariantCultureIgnoreCase))
-            return Icons.Material.Filled.SportsHandball;
-        if (type.Contains("Workday", StringComparison.InvariantCultureIgnoreCase))
-            return Icons.Material.Filled.Handyman;
-        if (type.Contains("Contest", StringComparison.InvariantCultureIgnoreCase))
-            return Icons.Material.Filled.Celebration;
-        if (type.Contains("Other", StringComparison.InvariantCultureIgnoreCase))
-            return Icons.Material.Filled.Celebration;
-        return Icons.Material.Filled.AddBox;
-    }
 
     protected override async Task OnSafeParametersSetAsync()
     {
         var result = await LandingService.Service
             .GetEvents(Past ? EventList.Past : EventList.Upcoming);
 
-        var events = result.Events.Values.Select(x =>
-            new EventInfo(GameName(x.GameId), x, result.Letters.Values.ToArray()));
-
         _events = Past
-            ? events.OrderByDescending(x => x.When).ToArray()
-            : events.OrderBy(x => x.When).ToArray();
+            ? result.Events.OrderByDescending(x => x.Event.Date).ToArray()
+            : result.Events.OrderBy(x => x.Event.Date).ToArray();
     }
 
     protected override void OnInitialized()

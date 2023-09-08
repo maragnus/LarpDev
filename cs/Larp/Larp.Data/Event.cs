@@ -5,6 +5,7 @@ namespace Larp.Data;
 
 public enum EventList
 {
+    All,
     Upcoming,
     Past,
     Dashboard

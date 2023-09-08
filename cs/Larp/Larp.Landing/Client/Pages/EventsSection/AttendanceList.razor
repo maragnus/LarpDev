@@ -47,6 +47,8 @@
                 <PropertyColumn Property="x => x.EventTitle" Title="Title" Groupable="false"/>
                 <PropertyColumn Property="x => x.EventType" Title="Type"/>
                 <PropertyColumn Property="x => x.MwFifthMoonstone" Title="Moonstone" Groupable="false"/>
+                <PropertyColumn Property="x => x.Cost" Title="Cost" Groupable="false"/>
+                <PropertyColumn Property="x => x.Paid" Title="Paid" Groupable="false"/>
                 <TemplateColumn T="AttendanceInfo" Sortable="false" Filterable="false" Groupable="false">
                     <CellTemplate>
                         @foreach (var letter in context.Item.Letters)
@@ -106,6 +108,10 @@
 
         public string Icon { get; init; } = default!;
 
+        public decimal? Cost { get; init; }
+
+        public decimal? Paid { get; init; }
+
         public Letter[] Letters { get; init; } = default!;
     }
 
@@ -129,7 +135,7 @@
 
         var attendances = await LandingService.Service.GetAttendance();
 
-        static IEnumerable<Letter> GetLetters(Event @event, Letter[] letters)
+        static IEnumerable<Letter> GetLetters(Event @event, params Letter?[] letters)
         {
             foreach (var name in @event.LetterTemplates)
             {
@@ -138,22 +144,24 @@
             }
         }
 
-        _events = attendances
-            .Select(attendance =>
+        _events = attendances.Events
+            .Select(item =>
             {
                 return new AttendanceInfo
                 {
-                    Icon = GetIcon(attendance.Event.EventType, attendance.Event.Title),
-                    GameName = games.TryGetValue(attendance.Event.GameId, out var gameName) ? gameName : "No Game",
-                    EventTitle = attendance.Event.Title ?? "No Title",
-                    EventType = attendance.Event.EventType ?? "No Type",
-                    When = attendance.Event.Date,
+                    Icon = GetIcon(item.Event.EventType, item.Event.Title),
+                    GameName = games.TryGetValue(item.Event.GameId, out var gameName) ? gameName : "No Game",
+                    EventTitle = item.Event.Title ?? "No Title",
+                    EventType = item.Event.EventType ?? "No Type",
+                    When = item.Event.Date,
                     MwFifthMoonstone = (
-                        (attendance.MwFifth?.Moonstone ?? 0)
-                        + (attendance.MwFifth?.PostMoonstone ?? 0)).ToString(),
-                    MwFifthCharacters = characters.TryFromKeys(attendance.MwFifth?.CharacterIds),
-                    Letters = GetLetters(attendance.Event, attendance.Letters).ToArray(),
-                    EventId = attendance.EventId
+                        (item.Attendance.MwFifth?.Moonstone ?? 0)
+                        + (item.Attendance.MwFifth?.PostMoonstone ?? 0)).ToString(),
+                    MwFifthCharacters = characters.TryFromKeys(item.Attendance.MwFifth?.CharacterIds),
+                    Letters = GetLetters(item.Event, item.PreEvent, item.PostEvent, item.BetweenEvent).ToArray(),
+                    EventId = item.Event.EventId,
+                    Cost = item.Attendance.ExpectedPayment,
+                    Paid = item.Attendance.ProvidedPayment
                 };
 
                 string GetIcon(string? type, string? title)

@@ -43,13 +43,13 @@ public interface ILandingService
     Task<AccountDashboard> GetDashboard();
 
     [ApiGet("events")]
-    Task<EventsAndLetters> GetEvents(EventList list);
+    Task<EventAttendanceList> GetEvents(EventList list);
 
     [ApiGet("larp/characters/names"), ApiAuthenticated]
     Task<Dictionary<string, string>> GetCharacterNames();
 
     [ApiGet("events/attendance"), ApiAuthenticated]
-    Task<EventAttendance[]> GetAttendance();
+    Task<EventAttendanceList> GetAttendance();
 
     [ApiPost("letters/new"), ApiAuthenticated]
     Task<Letter> DraftLetter(string eventId, string letterName);
@@ -68,4 +68,7 @@ public interface ILandingService
 
     [ApiGet("attachments/thumbnails/{attachmentId}/{fileName}")]
     Task<IFileInfo> GetAttachmentThumbnail(string attachmentId, string fileName);
+
+    [ApiPost("letters/templates/{letterTemplateId}"), ApiAuthenticated]
+    Task<LetterTemplate> GetLetterTemplate(string letterTemplateId);
 }
