@@ -1,0 +1,104 @@
+@page "/transactions"
+@inherits LarpPage
+@inject LandingService LandingService
+
+<PageHeader Container>Transactions</PageHeader>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="relative pt-4">
+    <MudStack Spacing="4">
+
+        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceEvenly" Class="my-4">
+
+            <MudTooltip Text="The amount of USD in your account to cover event admission">
+                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.Center">
+                    <MudCard Class="pa-2">
+                        <MudText Typo="Typo.h6">
+                            <MudStack Row AlignItems="AlignItems.Center" Spacing="0">
+                                <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.AttachMoney" Color="Color.Success" Style="font-size: inherit"/>
+                                @_balance.ToString("0.00")
+                            </MudStack>
+                        </MudText>
+                    </MudCard>
+                    <MudText Align="Align.Center" Typo="Typo.caption">Account<br/>Balance</MudText>
+                </MudStack>
+            </MudTooltip>
+            <MudTooltip Text="Deposit money into your account from Square">
+                <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Success">Add Funds</MudButton>
+            </MudTooltip>
+            <MudTooltip Text="Share your account balance with other accounts">
+                <MudButton StartIcon="@Icons.Material.Filled.People" Variant="Variant.Filled" Color="Color.Primary">Share</MudButton>
+            </MudTooltip>
+        </MudStack>
+    </MudStack>
+
+    <MudText Typo="Typo.h6" Class="mt-4 mb-4">Transactions</MudText>
+    <MudDataGrid T="TransactionInfo" Items="_transactions" Hover Filterable="true" Loading="IsLoading" Groupable Dense>
+        <NoRecordsContent>
+            <MudAlert Class="mx-4" Severity="Severity.Info" Icon="@Icons.Material.Filled.Info">
+                You have no transactions
+            </MudAlert>
+        </NoRecordsContent>
+        <Columns>
+            <TemplateColumn T="TransactionInfo" Groupable="false" Sortable="false" Filterable="false">
+                <CellTemplate>
+                    <MudIcon Icon="@context.Item.Icon" Color="@context.Item.Color" Size="Size.Small"/>
+                    <MudText Typo="Typo.body1" Color="@context.Item.Color">@context.Item.Type</MudText>
+                </CellTemplate>
+            </TemplateColumn>
+            <PropertyColumn Property="x => x.When" Title="Date" Format="ddd, MMM d, yyyy" Groupable="false"/>
+            <PropertyColumn Property="x => x.Source" Title="Source"/>
+            <PropertyColumn Property="x => x.Amount" Title="Amount" Groupable="false"/>
+        </Columns>
+    </MudDataGrid>
+    <MudAlert Severity="Severity.Info">Is there any incorrect? Please contact <a href="mailto:mystwood@mystwood.org?subject=Question+about+transactions" target="_blank">Mystwood</a>.</MudAlert>
+</MudContainer>
+
+@code {
+    private decimal _balance;
+    private TransactionInfo[] _transactions = Array.Empty<TransactionInfo>();
+
+    public class TransactionInfo
+    {
+        public string Icon { get; init; } = string.Empty;
+        public Color Color { get; init; }
+        public string Type { get; init; } = string.Empty;
+        public string Source { get; init; } = string.Empty;
+        public DateTime When { get; init; }
+        public decimal Amount { get; init; }
+        public string? Note { get; init; }
+    }
+
+    protected override async Task OnSafeParametersSetAsync()
+    {
+        var transactions = await LandingService.GetTransactions();
+        _transactions = transactions
+            .OrderByDescending(transaction => transaction.TransactionOn)
+            .Select(transaction => new TransactionInfo
+            {
+                Icon = transaction.Type switch {
+                    TransactionType.Deposit => Icons.Material.Filled.KeyboardDoubleArrowDown,
+                    TransactionType.Withdrawal => Icons.Material.Filled.KeyboardDoubleArrowUp,
+                    _ => Icons.Material.Filled.KeyboardDoubleArrowDown
+                    },
+                Color = transaction.Type switch {
+                    TransactionType.Deposit => Color.Primary,
+                    TransactionType.Withdrawal => Color.Error,
+                    _ => Color.Warning
+                    },
+                Source = transaction.SourceAccountName
+                         ?? transaction.EventTitle
+                         ?? transaction.Source
+                         ?? "Unknown",
+                Type = transaction.Type.ToString(),
+                When = transaction.TransactionOn.LocalDateTime,
+                Amount = transaction.Amount,
+                Note = transaction.Note
+            }).ToArray();
+
+        _balance = _transactions
+            .Select(transaction => transaction.Amount)
+            .DefaultIfEmpty()
+            .Sum();
+    }
+
+}

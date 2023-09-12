@@ -60,9 +60,13 @@ public partial class Account
     public AccountRole[] Roles { get; set; } = Array.Empty<AccountRole>();
 
     public int? ImportId { get; set; }
+
     public int? MwFifthMoonstone { get; set; }
+
     public int? MwFifthUsedMoonstone { get; set; }
+
     public string? MwFifthPreregistrationNotes { get; set; }
+
     public string? AdminNotes { get; set; }
 
     public int? DiscountPercent { get; set; }
@@ -74,6 +78,10 @@ public partial class Account
     public int? CharacterCount { get; set; }
 
     public int? CitationCount { get; set; }
+
+    public decimal? AccountBalance { get; set; }
+
+    public decimal? AccountDeposits { get; set; }
 
     [BsonIgnore]
     public string? PreferredEmail =>

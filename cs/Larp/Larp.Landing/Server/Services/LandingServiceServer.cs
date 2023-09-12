@@ -11,9 +11,11 @@ public class LandingServiceServer : ILandingService
     private readonly INotifyService _notifyService;
     private readonly IUserSession _userSession;
     private readonly IUserSessionManager _userSessionManager;
+    private TransactionManager _transactionManager;
 
     public LandingServiceServer(LarpContext db, IUserSessionManager userSessionManager, IUserSession userSession,
-        INotifyService notifyService, LetterManager letterManager, EventManager eventManager)
+        INotifyService notifyService, LetterManager letterManager, EventManager eventManager,
+        TransactionManager transactionManager)
     {
         _db = db;
         _userSessionManager = userSessionManager;
@@ -21,6 +23,7 @@ public class LandingServiceServer : ILandingService
         _notifyService = notifyService;
         _letterManager = letterManager;
         _eventManager = eventManager;
+        _transactionManager = transactionManager;
     }
 
     private string AccountId =>
@@ -223,6 +226,9 @@ public class LandingServiceServer : ILandingService
 
     public async Task<LetterTemplate> GetLetterTemplate(string letterTemplateId) =>
         await _letterManager.GetTemplate(letterTemplateId);
+
+    public async Task<Transaction[]> GetTransactions() =>
+        await _transactionManager.GetTransactions(AccountId);
 
     private async Task GrantAdminRoles(string accountId) =>
         await _userSessionManager.UpdateUserAccount(accountId,

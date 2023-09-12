@@ -6,4 +6,6 @@ public class AccountDashboard
     public int? AvailableMoonstone { get; init; }
     public Dictionary<string, CharacterSummary> Characters { get; init; } = new();
     public EventAttendanceList Events { get; init; } = new();
+
+    public decimal AccountBalance { get; init; }
 }

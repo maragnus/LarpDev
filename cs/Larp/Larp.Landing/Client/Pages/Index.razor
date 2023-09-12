@@ -41,6 +41,20 @@
                             <MudText Style="color: #fff" Align="Align.Center" Typo="Typo.caption">Available<br/>Moonstone</MudText>
                         </MudStack>
                     </MudTooltip>
+                    <MudTooltip Text="The amount of USD in your account to cover event admission">
+                        <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center">
+                            <MudCard Class="pa-2">
+                                <MudText Typo="Typo.h6">
+                                    <MudStack Row AlignItems="AlignItems.Center" Spacing="0">
+                                        <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.AttachMoney" Color="Color.Success" Style="font-size: inherit"/>
+                                        @_dashboard.AccountBalance.ToString("0.00")
+                                        <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small"/>
+                                    </MudStack>
+                                </MudText>
+                            </MudCard>
+                            <MudText Style="color: #fff" Align="Align.Center" Typo="Typo.caption">Account<br/>Balance</MudText>
+                        </MudStack>
+                    </MudTooltip>
                 </MudStack>
             </MudStack>
         }

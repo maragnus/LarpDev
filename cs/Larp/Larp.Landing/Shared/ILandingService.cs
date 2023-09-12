@@ -71,4 +71,7 @@ public interface ILandingService
 
     [ApiPost("letters/templates/{letterTemplateId}"), ApiAuthenticated]
     Task<LetterTemplate> GetLetterTemplate(string letterTemplateId);
+
+    [ApiPost("transactions"), ApiAuthenticated]
+    Task<Transaction[]> GetTransactions();
 }

@@ -16,41 +16,48 @@ public class LarpContext
 
     public LarpContext(IOptions<LarpDataOptions> options, LarpDataCache cache)
     {
-        var client = new MongoClient(options.Value.ConnectionString ??
-                                     throw new MongoConfigurationException(
-                                         "Connection String must be provided in options"));
-        var database = client.GetDatabase(options.Value.Database ??
-                                          throw new MongoConfigurationException(
-                                              "Database must be provided in options"));
+        var connectionString =
+            options.Value.ConnectionString ??
+            throw new MongoConfigurationException(
+                $"{LarpDataOptions.SectionName}.{nameof(LarpDataOptions.ConnectionString)} must be provided in options");
+        var databaseName =
+            options.Value.Database ??
+            throw new MongoConfigurationException(
+                $"{LarpDataOptions.SectionName}.{nameof(LarpDataOptions.Database)} must be provided in options");
 
-        Accounts = database.GetCollection<Account>(nameof(Accounts));
+        var client = new MongoClient(connectionString);
+        var database = client.GetDatabase(databaseName);
+
         AccountAttachments = database.GetCollection<AccountAttachment>(nameof(AccountAttachments));
+        Accounts = database.GetCollection<Account>(nameof(Accounts));
         Attendances = database.GetCollection<Attendance>(nameof(Attendances));
-        Events = database.GetCollection<Event>(nameof(Events));
-        Games = database.GetCollection<Game>(nameof(Games));
-        ClarifyTerms = database.GetCollection<ClarifyTerm>(nameof(ClarifyTerms));
-        Sessions = database.GetCollection<Session>(nameof(Sessions));
-        GameStates = database.GetCollection<BsonDocument>(nameof(GameStates));
-        Letters = database.GetCollection<Letter>(nameof(Letters));
-        LetterTemplates = database.GetCollection<LetterTemplate>(nameof(LetterTemplates));
-        MwFifthGame = new MwFifthGameContext(database, cache);
-        EventLog = database.GetCollection<BsonDocument>(nameof(EventLog));
         Citations = database.GetCollection<Citation>(nameof(Citations));
+        ClarifyTerms = database.GetCollection<ClarifyTerm>(nameof(ClarifyTerms));
+        EventLog = database.GetCollection<BsonDocument>(nameof(EventLog));
+        Events = database.GetCollection<Event>(nameof(Events));
+        GameStates = database.GetCollection<BsonDocument>(nameof(GameStates));
+        Games = database.GetCollection<Game>(nameof(Games));
+        LetterTemplates = database.GetCollection<LetterTemplate>(nameof(LetterTemplates));
+        Letters = database.GetCollection<Letter>(nameof(Letters));
+        MwFifthGame = new MwFifthGameContext(database, cache);
+        Sessions = database.GetCollection<Session>(nameof(Sessions));
+        Transactions = database.GetCollection<Transaction>(nameof(Transactions));
     }
 
-    public IMongoCollection<BsonDocument> EventLog { get; }
-    public IMongoCollection<AccountAttachment> AccountAttachments { get; }
     public IMongoCollection<Account> Accounts { get; }
-    public IMongoCollection<Event> Events { get; }
+    public IMongoCollection<AccountAttachment> AccountAttachments { get; }
     public IMongoCollection<Attendance> Attendances { get; }
-    public MwFifthGameContext MwFifthGame { get; }
-    public IMongoCollection<Game> Games { get; }
-    public IMongoCollection<Session> Sessions { get; }
+    public IMongoCollection<BsonDocument> EventLog { get; }
     public IMongoCollection<BsonDocument> GameStates { get; }
+    public IMongoCollection<Citation> Citations { get; }
+    public IMongoCollection<ClarifyTerm> ClarifyTerms { get; }
+    public IMongoCollection<Event> Events { get; }
+    public IMongoCollection<Game> Games { get; }
     public IMongoCollection<Letter> Letters { get; }
     public IMongoCollection<LetterTemplate> LetterTemplates { get; }
-    public IMongoCollection<ClarifyTerm> ClarifyTerms { get; }
-    public IMongoCollection<Citation> Citations { get; }
+    public IMongoCollection<Session> Sessions { get; }
+    public IMongoCollection<Transaction> Transactions { get; set; }
+    public MwFifthGameContext MwFifthGame { get; }
 
     public async Task Migrate()
     {

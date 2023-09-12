@@ -10,7 +10,7 @@
     private void LandingServiceOnAuthenticatedChanged(object? sender, EventArgs e) =>
         StateHasChanged();
 
-    public void Dispose()=>
+    public void Dispose() =>
         LandingService.AuthenticatedChanged -= LandingServiceOnAuthenticatedChanged;
 }
 
@@ -41,6 +41,7 @@
     @if (LandingService.IsAuthenticated)
     {
         <MudNavLink Href="/events/attendance" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.EmojiPeople">Attendance</MudNavLink>
+        <MudNavLink Href="/transactions" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.AttachMoney">Transactions</MudNavLink>
     }
     @* <MudNavLink Href="/clarify" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Book">Clarify</MudNavLink> *@
     @if (LandingService.IsAuthenticated)

@@ -102,8 +102,7 @@
         {
             foreach (var name in @event.LetterTemplates)
             {
-    // TODO -- if not IsOpen then change LetterState.NotStarted or LetterState.Draft to LetterState.Locked
-                yield return letters.FirstOrDefault(x => x.EventId == @event.EventId && x.Name == name.Name)
+                yield return letters.FirstOrDefault(x => x != null && x.EventId == @event.EventId && x.Name == name.Name)
                              ?? new Letter() { Name = name.Name, State = name.IsOpen ? LetterState.NotStarted : LetterState.Locked };
             }
         }

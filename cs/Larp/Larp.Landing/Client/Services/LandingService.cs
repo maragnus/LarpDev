@@ -212,4 +212,7 @@ public class LandingService
         foreach (var name in names)
             AccountNames[name.AccountId] = name;
     }
+
+    public async Task<Transaction[]> GetTransactions() =>
+        await Service.GetTransactions();
 }
