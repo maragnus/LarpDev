@@ -38,6 +38,15 @@
         }
     }
 
+    private async Task UpdatePayments()
+    {
+        await SafeActionAsync(async () =>
+        {
+            await LandingService.Admin.UpdateTransactions();
+            await DialogService.ShowMessageBox("Update Transactions", "All Square payments have been synchronized with account transactions");
+        });
+    }
+
     private async Task Clear()
     {
         _file = null;
@@ -103,6 +112,16 @@
 }
 
 <AdminLayout Title="Import/Export Data">
+    <MudPaper Class="mb-4 pa-4">
+        <MudStack Spacing="4" AlignItems="AlignItems.Start">
+            <MudText Typo="Typo.h6">Transactions</MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AttachMoney"
+                       OnClick="UpdatePayments">
+                Update Square Payments
+            </MudButton>
+        </MudStack>
+    </MudPaper>
+
     <MudPaper Class="mb-4 pa-4">
         <MudStack Spacing="4" AlignItems="AlignItems.Start">
             <MudText Typo="Typo.h6">Import Data</MudText>

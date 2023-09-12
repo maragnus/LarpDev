@@ -1,9 +1,11 @@
-using Larp.Square;
+using Larp.Payments;
 
 namespace Larp.Data.Mongo.Services;
 
 public class TransactionManager
 {
+    public const string SquareSource = "Square";
+    public const string DepositName = "Tavern Deposit";
     private readonly LarpContext _larpContext;
     private readonly ISquareService _squareService;
 
@@ -13,17 +15,61 @@ public class TransactionManager
         _squareService = squareService;
     }
 
-    public async Task<string> RequestPayment(string accountId, decimal amount, string name, string email, string phone)
+    public async Task UpdatePayments()
+    {
+        var payments = (await _squareService.GetPayments())
+            .ToDictionary(p => p.OrderId);
+
+        var transactions = await _larpContext.Transactions
+            .Find(t => t.Source == SquareSource)
+            .ToListAsync();
+
+        var writes = new List<WriteModel<Transaction>>();
+
+        foreach (var transaction in transactions)
+        {
+            if (string.IsNullOrEmpty(transaction.OrderId)
+                || !payments.TryGetValue(transaction.OrderId, out var payment))
+                continue;
+
+            var amount = payment.TotalMoney.Amount;
+            var status = Transaction.ConvertTransactionStatus(payment.Status);
+            var updatedAt = DateTimeOffset.Parse(payment.UpdatedAt);
+            if (transaction.Status == status
+                && transaction.TransactionOn == updatedAt
+                && transaction.Amount == amount
+                && transaction.ReceiptUrl == payment.ReceiptUrl)
+                continue;
+
+            var write = new UpdateOneModel<Transaction>(
+                Builders<Transaction>.Filter.Eq(t => t.TransactionId, transaction.TransactionId),
+                Builders<Transaction>.Update
+                    .Set(t => t.Status, status)
+                    .Set(t => t.Amount, amount)
+                    .Set(t => t.ReceiptUrl, payment.ReceiptUrl)
+                    .Set(t => t.TransactionOn, updatedAt)
+            );
+
+            writes.Add(write);
+        }
+
+        if (writes.Count == 0) return;
+
+        await _larpContext.Transactions.BulkWriteAsync(writes);
+    }
+
+    public async Task<string> RequestPayment(string accountId, decimal amount, string? name, string? email,
+        string? phone)
     {
         var id = ObjectId.GenerateNewId().ToString();
-        var response = await _squareService.CreatePaymentUrl(id, amount, "Tavern Deposit", name, email, phone);
+        var response = await _squareService.CreatePaymentUrl(id, amount, DepositName, name, email, phone);
 
         var transaction = new Transaction()
         {
             TransactionId = id,
             AccountId = accountId,
             Type = TransactionType.Deposit,
-            Source = "Square",
+            Source = SquareSource,
             OrderId = response.OrderId,
             Status = TransactionStatus.Pending,
             TransactionOn = DateTimeOffset.Now
@@ -82,7 +128,7 @@ public class TransactionManager
     {
         return await _larpContext.Transactions.AsQueryable()
             .Where(transaction => transaction.AccountId == accountId)
-            .SumAsync(transaction => transaction.Amount);
+            .SumAsync(transaction => transaction.Amount) / 100m;
     }
 
     public async Task<Dictionary<string, decimal>> GetBalances()
@@ -97,7 +143,7 @@ public class TransactionManager
                         Balance = group.Sum(transaction => transaction.Amount)
                     })
                 .ToListAsync())
-            .ToDictionary(t => t.AccountId, t => t.Balance);
+            .ToDictionary(t => t.AccountId, t => t.Balance / 100m);
     }
 
     public async Task UpdateByOrderId(string orderId, TransactionStatus status, decimal amount,

@@ -20,7 +20,7 @@
         <ProjectReference Include="..\..\Larp.Data\Larp.Data.csproj" />
         <ProjectReference Include="..\..\KiloTx.Restful.Server\KiloTx.Restful.Server.csproj" />
         <ProjectReference Include="..\..\Larp.Notify\Larp.Notify.csproj" />
-        <ProjectReference Include="..\..\Larp.Square\Larp.Square.csproj"/>
+        <ProjectReference Include="..\..\Larp.Payments\Larp.Payments.csproj"/>
         <ProjectReference Include="..\Client\Larp.Landing.Client.csproj" />
         <ProjectReference Include="..\Shared\Larp.Landing.Shared.csproj" />
     </ItemGroup>

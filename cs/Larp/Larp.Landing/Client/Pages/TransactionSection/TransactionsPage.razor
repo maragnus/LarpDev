@@ -107,7 +107,7 @@
                 Status = transaction.Status.ToString(),
                 Type = transaction.Type.ToString(),
                 When = transaction.TransactionOn.LocalDateTime,
-                Amount = transaction.Amount,
+                Amount = transaction.AmountDecimal,
                 Note = transaction.Note,
                 ReceiptUrl = transaction.ReceiptUrl
             }).ToArray();

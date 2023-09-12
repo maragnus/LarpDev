@@ -5,7 +5,7 @@ using Larp.Landing.Server.Import;
 using Larp.Landing.Server.Services;
 using Larp.Landing.Shared.MwFifth;
 using Larp.Notify;
-using Larp.Square;
+using Larp.Payments;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Internal;
 
@@ -54,7 +54,7 @@ builder.Configuration
     services.AddScoped<LarpDataSeeder>();
     services.AddStartupTask<LarpDataSeederStartupTask>();
 
-    // Larp.Square
+    // Larp.Payments
     services.Configure<SquareOptions>(
         builder.Configuration.GetSection(SquareOptions.SectionName));
     services.AddSquareService();

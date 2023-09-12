@@ -14,6 +14,7 @@
         <MudSwitch T="bool" Checked="Account.Roles.Contains(AccountRole.AccountAdmin)" CheckedChanged="value => SetRole(AccountRole.AccountAdmin, value)" Color="Color.Success" UnCheckedColor="Color.Error">Can manage accounts and access</MudSwitch>
         <MudSwitch T="bool" Checked="Account.Roles.Contains(AccountRole.MwFifthGameMaster)" CheckedChanged="value => SetRole(AccountRole.MwFifthGameMaster, value)" Color="Color.Success" UnCheckedColor="Color.Error">Can manage Mystwood 5e characters</MudSwitch>
         <MudSwitch T="bool" Checked="Account.Roles.Contains(AccountRole.CitationAccess)" CheckedChanged="value => SetRole(AccountRole.CitationAccess, value)" Color="Color.Success" UnCheckedColor="Color.Error">Can view and add player citations</MudSwitch>
+        <MudSwitch T="bool" Checked="Account.Roles.Contains(AccountRole.FinanceAccess)" CheckedChanged="value => SetRole(AccountRole.FinanceAccess, value)" Color="Color.Success" UnCheckedColor="Color.Error">Can view and update financial transactions</MudSwitch>
     </MudStack>
 </MudPaper>
 

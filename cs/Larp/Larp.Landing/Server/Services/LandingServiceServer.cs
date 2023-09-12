@@ -133,13 +133,15 @@ public class LandingServiceServer : ILandingService
         {
             var characters = await GetDashboardCharacters();
             var events = await _eventManager.GetEvents(EventList.Dashboard, AccountId);
+            var balance = await _transactionManager.GetBalance(_userSession.AccountId);
 
             return new AccountDashboard()
             {
                 Characters = characters.ToDictionary(cs => cs.Id),
                 Events = events,
                 AvailableMoonstone = _userSession.Account!.MwFifthMoonstone - _userSession.Account.MwFifthUsedMoonstone,
-                TotalMoonstone = _userSession.Account.MwFifthMoonstone
+                TotalMoonstone = _userSession.Account.MwFifthMoonstone,
+                AccountBalance = balance
             };
         }
         else

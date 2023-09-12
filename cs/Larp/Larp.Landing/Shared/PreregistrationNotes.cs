@@ -11,6 +11,7 @@ public class PlayerAttendee
     public string? Notes { get; set; }
     public Letter? PreEventLetter { get; set; }
     public int? DiscountPercentage { get; set; }
+    public decimal? Balance { get; set; }
 }
 
 public class CharacterAttendee

@@ -243,6 +243,9 @@ public interface IAdminService
 
     [ApiGet("letters/{letterId}"), ApiAuthenticated(AccountRoles.AccountAdmin)]
     Task<EventsAndLetters> GetLetter(string letterId);
+
+    [ApiPost("transactions/update"), ApiAuthenticated(AccountRoles.FinanceAccess)]
+    Task UpdateTransactions();
 }
 
 public class Dashboard

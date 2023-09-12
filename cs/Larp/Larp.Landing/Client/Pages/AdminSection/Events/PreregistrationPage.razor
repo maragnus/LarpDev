@@ -61,6 +61,7 @@
             <th colspan="2">Player (Age)</th>
             <th>Character</th>
             <th colspan="2">Event</th>
+            <th>Credit</th>
             <th>PC</th>
             <th>NPC</th>
             <th>Plot</th>
@@ -111,6 +112,7 @@
                 join attending in GetList(FieldNpcing) on component.Name equals attending
                 select component.ComponentId;
             var npcing = isNpcing ? string.Join("", npcingList) : "";
+            var balance = player.Balance;
 
             var sheets = player.Characters
                 .Where(x => characters.Contains(x.Name))
@@ -196,6 +198,7 @@
                             <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked"/>
                         </td>
                         <td class="right-half nowrap">$@cost @patreon</td>
+                        <td class="nowrap">$@balance</td>
                     }
                     else
                     {
@@ -203,6 +206,7 @@
                             <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked" Color="Color.Transparent"/>
                         </td>
                         <td class="right-half">&nbsp;</td>
+                        <td>&nbsp;</td>
                     }
                     <td class="center">@pcing</td>
                     <td class="center">@npcing</td>

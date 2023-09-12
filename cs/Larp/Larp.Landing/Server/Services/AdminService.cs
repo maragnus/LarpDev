@@ -24,11 +24,13 @@ public class AdminService : IAdminService
     private readonly LetterManager _letterManager;
     private readonly string? _sessionId;
     private readonly IUserSessionManager _userSessionManager;
+    private TransactionManager _transactionManager;
 
     public AdminService(LarpContext db, IUserSession userSession,
         MwFifthCharacterManager characterManager, IUserSessionManager userSessionManager,
         LetterManager letterManager, EventManager eventManager, CitationManager citationManager,
-        AttachmentManager attachmentManager, BackupManager backupManager, ISystemClock clock)
+        AttachmentManager attachmentManager, BackupManager backupManager, ISystemClock clock,
+        TransactionManager transactionManager)
     {
         _db = db;
         _characterManager = characterManager;
@@ -39,6 +41,7 @@ public class AdminService : IAdminService
         _attachmentManager = attachmentManager;
         _backupManager = backupManager;
         _clock = clock;
+        _transactionManager = transactionManager;
         _account = userSession.Account!;
         _sessionId = userSession.SessionId;
     }
@@ -296,6 +299,7 @@ public class AdminService : IAdminService
                 .Find(x => x.State == CharacterState.Live && accountIds.Contains(x.AccountId))
                 .ToListAsync())
             .ToDictionary(x => x.CharacterId);
+        var balances = await _transactionManager.GetBalances();
 
         foreach (var attendee in attendance)
         {
@@ -332,6 +336,7 @@ public class AdminService : IAdminService
                 Notes = account?.Notes,
                 PreEventLetter = letter,
                 DiscountPercentage = account?.DiscountPercent,
+                Balance = balances!.GetValueOrDefault(account?.AccountId),
                 Characters = (
                     from character in characters
                     let revision = accountRevisions[character.CharacterId]
@@ -574,6 +579,11 @@ public class AdminService : IAdminService
 
     public async Task<EventsAndLetters> GetLetter(string letterId) =>
         await _letterManager.GetEventLetter(letterId);
+
+    public async Task UpdateTransactions()
+    {
+        await _transactionManager.UpdatePayments();
+    }
 
     public async Task<EventAttendanceList> GetAccountAttendances(string accountId) =>
         await _eventManager.GetAccountAttendances(accountId);

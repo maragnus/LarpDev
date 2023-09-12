@@ -1,6 +1,7 @@
 using System.Text.Json;
-using Larp.Square;
+using Larp.Payments;
 using Square.Models;
+using Transaction = Larp.Data.Transaction;
 
 namespace Larp.Landing.Server.Services;
 
@@ -21,15 +22,7 @@ public class SquareTransactionHandler : ISquareTransactionHandler
             JsonSerializer.Serialize(payment, new JsonSerializerOptions() { WriteIndented = true }));
 
         var amount = (decimal)(payment.TotalMoney.Amount ?? 0) / 100;
-        var status = payment.Status switch
-        {
-            "APPROVED" => TransactionStatus.Approved,
-            "PENDING" => TransactionStatus.Pending,
-            "COMPLETED" => TransactionStatus.Complete,
-            "CANCELED" => TransactionStatus.Cancelled,
-            "FAILED" => TransactionStatus.Failed,
-            _ => TransactionStatus.Unknown
-        };
+        var status = Transaction.ConvertTransactionStatus(payment.Status);
 
         await _transactionManager.UpdateByOrderId(
             payment.OrderId,

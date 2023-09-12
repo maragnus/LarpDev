@@ -1,6 +1,6 @@
 using Square.Models;
 
-namespace Larp.Square;
+namespace Larp.Payments;
 
 public interface ISquareTransactionHandler
 {

@@ -10,7 +10,7 @@ public enum TransactionType
 public enum TransactionStatus
 {
     Unknown,
-    Complete,
+    Completed,
     Pending,
     Approved,
     Cancelled,
@@ -37,7 +37,9 @@ public class Transaction
 
     public TransactionType Type { get; set; }
 
-    public decimal Amount { get; set; }
+    public long Amount { get; set; }
+
+    [BsonIgnore] public decimal AmountDecimal => Amount / 100m;
 
     public DateTimeOffset TransactionOn { get; set; }
 
@@ -52,4 +54,15 @@ public class Transaction
     [BsonIgnore] public string? SourceAccountName { get; set; }
 
     [BsonIgnore] public string? EventTitle { get; set; }
+
+    public static TransactionStatus ConvertTransactionStatus(string status) =>
+        status.ToUpperInvariant() switch
+        {
+            "APPROVED" => TransactionStatus.Approved,
+            "PENDING" => TransactionStatus.Pending,
+            "COMPLETED" => TransactionStatus.Completed,
+            "CANCELED" => TransactionStatus.Cancelled,
+            "FAILED" => TransactionStatus.Failed,
+            _ => TransactionStatus.Unknown
+        };
 }

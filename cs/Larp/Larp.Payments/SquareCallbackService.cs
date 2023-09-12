@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 using Square.Models;
 using Square.Utilities;
 
-namespace Larp.Square;
+namespace Larp.Payments;
 
 public class SquareCallbackService
 {

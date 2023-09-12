@@ -7,18 +7,20 @@ using Square.Exceptions;
 using Square.Models;
 using Environment = Square.Environment;
 
-namespace Larp.Square;
+namespace Larp.Payments;
 
 public interface ISquareService
 {
     Task<SquarePaymentUrl> CreatePaymentUrl(string transactionId, decimal amount, string itemName, string name,
         string email, string phone);
+
+    Task<Payment[]> GetPayments();
 }
 
 public class SquarePaymentUrl
 {
-    public string Url { get; init; }
-    public string OrderId { get; init; }
+    public string Url { get; init; } = default!;
+    public string OrderId { get; init; } = default!;
 }
 
 public class SquareService : ISquareService
@@ -78,6 +80,13 @@ public class SquareService : ISquareService
         }
     }
 
+    public async Task<Payment[]> GetPayments()
+    {
+        var client = CreateClient();
+        var payments = await client.PaymentsApi.ListPaymentsAsync();
+        return payments.Payments.ToArray();
+    }
+
     public async Task<Location[]> GetLocations()
     {
         var client = CreateClient();
@@ -90,8 +99,10 @@ public class SquareService : ISquareService
         new SquareClient.Builder()
             .AccessToken(_options.AccessToken)
             .SquareVersion("2023-08-16")
-            .Environment(Environment.Sandbox)
-            //.CustomUrl(_options.SquareUrl)
+            .Environment(
+                Enum.TryParse<Square.Environment>(_options.Environment, out var env)
+                    ? env
+                    : Environment.Sandbox)
             .Build();
 }
 

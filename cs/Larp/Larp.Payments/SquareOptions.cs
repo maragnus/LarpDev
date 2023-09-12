@@ -1,4 +1,4 @@
-namespace Larp.Square;
+namespace Larp.Payments;
 
 public class SquareOptions
 {
@@ -6,9 +6,9 @@ public class SquareOptions
 
     public string? ApplicationId { get; set; }
     public string? AccessToken { get; set; }
-    public string? SquareUrl { get; set; }
     public string? CallbackUrl { get; set; }
     public string? SignatureKey { get; set; }
     public string? LocationId { get; set; }
     public string? ReturnUrl { get; set; }
+    public string? Environment { get; set; } = "Sandbox";
 }
