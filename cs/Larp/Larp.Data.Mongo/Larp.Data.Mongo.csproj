@@ -14,6 +14,7 @@
     <ItemGroup>
       <ProjectReference Include="..\KiloTx.Restful\KiloTx.Restful.csproj" />
       <ProjectReference Include="..\Larp.Data\Larp.Data.csproj" />
+        <ProjectReference Include="..\Larp.Square\Larp.Square.csproj"/>
     </ItemGroup>
 
 </Project>

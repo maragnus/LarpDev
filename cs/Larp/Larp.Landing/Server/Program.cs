@@ -5,6 +5,7 @@ using Larp.Landing.Server.Import;
 using Larp.Landing.Server.Services;
 using Larp.Landing.Shared.MwFifth;
 using Larp.Notify;
+using Larp.Square;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Internal;
 
@@ -53,6 +54,12 @@ builder.Configuration
     services.AddScoped<LarpDataSeeder>();
     services.AddStartupTask<LarpDataSeederStartupTask>();
 
+    // Larp.Square
+    services.Configure<SquareOptions>(
+        builder.Configuration.GetSection(SquareOptions.SectionName));
+    services.AddSquareService();
+    services.AddScoped<ISquareTransactionHandler, SquareTransactionHandler>();
+
     // Larp.Landing.Server
     services.AddScoped<ILandingService, LandingServiceServer>();
     services.AddScoped<IMwFifthService, MwFifthServiceServer>();
@@ -89,6 +96,8 @@ app.UseAuthorization();
 app.MapApi<ILandingService>();
 app.MapApi<IMwFifthService>();
 app.MapApi<IAdminService>();
+
+app.MapPost("/square/callback", SquareWebhook.HandleCallbackAsync);
 
 app.MapMethods("/api/{*path}",
     new[] { HttpMethods.Get, HttpMethods.Put, HttpMethods.Patch, HttpMethods.Post, HttpMethods.Patch },

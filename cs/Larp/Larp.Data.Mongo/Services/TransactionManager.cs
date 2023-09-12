@@ -1,12 +1,35 @@
+using Larp.Square;
+
 namespace Larp.Data.Mongo.Services;
 
 public class TransactionManager
 {
     private readonly LarpContext _larpContext;
+    private readonly ISquareService _squareService;
 
-    public TransactionManager(LarpContext larpContext)
+    public TransactionManager(LarpContext larpContext, ISquareService squareService)
     {
         _larpContext = larpContext;
+        _squareService = squareService;
+    }
+
+    public async Task<string> RequestPayment(string accountId, decimal amount, string name, string email, string phone)
+    {
+        var id = ObjectId.GenerateNewId().ToString();
+        var response = await _squareService.CreatePaymentUrl(id, amount, "Tavern Deposit", name, email, phone);
+
+        var transaction = new Transaction()
+        {
+            TransactionId = id,
+            AccountId = accountId,
+            Type = TransactionType.Deposit,
+            Source = "Square",
+            OrderId = response.OrderId,
+            Status = TransactionStatus.Pending,
+            TransactionOn = DateTimeOffset.Now
+        };
+        await _larpContext.Transactions.InsertOneAsync(transaction);
+        return response.Url;
     }
 
     public async Task<Transaction[]> GetTransactions(string accountId)
@@ -75,5 +98,17 @@ public class TransactionManager
                     })
                 .ToListAsync())
             .ToDictionary(t => t.AccountId, t => t.Balance);
+    }
+
+    public async Task UpdateByOrderId(string orderId, TransactionStatus status, decimal amount,
+        DateTimeOffset timestamp, string? receiptUrl)
+    {
+        await _larpContext.Transactions.UpdateOneAsync(t => t.OrderId == orderId,
+            Builders<Transaction>.Update
+                .Set(t => t.Status, status)
+                .Set(t => t.Amount, amount)
+                .Set(t => t.TransactionOn, timestamp)
+                .Set(t => t.ReceiptUrl, receiptUrl)
+        );
     }
 }

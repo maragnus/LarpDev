@@ -74,4 +74,7 @@ public interface ILandingService
 
     [ApiPost("transactions"), ApiAuthenticated]
     Task<Transaction[]> GetTransactions();
+
+    [ApiPost("transactions/deposit"), ApiAuthenticated]
+    Task<string> Deposit(decimal amount);
 }

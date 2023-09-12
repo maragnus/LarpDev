@@ -1,0 +1,26 @@
+@inject NavigationManager NavigationManager
+@inject LandingService LandingService
+
+<MudDialog T="string?" Class="pa-2">
+    <DialogContent>
+        Are you sure you want to deposit $25 USD into your account?
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Success" StartIcon="@Icons.Material.Filled.AttachMoney" Variant="Variant.Filled" OnClick="Deposit">Deposit</MudButton>
+        <MudButton Color="Color.Default" Variant="Variant.Filled" OnClick="Close">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = default!;
+
+    async Task Deposit()
+    {
+        var url = await LandingService.Service.Deposit(25);
+        NavigationManager.NavigateTo(url);
+    }
+
+    void Close() => MudDialog.Close(DialogResult.Cancel());
+}

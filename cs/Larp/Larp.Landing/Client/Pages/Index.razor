@@ -48,7 +48,7 @@
                                     <MudStack Row AlignItems="AlignItems.Center" Spacing="0">
                                         <MudIcon Size="Size.Large" Icon="@Icons.Material.Filled.AttachMoney" Color="Color.Success" Style="font-size: inherit"/>
                                         @_dashboard.AccountBalance.ToString("0.00")
-                                        <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small"/>
+                                        <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="Deposit"/>
                                     </MudStack>
                                 </MudText>
                             </MudCard>
@@ -184,5 +184,8 @@
         }
     }
 
-    private void GoTo(string pelUrl) => NavigationManager.NavigateTo(pelUrl);
+    private async Task Deposit()
+    {
+        await DialogService.ShowAsync<DepositDialog>("Deposit Funds");
+    }
 }

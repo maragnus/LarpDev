@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KiloTx.Restful.ClientGenera
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Larp.Landing.Client.RestClient", "Larp.Landing\Client.RestClient\Larp.Landing.Client.RestClient.csproj", "{769A2220-5CF8-4C45-8681-DE283AEC69E9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Larp.Square", "Larp.Square\Larp.Square.csproj", "{367C184F-AF8C-4428-8A76-7746DB34A9CF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +101,10 @@ Global
 		{769A2220-5CF8-4C45-8681-DE283AEC69E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{769A2220-5CF8-4C45-8681-DE283AEC69E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{769A2220-5CF8-4C45-8681-DE283AEC69E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{367C184F-AF8C-4428-8A76-7746DB34A9CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{367C184F-AF8C-4428-8A76-7746DB34A9CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{367C184F-AF8C-4428-8A76-7746DB34A9CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{367C184F-AF8C-4428-8A76-7746DB34A9CF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

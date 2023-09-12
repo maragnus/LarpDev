@@ -230,6 +230,14 @@ public class LandingServiceServer : ILandingService
     public async Task<Transaction[]> GetTransactions() =>
         await _transactionManager.GetTransactions(AccountId);
 
+    public async Task<string> Deposit(decimal amount)
+    {
+        var accountName = _userSession.Account?.Name ?? "Unnamed Account";
+        var accountEmail = _userSession.Account?.PreferredEmail;
+        var accountPhone = _userSession.Account?.Phone;
+        return await _transactionManager.RequestPayment(AccountId, amount, accountName, accountEmail, accountPhone);
+    }
+
     private async Task GrantAdminRoles(string accountId) =>
         await _userSessionManager.UpdateUserAccount(accountId,
             x =>

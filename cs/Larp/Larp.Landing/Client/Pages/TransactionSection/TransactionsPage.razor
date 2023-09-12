@@ -4,7 +4,7 @@
 
 <PageHeader Container>Transactions</PageHeader>
 
-<MudContainer MaxWidth="MaxWidth.Small" Class="relative pt-4">
+<MudContainer MaxWidth="MaxWidth.Medium" Class="relative pt-4">
     <MudStack Spacing="4">
 
         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceEvenly" Class="my-4">
@@ -23,7 +23,7 @@
                 </MudStack>
             </MudTooltip>
             <MudTooltip Text="Deposit money into your account from Square">
-                <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Success">Add Funds</MudButton>
+                <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Success" OnClick="Deposit">Add Funds</MudButton>
             </MudTooltip>
             <MudTooltip Text="Share your account balance with other accounts">
                 <MudButton StartIcon="@Icons.Material.Filled.People" Variant="Variant.Filled" Color="Color.Primary">Share</MudButton>
@@ -41,13 +41,26 @@
         <Columns>
             <TemplateColumn T="TransactionInfo" Groupable="false" Sortable="false" Filterable="false">
                 <CellTemplate>
-                    <MudIcon Icon="@context.Item.Icon" Color="@context.Item.Color" Size="Size.Small"/>
-                    <MudText Typo="Typo.body1" Color="@context.Item.Color">@context.Item.Type</MudText>
+                    <MudStack Row Spacing="1">
+                        <MudIcon Icon="@context.Item.Icon" Color="@context.Item.Color" Size="Size.Small" Style="font-size: inherit"/>
+                        <MudText Typo="Typo.body1" Color="@context.Item.Color">@context.Item.Type</MudText>
+                    </MudStack>
                 </CellTemplate>
             </TemplateColumn>
             <PropertyColumn Property="x => x.When" Title="Date" Format="ddd, MMM d, yyyy" Groupable="false"/>
+            <PropertyColumn Property="x => x.Status" Title="Status"/>
             <PropertyColumn Property="x => x.Source" Title="Source"/>
             <PropertyColumn Property="x => x.Amount" Title="Amount" Groupable="false"/>
+            <TemplateColumn T="TransactionInfo" Groupable="false" Sortable="false" Filterable="false">
+                <CellTemplate>
+                    <MudStack Row>
+                        <MudIconButton
+                            Icon="@Icons.Material.Filled.Receipt" Color="Color.Primary" Size="Size.Small"
+                            Disabled="string.IsNullOrEmpty(context.Item.ReceiptUrl)"
+                            OnClick="() => OpenReceipt(context.Item.ReceiptUrl)"/>
+                    </MudStack>
+                </CellTemplate>
+            </TemplateColumn>
         </Columns>
     </MudDataGrid>
     <MudAlert Severity="Severity.Info">Is there any incorrect? Please contact <a href="mailto:mystwood@mystwood.org?subject=Question+about+transactions" target="_blank">Mystwood</a>.</MudAlert>
@@ -63,9 +76,11 @@
         public Color Color { get; init; }
         public string Type { get; init; } = string.Empty;
         public string Source { get; init; } = string.Empty;
+        public string Status { get; init; } = string.Empty;
         public DateTime When { get; init; }
         public decimal Amount { get; init; }
         public string? Note { get; init; }
+        public string? ReceiptUrl { get; init; }
     }
 
     protected override async Task OnSafeParametersSetAsync()
@@ -89,16 +104,29 @@
                          ?? transaction.EventTitle
                          ?? transaction.Source
                          ?? "Unknown",
+                Status = transaction.Status.ToString(),
                 Type = transaction.Type.ToString(),
                 When = transaction.TransactionOn.LocalDateTime,
                 Amount = transaction.Amount,
-                Note = transaction.Note
+                Note = transaction.Note,
+                ReceiptUrl = transaction.ReceiptUrl
             }).ToArray();
 
         _balance = _transactions
             .Select(transaction => transaction.Amount)
             .DefaultIfEmpty()
             .Sum();
+    }
+
+    private async Task Deposit()
+    {
+        await DialogService.ShowAsync<DepositDialog>("Deposit Funds");
+    }
+
+    private void OpenReceipt(string? receiptUrl)
+    {
+        if (string.IsNullOrEmpty(receiptUrl)) return;
+        NavigationManager.NavigateTo(receiptUrl);
     }
 
 }
