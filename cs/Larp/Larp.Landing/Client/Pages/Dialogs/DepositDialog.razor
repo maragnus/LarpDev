@@ -3,10 +3,67 @@
 
 <MudDialog T="string?" Class="pa-2">
     <DialogContent>
-        Are you sure you want to deposit $25 USD into your account?
+        <MudStack>
+            <MudText Typo="Typo.button">Chronicles:</MudText>
+            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+                <MudChipSet @ref="_chipSet" MultiSelection>
+                    <MudChip T="int" Value="1" SelectedColor="Color.Success" CheckedIcon="@Icons.Material.Filled.Check" OnClick="UpdateOrder">1</MudChip>
+                    <MudChip T="int" Value="2" SelectedColor="Color.Success" CheckedIcon="@Icons.Material.Filled.Check" OnClick="UpdateOrder">2</MudChip>
+                    <MudChip T="int" Value="3" SelectedColor="Color.Success" CheckedIcon="@Icons.Material.Filled.Check" OnClick="UpdateOrder">3</MudChip>
+                    <MudChip T="int" Value="0" SelectedColor="Color.Success" CheckedIcon="@Icons.Material.Filled.Check" OnClick="UpdateOrder">Family Discount</MudChip>
+                </MudChipSet>
+                <MudPaper Elevation="2" Class="pa-2">
+                    <MudStack Row Spacing="0" AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
+                        <MudIcon Color="Color.Success" Icon="@Icons.Material.Filled.AttachMoney"/>
+                        <MudText>@_order.Total.ToString("0.00")</MudText>
+                    </MudStack>
+                </MudPaper>
+                <MudButton
+                    StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary"
+                    OnClick="Add" Disabled="!_canAdd">
+                    Add
+                </MudButton>
+            </MudStack>
+            <MudText Typo="Typo.button" Class="mt-4">Cart:</MudText>
+            <MudStack Spacing="2">
+                @foreach (var order in _orders)
+                {
+                    <MudPaper Elevation="1" Class="pl-4">
+                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                            <MudText>@order.Chronicles Chronicle(s)</MudText>
+                            @if (@order.FamilyDiscount)
+                            {
+                                <MudText>w/ Family Discount</MudText>
+                            }
+                            <MudStack Row>
+                                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="0">
+                                    <MudIcon Color="Color.Success" Icon="@Icons.Material.Filled.AttachMoney"/>
+                                    <MudText>@order.Total.ToString("0.00")</MudText>
+                                </MudStack>
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="() => Delete(order)"/>
+                            </MudStack>
+                        </MudStack>
+                    </MudPaper>
+                }
+            </MudStack>
+            <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Class="mt-2">
+                <MudText Typo="Typo.button">Total:</MudText>
+                <MudPaper Elevation="2" Class="pa-2">
+                    <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="0">
+                        <MudIcon Color="Color.Success" Icon="@Icons.Material.Filled.AttachMoney"/>
+                        <MudText>@_total.ToString("0.00")</MudText>
+                    </MudStack>
+                </MudPaper>
+            </MudStack>
+        </MudStack>
     </DialogContent>
     <DialogActions>
-        <MudButton Color="Color.Success" StartIcon="@Icons.Material.Filled.AttachMoney" Variant="Variant.Filled" OnClick="Deposit">Deposit</MudButton>
+        <MudButton
+            Color="Color.Success" StartIcon="@Icons.Material.Filled.AttachMoney"
+            Variant="Variant.Filled" OnClick="Deposit"
+            Disabled="_total == 0m">
+            Deposit
+        </MudButton>
         <MudButton Color="Color.Default" Variant="Variant.Filled" OnClick="Close">Cancel</MudButton>
     </DialogActions>
 </MudDialog>
@@ -16,11 +73,63 @@
     [CascadingParameter]
     MudDialogInstance MudDialog { get; set; } = default!;
 
+    private readonly List<Order> _orders = new();
+    private MudChip[] _selectedChips = Array.Empty<MudChip>();
+    private Order _order = new(0, false, 0);
+    private MudChipSet? _chipSet;
+    private decimal _total;
+    private bool _canAdd;
+
+    private record Order(int Chronicles, bool FamilyDiscount, decimal Total);
+
     async Task Deposit()
     {
-        var url = await LandingService.Service.Deposit(25);
+        if (_total <= 1m) return;
+        var url = await LandingService.Service.Deposit(_total);
         NavigationManager.NavigateTo(url);
     }
 
     void Close() => MudDialog.Close(DialogResult.Cancel());
+
+    void Clear()
+    {
+        _chipSet.SelectedChips = Array.Empty<MudChip>();
+        UpdateOrder();
+    }
+
+    void Add()
+    {
+        _orders.Add(_order);
+        _total = _orders.Sum(o => o.Total);
+        Clear();
+    }
+
+    private void UpdateOrder()
+    {
+        _selectedChips = _chipSet.SelectedChips;
+        var chronicles = _selectedChips.Count(c => (int)c.Value > 0);
+        var hasFamilyDiscount = _selectedChips.Any(c => (int)c.Value == 0);
+        if (chronicles == 0)
+        {
+            _order = new Order(0, hasFamilyDiscount, 0m);
+            _canAdd = false;
+            return;
+        }
+
+        var familyDiscount = hasFamilyDiscount ? -5 : 0;
+        var amount =
+            (20 + familyDiscount) +
+            (15 + familyDiscount) * (chronicles - 1);
+
+        _order = new Order(chronicles, hasFamilyDiscount, amount);
+        _canAdd = true;
+        StateHasChanged();
+    }
+
+    private void Delete(Order order)
+    {
+        _orders.Remove(order);
+        _total = _orders.Sum(o => o.Total);
+    }
+
 }

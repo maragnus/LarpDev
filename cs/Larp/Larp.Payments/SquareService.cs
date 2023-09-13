@@ -32,6 +32,7 @@ public class SquareService : ISquareService
     {
         _logger = logger;
         _options = options.Value;
+        _options.Validate();
     }
 
     public async Task<SquarePaymentUrl> CreatePaymentUrl(string transactionId, decimal amount, string itemName,
