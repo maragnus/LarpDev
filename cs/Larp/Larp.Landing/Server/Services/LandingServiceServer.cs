@@ -234,10 +234,9 @@ public class LandingServiceServer : ILandingService
 
     public async Task<string> Deposit(decimal amount)
     {
-        var accountName = _userSession.Account?.Name ?? "Unnamed Account";
-        var accountEmail = _userSession.Account?.PreferredEmail;
-        var accountPhone = _userSession.Account?.Phone;
-        return await _transactionManager.RequestPayment(AccountId, amount, accountName, accountEmail, accountPhone);
+        var account = _userSession.Account
+                      ?? throw new BadRequestException("Cannot Deposit without Account");
+        return await _transactionManager.RequestPayment(AccountId, amount, account);
     }
 
     private async Task GrantAdminRoles(string accountId) =>

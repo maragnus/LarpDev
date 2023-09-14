@@ -50,10 +50,16 @@
             <PropertyColumn Property="x => x.When" Title="Date" Format="ddd, MMM d, yyyy" Groupable="false"/>
             <PropertyColumn Property="x => x.Status" Title="Status"/>
             <PropertyColumn Property="x => x.Source" Title="Source"/>
-            <PropertyColumn Property="x => x.Amount" Title="Amount" Groupable="false"/>
+            <PropertyColumn Property="x => x.Amount" Title="Amount" Format="0.00" Groupable="false"/>
             <TemplateColumn T="TransactionInfo" Groupable="false" Sortable="false" Filterable="false">
                 <CellTemplate>
                     <MudStack Row>
+                        @if (!string.IsNullOrEmpty(context.Item.PaymentUrl))
+                        {
+                            <MudIconButton
+                                Icon="@Icons.Material.Filled.AttachMoney" Color="Color.Success" Size="Size.Small"
+                                OnClick="() => OpenReceipt(context.Item.PaymentUrl)"/>
+                        }
                         <MudIconButton
                             Icon="@Icons.Material.Filled.Receipt" Color="Color.Primary" Size="Size.Small"
                             Disabled="string.IsNullOrEmpty(context.Item.ReceiptUrl)"
@@ -81,6 +87,7 @@
         public decimal Amount { get; init; }
         public string? Note { get; init; }
         public string? ReceiptUrl { get; init; }
+        public string? PaymentUrl { get; set; }
     }
 
     protected override async Task OnSafeParametersSetAsync()
@@ -109,7 +116,9 @@
                 When = transaction.TransactionOn.LocalDateTime,
                 Amount = transaction.AmountDecimal,
                 Note = transaction.Note,
-                ReceiptUrl = transaction.ReceiptUrl
+                ReceiptUrl = transaction.ReceiptUrl,
+                PaymentUrl = transaction.Status != TransactionStatus.Completed
+                    ? transaction.OrderUrl : null
             }).ToArray();
 
         _balance = _transactions

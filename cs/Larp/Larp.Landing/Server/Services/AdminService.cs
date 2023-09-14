@@ -582,7 +582,7 @@ public class AdminService : IAdminService
 
     public async Task UpdateTransactions()
     {
-        await _transactionManager.UpdatePayments();
+        await _transactionManager.Synchronize();
     }
 
     public async Task<EventAttendanceList> GetAccountAttendances(string accountId) =>

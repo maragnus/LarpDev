@@ -7,15 +7,42 @@ public class TransactionManager
     public const string SquareSource = "Square";
     public const string DepositName = "Tavern Deposit";
     private readonly LarpContext _larpContext;
+    private readonly ILogger<TransactionManager> _logger;
     private readonly ISquareService _squareService;
 
-    public TransactionManager(LarpContext larpContext, ISquareService squareService)
+    public TransactionManager(LarpContext larpContext, ISquareService squareService, ILogger<TransactionManager> logger)
     {
         _larpContext = larpContext;
         _squareService = squareService;
+        _logger = logger;
     }
 
-    public async Task UpdatePayments()
+    private SiteAccount SiteAccountFromAccount(Account account) =>
+        new SiteAccount
+        {
+            AccountId = account.AccountId,
+            Email = account.PreferredEmail,
+            Phone = account.Phone,
+            BirthDate = account.BirthDate,
+            FinancialAccess = account.Roles.Contains(AccountRole.FinanceAccess),
+        }.WithFillName(account.Name);
+
+    public async Task Synchronize()
+    {
+        var accounts = await _larpContext.Accounts
+            .Find(account => account.State == AccountState.Active && account.FirstLogin.HasValue)
+            .ToListAsync();
+
+        var items = accounts.Select(SiteAccountFromAccount)
+            .ToArray();
+
+        await _squareService.Synchronize(items);
+
+        _logger.LogInformation("Square: Updating Transactions");
+        await UpdatePayments();
+    }
+
+    private async Task UpdatePayments()
     {
         var payments = (await _squareService.GetPayments())
             .ToDictionary(p => p.OrderId);
@@ -32,20 +59,24 @@ public class TransactionManager
                 || !payments.TryGetValue(transaction.OrderId, out var payment))
                 continue;
 
-            var amount = payment.TotalMoney.Amount;
+            var amount = payment.TotalMoney.Amount ?? 0;
             var status = Transaction.ConvertTransactionStatus(payment.Status);
             var updatedAt = DateTimeOffset.Parse(payment.UpdatedAt);
+
             if (transaction.Status == status
                 && transaction.TransactionOn == updatedAt
                 && transaction.Amount == amount
                 && transaction.ReceiptUrl == payment.ReceiptUrl)
                 continue;
 
+            _logger.LogInformation("Updating transaction: {Id} {Amount} {Date}", transaction.TransactionId,
+                transaction.AmountDecimal, updatedAt);
+
             var write = new UpdateOneModel<Transaction>(
                 Builders<Transaction>.Filter.Eq(t => t.TransactionId, transaction.TransactionId),
                 Builders<Transaction>.Update
                     .Set(t => t.Status, status)
-                    .Set(t => t.Amount, amount)
+                    .Set(t => t.Amount, (int)amount)
                     .Set(t => t.ReceiptUrl, payment.ReceiptUrl)
                     .Set(t => t.TransactionOn, updatedAt)
             );
@@ -58,11 +89,10 @@ public class TransactionManager
         await _larpContext.Transactions.BulkWriteAsync(writes);
     }
 
-    public async Task<string> RequestPayment(string accountId, decimal amount, string? name, string? email,
-        string? phone)
+    public async Task<string> RequestPayment(string accountId, decimal amount, Account account)
     {
-        var id = ObjectId.GenerateNewId().ToString();
-        var response = await _squareService.CreatePaymentUrl(id, amount, DepositName, name, email, phone);
+        var id = ObjectId.GenerateNewId().ToString()!;
+        var response = await _squareService.CreatePaymentUrl(id, amount, DepositName, SiteAccountFromAccount(account));
 
         var transaction = new Transaction()
         {
@@ -71,6 +101,7 @@ public class TransactionManager
             Type = TransactionType.Deposit,
             Source = SquareSource,
             OrderId = response.OrderId,
+            OrderUrl = response.LongUrl,
             Status = TransactionStatus.Pending,
             TransactionOn = DateTimeOffset.Now
         };
@@ -85,6 +116,49 @@ public class TransactionManager
                 .Find(transaction => transaction.AccountId == accountId)
                 .ToListAsync();
 
+        var attendances = await _larpContext.Attendances
+            .Find(attendance => attendance.AccountId == accountId && attendance.ExpectedPayment.HasValue)
+            .ToListAsync();
+
+        var eventIds = transactions.Select(transaction => transaction.EventId)
+            .Concat(attendances.Select(a => a.EventId))
+            .Where(id => !string.IsNullOrEmpty(id))
+            .Distinct()
+            .ToArray();
+
+        var events =
+            eventIds.Length == 0
+                ? new Dictionary<string, (string Title, DateTimeOffset Date)>()
+                : (await _larpContext.Events
+                    .Find(Builders<Event>.Filter.In(@event => @event.EventId, eventIds))
+                    .Project<Event>(Builders<Event>.Projection
+                        .Include(e => e.EventId)
+                        .Include(e => e.Title)
+                        .Include(e => e.Date)
+                    )
+                    .ToListAsync())
+                .ToDictionary(
+                    a => a.EventId,
+                    a => (a.Title ?? "Untitled Event", new DateTimeOffset(a.Date.ToDateTime(TimeOnly.MinValue))));
+
+        transactions.AddRange(
+            attendances.Select(attendance =>
+            {
+                var @event = events.GetValueOrDefault(attendance.EventId);
+                return new Transaction
+                {
+                    AccountId = attendance.AccountId,
+                    Amount = -1 * Math.Max(0,
+                        (int)Math.Floor(((attendance.ExpectedPayment ?? 0) - (attendance.ProvidedPayment ?? 0)) * 100)),
+                    EventId = attendance.EventId,
+                    EventTitle = @event.Item1,
+                    TransactionOn = @event.Item2,
+                    Status = TransactionStatus.Completed,
+                    Type = TransactionType.Withdrawal
+                };
+            })
+        );
+
         var accountIds = transactions.Select(transaction => transaction.AccountId)
             .Concat(transactions.Select(transaction => transaction.SourceAccountId))
             .Where(id => !string.IsNullOrEmpty(id))
@@ -98,18 +172,6 @@ public class TransactionManager
                     .ToListAsync())
                 .ToDictionary(a => a.AccountId, a => a.Name ?? "Unnamed Account");
 
-        var eventIds = transactions.Select(transaction => transaction.EventId)
-            .Where(id => !string.IsNullOrEmpty(id))
-            .Distinct()
-            .ToArray();
-        var events =
-            eventIds.Length == 0
-                ? new Dictionary<string, string>()
-                : (await _larpContext.Events
-                    .Find(Builders<Event>.Filter.In(@event => @event.EventId, eventIds))
-                    .ToListAsync())
-                .ToDictionary(a => a.EventId, a => a.Title ?? "Untitled Event");
-
         foreach (var transaction in transactions)
         {
             transaction.SourceAccountName = transaction.SourceAccountId is null
@@ -118,7 +180,7 @@ public class TransactionManager
 
             transaction.EventTitle = transaction.EventId is null
                 ? null
-                : events.GetValueOrDefault(transaction.EventId);
+                : events.GetValueOrDefault(transaction.EventId).Item1;
         }
 
         return transactions.ToArray();
@@ -126,14 +188,20 @@ public class TransactionManager
 
     public async Task<decimal> GetBalance(string accountId)
     {
-        return await _larpContext.Transactions.AsQueryable()
+        var deposits = await _larpContext.Transactions.AsQueryable()
             .Where(transaction => transaction.AccountId == accountId)
             .SumAsync(transaction => transaction.Amount) / 100m;
+
+        var withdrawals = await _larpContext.Attendances.AsQueryable()
+            .Where(transaction => transaction.AccountId == accountId && transaction.ExpectedPayment.HasValue)
+            .SumAsync(transaction => transaction.ExpectedPayment - (transaction.ProvidedPayment ?? 0)) / 100m;
+
+        return deposits - (withdrawals ?? 0);
     }
 
     public async Task<Dictionary<string, decimal>> GetBalances()
     {
-        return
+        var deposits =
             (await _larpContext.Transactions.Aggregate()
                 .Group(
                     transaction => transaction.AccountId,
@@ -144,17 +212,44 @@ public class TransactionManager
                     })
                 .ToListAsync())
             .ToDictionary(t => t.AccountId, t => t.Balance / 100m);
+
+        var withdrawals =
+            (await _larpContext.Attendances.Aggregate()
+                .Group(
+                    attendance => attendance.AccountId,
+                    group => new
+                    {
+                        AccountId = group.Key!,
+                        Expected = group.Sum(attendance => attendance.ExpectedPayment),
+                        Paid = group.Sum(attendance => attendance.ProvidedPayment)
+                    })
+                .ToListAsync())
+            .ToDictionary(t => t.AccountId, t =>
+                ((t.Expected ?? 0) - (t.Paid ?? 0)) / 100m);
+
+        foreach (var transaction in deposits.ToList())
+        {
+            if (withdrawals.TryGetValue(transaction.Key, out var withdrawal))
+                deposits[transaction.Key] -= withdrawal;
+        }
+
+        return deposits;
     }
 
-    public async Task UpdateByOrderId(string orderId, TransactionStatus status, decimal amount,
+    public async Task UpdateByOrderId(string orderId, TransactionStatus status, long amount,
         DateTimeOffset timestamp, string? receiptUrl)
     {
-        await _larpContext.Transactions.UpdateOneAsync(t => t.OrderId == orderId,
-            Builders<Transaction>.Update
-                .Set(t => t.Status, status)
-                .Set(t => t.Amount, amount)
-                .Set(t => t.TransactionOn, timestamp)
-                .Set(t => t.ReceiptUrl, receiptUrl)
-        );
+        var update = Builders<Transaction>.Update
+            .Set(t => t.Status, status)
+            .Set(t => t.Amount, amount)
+            .Set(t => t.TransactionOn, timestamp)
+            .Set(t => t.ReceiptUrl, receiptUrl);
+
+        // Prevent reverting status from out-of-order requests
+        if (status == TransactionStatus.Completed)
+            await _larpContext.Transactions.UpdateOneAsync(t => t.OrderId == orderId, update);
+        else
+            await _larpContext.Transactions.UpdateOneAsync(
+                t => t.OrderId == orderId && t.Status != TransactionStatus.Completed, update);
     }
 }

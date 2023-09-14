@@ -70,6 +70,7 @@ builder.Configuration
     services.AddSingleton<IImageModifier, ImageModifier>();
     services.AddResponseCompression();
     services.AddAuthenticationCore(options => options.AddScheme<LarpAuthenticationHandler>("Default", null));
+    services.AddStartupTask<SquareStartupTask>();
 }
 
 var app = builder.Build();

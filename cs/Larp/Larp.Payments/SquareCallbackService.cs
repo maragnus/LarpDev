@@ -27,8 +27,8 @@ public class SquareCallbackService
         var signature = request.Headers.TryGetValue("x-square-hmacsha256-signature", out var sig)
             ? sig.FirstOrDefault()
             : null;
-        return WebhooksHelper.IsValidWebhookEventSignature(body, signature, _options.SignatureKey,
-            _options.CallbackUrl);
+        return WebhooksHelper.IsValidWebhookEventSignature(body, signature, SquareService.SignatureKey,
+            _options.Webhook.CallbackUrl);
     }
 
     public async Task HandleCallbackAsync(HttpContext httpContext)
@@ -56,17 +56,5 @@ public class SquareCallbackService
             default:
                 throw new BadRequestException($"Unexpected type of {@event.Type}");
         }
-    }
-}
-
-internal class WebhookRequest
-{
-    public string? Type { get; set; }
-    public string? Id { get; set; }
-    public WebhookRequestObject? Object { get; set; }
-
-    internal class WebhookRequestObject
-    {
-        public Payment? Payment { get; set; }
     }
 }

@@ -21,13 +21,12 @@ public class SquareTransactionHandler : ISquareTransactionHandler
         _logger.LogInformation("Payment: {Json}",
             JsonSerializer.Serialize(payment, new JsonSerializerOptions() { WriteIndented = true }));
 
-        var amount = (decimal)(payment.TotalMoney.Amount ?? 0) / 100;
         var status = Transaction.ConvertTransactionStatus(payment.Status);
 
         await _transactionManager.UpdateByOrderId(
             payment.OrderId,
             status,
-            amount,
+            payment.TotalMoney.Amount ?? 0,
             DateTimeOffset.Parse(payment.UpdatedAt),
             payment.ReceiptUrl);
     }

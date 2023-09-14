@@ -140,13 +140,11 @@
     private async Task ViewLetter(Letter letter)
     {
         if (letter.State is LetterState.NotStarted or LetterState.Draft)
+        {
             NavigationManager.NavigateTo($"/events/{letter.EventId}/letter/{letter.Name}");
-        else
-            await PreviewLetter(letter);
-    }
+            return;
+        }
 
-    private async Task PreviewLetter(Letter letter)
-    {
         var template = await LandingService.GetTemplate(
             Item.Event.LetterTemplates.FirstOrDefault(t => t.Name == letter.Name)?.LetterTemplateId
             ?? letter.TemplateId);

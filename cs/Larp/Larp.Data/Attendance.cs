@@ -12,9 +12,15 @@ public class Attendance
     [BsonRepresentation(BsonType.ObjectId)]
     public string AccountId { get; set; } = default!;
 
-    [BsonIgnoreIfNull] public decimal? ProvidedPayment { get; set; }
+    [Obsolete("Use Paid instead"), BsonIgnore]
+    public decimal? ProvidedPayment { get; set; }
 
-    [BsonIgnoreIfNull] public decimal? ExpectedPayment { get; set; }
+    [Obsolete("Use Cost instead"), BsonIgnore]
+    public decimal? ExpectedPayment { get; set; }
+
+    [BsonIgnoreIfNull] public int? Paid { get; set; }
+
+    [BsonIgnoreIfNull] public int? Cost { get; set; }
 
     public MwFifthAttendance? MwFifth { get; set; }
 }

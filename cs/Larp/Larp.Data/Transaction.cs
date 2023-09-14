@@ -37,7 +37,7 @@ public class Transaction
 
     public TransactionType Type { get; set; }
 
-    public long Amount { get; set; }
+    public int Amount { get; set; }
 
     [BsonIgnore] public decimal AmountDecimal => Amount / 100m;
 
@@ -50,6 +50,8 @@ public class Transaction
     public string? AdminNotes { get; set; }
 
     public string? ReceiptUrl { get; set; }
+
+    public string? OrderUrl { get; set; }
 
     [BsonIgnore] public string? SourceAccountName { get; set; }
 

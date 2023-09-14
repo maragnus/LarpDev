@@ -56,7 +56,12 @@
                             var style = LetterTooltip[letter.State];
                             var icon = LetterIcon[letter.Name];
                             <MudTooltip Text="@style.Tooltip">
-                                <MudIconButton Disabled="letter.State == LetterState.Locked" Size="Size.Small" Icon="@icon" Color="@style.Color" OnClick="() => OpenLetter(context.Item.EventId, letter.Name)"/>
+                                <MudIconButton
+                                    Disabled="letter.State == LetterState.Locked"
+                                    Size="Size.Small"
+                                    Icon="@icon"
+                                    Color="@style.Color"
+                                    OnClick="() => OpenLetter(letter, context.Item.Event)"/>
                             </MudTooltip>
                         }
                     </CellTemplate>
@@ -112,6 +117,8 @@
 
         public decimal? Paid { get; init; }
 
+        public Event Event { get; init; } = default!;
+
         public Letter[] Letters { get; init; } = default!;
     }
 
@@ -151,6 +158,7 @@
                 {
                     Icon = GetIcon(item.Event.EventType, item.Event.Title),
                     GameName = games.TryGetValue(item.Event.GameId, out var gameName) ? gameName : "No Game",
+                    Event = item.Event,
                     EventTitle = item.Event.Title ?? "No Title",
                     EventType = item.Event.EventType ?? "No Type",
                     When = item.Event.Date,
@@ -187,9 +195,32 @@
             .ToArray();
     }
 
-    private void OpenLetter(string eventId, string letterName)
+    private async Task OpenLetter(Letter letter, Event @event)
     {
-        NavigationManager.NavigateTo($"/events/{eventId}/letter/{letterName}");
+        if (letter.State is LetterState.NotStarted or LetterState.Draft)
+        {
+            NavigationManager.NavigateTo($"/events/{letter.EventId}/letter/{letter.Name}");
+            return;
+        }
+
+        var template = await LandingService.GetTemplate(
+            @event.LetterTemplates.FirstOrDefault(t => t.Name == letter.Name)?.LetterTemplateId
+            ?? letter.TemplateId);
+
+        var options = new DialogOptions()
+        {
+            CloseOnEscapeKey = true, CloseButton = true, Position = DialogPosition.TopCenter
+        };
+        var parameters = new DialogParameters()
+        {
+            { nameof(LetterDialog.Template), template },
+            { nameof(LetterDialog.Letter), letter },
+            { nameof(LetterDialog.Event), @event },
+            { nameof(LetterDialog.ReadOnly), true },
+            { nameof(LetterDialog.AccountNames), LandingService.AccountNames }
+        };
+
+        await DialogService.ShowAsync<LetterDialog>("Letter", parameters, options);
     }
 
 }
