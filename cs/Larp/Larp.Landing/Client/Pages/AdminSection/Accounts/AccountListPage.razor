@@ -1,4 +1,5 @@
 @page "/admin/accounts"
+@using Larp.Common
 @inherits LarpPage
 @inject LandingService LandingService
 @inject IJSRuntime Js
@@ -44,6 +45,11 @@
             <PropertyColumn Property="x => x.Age" Title="Age"/>
             <PropertyColumn Property="x => x.MwFifthMoonstone" Title="MS Total"/>
             <PropertyColumn Property="x => x.MwFifthUsedMoonstone" Title="MS Spent"/>
+            <PropertyColumn Property="x => x.AccountBalance" Title="Balance">
+                <CellTemplate>
+                    @DisplayAmount(context.Item.AccountBalance)
+                </CellTemplate>
+            </PropertyColumn>
             <PropertyColumn Property="x => x.AttendanceCount" Title="Attendances"/>
             <PropertyColumn Property="x => x.AttachmentCount" Title="Attachments"/>
             <PropertyColumn Property="x => x.CharacterCount" Title="Characters"/>
@@ -70,6 +76,9 @@
 @code {
     private Account[] _allAccounts = Array.Empty<Account>();
     private Account[] _accounts = Array.Empty<Account>();
+
+    private static string? DisplayAmount(int? amount) =>
+        amount.ToCurrency()?.ToString("0.00");
 
     public bool HasCitationAccess => !LandingService.IsInRole(AccountRole.CitationAccess);
 

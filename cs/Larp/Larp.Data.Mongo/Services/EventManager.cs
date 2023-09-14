@@ -111,7 +111,7 @@ public class EventManager
     }
 
     public async Task SetEventAttendance(string eventId, string accountId, bool attended, int? moonstone1,
-        int? moonstone2, decimal? paid, decimal? expected, string[] characterIds)
+        int? moonstone2, int? paid, int? cost, string[] characterIds)
     {
         if (!attended)
         {
@@ -122,8 +122,10 @@ public class EventManager
         var update = Builders<Attendance>.Update
             .SetOnInsert(x => x.EventId, eventId)
             .SetOnInsert(x => x.AccountId, accountId)
-            .Set(x => x.ProvidedPayment, paid)
-            .Set(x => x.ExpectedPayment, expected)
+            .SetOnInsert(x => x.CreatedOn, DateTimeOffset.Now)
+            .SetOnInsert(x => x.UpdatedOn, DateTimeOffset.Now)
+            .Set(x => x.Paid, paid)
+            .Set(x => x.Cost, cost)
             .Set(x => x.MwFifth,
                 new MwFifthAttendance
                 {

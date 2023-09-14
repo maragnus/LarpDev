@@ -81,9 +81,7 @@ public partial class Account
 
     public int? CitationCount { get; set; }
 
-    public decimal? AccountBalance { get; set; }
-
-    public decimal? AccountDeposits { get; set; }
+    [BsonIgnore] public int AccountBalance { get; set; }
 
     [BsonIgnore]
     public string? PreferredEmail =>

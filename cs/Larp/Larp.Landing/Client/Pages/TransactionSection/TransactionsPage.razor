@@ -129,7 +129,10 @@
 
     private async Task Deposit()
     {
-        await DialogService.ShowAsync<DepositDialog>("Deposit Funds");
+        await DialogService.ShowAsync<DepositDialog>("Deposit Funds", new DialogParameters
+        {
+            { nameof(DepositDialog.Balance), _balance }
+        });
     }
 
     private void OpenReceipt(string? receiptUrl)

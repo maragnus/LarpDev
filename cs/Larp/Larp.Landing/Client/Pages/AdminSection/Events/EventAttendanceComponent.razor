@@ -1,3 +1,4 @@
+@using Larp.Common
 @inherits LarpPage
 
 @inject IJSRuntime Js
@@ -50,12 +51,12 @@
                               ValueChanged="async value => { context.Item.Paid = value; context.Item.Changed = true; await UpdateSaveAllNeeded(); }"/>
             </EditTemplate>
         </PropertyColumn>
-        <PropertyColumn Property="x => x.Expected" IsEditable="true">
+        <PropertyColumn Property="x => x.Cost" IsEditable="true">
             <EditTemplate>
                 <MudTextField T="decimal?" Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="!context.Item.Attended"
                               Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AttachMoney"
-                              Value="context.Item.Expected" Format="0.00"
-                              ValueChanged="async value => { context.Item.Expected = value; context.Item.Changed = true; await UpdateSaveAllNeeded();}"/>
+                              Value="context.Item.Cost" Format="0.00"
+                              ValueChanged="async value => { context.Item.Cost = value; context.Item.Changed = true; await UpdateSaveAllNeeded();}"/>
             </EditTemplate>
         </PropertyColumn>
         <PropertyColumn Property="x => x.PreEvent" IsEditable="false" SortBy="@(attendance => attendance.PreEvent?.State)">
@@ -121,7 +122,7 @@
         public int? Moonstone1 { get; set; }
         public int? Moonstone2 { get; set; }
         public decimal? Paid { get; set; }
-        public decimal? Expected { get; set; }
+        public decimal? Cost { get; set; }
         public string[] CharacterIds { get; set; } = Array.Empty<string>();
         public bool Changed { get; set; }
         public Letter? PreEvent { get; set; }
@@ -177,8 +178,8 @@
                 Attended = true,
                 Moonstone1 = attendance.MwFifth?.Moonstone ?? 0,
                 Moonstone2 = attendance.MwFifth?.PostMoonstone ?? 0,
-                Paid = attendance.ProvidedPayment,
-                Expected = attendance.ExpectedPayment,
+                Paid = attendance.Paid.ToCurrency(),
+                Cost = attendance.Cost.ToCurrency(),
                 CharacterIds = attendance.MwFifth?.CharacterIds ?? Array.Empty<string>(),
                 PreEvent = letters.FirstOrDefault(x => x.Name == LetterNames.PreEvent),
                 PostEvent = letters.FirstOrDefault(x => x.Name == LetterNames.PostEvent),
@@ -211,8 +212,13 @@
         await SafeActionAsync(async () =>
         {
             await LandingService.Admin.SetEventAttendance(
-                _event.EventId, item.AccountId, item.Attended,
-                item.Moonstone1, item.Moonstone2, item.Paid, item.Expected,
+                _event.EventId,
+                item.AccountId,
+                item.Attended,
+                item.Moonstone1,
+                item.Moonstone2,
+                item.Paid.ToCents(),
+                item.Cost.ToCents(),
                 Array.Empty<string>());
             item.Changed = false;
         });
@@ -271,11 +277,19 @@
                 Name = player.Name ?? "No Name Set",
                 AccountId = player.AccountId,
                 Paid = null,
-                Expected = null,
+                Cost = null,
                 Changed = false
             };
 
-            await LandingService.Admin.SetEventAttendance(_event.EventId, item.AccountId, item.Attended, item.Moonstone1, item.Moonstone2, item.Paid, item.Expected, Array.Empty<string>());
+            await LandingService.Admin.SetEventAttendance(
+                _event.EventId,
+                item.AccountId,
+                item.Attended,
+                item.Moonstone1,
+                item.Moonstone2,
+                item.Paid.ToCents(),
+                item.Cost.ToCents(),
+                Array.Empty<string>());
 
             _attendances.Add(item);
 

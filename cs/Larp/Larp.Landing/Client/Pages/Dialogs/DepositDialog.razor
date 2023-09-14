@@ -73,6 +73,9 @@
     [CascadingParameter]
     MudDialogInstance MudDialog { get; set; } = default!;
 
+    [Parameter]
+    public decimal Balance { get; set; }
+
     private readonly List<Order> _orders = new();
     private MudChip[] _selectedChips = Array.Empty<MudChip>();
     private Order _order = new(0, false, 0);
@@ -81,6 +84,11 @@
     private bool _canAdd;
 
     private record Order(int Chronicles, bool FamilyDiscount, decimal Total);
+
+    protected override void OnParametersSet()
+    {
+        RecalculateTotal();
+    }
 
     async Task Deposit()
     {
@@ -100,8 +108,15 @@
     void Add()
     {
         _orders.Add(_order);
-        _total = _orders.Sum(o => o.Total);
+        RecalculateTotal();
         Clear();
+    }
+
+    private void RecalculateTotal()
+    {
+        _total =
+            _orders.Sum(o => o.Total)
+            + (Balance < 0 ? -Balance : 0);
     }
 
     private void UpdateOrder()
@@ -129,7 +144,7 @@
     private void Delete(Order order)
     {
         _orders.Remove(order);
-        _total = _orders.Sum(o => o.Total);
+        RecalculateTotal();
     }
 
 }

@@ -1,3 +1,4 @@
+using Larp.Common;
 using Larp.Payments;
 
 namespace Larp.Data.Mongo.Services;
@@ -117,7 +118,7 @@ public class TransactionManager
                 .ToListAsync();
 
         var attendances = await _larpContext.Attendances
-            .Find(attendance => attendance.AccountId == accountId && attendance.ExpectedPayment.HasValue)
+            .Find(attendance => attendance.AccountId == accountId && attendance.Cost.HasValue)
             .ToListAsync();
 
         var eventIds = transactions.Select(transaction => transaction.EventId)
@@ -148,8 +149,7 @@ public class TransactionManager
                 return new Transaction
                 {
                     AccountId = attendance.AccountId,
-                    Amount = -1 * Math.Max(0,
-                        (int)Math.Floor(((attendance.ExpectedPayment ?? 0) - (attendance.ProvidedPayment ?? 0)) * 100)),
+                    Amount = -1 * Math.Max(0, (attendance.Cost ?? 0) - (attendance.Paid ?? 0)),
                     EventId = attendance.EventId,
                     EventTitle = @event.Item1,
                     TransactionOn = @event.Item2,
@@ -190,13 +190,13 @@ public class TransactionManager
     {
         var deposits = await _larpContext.Transactions.AsQueryable()
             .Where(transaction => transaction.AccountId == accountId)
-            .SumAsync(transaction => transaction.Amount) / 100m;
+            .SumAsync(transaction => transaction.Amount);
 
         var withdrawals = await _larpContext.Attendances.AsQueryable()
-            .Where(transaction => transaction.AccountId == accountId && transaction.ExpectedPayment.HasValue)
-            .SumAsync(transaction => transaction.ExpectedPayment - (transaction.ProvidedPayment ?? 0)) / 100m;
+            .Where(transaction => transaction.AccountId == accountId && transaction.Cost.HasValue)
+            .SumAsync(transaction => transaction.Cost - (transaction.Paid ?? 0));
 
-        return deposits - (withdrawals ?? 0);
+        return (deposits - (withdrawals ?? 0)).ToCurrency();
     }
 
     public async Task<Dictionary<string, decimal>> GetBalances()
@@ -211,7 +211,7 @@ public class TransactionManager
                         Balance = group.Sum(transaction => transaction.Amount)
                     })
                 .ToListAsync())
-            .ToDictionary(t => t.AccountId, t => t.Balance / 100m);
+            .ToDictionary(t => t.AccountId, t => t.Balance.ToCurrency());
 
         var withdrawals =
             (await _larpContext.Attendances.Aggregate()
@@ -220,12 +220,12 @@ public class TransactionManager
                     group => new
                     {
                         AccountId = group.Key!,
-                        Expected = group.Sum(attendance => attendance.ExpectedPayment),
-                        Paid = group.Sum(attendance => attendance.ProvidedPayment)
+                        Cost = group.Sum(attendance => attendance.Cost),
+                        Paid = group.Sum(attendance => attendance.Paid)
                     })
                 .ToListAsync())
             .ToDictionary(t => t.AccountId, t =>
-                ((t.Expected ?? 0) - (t.Paid ?? 0)) / 100m);
+                (t.Cost.ToCurrency() ?? 0) - (t.Paid.ToCurrency() ?? 0));
 
         foreach (var transaction in deposits.ToList())
         {
@@ -243,6 +243,7 @@ public class TransactionManager
             .Set(t => t.Status, status)
             .Set(t => t.Amount, amount)
             .Set(t => t.TransactionOn, timestamp)
+            .Set(t => t.UpdatedOn, DateTimeOffset.Now)
             .Set(t => t.ReceiptUrl, receiptUrl);
 
         // Prevent reverting status from out-of-order requests

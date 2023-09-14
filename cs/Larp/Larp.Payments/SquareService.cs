@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using Larp.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -78,7 +79,7 @@ public partial class SquareService : ISquareService
             var locationId = await GetDefaultLocationId();
 
             var money = new Money.Builder()
-                .Amount((int)(amount * 100))
+                .Amount(amount.ToCents())
                 .Currency("USD")
                 .Build();
 

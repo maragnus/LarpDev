@@ -16,6 +16,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\KiloTx.Restful\KiloTx.Restful.csproj"/>
+        <ProjectReference Include="..\Larp.Common\Larp.Common.csproj"/>
     </ItemGroup>
 
 </Project>

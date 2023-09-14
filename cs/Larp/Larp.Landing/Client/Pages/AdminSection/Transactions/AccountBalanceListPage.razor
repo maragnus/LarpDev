@@ -1,0 +1,54 @@
+@page "/admin/accounts/outstanding"
+@using Larp.Common
+@inherits LarpPage
+@inject LandingService LandingService
+@inject IJSRuntime Js
+
+<PageHeader Container>Outstanding Balances</PageHeader>
+
+<AdminLayout Title="Outstanding Balances" Loading="IsLoading">
+    <MudDataGrid T="Account" Items="_accounts" Dense Hover Class="d-flex flex-column mud-height-full pa-1">
+        <Columns>
+            <PropertyColumn Property="x => x.Name" Title="Name"/>
+            <PropertyColumn Property="x => x.PreferredEmail" Title="Email"/>
+            <PropertyColumn Property="x => x.Age" Title="Age"/>
+            <PropertyColumn Property="x => x.AccountBalance" Title="Balance">
+                <CellTemplate>
+                    @DisplayAmount(context.Item.AccountBalance)
+                </CellTemplate>
+            </PropertyColumn>
+            <TemplateColumn T="Account" Sortable="false" StickyRight>
+                <CellTemplate>
+                    <MudStack Row>
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.OpenInBrowser" Color="Color.Primary" OnClick="@(() => Open(context.Item))"/>
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.OpenInNew" Color="Color.Primary" OnClick="@(async () => await OpenInNew(context.Item))"/>
+                    </MudStack>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+    </MudDataGrid>
+</AdminLayout>
+
+@code {
+    private Account[] _accounts = Array.Empty<Account>();
+
+    private static string? DisplayAmount(int? amount) =>
+        amount.ToCurrency()?.ToString("0.00");
+
+    protected override async Task OnSafeInitializedAsync()
+    {
+        var accounts = await LandingService.Admin.GetAccounts(AccountState.Active);
+        _accounts = accounts.Where(account => account.AccountBalance.ToCurrency() < 0).ToArray();
+    }
+
+    private void Open(Account account)
+    {
+        NavigationManager.NavigateTo("/admin/accounts/" + account.AccountId);
+    }
+
+    private async Task OpenInNew(Account account)
+    {
+        await Js.InvokeVoidAsync("open", CancellationToken.None, $"/admin/accounts/{account.AccountId}");
+    }
+
+}

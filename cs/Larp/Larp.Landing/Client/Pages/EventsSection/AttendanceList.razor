@@ -168,8 +168,8 @@
                     MwFifthCharacters = characters.TryFromKeys(item.Attendance.MwFifth?.CharacterIds),
                     Letters = GetLetters(item.Event, item.PreEvent, item.PostEvent, item.BetweenEvent).ToArray(),
                     EventId = item.Event.EventId,
-                    Cost = item.Attendance.ExpectedPayment,
-                    Paid = item.Attendance.ProvidedPayment
+                    Cost = item.Attendance.Cost,
+                    Paid = item.Attendance.Paid
                 };
 
                 string GetIcon(string? type, string? title)

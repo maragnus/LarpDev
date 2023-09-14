@@ -23,8 +23,8 @@ public class AdminService : IAdminService
     private readonly EventManager _eventManager;
     private readonly LetterManager _letterManager;
     private readonly string? _sessionId;
+    private readonly TransactionManager _transactionManager;
     private readonly IUserSessionManager _userSessionManager;
-    private TransactionManager _transactionManager;
 
     public AdminService(LarpContext db, IUserSession userSession,
         MwFifthCharacterManager characterManager, IUserSessionManager userSessionManager,
@@ -48,6 +48,11 @@ public class AdminService : IAdminService
 
     public async Task<Account[]> GetAccounts(AccountState accountState)
     {
+        var transactions =
+            _account.Roles.Contains(AccountRole.FinanceAccess)
+                ? await _transactionManager.GetBalances()
+                : new();
+
         var attachments = (await _db.AccountAttachments.AsQueryable()
                 .GroupBy(x => x.AccountId)
                 .Select(x => new { x.Key, Count = x.Count() })
@@ -90,6 +95,7 @@ public class AdminService : IAdminService
             account.AttendanceCount = attendances.GetValueOrDefault(account.AccountId);
             account.CitationCount = citations.GetValueOrDefault(account.AccountId);
             account.CharacterCount = characters.GetValueOrDefault(account.AccountId);
+            account.AccountBalance = transactions.GetValueOrDefault(account.AccountId).ToCents();
         });
         return accounts.ToArray();
     }
@@ -135,7 +141,7 @@ public class AdminService : IAdminService
         {
             await SetEventAttendance(attendance.EventId, toAccountId, true,
                 attendance.MwFifth?.Moonstone, attendance.MwFifth?.PostMoonstone,
-                attendance.ProvidedPayment, attendance.ExpectedPayment,
+                attendance.Paid, attendance.Cost,
                 attendance.MwFifth?.CharacterIds ?? Array.Empty<string>());
         }
 
@@ -616,9 +622,11 @@ public class AdminService : IAdminService
     public async Task SetEventAttendance(
         string eventId, string accountId, bool attended,
         int? moonstone1, int? moonstone2,
-        decimal? paid, decimal? expected, string[] characterIds) =>
-        await _eventManager.SetEventAttendance(eventId, accountId, attended, moonstone1, moonstone2, paid, expected,
-            characterIds);
+        int? paid, int? cost, string[] characterIds) =>
+        await _eventManager.SetEventAttendance(
+            eventId, accountId, attended,
+            moonstone1, moonstone2,
+            paid, cost, characterIds);
 
     public async Task<Attendance[]> GetEventAttendances(string eventId) =>
         await _eventManager.GetEventAttendances(eventId);

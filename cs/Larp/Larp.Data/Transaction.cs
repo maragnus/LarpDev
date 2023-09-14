@@ -1,3 +1,5 @@
+using Larp.Common;
+
 namespace Larp.Data;
 
 public enum TransactionType
@@ -39,7 +41,7 @@ public class Transaction
 
     public int Amount { get; set; }
 
-    [BsonIgnore] public decimal AmountDecimal => Amount / 100m;
+    [BsonIgnore] public decimal AmountDecimal => Amount.ToCurrency();
 
     public DateTimeOffset TransactionOn { get; set; }
 
@@ -52,6 +54,8 @@ public class Transaction
     public string? ReceiptUrl { get; set; }
 
     public string? OrderUrl { get; set; }
+
+    public DateTimeOffset? UpdatedOn { get; set; }
 
     [BsonIgnore] public string? SourceAccountName { get; set; }
 

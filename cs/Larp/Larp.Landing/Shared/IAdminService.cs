@@ -86,7 +86,7 @@ public interface IAdminService
 
     [ApiPost("events/{eventId}/attendance/{accountId}"), ApiAuthenticated(AccountRoles.AdminAccess)]
     Task SetEventAttendance(string eventId, string accountId, bool attended, int? moonstone1,
-        int? moonstone2, decimal? paid, decimal? expected, string[] characterIds);
+        int? moonstone2, int? paid, int? cost, string[] characterIds);
 
     [ApiGet("accounts/names")]
     Task<Dictionary<string, AccountName>> GetAccountNames();
