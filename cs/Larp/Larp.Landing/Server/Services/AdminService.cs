@@ -588,7 +588,7 @@ public class AdminService : IAdminService
 
     public async Task UpdateTransactions()
     {
-        await _transactionManager.Synchronize();
+        await _transactionManager.SynchronizeOnStartup();
     }
 
     public async Task<EventAttendanceList> GetAccountAttendances(string accountId) =>

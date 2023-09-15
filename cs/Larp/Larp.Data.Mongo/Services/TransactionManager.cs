@@ -5,8 +5,8 @@ namespace Larp.Data.Mongo.Services;
 
 public class TransactionManager
 {
-    public const string SquareSource = "Square";
-    public const string DepositName = "Tavern Deposit";
+    private const string SquareSource = "Square";
+    private const string DepositName = "Tavern Deposit";
     private readonly LarpContext _larpContext;
     private readonly ILogger<TransactionManager> _logger;
     private readonly ISquareService _squareService;
@@ -30,8 +30,6 @@ public class TransactionManager
 
     public async Task Synchronize()
     {
-        if (!_squareService.SynchronizeOnStartup) return;
-
         var accounts = await _larpContext.Accounts
             .Find(account => account.State == AccountState.Active && account.FirstLogin.HasValue)
             .ToListAsync();
@@ -43,6 +41,12 @@ public class TransactionManager
 
         _logger.LogInformation("Square: Updating Transactions");
         await UpdatePayments();
+    }
+
+    public async Task SynchronizeOnStartup()
+    {
+        if (!_squareService.SynchronizeOnStartup) return;
+        await Synchronize();
     }
 
     private async Task UpdatePayments()
