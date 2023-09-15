@@ -1,4 +1,7 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
+using KiloTx.Restful;
 using Larp.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +23,11 @@ public interface ISquareService
     Task<Payment[]> GetPayments();
 
     Task Synchronize(SiteAccount[] accounts);
+
+    Task<SquarePaymentUrl> CreatePointOfSale(string id, int amount, string itemName, SiteAccount account,
+        DeviceType deviceType);
+
+    Task<string> GenerateDeviceCode(string name);
 }
 
 public partial class SquareService : ISquareService
@@ -64,6 +72,92 @@ public partial class SquareService : ISquareService
                 ex.HttpContext.Response.Body);
             throw;
         }
+    }
+
+    public async Task<string> GenerateDeviceCode(string name)
+    {
+        var response = await _client.DevicesApi.CreateDeviceCodeAsync(
+            new CreateDeviceCodeRequest(
+                CreateIdempotencyKey(),
+                new DeviceCode.Builder("TERMINAL_API")
+                    .Name(name)
+                    .LocationId(await GetDefaultLocationId())
+                    .Build()));
+        return response.DeviceCode.Code;
+    }
+
+    public async Task<SquarePaymentUrl> CreatePointOfSale(string id, int amount, string itemName, SiteAccount account,
+        DeviceType deviceType)
+    {
+        var customer = await UpdateCustomer(account);
+
+        if (deviceType == DeviceType.AndroidMobile)
+        {
+            var sb = new StringBuilder();
+
+            sb.Append("intent:#Intent;").Append("action=com.squareup.pos.action.CHARGE;")
+                .Append("package=com.squareup;").Append("S.browser_fallback_url=").Append(_options.ReturnUrl)
+                .Append(';')
+                .Append("S.com.squareup.pos.WEB_CALLBACK_URI=").Append(_options.PointOfSale.CallbackUrl).Append(';')
+                .Append("S.com.squareup.pos.CLIENT_ID=").Append(_options.ApplicationId).Append(';')
+                .Append("S.com.squareup.pos.API_VERSION=v2.0;")
+                .Append("i.com.squareup.pos.TOTAL_AMOUNT=").Append(amount).Append(';')
+                .Append("l.com.squareup.pos.AUTO_RETURN_TIMEOUT_MS=5000;")
+                .Append("S.com.squareup.pos.CURRENCY_CODE=USD;")
+                .Append("S.com.squareup.pos.CUSTOMER_ID=").Append(customer.Id).Append(';')
+                .Append("S.com.squareup.pos.TENDER_TYPES=" +
+                        "com.squareup.pos.TENDER_CARD," +
+                        "com.squareup.pos.TENDER_CARD_ON_FILE," +
+                        "com.squareup.pos.TENDER_CASH," +
+                        "com.squareup.pos.TENDER_OTHER;")
+                .Append("end");
+
+            return new SquarePaymentUrl
+            {
+                Url = sb.ToString()
+            };
+        }
+
+        if (deviceType == DeviceType.AppleMobile)
+        {
+            var sb = new StringBuilder();
+            var request = new SquarePointOfSaleRequest()
+            {
+                ClientId = _options.ApplicationId,
+                CustomerId = customer.Id,
+                CallbackUrl = _options.PointOfSale.CallbackUrl,
+                Version = "v2.0",
+                AutoReturn = true,
+                AmountMoney =
+                {
+                    Amount = amount.ToString(),
+                    CurrencyCode = "USD"
+                },
+                Options =
+                {
+                    SupportedTenderTypes = new[]
+                    {
+                        "CREDIT_CARD",
+                        "CASH",
+                        "OTHER",
+                        "SQUARE_GIFT_CARD",
+                        "CARD_ON_FILE"
+                    }
+                }
+            };
+
+            var json = JsonSerializer.Serialize(request);
+
+            sb.Append("square-commerce-v1://payment/create?data=")
+                .Append(Uri.EscapeDataString(json));
+
+            return new SquarePaymentUrl
+            {
+                Url = sb.ToString()
+            };
+        }
+
+        throw new BadRequestException("Unsupported device");
     }
 
     public async Task<Payment[]> GetPayments() =>

@@ -586,10 +586,14 @@ public class AdminService : IAdminService
     public async Task<EventsAndLetters> GetLetter(string letterId) =>
         await _letterManager.GetEventLetter(letterId);
 
-    public async Task UpdateTransactions()
-    {
+    public async Task UpdateTransactions() =>
         await _transactionManager.SynchronizeOnStartup();
-    }
+
+    public async Task<string> GetSquareDeviceCode() =>
+        await _transactionManager.GetAccountDeviceCode(_account.AccountId);
+
+    public async Task<string> PointOfSale(string accountId, int amount, DeviceType deviceType) =>
+        await _transactionManager.PointOfSale(accountId, amount, deviceType);
 
     public async Task<EventAttendanceList> GetAccountAttendances(string accountId) =>
         await _eventManager.GetAccountAttendances(accountId);

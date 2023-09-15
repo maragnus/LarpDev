@@ -1,3 +1,4 @@
+using Larp.Common;
 using Larp.Data.MwFifth;
 using Microsoft.Extensions.FileProviders;
 
@@ -246,6 +247,12 @@ public interface IAdminService
 
     [ApiPost("transactions/update"), ApiAuthenticated(AccountRoles.FinanceAccess)]
     Task UpdateTransactions();
+
+    [ApiGet("square/devicecode"), ApiAuthenticated(AccountRoles.FinanceAccess)]
+    Task<string> GetSquareDeviceCode();
+
+    [ApiPost("transactions/pos"), ApiAuthenticated(AccountRoles.FinanceAccess)]
+    Task<string> PointOfSale(string accountId, int amount, DeviceType deviceType);
 }
 
 public class Dashboard

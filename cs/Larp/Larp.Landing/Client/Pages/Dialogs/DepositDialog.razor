@@ -1,3 +1,4 @@
+@using Larp.Common
 @inject NavigationManager NavigationManager
 @inject LandingService LandingService
 @inject IDialogService DialogService 
@@ -138,6 +139,9 @@
     MudDialogInstance MudDialog { get; set; } = default!;
 
     [Parameter]
+    public string? AccountId { get; set; }
+
+    [Parameter]
     public decimal Balance { get; set; }
 
     private readonly List<Order> _orders = new();
@@ -164,7 +168,9 @@
         _loading = true;
         try
         {
-            var url = await LandingService.Service.Deposit(_total);
+            var url = AccountId == null
+                ? await LandingService.Service.Deposit(_total)
+                : await LandingService.Admin.PointOfSale(AccountId, _total.ToCents(), LandingService.DeviceType);
 
     // NOTE: Square takes two seconds for the URL to become available
             await Task.Delay(TimeSpan.FromSeconds(2));

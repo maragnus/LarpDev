@@ -1,6 +1,7 @@
 using System.Net;
 using Blazored.LocalStorage;
 using KiloTx.Restful;
+using Larp.Common;
 using Larp.Data;
 using Larp.Data.MwFifth;
 using Larp.Landing.Client.RestClient;
@@ -64,6 +65,7 @@ public class LandingService
     public Game MwFifthGame => Games[GameState.GameName];
     public GameState MwFifthGameState { get; private set; } = default!;
     public Dictionary<string, AccountName> AccountNames { get; } = new();
+    public DeviceType DeviceType { get; private set; }
 
     public DarkMode DarkMode
     {
@@ -177,6 +179,14 @@ public class LandingService
     public void UpdateBrowserInfo(BrowserInfo info)
     {
         BrowserInfo = info;
+        DeviceType = info.IsMobile switch
+        {
+            true when info.IsAndroid == true => DeviceType.AndroidMobile,
+            true when info.IsIPad == true || info.IsIPadPro == true || info.IsIPhone == true => DeviceType.AppleMobile,
+            true => DeviceType.OtherMobile,
+            _ => info.IsDesktop == true ? DeviceType.Desktop : DeviceType.Unknown
+        };
+
         LocationName =
             $"{info.BrowserName} on {info.OSName} {info.OSVersion} {info.DeviceModel} {info.DeviceType}"
                 .Replace("  ", " ").Trim();

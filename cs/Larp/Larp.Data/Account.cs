@@ -94,6 +94,7 @@ public partial class Account
         && !string.IsNullOrWhiteSpace(Location)
         && !string.IsNullOrWhiteSpace(Phone);
 
+    [BsonIgnoreIfNull] public string? SquareDeviceCode { get; set; }
 
     public static string? BuildNormalizedPhone(string? phone)
     {

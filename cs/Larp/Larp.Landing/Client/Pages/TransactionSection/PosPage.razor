@@ -1,0 +1,148 @@
+@page "/transactions/pos"
+@using Larp.Common
+@using PSC.Blazor.Components.BrowserDetect
+@inherits LarpPage
+@inject LandingService LandingService
+
+<PageHeader Container>Point of Sale</PageHeader>
+
+<BrowserDetect BrowserInfoChanged="info => LandingService.UpdateBrowserInfo(info)"/>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="relative pt-4">
+    <MudPaper Class="pa-4">
+        <MudStack Spacing="4">
+            @*<MudField Variant="Variant.Filled" Label="Device Code">@_deviceCode</MudField>*@
+
+            <MudTextField
+                T="string?"
+                Clearable
+                Immediate
+                @ref="_searchField"
+                Value="_query"
+                Label="Search Account"
+                Adornment="Adornment.End"
+                AdornmentColor="Color.Primary"
+                AdornmentIcon="@Icons.Material.TwoTone.Search"
+                DebounceInterval="500"
+                OnAdornmentClick="Search"
+                ValueChanged="Search">
+            </MudTextField>
+            <MudText Typo="Typo.body2">Search by player name, character name, phone number, or email</MudText>
+            @if (!string.IsNullOrEmpty(_query))
+            {
+                <MudDivider/>
+                <MudList Clickable="_searchResults.Count > 0">
+                    @if (_searchResults.Count == 0)
+                    {
+                        <MudListItem>
+                            <MudAlert Severity="Severity.Error" Icon="@Icons.Material.Filled.SearchOff">
+                                No results found
+                            </MudAlert>
+                        </MudListItem>
+                    }
+                    @foreach (var account in _searchResults)
+                    {
+                        <MudListItem OnClick="() => SelectAccount(account)">
+                            <MudStack Row Spacing="4" Justify="Justify.SpaceBetween">
+                                <MudText Typo="Typo.body1">
+                                    <strong>@account.Name</strong>
+                                </MudText>
+                                <MudText Typo="Typo.body2">
+                                    @account.Characters
+                                </MudText>
+                                <MudText Typo="Typo.body1">
+                                    <MudIcon Color="Color.Success" Icon="@Icons.Material.Filled.AttachMoney" Style="font-size: inherit"/>
+                                    @account.Balance.ToString("0.00")
+                                </MudText>
+                            </MudStack>
+                        </MudListItem>
+                    }
+                </MudList>
+            }
+        </MudStack>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private AccountItem[] _accounts = Array.Empty<AccountItem>();
+    private readonly List<AccountItem> _searchResults = new();
+    private MudTextField<string?> _searchField = default!;
+    private string? _query;
+    private AccountItem? _selected;
+
+    private record AccountItem(
+        string AccountId,
+        string Name,
+        string Emails,
+        string Phone,
+        string Characters,
+        decimal Balance);
+
+    protected override async Task OnSafeParametersSetAsync()
+    {
+        var accounts = await LandingService.Admin.GetAccounts(AccountState.Active);
+        var characters = await LandingService.Admin.GetMwFifthCharacters(CharacterState.Live);
+        var characterLookup = characters
+            .GroupBy(c => c.AccountId)
+            .ToDictionary(
+                character => character.Key,
+                character => string.Join(", ", character.Select(c => c.CharacterName)));
+        _accounts = accounts
+            .OrderBy(account => account.Name)
+            .Select(account => new AccountItem(
+                account.AccountId,
+                account.Name ?? "",
+                account.EmailList,
+                account.Phone ?? "",
+                characterLookup.GetValueOrDefault(account.AccountId) ?? "",
+                account.AccountBalance.ToCurrency())
+            )
+            .ToArray();
+    }
+
+    private void Search()
+    {
+        _searchResults.Clear();
+        if (string.IsNullOrWhiteSpace(_searchField.Text))
+            return;
+        _query = _searchField.Text;
+        _searchResults.AddRange(_accounts.Where(AccountMatch));
+        StateHasChanged();
+    }
+
+    private bool AccountMatch(AccountItem account) =>
+        !string.IsNullOrEmpty(_query)
+        && (
+            account.Name.Contains(_query, StringComparison.InvariantCultureIgnoreCase)
+            || account.Phone.Contains(_query)
+            || account.Emails.Contains(_query, StringComparison.InvariantCultureIgnoreCase)
+            || account.Characters.Contains(_query, StringComparison.InvariantCultureIgnoreCase));
+
+    private async Task SelectAccount(AccountItem account)
+    {
+        _selected = account;
+        await _searchField.Clear();
+        _query = null;
+        _searchResults.Clear();
+        StateHasChanged();
+
+        await DialogService.ShowAsync<DepositDialog>(_selected.Name, new DialogParameters
+        {
+            { nameof(DepositDialog.AccountId), _selected.AccountId },
+            { nameof(DepositDialog.Balance), _selected.Balance }
+        });
+
+        _selected = null;
+        StateHasChanged();
+    }
+
+    private void Cancel()
+    {
+        _selected = null;
+    }
+
+    private void Charge()
+    {
+    }
+
+}

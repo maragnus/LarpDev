@@ -14,6 +14,7 @@ public class SquareOptions
     public SquareWebhookOptions Webhook { get; set; } = new();
     public SquareLocationOptions Location { get; set; } = new();
     public bool SynchronizeOnStartup { get; set; }
+    public SquarePointOfSale PointOfSale { get; set; } = new();
 
     public void Validate()
     {
@@ -28,6 +29,11 @@ public class SquareOptions
         Webhook.Validate();
         Location.Validate();
     }
+}
+
+public class SquarePointOfSale
+{
+    public string? CallbackUrl { get; set; }
 }
 
 public class SquareLocationOptions

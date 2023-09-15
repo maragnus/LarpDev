@@ -28,6 +28,25 @@ public class TransactionManager
             FinancialAccess = account.Roles.Contains(AccountRole.FinanceAccess),
         }.WithFillName(account.Name);
 
+    public async Task<string> GetAccountDeviceCode(string accountId)
+    {
+        var account = await _larpContext.Accounts
+                          .Find(account => account.AccountId == accountId)
+                          .FirstOrDefaultAsync()
+                      ?? throw new BadRequestException("Account not found");
+
+        if (!string.IsNullOrEmpty(account.SquareDeviceCode))
+            return account.SquareDeviceCode;
+
+        var code = await _squareService.GenerateDeviceCode($"{account.Name} {account.PreferredEmail}");
+        await _larpContext.Accounts.UpdateOneAsync(
+            a => a.AccountId == accountId,
+            Builders<Account>.Update.Set(a => a.SquareDeviceCode, code));
+        account.SquareDeviceCode = code;
+
+        return account.SquareDeviceCode;
+    }
+
     public async Task Synchronize()
     {
         var accounts = await _larpContext.Accounts
@@ -258,5 +277,31 @@ public class TransactionManager
         else
             await _larpContext.Transactions.UpdateOneAsync(
                 t => t.OrderId == orderId && t.Status != TransactionStatus.Completed, update);
+    }
+
+    public async Task<string> PointOfSale(string accountId, int amount, DeviceType deviceType)
+    {
+        var account = await _larpContext.Accounts.Find(a => a.AccountId == accountId)
+                          .FirstOrDefaultAsync()
+                      ?? throw new BadRequestException("Account could not be found");
+
+        var id = ObjectId.GenerateNewId().ToString()!;
+        var response =
+            await _squareService.CreatePointOfSale(id, amount, DepositName, SiteAccountFromAccount(account),
+                deviceType);
+
+        var transaction = new Transaction()
+        {
+            TransactionId = id,
+            AccountId = accountId,
+            Type = TransactionType.Deposit,
+            Source = SquareSource,
+            OrderId = response.OrderId,
+            OrderUrl = response.LongUrl,
+            Status = TransactionStatus.Pending,
+            TransactionOn = DateTimeOffset.Now
+        };
+        await _larpContext.Transactions.InsertOneAsync(transaction);
+        return response.Url;
     }
 }
