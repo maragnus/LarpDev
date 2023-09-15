@@ -115,6 +115,8 @@
     {
         var dialog = await DialogService.ShowAsync<AddAdminDialog>("Add Administrator");
         var result = await dialog.Result;
+        if (result.Canceled) return;
+
         var stringResult = (StringResult)result.Data;
         if (stringResult.IsSuccess)
             NavigationManager.NavigateTo($"/admin/accounts/{stringResult.Value}");
@@ -126,6 +128,8 @@
     {
         var dialog = await DialogService.ShowAsync<AddAccountDialog>("Add Account");
         var result = await dialog.Result;
+        if (result.Canceled) return;
+
         var stringResult = (StringResult)result.Data;
         if (stringResult.IsSuccess)
             await OnSafeInitializedAsync();

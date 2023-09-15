@@ -164,6 +164,7 @@
         var dialog = await DialogService.ShowAsync<SkillDialog>("Automatically Add Skills");
         var result = await dialog.Result;
         if (result.Canceled) return;
+
         if (result.Data is string[] skills)
         {
             foreach (var item in skills)

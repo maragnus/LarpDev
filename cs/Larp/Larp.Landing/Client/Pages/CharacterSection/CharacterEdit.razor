@@ -2,7 +2,7 @@
 @page "/characters/{gameName}/{characterId}/edit"
 @using Larp.Landing.Client.Pages.MwFifth
 
-<PageHeader>New Character</PageHeader>
+<PageHeader Container>Character Editor</PageHeader>
 
 <MudContainer MaxWidth="MaxWidth.Medium">
     @if (GameName == "mw5e")
@@ -12,9 +12,11 @@
 </MudContainer>
 
 @code {
+
     [Parameter]
     public string? GameName { get; set; }
-    
+
     [Parameter]
     public string? CharacterId { get; set; }
+
 }

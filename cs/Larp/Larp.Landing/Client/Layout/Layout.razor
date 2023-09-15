@@ -1,36 +1,22 @@
 ﻿@inherits LayoutComponentBase
 @inject LandingService LandingService
-@inject IJSRuntime JsRuntime
 
-<CascadingValue Value="@_pageInfo">
-    <MudLayout>
-        <LayoutHeader/>
-        <MudMainContent>
-            @if (!_isLoaded)
-            {
-                <MudProgressCircular Size="Size.Large" Indeterminate/>
-            }
-            else
-            {
-                @Body
-            }
-        </MudMainContent>
-    </MudLayout>
-</CascadingValue>
+<MudLayout>
+    <LayoutHeader/>
+    <MudMainContent>
+        @if (!_isLoaded)
+        {
+            <MudProgressCircular Size="Size.Large" Indeterminate/>
+        }
+        else
+        {
+            @Body
+        }
+    </MudMainContent>
+</MudLayout>
 
 @code {
-
-    [UsedImplicitly] private PageInfo _pageInfo = new()
-    {
-        HeaderText = @<span>@LandingService.ServiceName</span>
-    };
-
     private bool _isLoaded;
-
-    protected override void OnInitialized()
-    {
-        _pageInfo.PageInfoChanged += async (_, _) => { await JsRuntime.InvokeVoidAsync("pageInfoChanged", _pageInfo.Container); };
-    }
 
     protected override async Task OnInitializedAsync()
     {

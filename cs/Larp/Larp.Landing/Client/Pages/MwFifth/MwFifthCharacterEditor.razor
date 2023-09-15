@@ -342,24 +342,38 @@
         }
     </MudItem>
     <MudItem md="3" sm="12">
-        <MudTimeline TimelinePosition="TimelinePosition.Left" SelectedIndexChanged="OnStepChange">
-            @foreach (var step in _steps)
-            {
-                if (step.IsAvailable != null && !step.IsAvailable())
-                    continue;
+        <MudPaper Elevation="2">
+            <MudTimeline TimelinePosition="TimelinePosition.Left" SelectedIndexChanged="OnStepChange">
+                @foreach (var step in _steps)
+                {
+                    if (step.IsAvailable != null && !step.IsAvailable())
+                        continue;
 
-                var isCurrentStep = _currentStep == step;
-                var isComplete = step.IsComplete();
-                <MudTimelineItem Color="isCurrentStep ? Color.Primary : (isComplete ? Color.Success : Color.Default)">
-                    <MudButton OnClick="() => _currentStep = step">
-                        <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="0">
-                            @step.Icon&nbsp;
-                            <MudText Align="Align.Left" Typo="Typo.caption" Style="margin-left: 0.5em">@step.Title</MudText>
-                        </MudStack>
-                    </MudButton>
-                </MudTimelineItem>
-            }
-        </MudTimeline>
+                    var isCurrentStep = _currentStep == step;
+                    var isComplete = step.IsComplete();
+                    <MudTimelineItem Color="isCurrentStep ? Color.Primary : (isComplete ? Color.Success : Color.Default)" Variant="Variant.Filled">
+                        <ItemDot>
+                            @if (isComplete)
+                            {
+                                <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Check"/>
+                            }
+                            else
+                            {
+                                <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.ArrowRight"/>
+                            }
+                        </ItemDot>
+                        <ItemContent>
+                            <MudButton OnClick="() => _currentStep = step">
+                                <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Spacing="0">
+                                    @step.Icon&nbsp;
+                                    <MudText Align="Align.Left" Typo="Typo.caption" Style="margin-left: 0.5em">@step.Title</MudText>
+                                </MudStack>
+                            </MudButton>
+                        </ItemContent>
+                    </MudTimelineItem>
+                }
+            </MudTimeline>
+        </MudPaper>
     </MudItem>
     <MudItem md="9" sm="12">
         <MudPaper Elevation="2" Style="padding: 2em">

@@ -30,6 +30,8 @@ public class TransactionManager
 
     public async Task Synchronize()
     {
+        if (!_squareService.SynchronizeOnStartup) return;
+
         var accounts = await _larpContext.Accounts
             .Find(account => account.State == AccountState.Active && account.FirstLogin.HasValue)
             .ToListAsync();

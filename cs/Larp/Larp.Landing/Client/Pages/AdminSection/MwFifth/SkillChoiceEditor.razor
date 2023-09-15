@@ -60,33 +60,35 @@
     }
 
     private bool SearchFunc(string arg1, string arg2) => arg1.Contains(arg2, StringComparison.InvariantCultureIgnoreCase);
-    
-    
+
+
     private async Task AddSkills()
     {
         var dialog = await DialogService.ShowAsync<SkillDialog>("Automatically Add Skills");
         var result = await dialog.Result;
         if (result.Canceled) return;
+
         if (result.Data is string[] skills)
         {
             foreach (var item in skills)
             {
                 if (item.StartsWith("Weapon Specialization") && item.Contains("any", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    foreach (var skill in LandingService.MwFifthGameState.Skills.Where(s=>s.Name.StartsWith("Weapon Specialization")))
+                    foreach (var skill in LandingService.MwFifthGameState.Skills.Where(s => s.Name.StartsWith("Weapon Specialization")))
                         SetSkill(skill.Name, true);
                     continue;
                 }
-                
+
                 if (item.StartsWith("Weapon Use") && item.Contains("any", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    foreach (var skill in LandingService.MwFifthGameState.Skills.Where(s=>s.Name.StartsWith("Weapon Use")))
+                    foreach (var skill in LandingService.MwFifthGameState.Skills.Where(s => s.Name.StartsWith("Weapon Use")))
                         SetSkill(skill.Name, true);
                     continue;
                 }
-                
+
                 SetSkill(item, true);
             }
         }
     }
+
 }

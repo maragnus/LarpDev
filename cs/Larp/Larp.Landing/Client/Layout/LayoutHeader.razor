@@ -73,12 +73,41 @@
         NavigationManager.NavigateTo(LandingService.IsAuthenticated ? "/profile" : "/login");
     }
 
+    private string DarkModeIcon =>
+        LandingService.DarkMode switch {
+            DarkMode.Dark => Icons.Material.TwoTone.DarkMode,
+            DarkMode.Light => Icons.Material.TwoTone.LightMode,
+            DarkMode.SystemDefault => Icons.Material.TwoTone.SystemUpdate,
+            _ => Icons.Material.TwoTone.SystemUpdate
+            };
+
+    private string DarkModeTooltip =>
+        LandingService.DarkMode switch {
+            DarkMode.Dark => "Currently in Dark Mode",
+            DarkMode.Light => "Currently in Light Mode",
+            DarkMode.SystemDefault => "Using system default for Dark Mode",
+            _ => Icons.Material.TwoTone.SystemUpdate
+            };
+
+    private void ToggleDarkMode()
+    {
+        LandingService.DarkMode = LandingService.DarkMode switch {
+            DarkMode.Dark => DarkMode.Light,
+            DarkMode.Light => DarkMode.SystemDefault,
+            DarkMode.SystemDefault => DarkMode.Dark,
+            _ => DarkMode.SystemDefault
+            };
+    }
+
 }
 
 <MudAppBar Color="Color.Primary" Fixed Dense Class="no-print">
     <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle"/>
     <MudText>@PageInfo.HeaderText</MudText>
     <MudSpacer/>
+    <MudTooltip Text="@DarkModeTooltip">
+        <MudIconButton Icon="@DarkModeIcon" Color="Color.Inherit" OnClick="ToggleDarkMode"/>
+    </MudTooltip>
     <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" OnClick="AccountClick"/>
 </MudAppBar>
 <MudDrawer @bind-Open="@_isDrawerOpen" Class="no-print" ClipMode="DrawerClipMode.Docked" Fixed>

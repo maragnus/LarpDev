@@ -13,6 +13,8 @@ namespace Larp.Payments;
 
 public interface ISquareService
 {
+    bool SynchronizeOnStartup { get; }
+
     Task<SquarePaymentUrl> CreatePaymentUrl(string transactionId, decimal amount, string itemName, SiteAccount account);
 
     Task<Payment[]> GetPayments();
@@ -33,9 +35,12 @@ public partial class SquareService : ISquareService
         _options = options.Value;
         _options.Validate();
         _client = CreateClient();
+        SynchronizeOnStartup = _options.SynchronizeOnStartup;
     }
 
     public static string? SignatureKey { get; private set; }
+
+    public bool SynchronizeOnStartup { get; init; }
 
     public async Task Synchronize(SiteAccount[] accounts)
     {

@@ -80,39 +80,50 @@
     return;
 }
 
-<div class="no-print">
-    @if (!Print)
-    {
-        <MudStack Row Spacing="4" Class="my-4">
-            @switch (_character.Revision.State)
-            {
-                case CharacterState.Draft:
-                    <MudButton Color="@Color.Error" OnClick="@DeleteDraft" Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.DeleteForever">Delete Draft</MudButton>
-                    break;
+@if (Print)
+{
+    <CharacterSheet Character="_character" Terms="_terms" FullLayout="FullLayout" Print="Print" Clarify="Clarify"/>
+}
+else
+{
+    <MudStack Spacing="4">
+        <div class="no-print">
+            <MudPaper Elevation="2" Class="py-4 px-4 mt-4">
+                <MudStack Row Spacing="4">
+                    @switch (_character.Revision.State)
+                    {
+                        case CharacterState.Draft:
+                            <MudButton Color="@Color.Error" OnClick="@DeleteDraft" Variant="Variant.Filled" StartIcon="@Icons.Material.Outlined.DeleteForever">Delete Draft</MudButton>
+                            break;
 
-                case CharacterState.Live:
-                    <MudButton Color="@Color.Secondary" OnClick="@PrintSheet" Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Print">Print</MudButton>
-                    <MudButton Color="@Color.Primary" OnClick="@CreateDraft" Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.Edit">Draft Changes</MudButton>
-                    break;
+                        case CharacterState.Live:
+                            <MudButton Color="@Color.Secondary" OnClick="@PrintSheet" Variant="Variant.Filled" StartIcon="@Icons.Material.Outlined.Print">Print</MudButton>
+                            <MudButton Color="@Color.Primary" OnClick="@CreateDraft" Variant="Variant.Filled" StartIcon="@Icons.Material.Outlined.Edit">Draft Changes</MudButton>
+                            break;
 
-                case CharacterState.Review:
-                    <MudAlert Severity="Severity.Info">
-                        <MudStack Spacing="4">
-                            <div>
-                                This draft is currently <strong>waiting for the Game Masters to review</strong>.
-                            </div>
-                            <div>
-                                Once your draft is approved, it will be Live and can be printed. If the Game Master has any questions, they'll reach out to you.
-                            </div>
-                            <div>
-                                If you have questions, please contact the chapter via email at <a href="mailto:@_chapterEmail?subject=Question+about+@_character.CharacterName">@_chapterEmail</a>.
-                            </div>
-                        </MudStack>
-                    </MudAlert>
-                    break;
-            }
-            <MudSwitch T="bool" @bind-Checked="Clarify" Color="Color.Tertiary" UnCheckedColor="Color.Secondary" ThumbIconColor="Color.Info" ThumbIcon="@Icons.Material.Filled.Info">Clarify</MudSwitch>
-        </MudStack>
-    }
-</div>
-<CharacterSheet Character="_character" Terms="_terms" FullLayout="FullLayout" Print="Print" Clarify="Clarify"/>
+                        case CharacterState.Review:
+                            <MudAlert Severity="Severity.Info">
+                                <MudStack Spacing="4">
+                                    <div>
+                                        This draft is currently <strong>waiting for the Game Masters to review</strong>.
+                                    </div>
+                                    <div>
+                                        Once your draft is approved, it will be Live and can be printed. If the Game Master has any questions, they'll reach out to you.
+                                    </div>
+                                    <div>
+                                        If you have questions, please contact the chapter via email at <a href="mailto:@_chapterEmail?subject=Question+about+@_character.CharacterName">@_chapterEmail</a>.
+                                    </div>
+                                </MudStack>
+                            </MudAlert>
+                            break;
+                    }
+                    <MudSwitch T="bool" @bind-Checked="Clarify" Color="Color.Tertiary" UnCheckedColor="Color.Secondary" ThumbIconColor="Color.Info" ThumbIcon="@Icons.Material.Filled.Info">Clarify</MudSwitch>
+                </MudStack>
+            </MudPaper>
+        </div>
+
+        <MudPaper Elevation="2" Class="pa-4">
+            <CharacterSheet Character="_character" Terms="_terms" FullLayout="FullLayout" Print="Print" Clarify="Clarify"/>
+        </MudPaper>
+    </MudStack>
+}

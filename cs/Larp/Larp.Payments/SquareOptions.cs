@@ -13,6 +13,7 @@ public class SquareOptions
     public string? DepositItemName { get; set; }
     public SquareWebhookOptions Webhook { get; set; } = new();
     public SquareLocationOptions Location { get; set; } = new();
+    public bool SynchronizeOnStartup { get; set; }
 
     public void Validate()
     {

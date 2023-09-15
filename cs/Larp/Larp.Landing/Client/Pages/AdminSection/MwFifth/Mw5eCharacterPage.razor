@@ -4,7 +4,7 @@
 @inherits LarpPage
 @inject LandingService LandingService
 
-<PageHeader>Mystwood 5e Characters</PageHeader>
+<PageHeader Container>Mystwood 5e Characters</PageHeader>
 
 <AdminLayout Title="Review Character">
     <MudButtonGroup Variant="Variant.Filled" Class="mb-4" OverrideStyles="false">
@@ -178,7 +178,9 @@
                         @_characterBuilder.RevisionPlayerNotes
                     </MudAlert>
                 }
-                <CharacterSheet Character="_characterBuilder" Admin/>
+                <MudPaper Class="pa-4">
+                    <CharacterSheet Character="_characterBuilder" Admin/>
+                </MudPaper>
             </MudStack>
         }
     </div>

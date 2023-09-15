@@ -53,11 +53,15 @@
         window.openInNew = async (url) => {
             window.open(url, "_blank");
         }
-        window.pageInfoChanged = async (container) => {
+        window.pageInfoChanged = async (container, darkMode) => {
             if (container) {
-                document.body.style.backgroundColor = "#FFFDE7";
+                document.body.style.backgroundColor = darkMode
+                    ? "#121814"
+                    : "#FFFDE7";
             } else {
-                document.body.style.backgroundColor = "#FFF";
+                document.body.style.backgroundColor = darkMode
+                    ? "#373740"
+                    : "#FFF";
             }
         }
     </script>

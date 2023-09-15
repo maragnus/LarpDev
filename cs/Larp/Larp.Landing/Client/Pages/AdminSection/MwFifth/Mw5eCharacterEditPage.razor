@@ -1,13 +1,12 @@
 @page "/admin/mw5e/characters/{CharacterId}/edit"
-@inherits LarpPage
-
 @using Larp.Landing.Client.Pages.MwFifth
+@inherits LarpPage
 @inject LandingService LandingService
 
-<PageHeader>Mystwood 5e Characters</PageHeader>
+<PageHeader Container>Mystwood 5e Characters</PageHeader>
 
 <AdminLayout Loading="IsLoading">
-    <MwFifthCharacterEditor Admin CharacterId="@CharacterId" />
+    <MwFifthCharacterEditor Admin CharacterId="@CharacterId"/>
 </AdminLayout>
 
 @code {
@@ -24,4 +23,5 @@
             await OnInitializedAsync();
         }
     }
+
 }

@@ -31,6 +31,7 @@ public class LandingService
     private readonly Dictionary<string, LetterTemplate> _letterTemplates = new();
     private readonly ILocalStorageService _localStorage;
     private readonly ILogger<LandingService> _logger;
+    private DarkMode _darkMode;
 
     public LandingService(ILandingService landing,
         IAdminService admin,
@@ -48,6 +49,8 @@ public class LandingService
         _localStorage = localStorage;
         _localStorage.Changed += LocalStorageOnChanged;
         _httpClientFactory = httpClientFactory;
+        DarkModeChanged += async (_, _) =>
+            await _localStorage.SetItemAsync(nameof(DarkMode), _darkMode.ToString());
     }
 
     public IReadOnlyDictionary<string, Game> Games { get; private set; } = default!;
@@ -58,11 +61,22 @@ public class LandingService
     public BrowserInfo? BrowserInfo { get; private set; }
     public string? LocationName { get; private set; }
     public Account? Account { get; private set; }
-
     public Game MwFifthGame => Games[GameState.GameName];
     public GameState MwFifthGameState { get; private set; } = default!;
     public Dictionary<string, AccountName> AccountNames { get; } = new();
 
+    public DarkMode DarkMode
+    {
+        get => _darkMode;
+        set
+        {
+            if (_darkMode == value) return;
+            _darkMode = value;
+            DarkModeChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    public event EventHandler? DarkModeChanged;
     public event EventHandler? AuthenticatedChanged;
     public async Task<CharacterSummary[]> GetCharacters() => await Service.GetCharacters();
 
@@ -76,6 +90,11 @@ public class LandingService
     {
         if (e.Key == SessionIdKey)
             SetSessionId((string)e.NewValue);
+
+        if (e.Key == nameof(DarkMode))
+            DarkMode = Enum.TryParse<DarkMode>((string)e.NewValue, out var darkMode)
+                ? darkMode
+                : DarkMode.SystemDefault;
     }
 
     private void SetSessionId(string? sessionId)
@@ -88,6 +107,15 @@ public class LandingService
     public async Task Refresh()
     {
         _logger.LogInformation("Refresh");
+        try
+        {
+            _darkMode = await _localStorage.GetItemAsync<DarkMode>(nameof(DarkMode));
+        }
+        catch
+        {
+            _darkMode = DarkMode.SystemDefault;
+        }
+
         var sessionId = await _localStorage.GetItemAsStringAsync(SessionIdKey);
         SetSessionId(sessionId);
         _logger.LogInformation("Refresh starting...");
@@ -215,4 +243,11 @@ public class LandingService
 
     public async Task<Transaction[]> GetTransactions() =>
         await Service.GetTransactions();
+}
+
+public enum DarkMode
+{
+    SystemDefault,
+    Light,
+    Dark
 }
