@@ -13,6 +13,6 @@ public class SquareStartupTask : IStartupTask
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        await _transactionManager.Synchronize();
+        await _transactionManager.SynchronizeOnStartup();
     }
 }

@@ -112,7 +112,9 @@
                 join attending in GetList(FieldNpcing) on component.Name equals attending
                 select component.ComponentId;
             var npcing = isNpcing ? string.Join("", npcingList) : "";
-            var balance = player.Balance;
+            var balance = (player.Balance ?? 0) > cost
+                ? "PAID"
+                : ((player.Balance ?? 0) - cost).ToString("0");
 
             var sheets = player.Characters
                 .Where(x => characters.Contains(x.Name))
