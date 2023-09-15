@@ -88,9 +88,20 @@ public partial class SquareService : ISquareService
                 .Currency("USD")
                 .Build();
 
+            var prepopulateData = new PrePopulatedData.Builder()
+                .BuyerAddress(new Address.Builder()
+                    .FirstName(account.FirstName)
+                    .LastName(account.LastName)
+                    .Build())
+                .BuyerEmail(account.Email);
+
+            if (TryFixPhoneNumber(account.Phone, out var phone))
+                prepopulateData.BuyerPhoneNumber(phone);
+
             var body = new CreatePaymentLinkRequest.Builder()
                 .IdempotencyKey(CreateIdempotencyKey())
                 .PaymentNote($"{customer.GivenName} {customer.FamilyName} {customer.EmailAddress}".Trim())
+                .PrePopulatedData(prepopulateData.Build())
                 .Order(new Order.Builder(locationId)
                     .CustomerId(customer.Id)
                     .ReferenceId(transactionId)
