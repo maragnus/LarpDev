@@ -34,6 +34,7 @@ public class SquareOptions
 public class SquarePointOfSale
 {
     public string? CallbackUrl { get; set; }
+    public string? ReturnUrl { get; set; }
 }
 
 public class SquareLocationOptions

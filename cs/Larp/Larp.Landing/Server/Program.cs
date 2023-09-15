@@ -98,7 +98,9 @@ app.MapApi<ILandingService>();
 app.MapApi<IMwFifthService>();
 app.MapApi<IAdminService>();
 
-app.MapPost("/square/callback", SquareWebhook.HandleCallbackAsync);
+app.MapMethods("/square/callback",
+    new[] { HttpMethods.Get, HttpMethods.Post },
+    SquareWebhook.HandleCallbackAsync);
 
 app.MapMethods("/api/{*path}",
     new[] { HttpMethods.Get, HttpMethods.Put, HttpMethods.Patch, HttpMethods.Post, HttpMethods.Patch },

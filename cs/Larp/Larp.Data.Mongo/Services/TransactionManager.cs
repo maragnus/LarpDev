@@ -6,6 +6,7 @@ namespace Larp.Data.Mongo.Services;
 public class TransactionManager
 {
     private const string SquareSource = "Square";
+    private const string SquareOnSiteSource = "Square On-Site";
     private const string DepositName = "Tavern Deposit";
     private readonly LarpContext _larpContext;
     private readonly ILogger<TransactionManager> _logger;
@@ -290,18 +291,37 @@ public class TransactionManager
             await _squareService.CreatePointOfSale(id, amount, DepositName, SiteAccountFromAccount(account),
                 deviceType);
 
-        var transaction = new Transaction()
-        {
-            TransactionId = id,
-            AccountId = accountId,
-            Type = TransactionType.Deposit,
-            Source = SquareSource,
-            OrderId = response.OrderId,
-            OrderUrl = response.LongUrl,
-            Status = TransactionStatus.Pending,
-            TransactionOn = DateTimeOffset.Now
-        };
-        await _larpContext.Transactions.InsertOneAsync(transaction);
         return response.Url;
+    }
+
+    public async Task ImportTransaction(string squareTransactionId)
+    {
+        var order = await _squareService.GetOrder(squareTransactionId);
+        var transaction = await _larpContext.Transactions
+            .Find(t => t.OrderId == squareTransactionId)
+            .FirstOrDefaultAsync();
+
+        var amount = (int)(order.TotalMoney.Amount ?? 0);
+        var status = Transaction.ConvertTransactionStatus(order.State);
+
+        if (transaction == null)
+        {
+            var customer = await _squareService.GetCustomer(order.CustomerId);
+            var updatedAt = DateTimeOffset.Parse(order.UpdatedAt);
+            var transactionId = ObjectId.GenerateNewId().ToString();
+
+            await _larpContext.Transactions.InsertOneAsync(new Transaction()
+            {
+                TransactionId = transactionId,
+                AccountId = customer.ReferenceId,
+                Amount = amount,
+                Status = status,
+                TransactionOn = updatedAt,
+                UpdatedOn = updatedAt,
+                OrderId = order.Id,
+                Source = SquareOnSiteSource,
+                Type = TransactionType.Deposit
+            });
+        }
     }
 }

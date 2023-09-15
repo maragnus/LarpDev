@@ -6,4 +6,5 @@ public interface ISquareTransactionHandler
 {
     Task PaymentCreated(Payment payment);
     Task PaymentUpdated(Payment payment);
+    Task PointOfSaleComplete(string transactionId);
 }

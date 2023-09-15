@@ -28,6 +28,10 @@ public interface ISquareService
         DeviceType deviceType);
 
     Task<string> GenerateDeviceCode(string name);
+
+    Task<Order> GetOrder(string orderId);
+
+    Task<Customer> GetCustomer(string customerId);
 }
 
 public partial class SquareService : ISquareService
@@ -86,6 +90,12 @@ public partial class SquareService : ISquareService
         return response.DeviceCode.Code;
     }
 
+    public async Task<Order> GetOrder(string orderId)
+    {
+        var transaction = await _client.OrdersApi.RetrieveOrderAsync(orderId);
+        return transaction.Order;
+    }
+
     public async Task<SquarePaymentUrl> CreatePointOfSale(string id, int amount, string itemName, SiteAccount account,
         DeviceType deviceType)
     {
@@ -126,7 +136,7 @@ public partial class SquareService : ISquareService
                 ClientId = _options.ApplicationId,
                 CustomerId = customer.Id,
                 CallbackUrl = _options.PointOfSale.CallbackUrl,
-                Version = "v2.0",
+                Version = "1.3",
                 AutoReturn = true,
                 AmountMoney =
                 {

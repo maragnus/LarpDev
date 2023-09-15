@@ -32,4 +32,9 @@ public class SquareTransactionHandler : ISquareTransactionHandler
     }
 
     public Task PaymentUpdated(Payment payment) => PaymentCreated(payment);
+
+    public async Task PointOfSaleComplete(string transactionId)
+    {
+        await _transactionManager.ImportTransaction(transactionId);
+    }
 }
