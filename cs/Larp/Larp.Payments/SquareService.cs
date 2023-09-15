@@ -271,21 +271,14 @@ public partial class SquareService : ISquareService
     private async Task SynchronizeTeamMembers(SiteAccount[] siteAccounts)
     {
         var teamMembers = await GetTeamMembers();
-        var accounts = teamMembers
-            .Join(siteAccounts, member => member.ReferenceId, account => account.AccountId, (member, account) => new
+        var accounts = siteAccounts
+            .Select(account => new
             {
-                Square = (TeamMember?)member,
-                Account = account
+                Account = account,
+                Square = teamMembers.FirstOrDefault(member => member.ReferenceId == account.AccountId)
+                         ?? teamMembers.FirstOrDefault(member => string.Equals(member.EmailAddress, account.Email,
+                             StringComparison.InvariantCultureIgnoreCase))
             })
-            .Concat(
-                siteAccounts
-                    .Where(account => teamMembers.All(member => member.ReferenceId != account.AccountId))
-                    .Select(account => new
-                    {
-                        Square = (TeamMember?)null,
-                        Account = account
-                    })
-            )
             .ToList();
 
         foreach (var item in accounts)
@@ -293,8 +286,19 @@ public partial class SquareService : ISquareService
             var account = item.Account;
             var square = item.Square;
 
-            if (account.FinancialAccess)
-                await UpdateTeamMember(account, square);
+            try
+            {
+                if (account.FinancialAccess)
+                    await UpdateTeamMember(account, square);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("Square: Failed to update team member {FirstName} {LastName} {Email}: {Message}",
+                    item.Account.FirstName,
+                    item.Account.LastName,
+                    item.Account.Email,
+                    ex.Message);
+            }
         }
     }
 
@@ -323,7 +327,18 @@ public partial class SquareService : ISquareService
             var account = item.Account;
             var square = item.Square;
 
-            await UpdateCustomer(account, square);
+            try
+            {
+                await UpdateCustomer(account, square);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("Square: Failed to update customer {FirstName} {LastName} {Email}: {Message}",
+                    item.Account.FirstName,
+                    item.Account.LastName,
+                    item.Account.Email,
+                    ex.Message);
+            }
         }
     }
 
