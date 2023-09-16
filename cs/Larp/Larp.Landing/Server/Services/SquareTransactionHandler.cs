@@ -1,7 +1,4 @@
-using System.Text.Json;
 using Larp.Payments;
-using Square.Models;
-using Transaction = Larp.Data.Transaction;
 
 namespace Larp.Landing.Server.Services;
 
@@ -16,25 +13,28 @@ public class SquareTransactionHandler : ISquareTransactionHandler
         _logger = logger;
     }
 
-    public async Task PaymentCreated(Payment payment)
+    public async Task PaymentCreated(string paymentId)
     {
-        _logger.LogInformation("Payment: {Json}",
-            JsonSerializer.Serialize(payment, new JsonSerializerOptions() { WriteIndented = true }));
-
-        var status = Transaction.ConvertTransactionStatus(payment.Status);
-
-        await _transactionManager.UpdateByOrderId(
-            payment.OrderId,
-            status,
-            payment.TotalMoney.Amount ?? 0,
-            DateTimeOffset.Parse(payment.UpdatedAt),
-            payment.ReceiptUrl);
+        await _transactionManager.UpdatePayment(paymentId);
     }
 
-    public Task PaymentUpdated(Payment payment) => PaymentCreated(payment);
+    public async Task PaymentUpdated(string paymentId)
+    {
+        await _transactionManager.UpdatePayment(paymentId);
+    }
+
+    public async Task OrderCreated(string orderId)
+    {
+        await _transactionManager.UpdateOrder(orderId);
+    }
+
+    public async Task OrderUpdated(string orderId)
+    {
+        await _transactionManager.UpdateOrder(orderId);
+    }
 
     public async Task PointOfSaleComplete(string transactionId)
     {
-        await _transactionManager.ImportTransaction(transactionId);
+        await _transactionManager.UpdateOrder(transactionId);
     }
 }

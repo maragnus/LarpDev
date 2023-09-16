@@ -2,6 +2,12 @@ namespace Larp.Common;
 
 public static class CurrencyExtensions
 {
+    public static int? ToInt32(this long? cents) =>
+        cents.HasValue ? Convert.ToInt32(cents.Value) : null;
+
+    public static long? ToInt64(this int? cents) =>
+        cents.HasValue ? Convert.ToInt64(cents.Value) : null;
+
     public static decimal ToCurrency(this int cents) =>
         Convert.ToDecimal(cents / 100m);
 

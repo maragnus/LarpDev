@@ -41,6 +41,8 @@ public class Transaction
 
     public int Amount { get; set; }
 
+    public int? RefundAmount { get; set; }
+
     [BsonIgnore] public decimal AmountDecimal => Amount.ToCurrency();
 
     public DateTimeOffset TransactionOn { get; set; }
@@ -60,6 +62,8 @@ public class Transaction
     [BsonIgnore] public string? SourceAccountName { get; set; }
 
     [BsonIgnore] public string? EventTitle { get; set; }
+
+    public List<string> ReceiptUrls { get; set; } = new();
 
     public static TransactionStatus ConvertTransactionStatus(string status) =>
         status.ToUpperInvariant() switch

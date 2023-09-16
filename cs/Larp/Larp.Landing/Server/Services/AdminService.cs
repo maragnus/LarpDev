@@ -586,7 +586,7 @@ public class AdminService : IAdminService
     public async Task<EventsAndLetters> GetLetter(string letterId) =>
         await _letterManager.GetEventLetter(letterId);
 
-    public async Task UpdateTransactions() =>
+    public async Task SquareSynchronize() =>
         await _transactionManager.Synchronize();
 
     public async Task<string> GetSquareDeviceCode() =>

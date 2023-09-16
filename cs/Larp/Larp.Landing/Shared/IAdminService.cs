@@ -246,7 +246,7 @@ public interface IAdminService
     Task<EventsAndLetters> GetLetter(string letterId);
 
     [ApiPost("transactions/update"), ApiAuthenticated(AccountRoles.FinanceAccess)]
-    Task UpdateTransactions();
+    Task SquareSynchronize();
 
     [ApiGet("square/devicecode"), ApiAuthenticated(AccountRoles.FinanceAccess)]
     Task<string> GetSquareDeviceCode();

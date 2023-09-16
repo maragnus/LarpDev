@@ -12,6 +12,7 @@
         private const string DefaultDragClass = "relative rounded-lg border-2 border-dashed pa-4 mt-4 mud-width-full mud-height-full z-10";
     private string _dragClass = DefaultDragClass;
     private readonly List<string> _fileNames = new();
+    private bool _synchronizingSquare;
 
     private async Task Import()
     {
@@ -38,13 +39,16 @@
         }
     }
 
-    private async Task UpdatePayments()
+    private async Task SquareSynchronize()
     {
+        _synchronizingSquare = true;
+        StateHasChanged();
         await SafeActionAsync(async () =>
         {
-            await LandingService.Admin.UpdateTransactions();
-            await DialogService.ShowMessageBox("Update Transactions", "All Square payments have been synchronized with account transactions");
+            await LandingService.Admin.SquareSynchronize();
+            await DialogService.ShowMessageBox("Synchronize Square", "All Square customers, team members, orders, and payments have been synchronized.");
         });
+        _synchronizingSquare = false;
     }
 
     private async Task Clear()
@@ -114,11 +118,16 @@
 <AdminLayout Title="Import/Export Data">
     <MudPaper Class="mb-4 pa-4">
         <MudStack Spacing="4" AlignItems="AlignItems.Start">
-            <MudText Typo="Typo.h6">Transactions</MudText>
+            <MudText Typo="Typo.h6">Square</MudText>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AttachMoney"
-                       OnClick="UpdatePayments">
-                Update Square Payments
+                       OnClick="SquareSynchronize" Disabled="_synchronizingSquare">
+                Synchronize
             </MudButton>
+            @if (_synchronizingSquare)
+            {
+                <MudText>Synchronization in progress...</MudText>
+                <MudProgressLinear Indeterminate Size="Size.Large"/>
+            }
         </MudStack>
     </MudPaper>
 

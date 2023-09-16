@@ -95,6 +95,7 @@ public partial class Account
         && !string.IsNullOrWhiteSpace(Phone);
 
     [BsonIgnoreIfNull] public string? SquareDeviceCode { get; set; }
+    [BsonIgnoreIfNull] public string? SquareCustomerId { get; set; }
 
     public static string? BuildNormalizedPhone(string? phone)
     {

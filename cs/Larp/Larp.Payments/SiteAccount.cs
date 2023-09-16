@@ -9,6 +9,7 @@ public class SiteAccount
     public string? Phone { get; set; } // Must be E.164 format
     public bool FinancialAccess { get; set; }
     public DateOnly? BirthDate { get; set; }
+    public string? CustomerId { get; set; }
 
     public void SetFullName(string? fullName)
     {

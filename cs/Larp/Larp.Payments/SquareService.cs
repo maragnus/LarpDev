@@ -20,7 +20,17 @@ public interface ISquareService
 
     Task<SquarePaymentUrl> CreatePaymentUrl(string transactionId, decimal amount, string itemName, SiteAccount account);
 
-    Task<Payment[]> GetPayments();
+    /// <summary>
+    /// Returns the <paramref name="limit"/> most recently created Payments
+    /// </summary>
+    /// <remarks>https://developer.squareup.com/reference/square/payments-api/list-payments</remarks>
+    Task<Payment[]> GetPayments(int limit = 100);
+
+    /// <summary>
+    /// Returns the <paramref name="limit"/> most recently updated Orders
+    /// </summary>
+    /// <remarks>https://developer.squareup.com/reference/square/orders-api/search-orders</remarks>
+    Task<Order[]> GetOrders(int limit = 100);
 
     Task Initialize();
 
@@ -34,11 +44,18 @@ public interface ISquareService
     Task<Order> GetOrder(string orderId);
 
     Task<Customer> GetCustomer(string customerId);
+    Task<Payment> GetPayment(string paymentId);
+    Task<Order> CompleteOrder(Order order);
 }
 
 public partial class SquareService : ISquareService
 {
+    private const bool PayOrderOnComplete = false;
     private static string? _locationId;
+
+    private static readonly string[] WebhookEventTypes =
+        { "payment.created", "payment.updated", "order.created", "order.updated" };
+
     private readonly SquareClient _client;
     private readonly ILogger<SquareService> _logger;
     private readonly SquareOptions _options;
@@ -78,12 +95,6 @@ public partial class SquareService : ISquareService
     {
         try
         {
-            _logger.LogInformation("Square: Updating Webhook Subscription");
-            await UpdateWebhookSubscription();
-
-            _logger.LogInformation("Square: Updating Default Location");
-            await GetDefaultLocationId();
-
             _logger.LogInformation("Square: Updating Team Members");
             await SynchronizeTeamMembers(accounts);
 
@@ -120,6 +131,52 @@ public partial class SquareService : ISquareService
     {
         var response = await _client.CustomersApi.RetrieveCustomerAsync(customerId);
         return response.Customer;
+    }
+
+    public async Task<Payment> GetPayment(string paymentId)
+    {
+        var response = await _client.PaymentsApi.GetPaymentAsync(paymentId);
+        return response.Payment;
+    }
+
+    public async Task<Order> CompleteOrder(Order order)
+    {
+        var result = order;
+
+        // Complete fulfillment
+        if (order.Fulfillments.Count > 0)
+        {
+            var fulfillment = order.Fulfillments.FirstOrDefault();
+            if (fulfillment?.State is "COMPLETED")
+            {
+                var orderModel = new Order.Builder(await GetDefaultLocationId())
+                    .State("COMPLETED")
+                    .Version(result.Version)
+                    .Fulfillments(new[]
+                    {
+                        new Fulfillment.Builder()
+                            .Uid(fulfillment.Uid)
+                            .State("COMPLETED")
+                            .Build()
+                    })
+                    .Build();
+
+                var response = await _client.OrdersApi.UpdateOrderAsync(order.Id, new UpdateOrderRequest(orderModel));
+                result = response.Order;
+            }
+        }
+
+        if (PayOrderOnComplete)
+        {
+            var response = await _client.OrdersApi.PayOrderAsync(order.Id,
+                new PayOrderRequest(
+                    CreateIdempotencyKey(),
+                    result.Version,
+                    order.Tenders.Select(t => t.PaymentId).ToList()));
+            return response.Order;
+        }
+
+        return order;
     }
 
     public async Task<SquarePaymentUrl> CreatePointOfSale(string id, int amount, string itemName, SiteAccount account,
@@ -196,11 +253,28 @@ public partial class SquareService : ISquareService
         throw new BadRequestException("Unsupported device");
     }
 
-    public async Task<Payment[]> GetPayments() =>
+    public async Task<Payment[]> GetPayments(int limit) =>
         await ListAsync(
-            async () => await _client.PaymentsApi.ListPaymentsAsync(),
+            async () => await _client.PaymentsApi.ListPaymentsAsync(limit: limit, sortOrder: "DESC"),
             async (cursor) => await _client.PaymentsApi.ListPaymentsAsync(cursor),
             response => response.Payments,
+            response => response.Cursor
+        );
+
+    /// <summary>
+    /// Returns the <paramref name="limit"/> most recently updated Orders
+    /// </summary>
+    /// <param name="limit">Maximum number of Orders to return</param>
+    public async Task<Order[]> GetOrders(int limit = 100) =>
+        await ListAsync(
+            async () => await _client.OrdersApi
+                .SearchOrdersAsync(
+                    new SearchOrdersRequest(new[] { await GetDefaultLocationId() },
+                        null,
+                        new SearchOrdersQuery(new SearchOrdersFilter(), new SearchOrdersSort("UPDATED_AT", "DESC")),
+                        limit)),
+            async (cursor) => await _client.OrdersApi.SearchOrdersAsync(new SearchOrdersRequest(null, cursor)),
+            response => response.Orders,
             response => response.Cursor
         );
 
@@ -225,6 +299,18 @@ public partial class SquareService : ISquareService
                     .Build())
                 .BuyerEmail(account.Email);
 
+            var order = new Order.Builder(locationId)
+                .CustomerId(customer.Id)
+                .ReferenceId(transactionId)
+                .LineItems(new[]
+                {
+                    new OrderLineItem.Builder("1")
+                        .Name(itemName)
+                        .BasePriceMoney(money)
+                        .Build()
+                })
+                .Build();
+
             if (TryFixPhoneNumber(account.Phone, out var phone))
                 prepopulateData.BuyerPhoneNumber(phone);
 
@@ -232,17 +318,7 @@ public partial class SquareService : ISquareService
                 .IdempotencyKey(CreateIdempotencyKey())
                 .PaymentNote($"{customer.GivenName} {customer.FamilyName} {customer.EmailAddress}".Trim())
                 .PrePopulatedData(prepopulateData.Build())
-                .Order(new Order.Builder(locationId)
-                    .CustomerId(customer.Id)
-                    .ReferenceId(transactionId)
-                    .LineItems(new[]
-                    {
-                        new OrderLineItem.Builder("1")
-                            .Name(itemName)
-                            .BasePriceMoney(money)
-                            .Build()
-                    })
-                    .Build())
+                .Order(order)
                 .CheckoutOptions(new CheckoutOptions.Builder()
                     .RedirectUrl(_options.ReturnUrl)
                     .AllowTipping(false)
@@ -280,8 +356,9 @@ public partial class SquareService : ISquareService
     private async Task UpdateWebhookSubscription()
     {
         var subscriptions = await GetWebhookSubscriptions();
-        var subscription =
-            subscriptions.FirstOrDefault(subscription => subscription.NotificationUrl == _options.Webhook.CallbackUrl);
+        var subscription = subscriptions
+            .FirstOrDefault(subscription => subscription.NotificationUrl == _options.Webhook.CallbackUrl);
+
         if (subscription is null)
         {
             var response = await _client.WebhookSubscriptionsApi.CreateWebhookSubscriptionAsync(
@@ -289,13 +366,22 @@ public partial class SquareService : ISquareService
                         .Name(_options.Webhook.Name)
                         .NotificationUrl(_options.Webhook.CallbackUrl)
                         .Enabled(true)
-                        .EventTypes(new[] { "payment.created", "payment.updated" })
+                        .EventTypes(WebhookEventTypes)
                         .Build())
                     .IdempotencyKey(CreateIdempotencyKey())
                     .Build());
             SignatureKey = response.Subscription.SignatureKey;
             _logger.LogInformation("Square: Created Webhook Subscription");
             return;
+        }
+
+        if (!subscription.EventTypes.Order().SequenceEqual(WebhookEventTypes.Order()))
+        {
+            await _client.WebhookSubscriptionsApi.UpdateWebhookSubscriptionAsync(
+                subscription.Id,
+                new UpdateWebhookSubscriptionRequest(new WebhookSubscription.Builder()
+                    .EventTypes(WebhookEventTypes)
+                    .Build()));
         }
 
         var key = await _client.WebhookSubscriptionsApi
@@ -360,12 +446,9 @@ public partial class SquareService : ISquareService
 
         foreach (var item in accounts)
         {
-            var account = item.Account;
-            var square = item.Square;
-
             try
             {
-                await UpdateCustomer(account, square);
+                await UpdateCustomer(item.Account, item.Square);
             }
             catch (Exception ex)
             {
@@ -419,10 +502,13 @@ public partial class SquareService : ISquareService
             var response = await _client.CustomersApi.CreateCustomerAsync(body.Build());
             _logger.LogInformation("Square: Created Customer {Email}", account.Email);
 
+            account.CustomerId = response.Customer.Id;
             return response.Customer;
         }
         else
         {
+            account.CustomerId = square.Id;
+
             var squareBirthday = string.IsNullOrEmpty(square.Birthday)
                 ? (DateOnly?)null
                 : DateOnly.Parse(square.Birthday);
@@ -452,6 +538,7 @@ public partial class SquareService : ISquareService
 
             _logger.LogInformation("Square: Updated Customer {Email}", account.Email);
             var response = await _client.CustomersApi.UpdateCustomerAsync(square.Id, body.Build());
+
             return response.Customer;
         }
     }

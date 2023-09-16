@@ -1,12 +1,12 @@
 using Larp.Common;
 using Larp.Payments;
+using Square.Models;
 
 namespace Larp.Data.Mongo.Services;
 
 public class TransactionManager
 {
     private const string SquareSource = "Square";
-    private const string SquareOnSiteSource = "Square On-Site";
     private const string DepositName = "Tavern Deposit";
     private readonly LarpContext _larpContext;
     private readonly ILogger<TransactionManager> _logger;
@@ -27,6 +27,7 @@ public class TransactionManager
             Phone = account.Phone,
             BirthDate = account.BirthDate,
             FinancialAccess = account.Roles.Contains(AccountRole.FinanceAccess),
+            CustomerId = account.SquareCustomerId
         }.WithFillName(account.Name);
 
     public async Task<string> GetAccountDeviceCode(string accountId)
@@ -59,63 +60,80 @@ public class TransactionManager
 
         await _squareService.Synchronize(items);
 
+        // Update SquareCustomerId
+        var updates = items
+            .Where(a => !string.IsNullOrEmpty(a.CustomerId))
+            .Select(account => new UpdateManyModel<Account>(
+                Builders<Account>.Filter.Eq(a => a.AccountId, account.AccountId),
+                Builders<Account>.Update.Set(a => a.SquareCustomerId, account.CustomerId)))
+            .ToList();
+        if (updates.Count > 0)
+            await _larpContext.Accounts.BulkWriteAsync(updates);
+
         _logger.LogInformation("Square: Updating Transactions");
-        await UpdatePayments();
+        await SynchronizeOrders();
     }
 
     public async Task SynchronizeOnStartup()
     {
+        await _squareService.Initialize();
+
         if (_squareService.SynchronizeOnStartup)
             await Synchronize();
-        else
-            await _squareService.Initialize();
     }
 
-    private async Task UpdatePayments()
+    private async Task SynchronizeOrders()
     {
+        var orders = (await _squareService.GetOrders())
+            .ToDictionary(p => p.Id);
+
         var payments = (await _squareService.GetPayments())
-            .ToDictionary(p => p.OrderId);
+            .GroupBy(p => p.OrderId)
+            .ToDictionary(p => p.Key, p => p.ToArray());
 
-        var transactions = await _larpContext.Transactions
-            .Find(t => t.Source == SquareSource)
-            .ToListAsync();
-
-        var writes = new List<WriteModel<Transaction>>();
-
-        foreach (var transaction in transactions)
+        var updates = new List<WriteModel<Transaction>>();
+        foreach (var item in orders.Values)
         {
-            if (string.IsNullOrEmpty(transaction.OrderId)
-                || !payments.TryGetValue(transaction.OrderId, out var payment))
+            var order = item;
+
+            if (order.CustomerId is null)
+            {
+                _logger.LogWarning("Ignoring Square Order {OrderId} with null Customer Id", order.Id);
                 continue;
+            }
 
-            var amount = payment.TotalMoney.Amount ?? 0;
-            var status = Transaction.ConvertTransactionStatus(payment.Status);
-            var updatedAt = DateTimeOffset.Parse(payment.UpdatedAt);
-
-            if (transaction.Status == status
-                && transaction.TransactionOn == updatedAt
-                && transaction.Amount == amount
-                && transaction.ReceiptUrl == payment.ReceiptUrl)
+            var account = await GetAccountFromCustomerId(order.CustomerId);
+            if (account is null)
+            {
+                _logger.LogWarning(
+                    "Ignoring Square Order {OrderId} where Customer Id {CustomerId} does not link to Account",
+                    order.Id, order.CustomerId);
                 continue;
+            }
 
-            _logger.LogInformation("Updating transaction: {Id} {Amount} {Date}", transaction.TransactionId,
-                transaction.AmountDecimal, updatedAt);
+            var orderPayments = payments.GetValueOrDefault(order.Id) ?? Array.Empty<Payment>();
 
-            var write = new UpdateOneModel<Transaction>(
-                Builders<Transaction>.Filter.Eq(t => t.TransactionId, transaction.TransactionId),
-                Builders<Transaction>.Update
-                    .Set(t => t.Status, status)
-                    .Set(t => t.Amount, (int)amount)
-                    .Set(t => t.ReceiptUrl, payment.ReceiptUrl)
-                    .Set(t => t.TransactionOn, updatedAt)
-            );
+            if (order.State == "OPEN")
+            {
+                var paid = order.Tenders.Any(t => t.AmountMoney.Amount is > 0);
+                _logger.LogInformation("Square Order {OrderId} Paid={IsPaid}",
+                    order.Id, paid);
 
-            writes.Add(write);
+                if (paid)
+                    order = await _squareService.CompleteOrder(order);
+            }
+
+            var update = new UpdateOneModel<Transaction>(
+                Builders<Transaction>.Filter.Eq(t => t.OrderId, order.Id),
+                BuildUpdateTransactionModel(order, account.AccountId, orderPayments))
+            {
+                IsUpsert = true
+            };
+
+            updates.Add(update);
         }
 
-        if (writes.Count == 0) return;
-
-        await _larpContext.Transactions.BulkWriteAsync(writes);
+        await _larpContext.Transactions.BulkWriteAsync(updates);
     }
 
     public async Task<string> RequestPayment(string accountId, decimal amount, Account account)
@@ -296,34 +314,156 @@ public class TransactionManager
         return response.Url;
     }
 
-    public async Task ImportTransaction(string squareTransactionId)
+    private async Task<Account?> GetAccountFromCustomerId(string customerId)
     {
-        var order = await _squareService.GetOrder(squareTransactionId);
-        var transaction = await _larpContext.Transactions
-            .Find(t => t.OrderId == squareTransactionId)
+        var account = await _larpContext.Accounts
+            .Find(a => a.SquareCustomerId == customerId)
+            .FirstOrDefaultAsync();
+        if (account is not null)
+            return account;
+
+        // Cross-reference missing, do a reverse lookup with Square
+
+        var customer =
+            await _squareService.GetCustomer(customerId)
+            ?? throw new BadRequestException("Invalid Customer Id on Payment");
+
+        if (string.IsNullOrEmpty(customer.ReferenceId))
+        {
+            _logger.LogInformation(
+                "Customer Id {CustomerId} does not have a Reference Id",
+                customer.Id);
+            return null;
+        }
+
+        account = await _larpContext.Accounts
+            .Find(a => a.AccountId == customer.ReferenceId)
             .FirstOrDefaultAsync();
 
-        var amount = (int)(order.TotalMoney.Amount ?? 0);
-        var status = Transaction.ConvertTransactionStatus(order.State);
-
-        if (transaction == null)
+        if (account is null)
         {
-            var customer = await _squareService.GetCustomer(order.CustomerId);
-            var updatedAt = DateTimeOffset.Parse(order.UpdatedAt);
-            var transactionId = ObjectId.GenerateNewId().ToString();
-
-            await _larpContext.Transactions.InsertOneAsync(new Transaction()
-            {
-                TransactionId = transactionId,
-                AccountId = customer.ReferenceId,
-                Amount = amount,
-                Status = status,
-                TransactionOn = updatedAt,
-                UpdatedOn = updatedAt,
-                OrderId = order.Id,
-                Source = SquareOnSiteSource,
-                Type = TransactionType.Deposit
-            });
+            _logger.LogInformation(
+                "Customer Id {CustomerId} with Reference Id {ReferenceId} does not reference an Account",
+                customer.Id, customer.ReferenceId);
+            return null;
         }
+
+        // Store this value so it's faster next time
+        await _larpContext.Accounts.UpdateOneAsync(
+            a => a.AccountId == account.AccountId,
+            Builders<Account>.Update
+                .Set(a => a.SquareCustomerId, customerId));
+
+        return account;
+    }
+
+    public async Task UpdateOrder(string orderId)
+    {
+        var order = await _squareService.GetOrder(orderId);
+        await UpdateOrder(order);
+    }
+
+    public async Task UpdateOrder(Order order)
+    {
+        if (order.CustomerId is null)
+        {
+            _logger.LogWarning("Ignoring Square Order {OrderId} with null Customer Id", order.Id);
+            return;
+        }
+
+        var account = await GetAccountFromCustomerId(order.CustomerId);
+        if (account is null)
+        {
+            _logger.LogWarning(
+                "Ignoring Square Order {OrderId} where Customer Id {CustomerId} does not link to Account",
+                order.Id, order.CustomerId);
+            return;
+        }
+
+        if (order.State == "OPEN")
+        {
+            var paid = order.Tenders.Any(t => t.AmountMoney.Amount is > 0);
+            _logger.LogInformation("Square Order {OrderId} Paid={IsPaid}",
+                order.Id, paid);
+
+            if (paid)
+                order = await _squareService.CompleteOrder(order);
+        }
+
+        await _larpContext.Transactions.UpdateOneAsync(
+            transaction => transaction.OrderId == order.Id,
+            BuildUpdateTransactionModel(order, account.AccountId),
+            new UpdateOptions() { IsUpsert = true });
+    }
+
+    public async Task UpdatePayment(string paymentId)
+    {
+        var payment = await _squareService.GetPayment(paymentId);
+        await UpdatePayment(payment);
+    }
+
+    public async Task UpdatePayment(Payment payment)
+    {
+        if (payment.CustomerId is null)
+        {
+            _logger.LogWarning(
+                "Ignoring Square Payment {PaymentId} on Order {OrderId} with null Customer Id",
+                payment.Id, payment.OrderId);
+            return;
+        }
+
+        var account = await GetAccountFromCustomerId(payment.CustomerId);
+        if (account is null)
+        {
+            _logger.LogWarning(
+                "Ignoring Square Payment {PaymentId} where Customer Id {CustomerId} does not link to Account",
+                payment.Id, payment.CustomerId);
+            return;
+        }
+
+        await _larpContext.Transactions.UpdateOneAsync(
+            transaction => transaction.OrderId == payment.OrderId,
+            Builders<Transaction>.Update
+                .SetOnInsert(t => t.OrderId, payment.OrderId)
+                .SetOnInsert(t => t.TransactionOn, DateTimeOffset.Parse(payment.CreatedAt))
+                .Set(t => t.UpdatedOn, DateTimeOffset.Parse(payment.UpdatedAt))
+                .SetOnInsert(t => t.AccountId, account.AccountId)
+                .SetOnInsert(t => t.Source, SquareSource)
+                .SetOnInsert(t => t.Status, TransactionStatus.Pending)
+                .AddToSet(t => t.ReceiptUrls, payment.ReceiptUrl),
+            new UpdateOptions() { IsUpsert = true });
+    }
+
+    private UpdateDefinition<Transaction> BuildUpdateTransactionModel(Order order, string accountId,
+        Payment[]? payments = null)
+    {
+        var state = order.State switch
+        {
+            "OPEN" => TransactionStatus.Pending,
+            "COMPLETED" => TransactionStatus.Completed,
+            "CANCELED" => TransactionStatus.Cancelled,
+            _ => TransactionStatus.Unknown
+        };
+
+        var model = Builders<Transaction>.Update
+            .SetOnInsert(t => t.OrderId, order.Id);
+
+        model = model.SetOnInsert(t => t.TransactionOn, DateTimeOffset.Parse(order.CreatedAt));
+        model = model.Set(t => t.UpdatedOn, DateTimeOffset.Parse(order.UpdatedAt));
+        model = model.Set(t => t.AccountId, accountId);
+        model = model.SetOnInsert(t => t.Source, SquareSource);
+        model = model.SetOnInsert(t => t.Status, state);
+        model = model.Set(t => t.Amount,
+            order.TotalMoney?.Amount.ToInt32()); // Total amount paid toward order minus refunds
+        model = model.Set(t => t.RefundAmount,
+            order.ReturnAmounts?.TotalMoney?.Amount.ToInt32()); // Total amount of refunds
+
+        if (payments is not { Length: > 0 }) return model;
+
+        // Add receipt list
+        var receipts = payments
+            .Select(op => op.ReceiptUrl)
+            .Where(url => !string.IsNullOrEmpty(url));
+        return model.Set(t => t.ReceiptUrls, receipts);
     }
 }
