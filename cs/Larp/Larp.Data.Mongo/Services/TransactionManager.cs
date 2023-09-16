@@ -65,8 +65,10 @@ public class TransactionManager
 
     public async Task SynchronizeOnStartup()
     {
-        if (!_squareService.SynchronizeOnStartup) return;
-        await Synchronize();
+        if (_squareService.SynchronizeOnStartup)
+            await Synchronize();
+        else
+            await _squareService.Initialize();
     }
 
     private async Task UpdatePayments()

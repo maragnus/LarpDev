@@ -22,6 +22,8 @@ public interface ISquareService
 
     Task<Payment[]> GetPayments();
 
+    Task Initialize();
+
     Task Synchronize(SiteAccount[] accounts);
 
     Task<SquarePaymentUrl> CreatePointOfSale(string id, int amount, string itemName, SiteAccount account,
@@ -53,6 +55,24 @@ public partial class SquareService : ISquareService
     public static string? SignatureKey { get; private set; }
 
     public bool SynchronizeOnStartup { get; init; }
+
+    public async Task Initialize()
+    {
+        try
+        {
+            _logger.LogInformation("Square: Updating Webhook Subscription");
+            await UpdateWebhookSubscription();
+
+            _logger.LogInformation("Square: Updating Default Location");
+            await GetDefaultLocationId();
+        }
+        catch (ApiException ex)
+        {
+            _logger.LogInformation("Initialize failed: {Json}",
+                ex.HttpContext.Response.Body);
+            throw;
+        }
+    }
 
     public async Task Synchronize(SiteAccount[] accounts)
     {
