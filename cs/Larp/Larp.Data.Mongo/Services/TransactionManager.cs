@@ -430,6 +430,7 @@ public class TransactionManager
                 .SetOnInsert(t => t.AccountId, account.AccountId)
                 .SetOnInsert(t => t.Source, SquareSource)
                 .SetOnInsert(t => t.Status, TransactionStatus.Pending)
+                .SetOnInsert(t => t.Type, TransactionType.Deposit)
                 .AddToSet(t => t.ReceiptUrls, payment.ReceiptUrl),
             new UpdateOptions() { IsUpsert = true });
     }
@@ -446,17 +447,16 @@ public class TransactionManager
         };
 
         var model = Builders<Transaction>.Update
-            .SetOnInsert(t => t.OrderId, order.Id);
-
-        model = model.SetOnInsert(t => t.TransactionOn, DateTimeOffset.Parse(order.CreatedAt));
-        model = model.Set(t => t.UpdatedOn, DateTimeOffset.Parse(order.UpdatedAt));
-        model = model.Set(t => t.AccountId, accountId);
-        model = model.SetOnInsert(t => t.Source, SquareSource);
-        model = model.SetOnInsert(t => t.Status, state);
-        model = model.Set(t => t.Amount,
-            order.TotalMoney?.Amount.ToInt32()); // Total amount paid toward order minus refunds
-        model = model.Set(t => t.RefundAmount,
-            order.ReturnAmounts?.TotalMoney?.Amount.ToInt32()); // Total amount of refunds
+            .SetOnInsert(t => t.OrderId, order.Id)
+            .SetOnInsert(t => t.TransactionOn, DateTimeOffset.Parse(order.CreatedAt))
+            .Set(t => t.UpdatedOn, DateTimeOffset.Parse(order.UpdatedAt))
+            .Set(t => t.AccountId, accountId)
+            .SetOnInsert(t => t.Source, SquareSource)
+            .SetOnInsert(t => t.Status, state)
+            .Set(t => t.Amount, order.TotalMoney?.Amount.ToInt32()) // Total amount paid toward order minus refunds
+            .Set(t => t.RefundAmount,
+                order.ReturnAmounts?.TotalMoney?.Amount.ToInt32()) // Total amount of refunds
+            .SetOnInsert(t => t.Type, TransactionType.Deposit);
 
         if (payments is not { Length: > 0 }) return model;
 
