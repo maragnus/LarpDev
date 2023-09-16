@@ -96,6 +96,12 @@ public partial class SquareService : ISquareService
         return transaction.Order;
     }
 
+    public async Task<Customer> GetCustomer(string customerId)
+    {
+        var response = await _client.CustomersApi.RetrieveCustomerAsync(customerId);
+        return response.Customer;
+    }
+
     public async Task<SquarePaymentUrl> CreatePointOfSale(string id, int amount, string itemName, SiteAccount account,
         DeviceType deviceType)
     {
