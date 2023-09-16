@@ -25,6 +25,12 @@ public class SquareCallbackService
 
     private bool IsFromSquare(HttpRequest request, string body)
     {
+        if (string.IsNullOrEmpty(SquareService.SignatureKey))
+        {
+            _logger.LogWarning("SignatureKey unset");
+            return false;
+        }
+
         var signature = request.Headers.TryGetValue("x-square-hmacsha256-signature", out var sig)
             ? sig.FirstOrDefault()
             : null;
