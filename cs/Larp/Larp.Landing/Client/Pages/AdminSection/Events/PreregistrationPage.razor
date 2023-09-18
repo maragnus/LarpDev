@@ -112,9 +112,15 @@
                 join attending in GetList(FieldNpcing) on component.Name equals attending
                 select component.ComponentId;
             var npcing = isNpcing ? string.Join("", npcingList) : "";
-            var balance = (player.Balance ?? 0) > cost
-                ? "PAID"
-                : ((player.Balance ?? 0) - cost).ToString("0");
+            var balance = GetPaid(cost, player.Balance);
+
+            static string GetPaid(decimal? cost, decimal? balance)
+            {
+                if (cost is null or 0) return "";
+                if (balance is null or 0) return $"-${cost}";
+                if (cost <= balance) return "PAID";
+                return $"-${balance - cost}";
+            }
 
             var sheets = player.Characters
                 .Where(x => characters.Contains(x.Name))
@@ -200,7 +206,7 @@
                             <MudIcon Icon="@Icons.Material.Filled.RadioButtonUnchecked"/>
                         </td>
                         <td class="right-half nowrap">$@cost @patreon</td>
-                        <td class="nowrap">$@balance</td>
+                        <td class="nowrap">@balance</td>
                     }
                     else
                     {
