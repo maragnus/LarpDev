@@ -589,7 +589,7 @@ public class TransactionManager
             TransactionOn = DateTimeOffset.Now,
             Type = TransactionType.Withdrawal,
             Status = TransactionStatus.Completed,
-            Amount = amount,
+            Amount = -amount,
             Source = "Tavern Transfer",
             UpdatedOn = DateTimeOffset.Now,
             SourceAccountId = toAccountId

@@ -175,6 +175,7 @@
             {
                 await LandingService.Service.Transfer(DestinationAccountId, _total.ToCents());
                 MudDialog.Close();
+                return;
             }
 
             var url =
