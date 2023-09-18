@@ -77,4 +77,13 @@ public interface ILandingService
 
     [ApiPost("transactions/deposit"), ApiAuthenticated]
     Task<string> Deposit(decimal amount);
+
+    [ApiGet("transactions/linked"), ApiAuthenticated]
+    Task<AccountName[]> GetLinkedAccounts();
+
+    [ApiPost("transactions/linked"), ApiAuthenticated]
+    Task<AccountName> AddLinkedAccounts(string email);
+
+    [ApiPost("transactions/transfer"), ApiAuthenticated]
+    Task Transfer(string accountId, int amount);
 }

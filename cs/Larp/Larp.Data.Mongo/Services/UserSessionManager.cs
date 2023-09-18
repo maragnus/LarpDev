@@ -30,6 +30,7 @@ public interface IUserSessionManager
     Task<Account> GetUserAccount(string accountId);
     Task UpdateUserAccount(string accountId, Func<UpdateDefinitionBuilder<Account>, UpdateDefinition<Account>> builder);
     void UserAccountChanged(string accountId);
+    void UserAccountChanged(IEnumerable<string?> accountId);
     Task AddAccountRole(string accountId, AccountRole role);
     Task RemoveAccountRole(string accountId, AccountRole role);
     Task<Account?> FindByEmail(string email);
@@ -317,6 +318,12 @@ public class UserSessionManager : IUserSessionManager
     public void UserAccountChanged(string accountId)
     {
         _cache.Remove(accountId);
+    }
+
+    public void UserAccountChanged(IEnumerable<string?> accountIds)
+    {
+        foreach (var accountId in accountIds.Where(id => !string.IsNullOrEmpty(id)))
+            _cache.Remove(accountId!);
     }
 
     public async Task AddAccountRole(string accountId, AccountRole role)

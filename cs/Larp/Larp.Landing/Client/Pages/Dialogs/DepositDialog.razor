@@ -139,6 +139,9 @@
     MudDialogInstance MudDialog { get; set; } = default!;
 
     [Parameter]
+    public string? DestinationAccountId { get; set; }
+
+    [Parameter]
     public string? AccountId { get; set; }
 
     [Parameter]
@@ -168,9 +171,16 @@
         _loading = true;
         try
         {
-            var url = AccountId == null
-                ? await LandingService.Service.Deposit(_total)
-                : await LandingService.Admin.PointOfSale(AccountId, _total.ToCents(), LandingService.DeviceType);
+            if (!string.IsNullOrEmpty(DestinationAccountId))
+            {
+                await LandingService.Service.Transfer(DestinationAccountId, _total.ToCents());
+                MudDialog.Close();
+            }
+
+            var url =
+                AccountId == null
+                    ? await LandingService.Service.Deposit(_total)
+                    : await LandingService.Admin.PointOfSale(AccountId, _total.ToCents(), LandingService.DeviceType);
 
     // NOTE: Square takes two seconds for the URL to become available
             await Task.Delay(TimeSpan.FromSeconds(2));

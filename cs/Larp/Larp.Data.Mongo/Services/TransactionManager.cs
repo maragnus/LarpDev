@@ -11,12 +11,15 @@ public class TransactionManager
     private readonly LarpContext _larpContext;
     private readonly ILogger<TransactionManager> _logger;
     private readonly ISquareService _squareService;
+    private readonly IUserSessionManager _userSessionManager;
 
-    public TransactionManager(LarpContext larpContext, ISquareService squareService, ILogger<TransactionManager> logger)
+    public TransactionManager(LarpContext larpContext, ISquareService squareService,
+        ILogger<TransactionManager> logger, IUserSessionManager userSessionManager)
     {
         _larpContext = larpContext;
         _squareService = squareService;
         _logger = logger;
+        _userSessionManager = userSessionManager;
     }
 
     private SiteAccount SiteAccountFromAccount(Account account) =>
@@ -32,10 +35,7 @@ public class TransactionManager
 
     public async Task<string> GetAccountDeviceCode(string accountId)
     {
-        var account = await _larpContext.Accounts
-                          .Find(account => account.AccountId == accountId)
-                          .FirstOrDefaultAsync()
-                      ?? throw new BadRequestException("Account not found");
+        var account = await _userSessionManager.GetUserAccount(accountId);
 
         if (!string.IsNullOrEmpty(account.SquareDeviceCode))
             return account.SquareDeviceCode;
@@ -69,6 +69,8 @@ public class TransactionManager
             .ToList();
         if (updates.Count > 0)
             await _larpContext.Accounts.BulkWriteAsync(updates);
+
+        _userSessionManager.UserAccountChanged(items.Select(item => item.AccountId));
 
         _logger.LogInformation("Square: Updating Transactions");
         await SynchronizeOrders();
@@ -525,5 +527,87 @@ public class TransactionManager
             .Select(op => op.ReceiptUrl)
             .Where(url => !string.IsNullOrEmpty(url));
         return model.Set(t => t.ReceiptUrls, receipts);
+    }
+
+    public async Task<AccountName> VerifyLinkedAccount(string email)
+    {
+        var account =
+            ObjectId.TryParse(email, out var id)
+                ? await _userSessionManager.GetUserAccount(id.ToString()!)
+                : await _userSessionManager.FindByEmail(email);
+
+        if (account is null) return new AccountName();
+
+        return new AccountName
+        {
+            AccountId = account.AccountId,
+            Name = account.Name ?? "Unnamed Account",
+            Emails = { new AccountEmail { Email = account.PreferredEmail! } }
+        };
+    }
+
+    public async Task<AccountName[]> GetLinkedAccounts(string accountId)
+    {
+        var query =
+            from transaction in _larpContext.Transactions.AsQueryable()
+            join account in _larpContext.Accounts.AsQueryable() on transaction.SourceAccountId equals account.AccountId
+            select account;
+        var accounts = await query.ToListAsync();
+
+        return accounts
+            .DistinctBy(account => account.AccountId)
+            .Where(account => account.AccountId != accountId)
+            .Select(account => new AccountName
+            {
+                AccountId = account.AccountId,
+                Name = account.Name ?? "Unnamed Account",
+                Emails = { new AccountEmail { Email = account.PreferredEmail! } }
+            }).ToArray();
+    }
+
+    public async Task Transfer(string fromAccountId, string toAccountId, int amount)
+    {
+        if (fromAccountId == toAccountId)
+            throw new BadRequestException("Cannot transfer to the same account");
+
+        await _userSessionManager.GetUserAccount(fromAccountId);
+        await _userSessionManager.GetUserAccount(toAccountId);
+
+        var balance = await GetBalance(fromAccountId);
+
+        if (amount > balance.ToCents())
+        {
+            _logger.LogWarning(
+                "Transfer from Account {FromAccountId} to Account {ToAccountId} of {Amount} cannot complete because it has insufficient funds of {Balance}",
+                fromAccountId, toAccountId, amount, balance);
+            throw new BadRequestException($"Insufficient funds");
+        }
+
+        var fromTransaction = new Transaction
+        {
+            AccountId = fromAccountId,
+            TransactionOn = DateTimeOffset.Now,
+            Type = TransactionType.Withdrawal,
+            Status = TransactionStatus.Completed,
+            Amount = amount,
+            Source = "Tavern Transfer",
+            UpdatedOn = DateTimeOffset.Now,
+            SourceAccountId = toAccountId
+        };
+
+        var toTransaction = new Transaction
+        {
+            AccountId = toAccountId,
+            TransactionOn = DateTimeOffset.Now,
+            Type = TransactionType.Deposit,
+            Status = TransactionStatus.Completed,
+            Amount = amount,
+            Source = "Tavern Transfer",
+            UpdatedOn = DateTimeOffset.Now,
+            SourceAccountId = fromAccountId
+        };
+
+        await _larpContext.Transactions.InsertOneAsync(fromTransaction);
+        await _larpContext.Transactions.InsertOneAsync(toTransaction);
     }
 }

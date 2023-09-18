@@ -239,6 +239,14 @@ public class LandingServiceServer : ILandingService
         return await _transactionManager.RequestPayment(AccountId, amount, account);
     }
 
+    public async Task<AccountName[]> GetLinkedAccounts() => await _transactionManager.GetLinkedAccounts(AccountId);
+
+    public async Task<AccountName> AddLinkedAccounts(string email) =>
+        await _transactionManager.VerifyLinkedAccount(email);
+
+    public async Task Transfer(string accountId, int amount) =>
+        await _transactionManager.Transfer(AccountId, accountId, amount);
+
     private async Task GrantAdminRoles(string accountId) =>
         await _userSessionManager.UpdateUserAccount(accountId,
             x =>

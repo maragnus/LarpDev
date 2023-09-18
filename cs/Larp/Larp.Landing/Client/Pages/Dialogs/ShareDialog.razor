@@ -1,0 +1,80 @@
+@inherits LarpPage
+
+@inject LandingService LandingService
+
+<MudDialog T="string?">
+    <DialogContent>
+        <MudStack Spacing="4">
+            <MudText Typo="Typo.body1">Enter an email address or select an account to transfer into.</MudText>
+            <MudTextField @bind-Value="_email" Immediate Label="Recipient Email Address" Variant="Variant.Outlined" AdornmentIcon="@Icons.Material.Filled.Email"/>
+            @if (_accounts.Length > 0)
+            {
+                <MudDivider/>
+                <MudList Clickable>
+                    @foreach (var item in _accounts)
+                    {
+                        <MudListItem OnClick="() => Submit(item.AccountId)">
+                            <MudStack Row Justify="Justify.SpaceBetween">
+                                <MudText>
+                                    <MudIcon Icon="@Icons.Material.Filled.Person" Style="font-size: inherit"/>
+                                    <strong>@item.Name</strong>
+                                </MudText>
+                                <MudText>@string.Join(", ", item.Emails.Select(e => e.Email))</MudText>
+                            </MudStack>
+                        </MudListItem>
+                    }
+                </MudList>
+            }
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                   OnClick="() => Submit(_email)"
+                   StartIcon="@Icons.Material.Filled.Search"
+                   Disabled="string.IsNullOrEmpty(_email)">
+            Search
+        </MudButton>
+        <MudButton Color="Color.Default" Variant="Variant.Filled" OnClick="Close">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = default!;
+
+    private AccountName[] _accounts = Array.Empty<AccountName>();
+    private string? _email;
+
+    protected override async Task OnSafeInitializedAsync()
+    {
+        _accounts = (await LandingService.Service.GetLinkedAccounts()).ToArray();
+    }
+
+    private async Task Submit(string emailOrAccountId)
+    {
+        if (string.IsNullOrWhiteSpace(emailOrAccountId))
+        {
+            MudDialog.Cancel();
+            return;
+        }
+
+        var accountId = emailOrAccountId.Trim();
+        var account = await LandingService.Service.AddLinkedAccounts(accountId);
+        if (string.IsNullOrEmpty(account.AccountId))
+        {
+            await DialogService.ShowMessageBox("Transfer To Account", "Account was not found.");
+            return;
+        }
+
+        await DialogService.ShowAsync<DepositDialog>("Transfer To " + account.Name, new DialogParameters
+        {
+            { nameof(DepositDialog.DestinationAccountId), account.AccountId },
+            { nameof(DepositDialog.Balance), 0m }
+        });
+
+        MudDialog.Close(DialogResult.Ok(account));
+    }
+
+    void Close() => MudDialog.Close(DialogResult.Cancel());
+}

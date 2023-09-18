@@ -27,7 +27,7 @@
                 <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Success" OnClick="Deposit">Add Funds</MudButton>
             </MudTooltip>
             <MudTooltip Text="Share your account balance with other accounts">
-                <MudButton StartIcon="@Icons.Material.Filled.People" Variant="Variant.Filled" Color="Color.Primary">Share</MudButton>
+                <MudButton StartIcon="@Icons.Material.Filled.People" Variant="Variant.Filled" Color="Color.Primary" OnClick="Share">Share</MudButton>
             </MudTooltip>
         </MudStack>
     </MudStack>
@@ -142,6 +142,11 @@
     {
         if (string.IsNullOrEmpty(receiptUrl)) return;
         NavigationManager.NavigateTo(receiptUrl);
+    }
+
+    private async Task Share()
+    {
+        await DialogService.ShowAsync<ShareDialog>("Transfer To Account");
     }
 
 }
