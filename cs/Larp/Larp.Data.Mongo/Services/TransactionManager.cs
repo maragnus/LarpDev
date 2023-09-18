@@ -278,16 +278,16 @@ public class TransactionManager
     {
         var deposits = await _larpContext.Transactions.AsQueryable()
             .Where(transaction => transaction.AccountId == accountId)
-            .SumAsync(transaction => transaction.Amount);
+            .SumAsync(transaction => transaction.Amount ?? 0);
 
         var withdrawals = await _larpContext.Attendances.AsQueryable()
             .Where(transaction => transaction.AccountId == accountId && transaction.Cost.HasValue)
-            .SumAsync(transaction => transaction.Cost - (transaction.Paid ?? 0));
+            .SumAsync(transaction => (transaction.Cost ?? 0) - (transaction.Paid ?? 0));
 
-        return (deposits - (withdrawals ?? 0)).ToCurrency();
+        return (deposits - withdrawals).ToCurrency();
     }
 
-    public async Task<Dictionary<string, decimal>> GetBalances()
+    public async Task<Dictionary<string, decimal?>> GetBalances()
     {
         var deposits =
             (await _larpContext.Transactions.Aggregate()
@@ -324,7 +324,7 @@ public class TransactionManager
         return deposits;
     }
 
-    public async Task UpdateByOrderId(string orderId, TransactionStatus status, long amount,
+    public async Task UpdateByOrderId(string orderId, TransactionStatus status, long? amount,
         DateTimeOffset timestamp, string? receiptUrl)
     {
         var update = Builders<Transaction>.Update

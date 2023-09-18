@@ -1,4 +1,5 @@
 @page "/transactions"
+@using Larp.Common
 @inherits LarpPage
 @inject LandingService LandingService
 
@@ -116,7 +117,7 @@
                 Status = transaction.Status.ToString(),
                 Type = transaction.Type.ToString(),
                 When = transaction.TransactionOn.LocalDateTime,
-                Amount = transaction.AmountDecimal,
+                Amount = transaction.Amount.ToCurrency() ?? 0m,
                 Note = transaction.Note,
                 ReceiptUrl = transaction.ReceiptUrl,
                 PaymentUrl = transaction.Status != TransactionStatus.Completed

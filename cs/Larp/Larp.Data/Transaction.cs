@@ -1,5 +1,3 @@
-using Larp.Common;
-
 namespace Larp.Data;
 
 public enum TransactionType
@@ -41,11 +39,9 @@ public class Transaction
 
     public TransactionType Type { get; set; }
 
-    public int Amount { get; set; }
+    public int? Amount { get; set; }
 
     public int? RefundAmount { get; set; }
-
-    [BsonIgnore] public decimal AmountDecimal => Amount.ToCurrency();
 
     public DateTimeOffset TransactionOn { get; set; }
 

@@ -95,7 +95,7 @@ public class AdminService : IAdminService
             account.AttendanceCount = attendances.GetValueOrDefault(account.AccountId);
             account.CitationCount = citations.GetValueOrDefault(account.AccountId);
             account.CharacterCount = characters.GetValueOrDefault(account.AccountId);
-            account.AccountBalance = transactions.GetValueOrDefault(account.AccountId).ToCents();
+            account.AccountBalance = transactions.GetValueOrDefault(account.AccountId).ToCents() ?? 0;
         });
         return accounts.ToArray();
     }
