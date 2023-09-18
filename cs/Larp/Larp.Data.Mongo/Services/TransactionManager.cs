@@ -135,10 +135,17 @@ public class TransactionManager
         {
             var order = item;
 
-            if (order.CustomerId is null)
+            var customerId = order.CustomerId;
+            if (customerId is null)
             {
-                _logger.LogWarning("Ignoring Square Order {OrderId} with null Customer Id", order.Id);
-                continue;
+                var sourceOrder = orders.GetValueOrDefault(order.Returns.FirstOrDefault()?.SourceOrderId ?? "");
+                customerId = sourceOrder?.CustomerId;
+
+                if (customerId is null)
+                {
+                    _logger.LogWarning("Ignoring Square Order {OrderId} with null Customer Id", order.Id);
+                    continue;
+                }
             }
 
             var account = await GetAccountFromCustomerId(order.CustomerId);
@@ -453,10 +460,22 @@ public class TransactionManager
 
     private async Task UpdateOrder(Order order)
     {
-        if (order.CustomerId is null)
+        // Get Customer ID from order or a linked order
+        var customerId = order.CustomerId;
+        if (customerId is null)
         {
-            _logger.LogWarning("Ignoring Square Order {OrderId} with null Customer Id", order.Id);
-            return;
+            var sourceOrderId = order.Returns.FirstOrDefault()?.SourceOrderId;
+            if (sourceOrderId is not null)
+            {
+                var sourceOrder = await _squareService.GetOrder(sourceOrderId);
+                customerId = sourceOrder?.CustomerId;
+            }
+
+            if (customerId is null)
+            {
+                _logger.LogWarning("Ignoring Square Order {OrderId} with null Customer Id", order.Id);
+                return;
+            }
         }
 
         var account = await GetAccountFromCustomerId(order.CustomerId);
@@ -535,10 +554,26 @@ public class TransactionManager
             _ => TransactionStatus.Unknown
         };
 
-        var amount =
+        var paidAmount =
             state == TransactionStatus.Unpaid
                 ? null
                 : order.TotalMoney?.Amount.ToInt32();
+
+        var returnAmount =
+            order.ReturnAmounts?.TotalMoney?.Amount.ToInt32();
+
+        var amount =
+            paidAmount.HasValue || returnAmount.HasValue
+                ? (int?)((paidAmount ?? 0) - (returnAmount ?? 0))
+                : null;
+
+        var type = amount switch
+        {
+            < 0 => TransactionType.Refund,
+            > 0 => TransactionType.Deposit,
+            0 when order.Returns.Count > 0 => TransactionType.Refund,
+            _ => TransactionType.Deposit
+        };
 
         var model = Builders<Transaction>.Update
             .SetOnInsert(t => t.OrderId, order.Id)
@@ -547,10 +582,8 @@ public class TransactionManager
             .Set(t => t.AccountId, accountId)
             .SetOnInsert(t => t.Source, SquareSource)
             .SetOnInsert(t => t.Status, state)
-            .Set(t => t.Amount, amount) // Total amount paid toward order minus refunds
-            .Set(t => t.RefundAmount,
-                order.ReturnAmounts?.TotalMoney?.Amount.ToInt32()) // Total amount of refunds
-            .SetOnInsert(t => t.Type, TransactionType.Deposit);
+            .Set(t => t.Amount, amount)
+            .SetOnInsert(t => t.Type, type);
 
         if (payments is not { Length: > 0 }) return model;
 
@@ -561,31 +594,16 @@ public class TransactionManager
         return model.Set(t => t.ReceiptUrls, receipts);
     }
 
-    private UpdateDefinition<Transaction> BuildUpdateTransactionModel(PaymentRefund refund, string accountId,
-        Payment[]? payments = null)
+    private UpdateDefinition<Transaction> BuildUpdateTransactionModel(PaymentRefund refund, string accountId)
     {
-        var state = refund.Status switch
-        {
-            "PENDING" => TransactionStatus.Pending,
-            "COMPLETED" => TransactionStatus.Completed,
-            "REJECTED" => TransactionStatus.Cancelled,
-            "FAILED" => TransactionStatus.Failed,
-            _ => TransactionStatus.Unknown
-        };
-
-        var amount =
-            state != TransactionStatus.Completed || !refund.AmountMoney.Amount.HasValue
-                ? null
-                : (int?)-Math.Abs(refund.AmountMoney?.Amount.ToInt32() ?? 0);
-
         return Builders<Transaction>.Update
             .SetOnInsert(t => t.OrderId, refund.OrderId)
             .SetOnInsert(t => t.TransactionOn, DateTimeOffset.Parse(refund.CreatedAt))
             .Set(t => t.UpdatedOn, DateTimeOffset.Parse(refund.UpdatedAt))
             .Set(t => t.AccountId, accountId)
             .SetOnInsert(t => t.Source, SquareSource)
-            .SetOnInsert(t => t.Status, state)
-            .Set(t => t.Amount, amount)
+            .SetOnInsert(t => t.Status, TransactionStatus.Pending)
+            .SetOnInsert(t => t.Amount, null)
             .SetOnInsert(t => t.Type, TransactionType.Refund);
     }
 }

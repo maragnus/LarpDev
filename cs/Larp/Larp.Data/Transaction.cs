@@ -19,6 +19,7 @@ public enum TransactionStatus
     Unpaid
 }
 
+[Serializable]
 public class Transaction
 {
     [BsonId, BsonRepresentation(BsonType.ObjectId)]
@@ -62,8 +63,6 @@ public class Transaction
     [BsonIgnore] public string? EventTitle { get; set; }
 
     public List<string> ReceiptUrls { get; set; } = new();
-
-    public Dictionary<string, int> Refunds { get; set; } = new();
 
     public static TransactionStatus ConvertTransactionStatus(string status) =>
         status.ToUpperInvariant() switch
