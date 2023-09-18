@@ -117,7 +117,7 @@ public class TransactionManager
                 }
             }
 
-            var account = await GetAccountFromCustomerId(order.CustomerId);
+            var account = await GetAccountFromCustomerId(customerId);
             if (account is null)
             {
                 _logger.LogWarning(
