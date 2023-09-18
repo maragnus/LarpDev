@@ -104,16 +104,23 @@ public class SquareCallbackService
                 await _transactionHandler.PaymentUpdated(id);
                 break;
             case "order.created":
-                await _transactionHandler.OrderUpdated(id);
+                await _transactionHandler.OrderCreated(id);
                 break;
             case "order.updated":
                 await _transactionHandler.OrderUpdated(id);
+                break;
+            case "refund.created":
+                await _transactionHandler.RefundCreated(id);
+                break;
+            case "refund.updated":
+                await _transactionHandler.RefundUpdated(id);
                 break;
             default:
                 throw new BadRequestException($"Unexpected type of {@event.Type}");
         }
     }
 
+    [Serializable]
     private class EventRequest
     {
         [JsonPropertyName("type")] public string? Type { get; set; }

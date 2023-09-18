@@ -100,11 +100,13 @@
                 Icon = transaction.Type switch {
                     TransactionType.Deposit => Icons.Material.Filled.KeyboardDoubleArrowDown,
                     TransactionType.Withdrawal => Icons.Material.Filled.KeyboardDoubleArrowUp,
+                    TransactionType.Refund => Icons.Material.Filled.Undo, 
                     _ => Icons.Material.Filled.KeyboardDoubleArrowDown
                     },
                 Color = transaction.Type switch {
                     TransactionType.Deposit => Color.Primary,
                     TransactionType.Withdrawal => Color.Error,
+                    TransactionType.Refund => Color.Warning,
                     _ => Color.Warning
                     },
                 Source = transaction.SourceAccountName

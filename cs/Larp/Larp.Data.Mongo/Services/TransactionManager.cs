@@ -82,6 +82,45 @@ public class TransactionManager
             await Synchronize();
     }
 
+    private async Task SynchronizeRefunds(IReadOnlyDictionary<string, Order> orders)
+    {
+        var refunds = await _squareService.GetRefunds();
+
+        var updates = new List<WriteModel<Transaction>>();
+        foreach (var refund in refunds)
+        {
+            var order = orders.GetValueOrDefault(refund.OrderId);
+            if (order is null) continue;
+
+            if (order.CustomerId is null)
+            {
+                _logger.LogWarning("Ignoring Square Refund {RefundId} with null Customer Id", refund.Id);
+                continue;
+            }
+
+            var account = await GetAccountFromCustomerId(order.CustomerId);
+            if (account is null)
+            {
+                _logger.LogWarning(
+                    "Ignoring Square Refund {RefundId} where Customer Id {CustomerId} does not link to Account",
+                    refund.Id, order.CustomerId);
+                continue;
+            }
+
+            var update = new UpdateOneModel<Transaction>(
+                Builders<Transaction>.Filter.Eq(t => t.OrderId, refund.Id),
+                BuildUpdateTransactionModel(refund, account.AccountId))
+            {
+                IsUpsert = true
+            };
+
+            updates.Add(update);
+        }
+
+        if (updates.Count > 0)
+            await _larpContext.Transactions.BulkWriteAsync(updates);
+    }
+
     private async Task SynchronizeOrders()
     {
         var orders = (await _squareService.GetOrders())
@@ -133,7 +172,10 @@ public class TransactionManager
             updates.Add(update);
         }
 
-        await _larpContext.Transactions.BulkWriteAsync(updates);
+        if (updates.Count > 0)
+            await _larpContext.Transactions.BulkWriteAsync(updates);
+
+        await SynchronizeRefunds(orders);
     }
 
     public async Task<string> RequestPayment(string accountId, decimal amount, Account account)
@@ -314,8 +356,11 @@ public class TransactionManager
         return response.Url;
     }
 
-    private async Task<Account?> GetAccountFromCustomerId(string customerId)
+    private async Task<Account?> GetAccountFromCustomerId(string? customerId)
     {
+        if (string.IsNullOrEmpty(customerId))
+            return null;
+
         var account = await _larpContext.Accounts
             .Find(a => a.SquareCustomerId == customerId)
             .FirstOrDefaultAsync();
@@ -357,13 +402,56 @@ public class TransactionManager
         return account;
     }
 
+    public async Task UpdateRefund(string refundId)
+    {
+        var refund = await _squareService.GetRefund(refundId);
+        await UpdateRefund(refund);
+    }
+
+    private async Task UpdateRefund(PaymentRefund refund)
+    {
+        if (refund.Status != "COMPLETED") return;
+
+        var order = await _squareService.GetOrder(refund.OrderId);
+
+        var account = await GetAccountFromCustomerId(order.CustomerId);
+        if (account is null)
+        {
+            _logger.LogWarning(
+                "Ignoring Square Return {ReturnId} where Customer Id {CustomerId} does not link to Account",
+                refund.Id, order.CustomerId);
+            return;
+        }
+
+        await _larpContext.Transactions.UpdateOneAsync(
+            transaction => transaction.OrderId == refund.Id,
+            Builders<Transaction>.Update
+                .SetOnInsert(t => t.OrderId, refund.Id)
+                .SetOnInsert(t => t.TransactionOn, DateTimeOffset.Parse(refund.CreatedAt))
+                .Set(t => t.UpdatedOn, DateTimeOffset.Parse(refund.UpdatedAt))
+                .Set(t => t.AccountId, account.AccountId)
+                .SetOnInsert(t => t.Source, SquareSource)
+                .SetOnInsert(t => t.Status, TransactionStatus.Completed)
+                // Total amount refunded
+                .Set(t => t.Amount, -Math.Abs(refund.AmountMoney?.Amount.ToInt32() ?? 0))
+                .SetOnInsert(t => t.Type, TransactionType.Deposit),
+            new UpdateOptions() { IsUpsert = true });
+    }
+
+    private async Task<Transaction?> GetTransactionByOrder(string orderId)
+    {
+        return await _larpContext.Transactions
+            .Find(transaction => transaction.OrderId == orderId)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task UpdateOrder(string orderId)
     {
         var order = await _squareService.GetOrder(orderId);
         await UpdateOrder(order);
     }
 
-    public async Task UpdateOrder(Order order)
+    private async Task UpdateOrder(Order order)
     {
         if (order.CustomerId is null)
         {
@@ -402,7 +490,7 @@ public class TransactionManager
         await UpdatePayment(payment);
     }
 
-    public async Task UpdatePayment(Payment payment)
+    private async Task UpdatePayment(Payment payment)
     {
         if (payment.CustomerId is null)
         {
@@ -440,11 +528,17 @@ public class TransactionManager
     {
         var state = order.State switch
         {
+            "DRAFT" => TransactionStatus.Unpaid,
             "OPEN" => TransactionStatus.Pending,
             "COMPLETED" => TransactionStatus.Completed,
             "CANCELED" => TransactionStatus.Cancelled,
             _ => TransactionStatus.Unknown
         };
+
+        var amount =
+            state == TransactionStatus.Unpaid
+                ? null
+                : order.TotalMoney?.Amount.ToInt32();
 
         var model = Builders<Transaction>.Update
             .SetOnInsert(t => t.OrderId, order.Id)
@@ -453,7 +547,7 @@ public class TransactionManager
             .Set(t => t.AccountId, accountId)
             .SetOnInsert(t => t.Source, SquareSource)
             .SetOnInsert(t => t.Status, state)
-            .Set(t => t.Amount, order.TotalMoney?.Amount.ToInt32()) // Total amount paid toward order minus refunds
+            .Set(t => t.Amount, amount) // Total amount paid toward order minus refunds
             .Set(t => t.RefundAmount,
                 order.ReturnAmounts?.TotalMoney?.Amount.ToInt32()) // Total amount of refunds
             .SetOnInsert(t => t.Type, TransactionType.Deposit);
@@ -465,5 +559,33 @@ public class TransactionManager
             .Select(op => op.ReceiptUrl)
             .Where(url => !string.IsNullOrEmpty(url));
         return model.Set(t => t.ReceiptUrls, receipts);
+    }
+
+    private UpdateDefinition<Transaction> BuildUpdateTransactionModel(PaymentRefund refund, string accountId,
+        Payment[]? payments = null)
+    {
+        var state = refund.Status switch
+        {
+            "PENDING" => TransactionStatus.Pending,
+            "COMPLETED" => TransactionStatus.Completed,
+            "REJECTED" => TransactionStatus.Cancelled,
+            "FAILED" => TransactionStatus.Failed,
+            _ => TransactionStatus.Unknown
+        };
+
+        var amount =
+            state != TransactionStatus.Completed || !refund.AmountMoney.Amount.HasValue
+                ? null
+                : (int?)-Math.Abs(refund.AmountMoney?.Amount.ToInt32() ?? 0);
+
+        return Builders<Transaction>.Update
+            .SetOnInsert(t => t.OrderId, refund.OrderId)
+            .SetOnInsert(t => t.TransactionOn, DateTimeOffset.Parse(refund.CreatedAt))
+            .Set(t => t.UpdatedOn, DateTimeOffset.Parse(refund.UpdatedAt))
+            .Set(t => t.AccountId, accountId)
+            .SetOnInsert(t => t.Source, SquareSource)
+            .SetOnInsert(t => t.Status, state)
+            .Set(t => t.Amount, amount)
+            .SetOnInsert(t => t.Type, TransactionType.Refund);
     }
 }

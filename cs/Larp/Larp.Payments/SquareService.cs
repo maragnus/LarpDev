@@ -1,10 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using KiloTx.Restful;
 using Larp.Common;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Square;
@@ -32,6 +29,12 @@ public interface ISquareService
     /// <remarks>https://developer.squareup.com/reference/square/orders-api/search-orders</remarks>
     Task<Order[]> GetOrders(int limit = 100);
 
+    /// <summary>
+    /// Returns the <paramref name="limit"/> most recently updated Refunds
+    /// </summary>
+    /// <remarks>https://developer.squareup.com/reference/square/refunds-api/list-payment-refunds</remarks>
+    Task<PaymentRefund[]> GetRefunds(int limit = 100);
+
     Task Initialize();
 
     Task Synchronize(SiteAccount[] accounts);
@@ -41,20 +44,26 @@ public interface ISquareService
 
     Task<string> GenerateDeviceCode(string name);
 
+    Task<Order> CompleteOrder(Order order);
+
     Task<Order> GetOrder(string orderId);
 
     Task<Customer> GetCustomer(string customerId);
     Task<Payment> GetPayment(string paymentId);
-    Task<Order> CompleteOrder(Order order);
+    Task<PaymentRefund> GetRefund(string refundId);
 }
 
-public partial class SquareService : ISquareService
+public class SquareService : ISquareService
 {
     private const bool PayOrderOnComplete = false;
     private static string? _locationId;
 
     private static readonly string[] WebhookEventTypes =
-        { "payment.created", "payment.updated", "order.created", "order.updated" };
+    {
+        "payment.created", "payment.updated",
+        "order.created", "order.updated",
+        "refund.created", "refund.updated"
+    };
 
     private readonly SquareClient _client;
     private readonly ILogger<SquareService> _logger;
@@ -113,7 +122,7 @@ public partial class SquareService : ISquareService
     {
         var response = await _client.DevicesApi.CreateDeviceCodeAsync(
             new CreateDeviceCodeRequest(
-                CreateIdempotencyKey(),
+                SquareUtilities.CreateIdempotencyKey(),
                 new DeviceCode.Builder("TERMINAL_API")
                     .Name(name)
                     .LocationId(await GetDefaultLocationId())
@@ -137,6 +146,12 @@ public partial class SquareService : ISquareService
     {
         var response = await _client.PaymentsApi.GetPaymentAsync(paymentId);
         return response.Payment;
+    }
+
+    public async Task<PaymentRefund> GetRefund(string refundId)
+    {
+        var response = await _client.RefundsApi.GetPaymentRefundAsync(refundId);
+        return response.Refund;
     }
 
     public async Task<Order> CompleteOrder(Order order)
@@ -170,7 +185,7 @@ public partial class SquareService : ISquareService
         {
             var response = await _client.OrdersApi.PayOrderAsync(order.Id,
                 new PayOrderRequest(
-                    CreateIdempotencyKey(),
+                    SquareUtilities.CreateIdempotencyKey(),
                     result.Version,
                     order.Tenders.Select(t => t.PaymentId).ToList()));
             return response.Order;
@@ -254,7 +269,7 @@ public partial class SquareService : ISquareService
     }
 
     public async Task<Payment[]> GetPayments(int limit) =>
-        await ListAsync(
+        await SquareUtilities.ListAsync(
             async () => await _client.PaymentsApi.ListPaymentsAsync(limit: limit, sortOrder: "DESC"),
             async (cursor) => await _client.PaymentsApi.ListPaymentsAsync(cursor),
             response => response.Payments,
@@ -266,7 +281,7 @@ public partial class SquareService : ISquareService
     /// </summary>
     /// <param name="limit">Maximum number of Orders to return</param>
     public async Task<Order[]> GetOrders(int limit = 100) =>
-        await ListAsync(
+        await SquareUtilities.ListAsync(
             async () => await _client.OrdersApi
                 .SearchOrdersAsync(
                     new SearchOrdersRequest(new[] { await GetDefaultLocationId() },
@@ -311,11 +326,11 @@ public partial class SquareService : ISquareService
                 })
                 .Build();
 
-            if (TryFixPhoneNumber(account.Phone, out var phone))
+            if (SquareUtilities.TryFixPhoneNumber(account.Phone, out var phone))
                 prepopulateData.BuyerPhoneNumber(phone);
 
             var body = new CreatePaymentLinkRequest.Builder()
-                .IdempotencyKey(CreateIdempotencyKey())
+                .IdempotencyKey(SquareUtilities.CreateIdempotencyKey())
                 .PaymentNote($"{customer.GivenName} {customer.FamilyName} {customer.EmailAddress}".Trim())
                 .PrePopulatedData(prepopulateData.Build())
                 .Order(order)
@@ -343,6 +358,14 @@ public partial class SquareService : ISquareService
         }
     }
 
+    public async Task<PaymentRefund[]> GetRefunds(int limit = 100) =>
+        await SquareUtilities.ListAsync(
+            async () => await _client.RefundsApi.ListPaymentRefundsAsync(limit: limit, sortOrder: "DESC"),
+            async (cursor) => await _client.RefundsApi.ListPaymentRefundsAsync(cursor),
+            response => response.Refunds,
+            response => response.Cursor
+        );
+
     private SquareClient CreateClient() =>
         new SquareClient.Builder()
             .AccessToken(_options.AccessToken)
@@ -368,7 +391,7 @@ public partial class SquareService : ISquareService
                         .Enabled(true)
                         .EventTypes(WebhookEventTypes)
                         .Build())
-                    .IdempotencyKey(CreateIdempotencyKey())
+                    .IdempotencyKey(SquareUtilities.CreateIdempotencyKey())
                     .Build());
             SignatureKey = response.Subscription.SignatureKey;
             _logger.LogInformation("Square: Created Webhook Subscription");
@@ -483,12 +506,12 @@ public partial class SquareService : ISquareService
 
     private async Task<Customer> UpdateCustomer(SiteAccount account, Customer? square)
     {
-        var hasPhone = TryFixPhoneNumber(account.Phone, out var phone);
+        var hasPhone = SquareUtilities.TryFixPhoneNumber(account.Phone, out var phone);
 
         if (square == null)
         {
             var body = new CreateCustomerRequest.Builder()
-                .IdempotencyKey(CreateIdempotencyKey())
+                .IdempotencyKey(SquareUtilities.CreateIdempotencyKey())
                 .GivenName(account.FirstName)
                 .FamilyName(account.LastName)
                 .ReferenceId(account.AccountId)
@@ -551,12 +574,12 @@ public partial class SquareService : ISquareService
             .ReferenceId(account.AccountId)
             .EmailAddress(account.Email);
 
-        if (TryFixPhoneNumber(account.Phone, out var phone))
+        if (SquareUtilities.TryFixPhoneNumber(account.Phone, out var phone))
             teamMember.PhoneNumber(phone);
 
         if (square == null)
         {
-            var body = new CreateTeamMemberRequest(CreateIdempotencyKey(), teamMember.Build());
+            var body = new CreateTeamMemberRequest(SquareUtilities.CreateIdempotencyKey(), teamMember.Build());
             await _client.TeamApi.CreateTeamMemberAsync(body);
             _logger.LogInformation("Square: Created Team Member {Email}", account.Email);
         }
@@ -574,66 +597,8 @@ public partial class SquareService : ISquareService
         }
     }
 
-    private static bool TryFixPhoneNumber(string? phone, out string sanitizedPhone)
-    {
-        sanitizedPhone = "";
-
-        if (string.IsNullOrWhiteSpace(phone))
-            return false;
-
-        sanitizedPhone = RegexToNumeric().Replace(phone.Trim(), "");
-
-        if (phone.StartsWith('+') && sanitizedPhone.Length > 5)
-        {
-            sanitizedPhone = $"+1{sanitizedPhone}";
-            return true;
-        }
-
-        if (sanitizedPhone.Length == 10)
-        {
-            sanitizedPhone = $"+1{sanitizedPhone}";
-            return true;
-        }
-
-        if (sanitizedPhone.Length == 11 && sanitizedPhone.StartsWith("1"))
-        {
-            sanitizedPhone = $"+{sanitizedPhone}";
-            return true;
-        }
-
-        return false;
-    }
-
-    [GeneratedRegex("[^\\d]")]
-    private static partial Regex RegexToNumeric();
-
-    private static string CreateIdempotencyKey() => Guid.NewGuid().ToString();
-
-    private static async Task<TItem[]> ListAsync<TItem, TResponse>(
-        Func<Task<TResponse>> firstRequest,
-        Func<string, Task<TResponse>> nextRequest,
-        Func<TResponse, IList<TItem>?> getItems,
-        Func<TResponse, string?> getCursor)
-    {
-        var items = new List<TItem>();
-        var response = await firstRequest();
-        var responseItems = getItems(response);
-        while (responseItems is not null)
-        {
-            var count = items.Count;
-            items.AddRange(responseItems);
-
-            var cursor = getCursor(response);
-            if (items.Count == count || string.IsNullOrEmpty(cursor)) break;
-            response = await nextRequest(cursor);
-            responseItems = getItems(response)?.ToList();
-        }
-
-        return items.ToArray();
-    }
-
     private async Task<WebhookSubscription[]> GetWebhookSubscriptions() =>
-        await ListAsync(
+        await SquareUtilities.ListAsync(
             async () => await _client.WebhookSubscriptionsApi.ListWebhookSubscriptionsAsync(),
             async (cursor) => await _client.WebhookSubscriptionsApi.ListWebhookSubscriptionsAsync(cursor),
             response => response.Subscriptions,
@@ -647,7 +612,7 @@ public partial class SquareService : ISquareService
     }
 
     private async Task<TeamMember[]> GetTeamMembers() =>
-        await ListAsync(
+        await SquareUtilities.ListAsync(
             async () => await _client.TeamApi.SearchTeamMembersAsync(new SearchTeamMembersRequest()),
             async (cursor) =>
                 await _client.TeamApi.SearchTeamMembersAsync(new SearchTeamMembersRequest(cursor: cursor)),
@@ -656,7 +621,7 @@ public partial class SquareService : ISquareService
         );
 
     private async Task<Customer[]> GetCustomers() =>
-        await ListAsync(
+        await SquareUtilities.ListAsync(
             async () => await _client.CustomersApi.ListCustomersAsync(),
             async (cursor) => await _client.CustomersApi.ListCustomersAsync(cursor),
             response => response.Customers,
@@ -668,17 +633,11 @@ public partial class SquareService : ISquareService
         if (!string.IsNullOrEmpty(_locationId))
             return _locationId;
 
-        var location = await GetDefaultLocation();
+        var locations = await GetLocations();
+        var location = locations.FirstOrDefault(location => location.Name == _options.Location.Name)
+                       ?? await CreateDefaultLocation();
         _locationId = location.Id;
         return _locationId;
-    }
-
-    private async ValueTask<Location> GetDefaultLocation()
-    {
-        var locations = await GetLocations();
-        return locations
-                   .FirstOrDefault(location => location.Name == _options.Location.Name)
-               ?? await CreateDefaultLocation();
     }
 
     private async Task<Location> CreateDefaultLocation()
@@ -699,18 +658,5 @@ public partial class SquareService : ISquareService
         var result = await _client.LocationsApi.CreateLocationAsync(request);
         _logger.LogInformation("Square: Created Default Location");
         return result.Location;
-    }
-}
-
-public static class SquareWebhook
-{
-    public static IServiceCollection AddSquareService(this IServiceCollection serviceCollection) =>
-        serviceCollection
-            .AddScoped<SquareCallbackService>()
-            .AddScoped<ISquareService, SquareService>();
-
-    public static async Task HandleCallbackAsync(HttpContext httpContext, SquareCallbackService callbackService)
-    {
-        await callbackService.HandleCallbackAsync(httpContext);
     }
 }

@@ -7,6 +7,7 @@ public enum TransactionType
     Unknown,
     Deposit,
     Withdrawal,
+    Refund
 }
 
 public enum TransactionStatus
@@ -16,7 +17,8 @@ public enum TransactionStatus
     Pending,
     Approved,
     Cancelled,
-    Failed
+    Failed,
+    Unpaid
 }
 
 public class Transaction
@@ -64,6 +66,8 @@ public class Transaction
     [BsonIgnore] public string? EventTitle { get; set; }
 
     public List<string> ReceiptUrls { get; set; } = new();
+
+    public Dictionary<string, int> Refunds { get; set; } = new();
 
     public static TransactionStatus ConvertTransactionStatus(string status) =>
         status.ToUpperInvariant() switch

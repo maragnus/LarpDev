@@ -13,28 +13,24 @@ public class SquareTransactionHandler : ISquareTransactionHandler
         _logger = logger;
     }
 
-    public async Task PaymentCreated(string paymentId)
-    {
+    public async Task PaymentCreated(string paymentId) =>
         await _transactionManager.UpdatePayment(paymentId);
-    }
 
-    public async Task PaymentUpdated(string paymentId)
-    {
+    public async Task PaymentUpdated(string paymentId) =>
         await _transactionManager.UpdatePayment(paymentId);
-    }
 
-    public async Task OrderCreated(string orderId)
-    {
+    public async Task OrderCreated(string orderId) =>
         await _transactionManager.UpdateOrder(orderId);
-    }
 
-    public async Task OrderUpdated(string orderId)
-    {
+    public async Task OrderUpdated(string orderId) =>
         await _transactionManager.UpdateOrder(orderId);
-    }
 
-    public async Task PointOfSaleComplete(string transactionId)
-    {
+    public async Task RefundCreated(string refundId) =>
+        await _transactionManager.UpdateRefund(refundId);
+
+    public async Task RefundUpdated(string refundId) =>
+        await _transactionManager.UpdateRefund(refundId);
+
+    public async Task PointOfSaleComplete(string transactionId) =>
         await _transactionManager.UpdateOrder(transactionId);
-    }
 }
