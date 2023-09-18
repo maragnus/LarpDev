@@ -82,45 +82,6 @@ public class TransactionManager
             await Synchronize();
     }
 
-    private async Task SynchronizeRefunds(IReadOnlyDictionary<string, Order> orders)
-    {
-        var refunds = await _squareService.GetRefunds();
-
-        var updates = new List<WriteModel<Transaction>>();
-        foreach (var refund in refunds)
-        {
-            var order = orders.GetValueOrDefault(refund.OrderId);
-            if (order is null) continue;
-
-            if (order.CustomerId is null)
-            {
-                _logger.LogWarning("Ignoring Square Refund {RefundId} with null Customer Id", refund.Id);
-                continue;
-            }
-
-            var account = await GetAccountFromCustomerId(order.CustomerId);
-            if (account is null)
-            {
-                _logger.LogWarning(
-                    "Ignoring Square Refund {RefundId} where Customer Id {CustomerId} does not link to Account",
-                    refund.Id, order.CustomerId);
-                continue;
-            }
-
-            var update = new UpdateOneModel<Transaction>(
-                Builders<Transaction>.Filter.Eq(t => t.OrderId, refund.Id),
-                BuildUpdateTransactionModel(refund, account.AccountId))
-            {
-                IsUpsert = true
-            };
-
-            updates.Add(update);
-        }
-
-        if (updates.Count > 0)
-            await _larpContext.Transactions.BulkWriteAsync(updates);
-    }
-
     private async Task SynchronizeOrders()
     {
         var orders = (await _squareService.GetOrders())
@@ -138,8 +99,16 @@ public class TransactionManager
             var customerId = order.CustomerId;
             if (customerId is null)
             {
-                var sourceOrder = orders.GetValueOrDefault(order.Returns.FirstOrDefault()?.SourceOrderId ?? "");
-                customerId = sourceOrder?.CustomerId;
+                var sourceOrderId = order.Returns?.FirstOrDefault()?.SourceOrderId;
+                if (sourceOrderId is not null)
+                {
+                    _logger.LogWarning("Checking Square Order {OrderId} Source Order {SourceOrderId} for Customer Id",
+                        order.Id, sourceOrderId);
+
+                    var sourceOrder = orders.GetValueOrDefault(sourceOrderId)
+                                      ?? await _squareService.GetOrder(sourceOrderId);
+                    customerId = sourceOrder?.CustomerId;
+                }
 
                 if (customerId is null)
                 {
@@ -181,8 +150,6 @@ public class TransactionManager
 
         if (updates.Count > 0)
             await _larpContext.Transactions.BulkWriteAsync(updates);
-
-        await SynchronizeRefunds(orders);
     }
 
     public async Task<string> RequestPayment(string accountId, decimal amount, Account account)
@@ -409,42 +376,6 @@ public class TransactionManager
         return account;
     }
 
-    public async Task UpdateRefund(string refundId)
-    {
-        var refund = await _squareService.GetRefund(refundId);
-        await UpdateRefund(refund);
-    }
-
-    private async Task UpdateRefund(PaymentRefund refund)
-    {
-        if (refund.Status != "COMPLETED") return;
-
-        var order = await _squareService.GetOrder(refund.OrderId);
-
-        var account = await GetAccountFromCustomerId(order.CustomerId);
-        if (account is null)
-        {
-            _logger.LogWarning(
-                "Ignoring Square Return {ReturnId} where Customer Id {CustomerId} does not link to Account",
-                refund.Id, order.CustomerId);
-            return;
-        }
-
-        await _larpContext.Transactions.UpdateOneAsync(
-            transaction => transaction.OrderId == refund.Id,
-            Builders<Transaction>.Update
-                .SetOnInsert(t => t.OrderId, refund.Id)
-                .SetOnInsert(t => t.TransactionOn, DateTimeOffset.Parse(refund.CreatedAt))
-                .Set(t => t.UpdatedOn, DateTimeOffset.Parse(refund.UpdatedAt))
-                .Set(t => t.AccountId, account.AccountId)
-                .SetOnInsert(t => t.Source, SquareSource)
-                .SetOnInsert(t => t.Status, TransactionStatus.Completed)
-                // Total amount refunded
-                .Set(t => t.Amount, -Math.Abs(refund.AmountMoney?.Amount.ToInt32() ?? 0))
-                .SetOnInsert(t => t.Type, TransactionType.Deposit),
-            new UpdateOptions() { IsUpsert = true });
-    }
-
     private async Task<Transaction?> GetTransactionByOrder(string orderId)
     {
         return await _larpContext.Transactions
@@ -455,6 +386,7 @@ public class TransactionManager
     public async Task UpdateOrder(string orderId)
     {
         var order = await _squareService.GetOrder(orderId);
+        if (order is null) return;
         await UpdateOrder(order);
     }
 
@@ -506,6 +438,7 @@ public class TransactionManager
     public async Task UpdatePayment(string paymentId)
     {
         var payment = await _squareService.GetPayment(paymentId);
+        if (payment is null) return;
         await UpdatePayment(payment);
     }
 
@@ -592,18 +525,5 @@ public class TransactionManager
             .Select(op => op.ReceiptUrl)
             .Where(url => !string.IsNullOrEmpty(url));
         return model.Set(t => t.ReceiptUrls, receipts);
-    }
-
-    private UpdateDefinition<Transaction> BuildUpdateTransactionModel(PaymentRefund refund, string accountId)
-    {
-        return Builders<Transaction>.Update
-            .SetOnInsert(t => t.OrderId, refund.OrderId)
-            .SetOnInsert(t => t.TransactionOn, DateTimeOffset.Parse(refund.CreatedAt))
-            .Set(t => t.UpdatedOn, DateTimeOffset.Parse(refund.UpdatedAt))
-            .Set(t => t.AccountId, accountId)
-            .SetOnInsert(t => t.Source, SquareSource)
-            .SetOnInsert(t => t.Status, TransactionStatus.Pending)
-            .SetOnInsert(t => t.Amount, null)
-            .SetOnInsert(t => t.Type, TransactionType.Refund);
     }
 }

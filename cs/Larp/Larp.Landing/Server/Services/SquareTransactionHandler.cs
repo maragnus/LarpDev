@@ -25,11 +25,9 @@ public class SquareTransactionHandler : ISquareTransactionHandler
     public async Task OrderUpdated(string orderId) =>
         await _transactionManager.UpdateOrder(orderId);
 
-    public async Task RefundCreated(string refundId) =>
-        await _transactionManager.UpdateRefund(refundId);
+    public Task RefundCreated(string refundId) => Task.CompletedTask;
 
-    public async Task RefundUpdated(string refundId) =>
-        await _transactionManager.UpdateRefund(refundId);
+    public Task RefundUpdated(string refundId) => Task.CompletedTask;
 
     public async Task PointOfSaleComplete(string transactionId) =>
         await _transactionManager.UpdateOrder(transactionId);

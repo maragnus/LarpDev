@@ -46,11 +46,11 @@ public interface ISquareService
 
     Task<Order> CompleteOrder(Order order);
 
-    Task<Order> GetOrder(string orderId);
+    Task<Order?> GetOrder(string orderId);
 
-    Task<Customer> GetCustomer(string customerId);
-    Task<Payment> GetPayment(string paymentId);
-    Task<PaymentRefund> GetRefund(string refundId);
+    Task<Customer?> GetCustomer(string customerId);
+    Task<Payment?> GetPayment(string paymentId);
+    Task<PaymentRefund?> GetRefund(string refundId);
 }
 
 public class SquareService : ISquareService
@@ -80,7 +80,7 @@ public class SquareService : ISquareService
 
     public static string? SignatureKey { get; private set; }
 
-    public bool SynchronizeOnStartup { get; init; }
+    public bool SynchronizeOnStartup { get; }
 
     public async Task Initialize()
     {
@@ -130,25 +130,25 @@ public class SquareService : ISquareService
         return response.DeviceCode.Code;
     }
 
-    public async Task<Order> GetOrder(string orderId)
+    public async Task<Order?> GetOrder(string orderId)
     {
         var transaction = await _client.OrdersApi.RetrieveOrderAsync(orderId);
         return transaction.Order;
     }
 
-    public async Task<Customer> GetCustomer(string customerId)
+    public async Task<Customer?> GetCustomer(string customerId)
     {
         var response = await _client.CustomersApi.RetrieveCustomerAsync(customerId);
         return response.Customer;
     }
 
-    public async Task<Payment> GetPayment(string paymentId)
+    public async Task<Payment?> GetPayment(string paymentId)
     {
         var response = await _client.PaymentsApi.GetPaymentAsync(paymentId);
         return response.Payment;
     }
 
-    public async Task<PaymentRefund> GetRefund(string refundId)
+    public async Task<PaymentRefund?> GetRefund(string refundId)
     {
         var response = await _client.RefundsApi.GetPaymentRefundAsync(refundId);
         return response.Refund;
@@ -156,42 +156,28 @@ public class SquareService : ISquareService
 
     public async Task<Order> CompleteOrder(Order order)
     {
-        var result = order;
+        if (order.Fulfillments.Count <= 0) return order;
 
-        // Complete fulfillment
-        if (order.Fulfillments.Count > 0)
+        var orderModel = new Order.Builder(await GetDefaultLocationId())
+            .State("COMPLETED")
+            .Version(order.Version);
+
+        var fulfillment = order.Fulfillments.FirstOrDefault();
+        if (fulfillment is { State: not "COMPLETED" })
         {
-            var fulfillment = order.Fulfillments.FirstOrDefault();
-            if (fulfillment?.State is "COMPLETED")
+            orderModel.Fulfillments(new[]
             {
-                var orderModel = new Order.Builder(await GetDefaultLocationId())
+                new Fulfillment.Builder()
+                    .Uid(fulfillment.Uid)
                     .State("COMPLETED")
-                    .Version(result.Version)
-                    .Fulfillments(new[]
-                    {
-                        new Fulfillment.Builder()
-                            .Uid(fulfillment.Uid)
-                            .State("COMPLETED")
-                            .Build()
-                    })
-                    .Build();
-
-                var response = await _client.OrdersApi.UpdateOrderAsync(order.Id, new UpdateOrderRequest(orderModel));
-                result = response.Order;
-            }
+                    .Build()
+            });
         }
 
-        if (PayOrderOnComplete)
-        {
-            var response = await _client.OrdersApi.PayOrderAsync(order.Id,
-                new PayOrderRequest(
-                    SquareUtilities.CreateIdempotencyKey(),
-                    result.Version,
-                    order.Tenders.Select(t => t.PaymentId).ToList()));
-            return response.Order;
-        }
-
-        return order;
+        var response = await _client.OrdersApi.UpdateOrderAsync(
+            order.Id,
+            new UpdateOrderRequest(orderModel.Build()));
+        return response.Order;
     }
 
     public async Task<SquarePaymentUrl> CreatePointOfSale(string id, int amount, string itemName, SiteAccount account,
@@ -307,7 +293,7 @@ public class SquareService : ISquareService
                 .Currency("USD")
                 .Build();
 
-            var prepopulateData = new PrePopulatedData.Builder()
+            var prepopulatedData = new PrePopulatedData.Builder()
                 .BuyerAddress(new Address.Builder()
                     .FirstName(account.FirstName)
                     .LastName(account.LastName)
@@ -327,12 +313,12 @@ public class SquareService : ISquareService
                 .Build();
 
             if (SquareUtilities.TryFixPhoneNumber(account.Phone, out var phone))
-                prepopulateData.BuyerPhoneNumber(phone);
+                prepopulatedData.BuyerPhoneNumber(phone);
 
             var body = new CreatePaymentLinkRequest.Builder()
                 .IdempotencyKey(SquareUtilities.CreateIdempotencyKey())
                 .PaymentNote($"{customer.GivenName} {customer.FamilyName} {customer.EmailAddress}".Trim())
-                .PrePopulatedData(prepopulateData.Build())
+                .PrePopulatedData(prepopulatedData.Build())
                 .Order(order)
                 .CheckoutOptions(new CheckoutOptions.Builder()
                     .RedirectUrl(_options.ReturnUrl)
@@ -371,7 +357,7 @@ public class SquareService : ISquareService
             .AccessToken(_options.AccessToken)
             .SquareVersion("2023-08-16")
             .Environment(
-                Enum.TryParse<Square.Environment>(_options.Environment, out var env)
+                Enum.TryParse<Environment>(_options.Environment, out var env)
                     ? env
                     : Environment.Sandbox)
             .Build();
@@ -493,6 +479,7 @@ public class SquareService : ISquareService
         var body = new SearchCustomersRequest.Builder()
             .Query(new CustomerQuery(filter))
             .Build();
+
         var results = await _client.CustomersApi.SearchCustomersAsync(body);
 
         return results.Customers.FirstOrDefault();
