@@ -197,12 +197,22 @@ public class LarpPage : ComponentBase
             switch (httpRequestException.StatusCode)
             {
                 case HttpStatusCode.Unauthorized:
-                    await DialogService.ShowMessageBox("Not Logged In", "You must be logged in to access this area",
+                    await DialogService.ShowMessageBox(
+                        "Not Logged In",
+                        "You must be logged in to access this area",
                         "Login");
                     NavigationManager.NavigateTo("/login");
                     return false;
                 case HttpStatusCode.Forbidden:
-                    await DialogService.ShowMessageBox("Admin Role Needed", "You do not have access to this area",
+                    await DialogService.ShowMessageBox(
+                        "Admin Role Needed",
+                        "You do not have access to this area",
+                        "Ok");
+                    return false;
+                case HttpStatusCode.BadRequest:
+                    await DialogService.ShowMessageBox(
+                        "Cannot Perform Action",
+                        "The action you tried to perform is not available",
                         "Ok");
                     return false;
                 case null:

@@ -1,6 +1,5 @@
 ﻿@page "/"
 @using Larp.Landing.Shared
-@using System.Text.Json
 @using Larp.Landing.Client.Pages.EventsSection
 @inherits LarpPage
 @inject LandingService LandingService
@@ -140,6 +139,38 @@
                     }
                 </MudStack>
             }
+
+            @if (_beaEvents.Length > 0)
+            {
+                <MudText Typo="Typo.h6" Style="color: #fff">Between Event Actions</MudText>
+                <MudStack Spacing="4">
+                    @foreach (var ev in _beaEvents)
+                    {
+                        var beaUrl = () => NavigationManager.NavigateTo($"/events/{ev.Event.EventId}/letter/{LetterNames.BetweenEvent}");
+
+                        <EventCard Item="ev" HideLetters>
+                            <Header>
+                                @switch (ev.BetweenEvent?.State)
+                                {
+                                    case null:
+                                    case LetterState.NotStarted:
+                                    case LetterState.Draft:
+                                        <MudChip Color="Color.Error" Icon="@Icons.Material.Filled.QuestionMark" Size="Size.Small" OnClick="beaUrl">BEA Not Started</MudChip>
+                                        break;
+
+                                    case LetterState.Submitted:
+                                        <MudChip Color="@Color.Warning" Icon="@Icons.Material.Filled.ManageSearch" Size="@Size.Small" OnClick="beaUrl">BEA Submitted</MudChip>
+                                        break;
+
+                                    case LetterState.Approved:
+                                        <MudChip Color="@Color.Success" Icon="@Icons.Material.Filled.Check" Size="@Size.Small" OnClick="beaUrl">BEA Approved</MudChip>
+                                        break;
+                                }
+                            </Header>
+                        </EventCard>
+                    }
+                </MudStack>
+            }
         </MudStack>
 
         <MudText Typo="Typo.body2" Align="Align.Center" Style="color: #ccc;">Revision <Revision/></MudText>
@@ -161,6 +192,7 @@
     private AccountDashboard _dashboard = new();
     private EventAttendanceItem[] _upcomingEvents = Array.Empty<EventAttendanceItem>();
     private EventAttendanceItem[] _pelEvents = Array.Empty<EventAttendanceItem>();
+    private EventAttendanceItem[] _beaEvents = Array.Empty<EventAttendanceItem>();
 
     private string When(DateOnly date)
     {
@@ -193,7 +225,12 @@
                 .Where(e => e.PostEvent?.State != LetterState.Approved) // PEL not approved
                 .ToArray();
 
-            Console.WriteLine(JsonSerializer.Serialize(_upcomingEvents, new JsonSerializerOptions { WriteIndented = true }));
+    // All events with Prereg or PEL submitted but no BEA approved
+            _beaEvents = _dashboard.Events.Events
+                .Where(e => e.Event.IsBetweenEventOpen()) // BEA is open
+                .Where(e => e.PreEvent != null || e.PostEvent != null) // Prereg or PEL created
+                .Where(e => e.BetweenEvent?.State != LetterState.Approved) // BEA not approved
+                .ToArray();
         }
         catch (Exception ex)
         {

@@ -8,14 +8,7 @@
 <MudStack Spacing="4">
     @foreach (var ev in _events)
     {
-        <EventCard Item="ev">
-            <Header>
-                @if (LandingService.IsInRole(AccountRole.AdminAccess))
-                {
-                    <MudIconButton Href="@($"/admin/events/{ev.Event.EventId}")" Variant="Variant.Filled" Icon="@Icons.Material.Filled.Edit" Color="Color.Default"/>
-                }
-            </Header>
-        </EventCard>
+        <EventCard Item="ev"/>
     }
 </MudStack>
 
@@ -40,6 +33,7 @@
             ? result.Events.OrderByDescending(x => x.Event.Date).ToArray()
             : result.Events.OrderBy(x => x.Event.Date).ToArray();
     }
+
 
     protected override void OnInitialized()
     {

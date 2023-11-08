@@ -14,6 +14,10 @@
                     <em>@When(Item.Event.Date)</em>
                 </MudText>
                 @Header
+                @if (LandingService.IsInRole(AccountRole.AdminAccess))
+                {
+                    <MudIconButton Href="@($"/admin/events/{Item.Event.EventId}")" Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" Size="Size.Small"/>
+                }
             </MudStack>
             @if (Item.Event.Date.DayOfYear > 1)
             {
@@ -141,7 +145,7 @@
     {
         if (letter.State is LetterState.NotStarted or LetterState.Draft)
         {
-            NavigationManager.NavigateTo($"/events/{letter.EventId}/letter/{letter.Name}");
+            NavigationManager.NavigateTo($"/events/{Item.Event.EventId}/letter/{letter.Name}");
             return;
         }
 
@@ -168,6 +172,16 @@
     protected override void OnParametersSet()
     {
         _icon = GetEventIcon(Item.Event.EventType, Item.Event.Title);
+        Item.PreEvent ??= MockLetter(LetterNames.PreEvent);
+        Item.PostEvent ??= MockLetter(LetterNames.PostEvent);
+        Item.BetweenEvent ??= MockLetter(LetterNames.BetweenEvent);
+    }
+
+    private Letter? MockLetter(string letterName)
+    {
+        var template = Item.Event.LetterTemplates.FirstOrDefault(el => el.Name == letterName);
+        if (template is not { IsOpen: true }) return null;
+        return new Letter { Name = letterName, State = LetterState.NotStarted };
     }
 
 }

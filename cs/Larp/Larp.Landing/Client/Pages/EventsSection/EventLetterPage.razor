@@ -1,5 +1,6 @@
 @page "/events/{EventId}/letter/{LetterName}"
 @inject LandingService LandingService
+@using System.Net
 @inherits LarpPage
 
 <PageHeader Container>Event Letter</PageHeader>
@@ -9,6 +10,14 @@
     <MudOverlay Absolute DarkBackground Visible="IsLoading">
         <MudProgressCircular Indeterminate/>
     </MudOverlay>
+    return;
+}
+
+@if (_errorMessage != null)
+{
+    <MudAlert Severity="Severity.Error" Icon="@Icons.Material.Filled.Error" Class="ma-4">
+        @_errorMessage
+    </MudAlert>
     return;
 }
 
@@ -60,16 +69,24 @@
     bool _isReadOnly;
     Event _event = default!;
     IDictionary<string, AccountName> _accountNames = default!;
+    string? _errorMessage = null;
 
     protected override async Task OnSafeParametersSetAsync()
     {
-        var letter = await LandingService.Service.GetEventLetter(EventId, LetterName);
-        _letter = letter.Letters.Values.First();
-        _template = letter.LetterTemplates.Values.First();
-        _event = letter.Events.Values.First();
-        _accountNames = letter.Accounts;
-        _isReadOnly = _letter.State is LetterState.Submitted or LetterState.Approved;
-        _isSaving = false;
+        try
+        {
+            var letter = await LandingService.Service.GetEventLetter(EventId, LetterName);
+            _letter = letter.Letters.Values.First();
+            _template = letter.LetterTemplates.Values.First();
+            _event = letter.Events.Values.First();
+            _accountNames = letter.Accounts;
+            _isReadOnly = _letter.State is LetterState.Submitted or LetterState.Approved;
+            _isSaving = false;
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.BadRequest)
+        {
+            _errorMessage = $"The {LetterName} letter for this event is currently closed";
+        }
     }
 
     private async Task Save()
