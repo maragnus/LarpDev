@@ -53,4 +53,19 @@
             <MudNavLink Href="/admin" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Shield">Administration</MudNavLink>
         }
     }
+    <MudDivider/>
+    @if (LandingService.IsAuthenticated || LandingService.Sessions.Length > 0)
+    {
+        @foreach (var session in LandingService.Sessions)
+        {
+            var url = $"/switch/{session.SessionId}";
+            <MudNavLink Href="@url" Icon="@Icons.Material.Filled.Person2" Disabled="@(session == LandingService.ActiveSession)">@(session.Name ?? "No Name Set")</MudNavLink>
+        }
+        <MudNavLink Href="/login" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Add">Add Account</MudNavLink>
+        <MudNavLink Href="/logout" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Logout">Logout</MudNavLink>
+    }
+    else
+    {
+        <MudNavLink Href="/login" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Login">Login</MudNavLink>
+    }
 </MudNavMenu>

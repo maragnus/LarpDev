@@ -1,0 +1,16 @@
+@inject LandingService LandingService
+@inject NavigationManager NavigationManager 
+@page "/switch/{sessionId}"
+
+@code {
+
+    [Parameter]
+    public string SessionId { get; set; } = "";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LandingService.SwitchSession(SessionId);
+        NavigationManager.NavigateTo("/");
+    }
+
+}

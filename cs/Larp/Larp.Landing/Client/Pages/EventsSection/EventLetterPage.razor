@@ -5,7 +5,7 @@
 
 <PageHeader Container>Event Letter</PageHeader>
 
-@if (IsLoading)
+@if (IsLoading || _letter == null)
 {
     <MudOverlay Absolute DarkBackground Visible="IsLoading">
         <MudProgressCircular Indeterminate/>
@@ -64,7 +64,7 @@
     public string LetterName { get; set; } = default!;
 
     bool _isSaving = true;
-    Letter _letter = default!;
+    Letter? _letter;
     LetterTemplate _template = default!;
     bool _isReadOnly;
     Event _event = default!;

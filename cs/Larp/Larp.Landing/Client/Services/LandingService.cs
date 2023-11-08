@@ -25,6 +25,7 @@ public class LandingService
 
     private const int GameStateUpdateFrequencyHours = 4;
     private const string SessionIdKey = "SessionId";
+    private const string AccountsKey = "Accounts";
 
     private readonly DataCacheService _dataCache;
     private readonly HttpClientFactory _httpClientFactory;
@@ -66,6 +67,8 @@ public class LandingService
     public GameState MwFifthGameState { get; private set; } = default!;
     public Dictionary<string, AccountName> AccountNames { get; } = new();
     public DeviceType DeviceType { get; private set; }
+    public Session[] Sessions { get; private set; } = Array.Empty<Session>();
+    public Session? ActiveSession { get; private set; }
 
     public DarkMode DarkMode
     {
@@ -122,9 +125,14 @@ public class LandingService
         SetSessionId(sessionId);
         _logger.LogInformation("Refresh starting...");
         await Task.WhenAll(
+            RefreshSessions(),
             GetGames(),
             GetMwFifthGameState(),
             GetAccount());
+
+        if (Account != null)
+            await AddSession(Account.AccountId, Account?.Name, sessionId);
+
         _logger.LogInformation("Refresh complete");
     }
 
@@ -155,6 +163,24 @@ public class LandingService
             throw new Exception(sessionId.ErrorMessage);
         await _localStorage.SetItemAsStringAsync(SessionIdKey, sessionId.Value ?? "");
         SetSessionId(sessionId.Value);
+        if (!string.IsNullOrEmpty(sessionId.Value))
+        {
+            var account = await GetAccount();
+            await AddSession(account.AccountId, account.Name, sessionId.Value);
+        }
+    }
+
+    private async Task CleanupSession()
+    {
+        Account = null;
+        var sessionId = await _localStorage.GetItemAsStringAsync(SessionIdKey);
+        await _localStorage.RemoveItemAsync(SessionIdKey);
+        await RemoveSession(sessionId);
+        SetSessionId(null);
+        if (ActiveSession == null && Sessions.Length > 0)
+            await SwitchSession(Sessions.FirstOrDefault().SessionId);
+        else
+            SetSessionId(null);
     }
 
     public async Task Logout(bool force)
@@ -162,8 +188,7 @@ public class LandingService
         try
         {
             await Service.Logout();
-            await _localStorage.RemoveItemAsync(SessionIdKey);
-            SetSessionId(null);
+            await CleanupSession();
         }
         catch (Exception ex)
         {
@@ -171,8 +196,7 @@ public class LandingService
             if (!force)
                 throw;
 
-            await _localStorage.RemoveItemAsync(SessionIdKey);
-            SetSessionId(null);
+            await CleanupSession();
         }
     }
 
@@ -196,6 +220,8 @@ public class LandingService
     {
         await Logout(true);
         await _localStorage.ClearAsync();
+        Sessions = Array.Empty<Session>();
+        ActiveSession = null;
     }
 
     public async Task<Account> GetAccount()
@@ -209,8 +235,8 @@ public class LandingService
         }
         catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
         {
-            Account = null;
-            SetSessionId(null);
+            _logger.LogWarning("Session is no longer valid, signing out");
+            await CleanupSession();
             return new Account();
         }
         catch (BadRequestException ex)
@@ -245,7 +271,7 @@ public class LandingService
     public void UpdateAccountNames(IDictionary<string, AccountName> names) =>
         UpdateAccountNames(names.Values);
 
-    public void UpdateAccountNames(IEnumerable<AccountName> names)
+    private void UpdateAccountNames(IEnumerable<AccountName> names)
     {
         foreach (var name in names)
             AccountNames[name.AccountId] = name;
@@ -253,6 +279,45 @@ public class LandingService
 
     public async Task<Transaction[]> GetTransactions() =>
         await Service.GetTransactions();
+
+    private async Task RefreshSessions()
+    {
+        Sessions = await _localStorage.GetItemAsync<Session[]>(AccountsKey)
+                   ?? Array.Empty<Session>();
+        var sessionId = await _localStorage.GetItemAsStringAsync(SessionIdKey);
+        ActiveSession = Sessions.FirstOrDefault(session => session.SessionId == sessionId);
+    }
+
+    private async Task RemoveSession(string? sessionId)
+    {
+        if (string.IsNullOrEmpty(sessionId)) return;
+        await RefreshSessions();
+        if (Sessions.All(session => session.SessionId != sessionId)) return;
+        Sessions = Sessions.Where(session => session.SessionId != sessionId).ToArray();
+        await _localStorage.SetItemAsync(AccountsKey, Sessions);
+        if (sessionId == ActiveSession?.SessionId)
+            ActiveSession = null;
+    }
+
+    private async Task AddSession(string accountId, string? name, string sessionId)
+    {
+        await RefreshSessions();
+        if (Sessions.Any(session => session.SessionId == sessionId)) return;
+        var session = new Session(accountId, name, sessionId);
+        Sessions = Sessions.Concat(new[] { session }).ToArray();
+        await _localStorage.SetItemAsync(AccountsKey, Sessions);
+        ActiveSession = session;
+        InvokeAuthenticatedChanged();
+    }
+
+    public async Task SwitchSession(string? sessionId)
+    {
+        if (string.IsNullOrEmpty(sessionId)) return;
+        await _localStorage.SetItemAsStringAsync(SessionIdKey, sessionId);
+        await Refresh();
+    }
+
+    public record Session(string AccountId, string? Name, string SessionId);
 }
 
 public enum DarkMode

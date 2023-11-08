@@ -5,15 +5,14 @@
 @inject LandingService LandingService
 @inject ILogger<LoginPage> Logger;
 @inject IDialogService Dialog
+@using System.ComponentModel.DataAnnotations
+@using PSC.Blazor.Components.BrowserDetect
 @implements IDisposable
 
 <PageHeader>Sign in</PageHeader>
 
 <div class="background"></div>
 <div class="buffer"></div>
-
-@using PSC.Blazor.Components.BrowserDetect
-@using System.ComponentModel.DataAnnotations
 
 <BrowserDetect BrowserInfoChanged="info => LandingService.UpdateBrowserInfo(info)"/>
 
@@ -22,7 +21,7 @@
         <MudOverlay Absolute="true" Visible="_isBusy" DarkBackground AutoClose="false">
             <MudProgressCircular Size="Size.Large" Color="Color.Primary" Indeterminate="true"/>
         </MudOverlay>
-        @if (LandingService.IsAuthenticated)
+        @if (false) //(LandingService.IsAuthenticated)
         {
             @* User is already logged in *@
             <MudStack Spacing="4">
@@ -148,7 +147,7 @@
 
         _isBusy = true;
         StateHasChanged();
-        
+
         try
         {
             await LandingService.LoginConfirm(model.EmailAddress!, model.Token!, model.DeviceName!);
