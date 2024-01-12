@@ -148,6 +148,7 @@ public class SkillChoice
 {
     public int Count { get; set; }
     public string[] Choices { get; set; } = Array.Empty<string>();
+    public override string ToString() => $"[{Count} of {string.Join(",", Choices)}]";
 }
 
 [PublicAPI]

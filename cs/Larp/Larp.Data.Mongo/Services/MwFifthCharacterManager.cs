@@ -503,7 +503,8 @@ public class MwFifthCharacterManager
                     .Set(x => x.CharacterCount, characters.GetValueOrDefault(accountId)?.Count)))
             .ToList();
 
-        await larpContext.Accounts.BulkWriteAsync(updates);
+        if (updates.Count > 0)
+            await larpContext.Accounts.BulkWriteAsync(updates);
     }
 
     public async Task<CharacterAccountSummary[]> GetState(CharacterState state)

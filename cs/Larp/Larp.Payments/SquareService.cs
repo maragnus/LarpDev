@@ -68,12 +68,16 @@ public class SquareService : ISquareService
     private readonly SquareClient _client;
     private readonly ILogger<SquareService> _logger;
     private readonly SquareOptions _options;
-
+    
+    public bool IsDisabled { get; }
+    
     public SquareService(IOptions<SquareOptions> options, ILogger<SquareService> logger)
     {
         _logger = logger;
         _options = options.Value;
-        _options.Validate();
+        IsDisabled = "disabled".Equals(_options.AccessToken); 
+        if (!IsDisabled)
+            _options.Validate();
         _client = CreateClient();
         SynchronizeOnStartup = _options.SynchronizeOnStartup;
     }
@@ -84,6 +88,8 @@ public class SquareService : ISquareService
 
     public async Task Initialize()
     {
+        if (IsDisabled) return;
+        
         try
         {
             _logger.LogInformation("Square: Updating Webhook Subscription");
@@ -102,6 +108,8 @@ public class SquareService : ISquareService
 
     public async Task Synchronize(SiteAccount[] accounts)
     {
+        if (IsDisabled) return;
+
         try
         {
             _logger.LogInformation("Square: Updating Team Members");
@@ -120,6 +128,8 @@ public class SquareService : ISquareService
 
     public async Task<string> GenerateDeviceCode(string name)
     {
+        if (IsDisabled) return "";
+
         var response = await _client.DevicesApi.CreateDeviceCodeAsync(
             new CreateDeviceCodeRequest(
                 SquareUtilities.CreateIdempotencyKey(),

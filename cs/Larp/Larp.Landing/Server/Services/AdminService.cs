@@ -595,6 +595,9 @@ public class AdminService : IAdminService
     public async Task<string> PointOfSale(string accountId, int amount, DeviceType deviceType) =>
         await _transactionManager.PointOfSale(accountId, amount, deviceType);
 
+    public Task<IFileInfo> ExportGameState5E() =>
+        _backupManager.ExportGameState5E();
+
     public async Task<EventAttendanceList> GetAccountAttendances(string accountId) =>
         await _eventManager.GetAccountAttendances(accountId);
 

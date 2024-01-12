@@ -42,7 +42,7 @@ public static class MapApiExtensions
         {
             var uri = rootUri + api!.ApiPath.Trim('/');
 
-            logger.LogInformation("Map {Method} {Uri} for {Type}", api.HttpMethod, uri, typeof(TInterface).Name);
+            logger.LogDebug("Map {Method} {Uri} for {Type}", api.HttpMethod, uri, typeof(TInterface).Name);
 
             app.MapMethods(uri, new[] { api.HttpMethod.Method },
                 async (HttpContext httpContext, TInterface obj) =>

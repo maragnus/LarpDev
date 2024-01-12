@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Logging;
 
 namespace Larp.Common.LifeCycle;
 
@@ -75,9 +76,10 @@ public static class ServiceCollectionExtensions
 
     private static LifecycleTaskService.LifeCycleTasksLists GetTaskList(IServiceCollection serviceCollection)
     {
-        if (serviceCollection
-                        .FirstOrDefault(x => x.ImplementationType == typeof(LifecycleTaskService.LifeCycleTasksLists))?
-                        .ImplementationInstance is not LifecycleTaskService.LifeCycleTasksLists lists)
+        var lists = serviceCollection.FirstOrDefault(x => x.ImplementationInstance is LifecycleTaskService.LifeCycleTasksLists)?
+            .ImplementationInstance as LifecycleTaskService.LifeCycleTasksLists;
+        
+        if (lists == null)
         {
             lists = new LifecycleTaskService.LifeCycleTasksLists();
             serviceCollection.AddSingleton(lists);

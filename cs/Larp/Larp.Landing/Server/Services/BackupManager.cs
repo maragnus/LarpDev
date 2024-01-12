@@ -283,4 +283,101 @@ public class BackupManager
         await seeder.Reseed();
         _larpContext.MwFifthGame.ClearGameState();
     }
+
+    public async Task<IFileInfo> ExportGameState5E()
+    {
+        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+        var fileProvider = _serviceProvider.GetRequiredService<IFileProvider>();
+        var path = fileProvider.GetFileInfo($"{Path.GetRandomFileName()}.xlsx");
+        var file = new FileInfo(path.PhysicalPath!);
+        using var package = new ExcelPackage(file);
+
+        using var workbook = package.Workbook;
+
+        var gameState = await _larpContext.MwFifthGame.GetGameState();
+        var clarifies = await _larpContext.ClarifyTerms.Find(_ => true).ToListAsync();
+        
+        WriteSheet("HomeChapters", gameState.HomeChapters);
+        WriteSheetParsed("Occupations", gameState.Occupations, occupation => new
+        {
+            occupation.Name,
+            occupation.Type,
+            Specialties = string.Join(",", occupation.Specialties ?? Array.Empty<string>()),
+            Skills = string.Join(",", occupation.Skills),
+            Choices = string.Join(",", (occupation.Choices ?? Array.Empty<SkillChoice>()).Select(c=>c.ToString())),
+            Chapters = string.Join(",", occupation.Chapters ?? Array.Empty<string>()),
+            occupation.Duty,
+            occupation.Livery,
+            occupation.Leadership
+        });
+        WriteSheetParsed("Skills", gameState.Skills, skill => new
+        {
+            skill.Title,
+            skill.Class,
+            skill.Purchasable,
+            skill.CostPerPurchase,
+            skill.RanksPerPurchase,
+            Chapters = string.Join(",", skill.Chapters ?? Array.Empty<string>())
+        });
+        WriteSheet("Advantages", gameState.Advantages);
+        WriteSheet("Disadvantages", gameState.Disadvantages);
+        WriteSheetParsed("Gifts", gameState.Gifts, gift => new
+        {
+            gift.Name,
+            Property1 = Get(gift.Properties, 0),
+            Property2 = Get(gift.Properties, 1),
+            Property3 = Get(gift.Properties, 2),
+        });
+        WriteSheetParsed("Gift Ranks", 
+            gameState.Gifts.SelectMany(gift => gift.Ranks.Select(rank => (gift, rank))), 
+            item => new
+            {
+                Gift = item.gift.Name,
+                Rank = item.rank.Rank,
+                Property1 = Get(item.gift.Properties, 0),
+                Value1 = Get(item.rank.Properties, 0),
+                Property2 = Get(item.gift.Properties, 1),
+                Value2 = Get(item.rank.Properties, 1),
+                Property3 = Get(item.gift.Properties, 2),
+                Value3 = Get(item.rank.Properties, 2),
+                Abilities = string.Join(",", item.rank.Abilities.Select(a=>a.Title))
+            });
+        WriteSheet("Religions", gameState.Religions);
+        WriteSheetParsed("Spells", gameState.Spells, spell => new
+        {
+            spell.Name,
+            spell.Type,
+            spell.Category,
+            Categories = string.Join(",", spell.Categories),
+            spell.Effect,
+            spell.Mana
+        });
+        WriteSheetParsed("Clarify", clarifies, clarify => new
+        {
+            clarify.Name,
+            clarify.Summary,
+            clarify.Description
+        });
+
+        string? Get(string[] strings, int index) =>
+            index >= strings.Length ? null : strings[index];
+
+        void WriteSheet<T>(string name, IEnumerable<T> data)
+        {
+            var sheet = workbook.Worksheets.Add(name);
+            sheet.Cells.LoadFromCollection(data, true, TableStyles.Light6);
+            sheet.Columns.AutoFit();
+        }
+        
+        void WriteSheetParsed<TInput, TOutput>(string name, IEnumerable<TInput> data, Func<TInput, TOutput> parser)
+        {
+            var sheet = workbook.Worksheets.Add(name);
+            sheet.Cells.LoadFromCollection(data.Select(parser), true, TableStyles.Light6);
+            sheet.Columns.AutoFit();
+        }
+        
+        await package.SaveAsync();
+
+        return path;
+    }
 }

@@ -253,6 +253,10 @@ public interface IAdminService
 
     [ApiPost("transactions/pos"), ApiAuthenticated(AccountRoles.FinanceAccess)]
     Task<string> PointOfSale(string accountId, int amount, DeviceType deviceType);
+
+    [ApiGet("data/export/mw5e"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    [ApiContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")]
+    Task<IFileInfo> ExportGameState5E();
 }
 
 public class Dashboard
