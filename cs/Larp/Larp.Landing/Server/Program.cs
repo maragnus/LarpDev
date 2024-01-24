@@ -1,4 +1,6 @@
 using System.Collections;
+using Larp.Assistant;
+using Larp.Assistant.OpenAi;
 using Larp.Common.LifeCycle;
 using Larp.Data.Seeder;
 using Larp.Landing.Server.Import;
@@ -49,6 +51,8 @@ builder.Configuration
     services.AddScoped<EventManager>();
     services.AddScoped<CitationManager>();
     services.AddScoped<TransactionManager>();
+    services.AddAiAssistant();
+    services.Configure<OpenAiOptions>(builder.Configuration.GetSection(OpenAiOptions.SectionName));
 
     // Larp.Data.Seeder
     services.AddScoped<LarpDataSeeder>();
@@ -64,6 +68,7 @@ builder.Configuration
     services.AddScoped<ILandingService, LandingServiceServer>();
     services.AddScoped<IMwFifthService, MwFifthServiceServer>();
     services.AddScoped<IAdminService, AdminService>();
+    services.AddScoped<IAssistantService, AssistantService>();
     services.AddScoped<IUserSession, UserSession>();
     services.AddScoped<ExcelImporter>();
     services.AddScoped<BackupManager>();
@@ -97,6 +102,7 @@ app.UseAuthorization();
 app.MapApi<ILandingService>();
 app.MapApi<IMwFifthService>();
 app.MapApi<IAdminService>();
+app.MapApi<IAssistantService>();
 
 app.MapMethods("/square/callback",
     new[] { HttpMethods.Get, HttpMethods.Post },

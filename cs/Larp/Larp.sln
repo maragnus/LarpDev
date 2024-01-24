@@ -35,6 +35,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Larp.Landing.Client.RestCli
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Larp.Payments", "Larp.Payments\Larp.Payments.csproj", "{367C184F-AF8C-4428-8A76-7746DB34A9CF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Larp.Assistant", "Larp.Assistant\Larp.Assistant.csproj", "{AFF5499F-CE7F-4D9A-B07A-189A44FA53E2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Larp.Assistant.OpenAi", "Larp.Assistant.OpenAi\Larp.Assistant.OpenAi.csproj", "{7E556D50-1977-4BDF-8F1F-747F052AED3B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,6 +109,14 @@ Global
 		{367C184F-AF8C-4428-8A76-7746DB34A9CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{367C184F-AF8C-4428-8A76-7746DB34A9CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{367C184F-AF8C-4428-8A76-7746DB34A9CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFF5499F-CE7F-4D9A-B07A-189A44FA53E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFF5499F-CE7F-4D9A-B07A-189A44FA53E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFF5499F-CE7F-4D9A-B07A-189A44FA53E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFF5499F-CE7F-4D9A-B07A-189A44FA53E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E556D50-1977-4BDF-8F1F-747F052AED3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E556D50-1977-4BDF-8F1F-747F052AED3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E556D50-1977-4BDF-8F1F-747F052AED3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E556D50-1977-4BDF-8F1F-747F052AED3B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -17,22 +17,22 @@
             <Columns>
                 <PropertyColumn Property="x => x.Name" Title="Name" IsEditable>
                     <EditTemplate>
-                        <MudTextField @bind-Value="@context.Item.Name"/>
+                        <MudTextField T="string" @bind-Value="@context.Item.Name"/>
                     </EditTemplate>
                 </PropertyColumn>
                 <PropertyColumn Property="x => x.Rank" Title="Rank" IsEditable>
                     <EditTemplate>
-                        <MudNumericField @bind-Value="@context.Item.Rank" Style="width: 4em"/>
+                        <MudNumericField T="int" @bind-Value="@context.Item.Rank" Style="width: 4em"/>
                     </EditTemplate>
                 </PropertyColumn>
                 <PropertyColumn Property="x => x.Physical" Title="Physical" IsEditable>
                     <EditTemplate>
-                        <MudSwitch Checked="@context.Item.Physical" Color="Color.Success" UnCheckedColor="Color.Error" CheckedChanged="(bool value) => { context.Item.Physical = value; }" Style="width: 4em"/>
+                        <MudSwitch Checked="@context.Item.Physical" Color="Color.Success" UnCheckedColor="Color.Error" CheckedChanged="@((bool value) => { context.Item.Physical = value; return Task.CompletedTask; })" Style="width: 4em"/>
                     </EditTemplate>
                 </PropertyColumn>
                 <PropertyColumn Property="x => x.Description" Title="Description" IsEditable>
                     <EditTemplate>
-                        <MudTextField Lines="4" @bind-Value="@context.Item.Description"/>
+                        <MudTextField T="string?" Lines="4" @bind-Value="@context.Item.Description"/>
                     </EditTemplate>
                 </PropertyColumn>
             </Columns>

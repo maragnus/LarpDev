@@ -80,7 +80,7 @@ public partial class Account
     public int? CharacterCount { get; set; }
 
     public int? CitationCount { get; set; }
-
+    
     [BsonIgnore] public int AccountBalance { get; set; }
 
     [BsonIgnore]
@@ -96,6 +96,8 @@ public partial class Account
 
     [BsonIgnoreIfNull] public string? SquareDeviceCode { get; set; }
     [BsonIgnoreIfNull] public string? SquareCustomerId { get; set; }
+    
+    public string? AssistantThreadId { get; set; }
 
     public static string? BuildNormalizedPhone(string? phone)
     {

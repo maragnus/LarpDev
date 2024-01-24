@@ -14,12 +14,15 @@
     [Parameter]
     public RenderFragment? LoadingSkeleton { get; set; }
 
+    [Parameter] 
+    public MaxWidth MaxWidth { get; set; } = MaxWidth.ExtraLarge;
+
     [Parameter]
     public bool Saving { get; set; }
 
 }
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="my-4 relative">
+<MudContainer MaxWidth="@MaxWidth" Class="my-4 relative">
     @if (Title != null)
     {
         <MudText Typo="Typo.h6" Class="mb-4">@Title</MudText>

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="OpenAI-DotNet" Version="7.6.2" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="7.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Larp.Assistant\Larp.Assistant.csproj" />
+    </ItemGroup>
+</Project>

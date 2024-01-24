@@ -21,7 +21,7 @@
                 <PropertyColumn Property="x => x.Location" Title="Location" IsEditable/>
                 <PropertyColumn Property="x => x.Retired" Title="Retired" IsEditable>
                     <EditTemplate>
-                        <MudSwitch Checked="@context.Item.Retired" Color="Color.Success" UnCheckedColor="Color.Error" CheckedChanged="(bool value) => { context.Item.Retired = value; }" Style="width: 4em"/>
+                        <MudSwitch Checked="@context.Item.Retired" Color="Color.Success" UnCheckedColor="Color.Error" CheckedChanged="@((bool value) => { context.Item.Retired = value; return Task.CompletedTask; })" Style="width: 4em"/>
                     </EditTemplate>
                 </PropertyColumn>
                 <PropertyColumn Property="x => x.Homelands" Title="Homelands" IsEditable>

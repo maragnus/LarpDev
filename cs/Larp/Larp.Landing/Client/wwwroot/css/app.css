@@ -117,3 +117,7 @@ a, .btn-link {
     }
 
 ul, li { margin: 0; padding: 0; padding-inline-start: 0 !important; }
+
+.paragraphs p + p {
+    margin-top: 0.5em;
+}
