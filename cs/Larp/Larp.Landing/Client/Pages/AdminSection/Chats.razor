@@ -1,0 +1,130 @@
+﻿@page "/chats/{AccountId?}"
+@using Larp.Landing.Shared
+@using Larp.Assistant
+@inherits LarpPage
+@inject LandingService LandingService
+@inject IAssistantService AssistantService
+@implements IDisposable
+
+<AdminLayout Title="Monitor Game Master Assistants" MaxWidth="MaxWidth.Medium">
+    <MudPaper Elevation="1" Class="pa-4">
+        <MudStack Spacing="4">
+            @if (_listMode)
+            {
+                <MudList Clickable>
+                    @foreach (var conversation in _conversations)
+                    {
+                        <MudListItem OnClick="@(() => OpenConversation(conversation.AccountId))" Icon="@Icons.Material.Filled.ChatBubble">
+                            @conversation.AccountName
+                        </MudListItem>
+                    }
+                </MudList>
+            }
+            else
+            {
+                <MudStack Spacing="6">
+                    @foreach (var message in _messages)
+                    {
+                        var author = message.Input ? _userName : message.Role;
+                        <ChatMessage @key="@message.Id" Response="!message.Input" Author="@author" Text="@message.Content"/>
+                    }
+                    @if (_isBusy)
+                    {
+                        <MudProgressLinear Indeterminate Size="Size.Large"/>
+                    }
+                </MudStack>
+                <MudButton StartIcon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" OnClick="@BackToList">Back To List</MudButton>
+            }
+        </MudStack>
+    </MudPaper>
+</AdminLayout>
+
+@code {
+    private bool _isBusy = true;
+    private List<AiConversation> _conversations = new();
+    private List<AiMessage> _messages = new();
+    private string? _runId;
+    private readonly CancellationTokenSource _timerCancellationToken = new();
+    private bool _listMode = true;
+    private string? _userName;
+
+    [Parameter]public string? AccountId { get; set; } 
+    
+    protected override async Task OnSafeInitializedAsync()
+    {
+        await base.OnSafeInitializedAsync();
+        _conversations.AddRange(await AssistantService.GetConversations());
+    }
+
+    protected override async Task OnSafeParametersSetAsync()
+    {
+        await base.OnSafeParametersSetAsync();
+        if (string.IsNullOrEmpty(AccountId))
+        {
+            _listMode = true;
+            _runId = null;
+            _messages.Clear();
+        }
+        else
+        {
+            _listMode = false;
+            var conversation = _conversations.FirstOrDefault(x => x.AccountId == AccountId) ?? AiConversation.Empty;
+            _userName = conversation.AccountName;
+            ProcessRun(conversation.Run);
+        } 
+            
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (!firstRender) return;
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
+        while (!_timerCancellationToken.IsCancellationRequested && await timer.WaitForNextTickAsync())
+            await UpdateRun();
+    }
+
+    public void Dispose()
+    {
+        _timerCancellationToken.Cancel();
+        _timerCancellationToken.Dispose();
+    }
+
+    private async Task UpdateRun()
+    {
+        if (string.IsNullOrEmpty(_runId)) return;
+        var run = await AssistantService.UpdateRun(_runId);
+        ProcessRun(run);
+    }
+    
+    private void ProcessRun(AiRun run)
+    {
+        if (run.RunStatus is RunStatus.Completed or RunStatus.Failed)
+        {
+            _messages.Clear();
+            _messages.AddRange(run.Messages);
+            _isBusy = false;
+            _runId = null;
+            StateHasChanged();
+        }
+        else if (_runId != run.RunId || !_isBusy)
+        {
+            _messages.Clear();
+            _messages.AddRange(run.Messages);
+            _runId = run.RunId;
+            _isBusy = true;
+            StateHasChanged();
+        }
+    }
+
+    private void OpenConversation(string accountId)
+    {
+        NavigationManager.NavigateTo($"/chats/{accountId}");
+    }
+
+    private void BackToList()
+    {
+        NavigationManager.NavigateTo("/chats");
+    }
+
+}

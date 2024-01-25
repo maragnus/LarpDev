@@ -6,18 +6,21 @@ namespace Larp.Landing.Shared;
 [ApiRoot("/api/admin/ai")]
 public interface IAssistantService
 {
-    [ApiGet("assistant/{runId}"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    [ApiGet("assistant/{runId}"), ApiAuthenticated(AccountRoles.AdminAccess)]
     Task<AiRun> UpdateRun(string runId);
 
-    [ApiGet("assistant"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    [ApiGet("assistant"), ApiAuthenticated(AccountRoles.AdminAccess)]
     Task<AiRun> Resume();
     
-    [ApiPut("assistant"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    [ApiPut("assistant"), ApiAuthenticated(AccountRoles.AdminAccess)]
     Task<AiRun> StartNew(string message);
     
-    [ApiPost("assistant"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    [ApiPost("assistant"), ApiAuthenticated(AccountRoles.AdminAccess)]
     Task<AiRun> Continue(string message);
     
-    [ApiDelete("assistant"), ApiAuthenticated(AccountRoles.MwFifthGameMaster)]
+    [ApiDelete("assistant"), ApiAuthenticated(AccountRoles.AdminAccess)]
     Task Delete();
+
+    [ApiGet("assistants"), ApiAuthenticated(AccountRoles.AccountAdmin)]
+    Task<AiConversation[]> GetConversations();
 }
