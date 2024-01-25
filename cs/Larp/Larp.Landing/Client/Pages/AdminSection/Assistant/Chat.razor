@@ -37,7 +37,7 @@
                 @foreach (var message in _messages)
                 {
                     var author = message.Input ? _userName : message.Role;
-                    <ChatMessage @key="@message.Id" Response="!message.Input" Author="@author" Text="@message.Content"/>
+                    <ChatMessage @key="@message.Id" Response="!message.Input" Author="@author" Message="@message"/>
                 }
                 @if (_isBusy)
                 {
@@ -186,7 +186,6 @@
     {
         var dialog = await DialogService.ShowMessageBox("Delete Thread", "Are you sure you want to clear this thread and start a new conversation?", "Yes, start over", "No, continue conversation");
         if (dialog != true) return;
-        await AssistantService.Delete();
         await Restart();
     }
 

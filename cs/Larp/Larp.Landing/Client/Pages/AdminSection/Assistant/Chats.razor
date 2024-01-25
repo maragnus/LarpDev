@@ -31,7 +31,7 @@
                     @foreach (var message in _messages)
                     {
                         var author = message.Input ? _userName : message.Role;
-                        <ChatMessage @key="@message.Id" Response="!message.Input" Author="@author" Text="@message.Content"/>
+                        <ChatMessage @key="@message.Id" Response="!message.Input" Author="@author" Message="@message"/>
                     }
                     @if (_isBusy)
                     {

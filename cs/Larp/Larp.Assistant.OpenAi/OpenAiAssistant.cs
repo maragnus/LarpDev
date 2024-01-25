@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using OpenAI;
 using OpenAI.Threads;
 
@@ -6,10 +8,12 @@ namespace Larp.Assistant.OpenAi;
 
 public class OpenAiAssistant : IAiAssistant
 {
-    private OpenAiOptions _options;
+    private readonly ILogger<OpenAiAssistant> _logger;
+    private readonly OpenAiOptions _options;
 
-    public OpenAiAssistant(IOptions<OpenAiOptions> options)
+    public OpenAiAssistant(IOptions<OpenAiOptions> options, ILogger<OpenAiAssistant> logger)
     {
+        _logger = logger;
         _options = options.Value;
     }
     
@@ -40,6 +44,7 @@ public class OpenAiAssistant : IAiAssistant
         var run = runs.Items.FirstOrDefault(run =>
             run.Status is OpenAI.Threads.RunStatus.Cancelling or OpenAI.Threads.RunStatus.Queued
                 or OpenAI.Threads.RunStatus.InProgress or OpenAI.Threads.RunStatus.RequiresAction);
+        _logger.LogInformation("Json: {Messages}", JsonSerializer.Serialize(messages));
         return BuildAiRun(threadId, run?.Id ?? "", run?.Status ?? OpenAI.Threads.RunStatus.Completed, messages);
     }
 
@@ -62,7 +67,7 @@ public class OpenAiAssistant : IAiAssistant
         new(true, threadId, runId, ToRunStatus(status),
             messages?.Items
                 .OrderBy(message => message.CreatedAt)
-                .Select(message => new AiMessage(message.Id, message.Role == Role.User, message.Role.ToString(), message.PrintContent(), message.CreatedAt))
+                .Select(message => new AiMessage(message.Id, message.Role == Role.User, message.Role.ToString(), message.PrintContent(), GetAnnotations(message), message.CreatedAt))
                 .ToArray()
             ?? Array.Empty<AiMessage>());
 
@@ -75,4 +80,13 @@ public class OpenAiAssistant : IAiAssistant
         OpenAI.Threads.RunStatus.RequiresAction => RunStatus.InProgress,
         _ => RunStatus.Failed
     };
+
+    private static AiAnnotation[] GetAnnotations(MessageResponse message)
+    {
+        return message.Content
+            .SelectMany(x => x.Text.Annotations)
+            .Select(annotation => new AiAnnotation(annotation.Text, annotation.StartIndex, annotation.EndIndex,
+                annotation.FileCitation.FileId, annotation.FileCitation.Quote))
+            .ToArray();
+    }
 }
