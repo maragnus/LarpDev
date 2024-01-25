@@ -19,6 +19,11 @@
                         </MudListItem>
                     }
                 </MudList>
+                
+                @if (IsLoading)
+                {
+                    <MudProgressLinear Indeterminate Size="Size.Large"/>
+                }
             }
             else
             {

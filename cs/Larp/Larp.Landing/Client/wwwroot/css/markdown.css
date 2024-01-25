@@ -1,0 +1,45 @@
+﻿.markdown * {
+    margin: revert;
+    padding: revert;
+}
+.markdown {
+    line-height: 1.75;
+}
+.markdown ul, .markdown ol {
+    margin-left: 0;
+    padding-left: 0;
+}
+.markdown ol ol, .markdown ol ul, .markdown ul ol, .markdown ul ul {
+    margin-bottom: 0;
+    margin-top: 0;
+    padding-left: 1em;
+}
+\           .markdown p, .markdown ul, .markdown ol, .markdown li {
+    margin-bottom: 1em;
+}
+.markdown ol {
+    list-style: none;
+    counter-reset: step-counter;
+    padding-inline-start: 25px;
+    padding-left: 0;
+}
+.markdown ol > li {
+    counter-increment: step-counter;
+}
+.markdown ol > li:before {
+    content: counter(step-counter)".";
+    display: inline-block;
+    position: absolute;
+    margin-left: -25px;
+    color: rgba(142,142,160);
+}
+.markdown ul > li {
+    counter-increment: none;
+}
+.markdown ul > li:before {
+    content: "\2022";
+    display: inline-block;
+    position: absolute;
+    margin-left: -1em;
+    color: rgba(142,142,160);
+}

@@ -6,19 +6,19 @@ namespace Larp.Landing.Shared;
 [ApiRoot("/api/admin/ai")]
 public interface IAssistantService
 {
-    [ApiGet("assistant/{runId}"), ApiAuthenticated(AccountRoles.AdminAccess)]
+    [ApiGet("assistant/{runId}"), ApiAuthenticated()]
     Task<AiRun> UpdateRun(string runId);
 
-    [ApiGet("assistant"), ApiAuthenticated(AccountRoles.AdminAccess)]
+    [ApiGet("assistant"), ApiAuthenticated()]
     Task<AiRun> Resume();
     
-    [ApiPut("assistant"), ApiAuthenticated(AccountRoles.AdminAccess)]
+    [ApiPut("assistant"), ApiAuthenticated()]
     Task<AiRun> StartNew(string message);
     
-    [ApiPost("assistant"), ApiAuthenticated(AccountRoles.AdminAccess)]
+    [ApiPost("assistant"), ApiAuthenticated()]
     Task<AiRun> Continue(string message);
     
-    [ApiDelete("assistant"), ApiAuthenticated(AccountRoles.AdminAccess)]
+    [ApiDelete("assistant"), ApiAuthenticated()]
     Task Delete();
 
     [ApiGet("assistants"), ApiAuthenticated(AccountRoles.AccountAdmin)]

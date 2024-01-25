@@ -1,9 +1,11 @@
 ﻿@page "/chat"
 @using Larp.Landing.Shared
 @using Larp.Assistant
+@using System.Text
 @inherits LarpPage
 @inject LandingService LandingService
 @inject IAssistantService AssistantService
+@inject IJSRuntime Js
 @implements IDisposable
 
 <AdminLayout Title="Game Master Assistant" MaxWidth="MaxWidth.Medium">
@@ -150,9 +152,34 @@
         ProcessRun(run);
     }
 
-    private Task Download()
+    private async Task Download()
     {
-        return Task.CompletedTask;
+        await SafeActionAsync(async () =>
+        {
+            var stream = ConversationToStream();
+            var streamRef = new DotNetStreamReference(stream: stream);
+            await Js.InvokeVoidAsync("downloadFileFromStream", $"Mystwood 2 AI Assistant Conversation - {_userName}.md", streamRef);
+        });
+    }
+
+    private MemoryStream ConversationToStream()
+    {
+        var stream = new MemoryStream();
+        
+        using var writer = new StreamWriter(stream, leaveOpen: true, encoding: Encoding.UTF8);
+        foreach (var message in _messages)
+        {
+            writer.Write("# ");
+            writer.Write(message.Role);
+            writer.WriteLine(":");
+            writer.WriteLine();
+            writer.WriteLine(message.Content);
+            writer.WriteLine();
+        }
+        writer.Flush();
+        stream.Seek(0, SeekOrigin.Begin);
+    
+        return stream;
     }
 
     private async Task Delete()
