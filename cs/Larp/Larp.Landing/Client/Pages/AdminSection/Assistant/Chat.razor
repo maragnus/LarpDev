@@ -1,4 +1,4 @@
-﻿@page "/chat"
+﻿@page "/admin/assistant"
 @using Larp.Landing.Shared
 @using Larp.Assistant
 @using System.Text
@@ -11,7 +11,7 @@
 <AdminLayout Title="Game Master Assistant" MaxWidth="MaxWidth.Medium">
     @if (_showWarning)
     {
-        <MudAlert Severity="Severity.Warning" Icon="@Icons.Material.Filled.Warning" ShowCloseIcon CloseIconClicked="@CloseWarning" Class="mb-4">
+        <MudAlert Severity="Severity.Warning" Icon="@Icons.Material.Filled.Warning" ShowCloseIcon CloseIconClicked="@CloseWarning" Class="mb-4 no-print">
             <MudText Typo="Typo.body2">
                 <p>
                     <strong>Personal usage is prohibited.</strong>
@@ -23,7 +23,7 @@
     }
     else
     {
-        <MudStack Row Class="mb-4">
+        <MudStack Row Class="mb-4 no-print">
             <MudIcon Icon="@Icons.Material.Filled.Info" Style="font-size: inherit"/>
             <MudText Typo="Typo.caption" Color="Color.Dark">
                 This assistant is solely for Mystwood content generation. Please avoid unrelated use to prevent extra charges. Ensure you've agreed to <a target="_blank" href="https://openai.com/policies">OpenAI's Terms</a> before proceeding.
@@ -45,7 +45,7 @@
                 }
             </MudStack>
             <EditForm Model="_prompt" OnSubmit="@SendMessage">
-                <MudStack Spacing="0">
+                <MudStack Spacing="0" Class="no-print">
                     <MudTextField T="string?" For="() => _prompt.Query" @bind-Value="_prompt.Query"
                                   Variant="Variant.Outlined" FullWidth Clearable Placeholder="Message the Assistant..."
                                   Lines="@(_multiLine ? 4 : 1)"

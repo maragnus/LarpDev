@@ -1,0 +1,72 @@
+﻿@using Larp.Assistant
+@using System.Text
+<MudStack Row>
+    @if (Response)
+    {
+        <MudAvatar Style=" background-color: #AB68FF" Size="Size.Small">
+            <MudImage Src="/openai-w.svg" Alt="OpenAI Logo"/>
+        </MudAvatar>
+    }
+    else
+    {
+        <MudAvatar Color="Color.Primary" Size="Size.Small">
+            <MudIcon Icon="@Icons.Material.Filled.Person" />
+        </MudAvatar>
+    } 
+    <MudStack Spacing="1">
+        <MudText Typo="Typo.body1"><strong>@Author</strong></MudText>
+        <MudText Typo="Typo.body2" Class="markdown" Inline="false">
+            @_content
+        </MudText>
+        @if (_annotations.Count > 0)
+        {
+            <MudStack Justify="Justify.FlexStart" Spacing="2">
+                @foreach (var annotation in _annotations)
+                {
+                    <MudTooltip Placement="Placement.Start" Arrow>
+                        <TooltipContent>
+                            <div style="max-width: 250px">
+                                @annotation.Citation
+                            </div>
+                        </TooltipContent>
+                        <ChildContent>
+                            @annotation.Name
+                        </ChildContent>
+                    </MudTooltip>
+                }
+            </MudStack>
+        }
+    </MudStack>
+</MudStack>
+
+@code {
+    private MarkupString _content;
+    private List<Annotation> _annotations = new();
+
+    [Parameter]
+    public bool Response { get; set; }
+
+    [Parameter] public string Author { get; set; } = default!;
+
+    [Parameter] public AiMessage Message { get; set; } = default!;
+
+    private record Annotation(string Name, MarkupString Citation);
+    
+    protected override void OnParametersSet()
+    {
+        _annotations.Clear();
+        var sb = new StringBuilder(Message.Content);
+        foreach (var (annotation, index) in Message.Annotations.Select((annotation, index) => (annotation, index + 1)))
+        {
+            var name = $"[{index}]";
+            sb.Replace(annotation.Label, name);
+            var source = $"__{annotation.FileName}__\r\n\r\n";
+            var quote = new StringBuilder(annotation.Quote).Insert(0, source);
+            var markdown = new MarkupString(Markdig.Markdown.ToHtml(quote.ToString()));
+            _annotations.Add(new Annotation(name, markdown));
+        }
+
+        _content = new MarkupString(Markdig.Markdown.ToHtml(sb.ToString()));
+    }
+
+}

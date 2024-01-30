@@ -3,7 +3,7 @@
 namespace Larp.Landing.Shared;
 
 [PublicAPI]
-[ApiRoot("/api/admin/ai")]
+[ApiRoot("/api/admin")]
 public interface IAssistantService
 {
     [ApiGet("assistant/{runId}"), ApiAuthenticated()]

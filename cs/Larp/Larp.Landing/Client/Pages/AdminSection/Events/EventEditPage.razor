@@ -112,6 +112,12 @@
                                 <MudSelectItem T="bool" Value="@false">Visible</MudSelectItem>
                             </MudSelect>
                         </MudItem>
+                        <MudItem xs="12" md="12" lg="12">
+                            <MudTextField T="string?" Label="Summary" Lines="3" @bind-Value="@_model.Summary" For="() => _model.Summary" Variant="Variant.Outlined"/>
+                        </MudItem>
+                        <MudItem xs="12" md="12" lg="12">
+                            <MudTextField T="string?" Label="Clarify Prompts" Placeholder="One prompt per line" Lines="3" @bind-Value="@_model.Clarifies" For="() => _model.Clarifies" Variant="Variant.Outlined"/>
+                        </MudItem>
                         <MudItem xs="12" md="12" lg="6">
                             <MudTextField T="string?" Label="Preregistration Notes" Lines="3" @bind-Value="@_model.PreregistrationNotes" For="() => _model.PreregistrationNotes" Variant="Variant.Outlined"/>
                         </MudItem>
@@ -184,7 +190,7 @@
                         </PropertyColumn>
                         <PropertyColumn Property="x => x.IsFree" Title="Free" IsEditable>
                             <EditTemplate>
-                                <MudSwitch T="bool" Required Color="Color.Success" UnCheckedColor="Color.Warning" Checked="@context.Item.IsFree" CheckedChanged="value => {context.Item.IsFree = value; _hasEventChanges = true; }"/>
+                                <MudSwitch T="bool" Required Color="Color.Success" UnCheckedColor="Color.Warning" Checked="@context.Item.IsFree" CheckedChanged="value => { context.Item.IsFree = value; _hasEventChanges = true; }"/>
                             </EditTemplate>
                         </PropertyColumn>
                         <TemplateColumn T="EventComponent" IsEditable="false">
@@ -211,8 +217,7 @@
 
 @code {
 
-    [Parameter]
-    public string EventId { get; set; } = default!;
+    [Parameter] public string EventId { get; set; } = default!;
 
     private readonly EventModel _model = new();
     private EditContext _editContext = default!;
@@ -229,20 +234,15 @@
 
     public class EventModel
     {
-        [Required]
-        public string? Title { get; set; }
+        [Required] public string? Title { get; set; }
 
-        [Required]
-        public string? Location { get; set; }
+        [Required] public string? Location { get; set; }
 
-        [Required]
-        public string? EventType { get; set; }
+        [Required] public string? EventType { get; set; }
 
-        [Required]
-        public DateTime? Date { get; set; }
+        [Required] public DateTime? Date { get; set; }
 
-        [Required]
-        public string? GameId { get; set; }
+        [Required] public string? GameId { get; set; }
 
         public bool Hidden { get; set; }
 
@@ -252,9 +252,11 @@
         public int EventCost { get; set; }
         public int ChronicleCost { get; set; }
 
+        public string? Summary { get; set; }
         public string? PreEventLetter { get; set; }
         public string? PostEventLetter { get; set; }
         public string? BetweenEventLetter { get; set; }
+        public string? Clarifies { get; set; }
 
         public bool PreEventLetterOpen { get; set; }
         public bool PostEventLetterOpen { get; set; }
@@ -272,6 +274,9 @@
             AdminNotes = e.AdminNotes;
             EventCost = e.EventCost;
             ChronicleCost = e.ChronicleCost;
+            Summary = e.Summary;
+            Clarifies = e.Clarifies;
+
             var preEvent = e.LetterTemplates.FirstOrDefault(letter => letter.Name == LetterNames.PreEvent);
             PreEventLetter = preEvent?.LetterTemplateId;
             PreEventLetterOpen = preEvent?.IsOpen ?? false;
@@ -281,9 +286,6 @@
             var betweenEvent = e.LetterTemplates.FirstOrDefault(letter => letter.Name == LetterNames.BetweenEvent);
             BetweenEventLetter = betweenEvent?.LetterTemplateId;
             BetweenEventLetterOpen = betweenEvent?.IsOpen ?? false;
-
-            Console.WriteLine(JsonSerializer.Serialize(e));
-            Console.WriteLine(JsonSerializer.Serialize(this));
         }
 
         public Event Save()
@@ -297,6 +299,8 @@
                 Date = DateOnly.FromDateTime(Date ?? DateTime.Today),
                 IsHidden = Hidden,
                 PreregistrationNotes = PreregistrationNotes,
+                Summary = Summary,
+                Clarifies = Clarifies.ReplaceLineEndings("\n"),
                 AdminNotes = AdminNotes,
                 EventCost = EventCost,
                 ChronicleCost = ChronicleCost

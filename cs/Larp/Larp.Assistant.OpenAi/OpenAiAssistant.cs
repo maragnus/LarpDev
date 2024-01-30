@@ -44,7 +44,10 @@ public class OpenAiAssistant : IAiAssistant
         var run = runs.Items.FirstOrDefault(run =>
             run.Status is OpenAI.Threads.RunStatus.Cancelling or OpenAI.Threads.RunStatus.Queued
                 or OpenAI.Threads.RunStatus.InProgress or OpenAI.Threads.RunStatus.RequiresAction);
-        _logger.LogInformation("Json: {Messages}", JsonSerializer.Serialize(messages));
+        
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("Json: {Messages}", JsonSerializer.Serialize(messages));
+        
         return BuildAiRun(threadId, run?.Id ?? "", run?.Status ?? OpenAI.Threads.RunStatus.Completed, messages);
     }
 

@@ -30,6 +30,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
     services.AddSingleton<IMwFifthService, MwFifthServiceClient>();
     services.AddSingleton<IAdminService, AdminServiceClient>();
     services.AddSingleton<IAssistantService, AssistantClient>();
+    services.AddSingleton<IClarifyService, ClarifyClient>();
 
     // MudBlazor
     services.AddMudServices();

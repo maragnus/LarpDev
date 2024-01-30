@@ -1,4 +1,4 @@
-﻿@page "/chats/{AccountId?}"
+﻿@page "/admin/assistants/{AccountId?}"
 @using Larp.Landing.Shared
 @using Larp.Assistant
 @inherits LarpPage
@@ -38,7 +38,7 @@
                         <MudProgressLinear Indeterminate Size="Size.Large"/>
                     }
                 </MudStack>
-                <MudButton StartIcon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" OnClick="@BackToList">Back To List</MudButton>
+                <MudButton StartIcon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" OnClick="@BackToList" Class="no-print">Back To List</MudButton>
             }
         </MudStack>
     </MudPaper>
@@ -124,12 +124,12 @@
 
     private void OpenConversation(string accountId)
     {
-        NavigationManager.NavigateTo($"/chats/{accountId}");
+        NavigationManager.NavigateTo($"/admin/assistants/{accountId}");
     }
 
     private void BackToList()
     {
-        NavigationManager.NavigateTo("/chats");
+        NavigationManager.NavigateTo("/admin/assistants");
     }
 
 }

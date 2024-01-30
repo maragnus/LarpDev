@@ -56,7 +56,10 @@ public class Event
     public string? Location { get; set; }
 
     public DateOnly Date { get; set; }
-
+    
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public string? Summary { get; set; }
+    
     [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? EventType { get; set; }
 
@@ -81,6 +84,9 @@ public class Event
 
     [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? Chapter { get; set; }
+
+    [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public string? Clarifies { get; set; }
 
     private static bool Summarize<T>(IEnumerable<T> oldList, IEnumerable<T> newList, Func<T, string> transformer,
         out string[] oldItems, out string[] newItems)

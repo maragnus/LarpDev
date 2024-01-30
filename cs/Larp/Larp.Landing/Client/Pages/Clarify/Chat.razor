@@ -1,0 +1,211 @@
+﻿@page "/clarify"
+@using Larp.Landing.Shared
+@using Larp.Assistant
+@using System.Text
+@inherits LarpPage
+@inject LandingService LandingService
+@inject IClarifyService AssistantService
+@inject IJSRuntime Js
+@implements IDisposable
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="relative">
+    <MudOverlay Absolute DarkBackground Visible="IsLoading">
+        <MudProgressCircular Indeterminate/>
+    </MudOverlay>
+    
+    @if (_showWarning)
+    {
+        <MudAlert Severity="Severity.Warning" Icon="@Icons.Material.Filled.Info" ShowCloseIcon CloseIconClicked="@CloseWarning" Class="my-4">
+            <MudText Typo="Typo.body2">
+                <p>Welcome to Mystwood AI Assistant, <strong>Clarify</strong>!</p>
+                <p>Clarify is running OpenAI's GPT-4 and is trained on Mystwood's manual and the Chapter lorebooks. Introduce yourself and feel free to have a conversation with Clarify about Mystwood lore and the rules. Clarify isn't guaranteed to be correct, but should help to point you in the right direction.</p>
+                <p>Please read and agree to <a target="_blank" href="https://openai.com/policies">OpenAI's Terms and Policies</a> prior to engaging with this assistant.</p>
+                <p>Feel free to click the <strong>X</strong> on the right once you've read.</p>
+            </MudText>
+        </MudAlert>
+    }
+    else
+    {
+        <MudStack Row Class="mb-4">
+            <MudIcon Icon="@Icons.Material.Filled.Info" Style="font-size: inherit"/>
+            <MudText Typo="Typo.caption" Color="Color.Dark">
+                This assistant is solely for Mystwood content access. Please avoid unrelated use to prevent extra charges. Ensure you've agreed to <a target="_blank" href="https://openai.com/policies">OpenAI's Terms</a> before proceeding.
+            </MudText>
+        </MudStack>
+    }
+
+    <MudPaper Elevation="1" Class="pa-4">
+        <MudStack Spacing="4">
+            <MudStack Spacing="6" Class="no-print">
+                @foreach (var message in _messages)
+                {
+                    var author = message.Input ? _userName : "Clarify";
+                    <ChatMessage @key="@message.Id" Response="!message.Input" Author="@author" Message="@message"/>
+                }
+                @if (_isBusy)
+                {
+                    <MudProgressLinear Indeterminate Size="Size.Large"/>
+                }
+            </MudStack>
+            <EditForm Model="_prompt" OnSubmit="@SendMessage">
+                <MudStack Spacing="0" Class="no-print">
+                    <MudTextField T="string?" For="() => _prompt.Query" @bind-Value="_prompt.Query"
+                                  Variant="Variant.Outlined" FullWidth Clearable Placeholder="Message the Assistant..."
+                                  Lines="@(_multiLine ? 4 : 1)"
+                                  Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Send" AdornmentColor="Color.Primary"
+                                  OnAdornmentClick="@SendMessage"/>
+                    <MudStack Row Justify="Justify.SpaceBetween">
+                        <MudCheckBox @bind-Checked="_multiLine" Size="Size.Small">Enable Multiple Lines</MudCheckBox>
+                        <MudDivider Vertical DividerType="DividerType.Middle"/>
+                        <MudStack Row Spacing="2">
+                            <MudTooltip Text="Download this transcript">
+                                <MudIconButton Icon="@Icons.Material.Filled.Download" Size="Size.Medium" Color="Color.Tertiary" OnClick="@Download"/>
+                            </MudTooltip>
+                            <MudTooltip Text="Delete this thread and begin a new conversation">
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Medium" Color="Color.Secondary" OnClick="@Delete"/>
+                            </MudTooltip>
+                        </MudStack>
+                    </MudStack>
+                </MudStack>
+            </EditForm>
+        </MudStack>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private bool _multiLine;
+    private readonly PromptModel _prompt = new();
+    private bool _showWarning = true;
+    private string _userName = default!;
+    private bool _isBusy = true;
+    private List<AiMessage> _messages = new();
+    private string? _runId;
+    private readonly CancellationTokenSource _timerCancellationToken = new();
+
+    protected override async Task OnSafeInitializedAsync()
+    {
+        await base.OnSafeInitializedAsync();
+        _userName = LandingService.Account?.Name ?? "You";
+        var run = await AssistantService.Resume();
+        if (run.Exists)
+        {
+            ProcessRun(run);
+            return;
+        }
+
+        await Restart();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (!firstRender) return;
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
+        while (!_timerCancellationToken.IsCancellationRequested && await timer.WaitForNextTickAsync())
+            await UpdateRun();
+    }
+
+    public void Dispose()
+    {
+        _timerCancellationToken.Cancel();
+        _timerCancellationToken.Dispose();
+    }
+
+    private async Task UpdateRun()
+    {
+        if (string.IsNullOrEmpty(_runId)) return;
+        var run = await AssistantService.UpdateRun(_runId);
+        ProcessRun(run);
+    }
+
+    private void ProcessRun(AiRun run)
+    {
+        if (run.RunStatus is RunStatus.Completed or RunStatus.Failed)
+        {
+            _messages.Clear();
+            _messages.AddRange(run.Messages);
+            _isBusy = false;
+            _runId = null;
+            StateHasChanged();
+        }
+        else if (_runId != run.RunId || !_isBusy)
+        {
+            _messages.Clear();
+            _messages.AddRange(run.Messages);
+            _runId = run.RunId;
+            _isBusy = true;
+            StateHasChanged();
+        }
+    }
+
+    class PromptModel
+    {
+        public string? Query { get; set; }
+    }
+
+    private async Task SendMessage()
+    {
+        var query = _prompt.Query;
+        _prompt.Query = null;
+        if (string.IsNullOrWhiteSpace(query)) return;
+
+        _isBusy = true;
+        StateHasChanged();
+
+        var run = await AssistantService.Continue(query.Trim());
+        ProcessRun(run);
+    }
+
+    private async Task Download()
+    {
+        await SafeActionAsync(async () =>
+        {
+            var stream = ConversationToStream();
+            var streamRef = new DotNetStreamReference(stream: stream);
+            await Js.InvokeVoidAsync("downloadFileFromStream", $"Mystwood Clarify AI Assistant Conversation - {_userName}.md", streamRef);
+        });
+    }
+
+    private MemoryStream ConversationToStream()
+    {
+        var stream = new MemoryStream();
+
+        using var writer = new StreamWriter(stream, leaveOpen: true, encoding: Encoding.UTF8);
+        foreach (var message in _messages)
+        {
+            writer.Write("# ");
+            writer.Write(message.Role);
+            writer.WriteLine(":");
+            writer.WriteLine();
+            writer.WriteLine(message.Content);
+            writer.WriteLine();
+        }
+
+        writer.Flush();
+        stream.Seek(0, SeekOrigin.Begin);
+
+        return stream;
+    }
+
+    private async Task Delete()
+    {
+        var dialog = await DialogService.ShowMessageBox("Delete Thread", "Are you sure you want to clear this thread and start a new conversation?", "Yes, start over", "No, continue conversation");
+        if (dialog != true) return;
+        await Restart();
+    }
+
+    private async Task Restart()
+    {
+        var run = await AssistantService.StartNew($"Hi, my name is {LandingService.Account?.Name ?? "User"} and I'm a player at Mystwood. In what ways can you help me?");
+        ProcessRun(run);
+    }
+
+    private Task CloseWarning()
+    {
+        _showWarning = false;
+        StateHasChanged();
+
+        return Task.CompletedTask;
+    }
+
+}

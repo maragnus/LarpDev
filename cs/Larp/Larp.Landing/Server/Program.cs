@@ -69,6 +69,7 @@ builder.Configuration
     services.AddScoped<IMwFifthService, MwFifthServiceServer>();
     services.AddScoped<IAdminService, AdminService>();
     services.AddScoped<IAssistantService, AssistantService>();
+    services.AddScoped<IClarifyService, ClarifyService>();
     services.AddScoped<IUserSession, UserSession>();
     services.AddScoped<ExcelImporter>();
     services.AddScoped<BackupManager>();
@@ -103,6 +104,7 @@ app.MapApi<ILandingService>();
 app.MapApi<IMwFifthService>();
 app.MapApi<IAdminService>();
 app.MapApi<IAssistantService>();
+app.MapApi<IClarifyService>();
 
 app.MapMethods("/square/callback",
     new[] { HttpMethods.Get, HttpMethods.Post },

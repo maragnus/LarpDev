@@ -98,6 +98,7 @@ public partial class Account
     [BsonIgnoreIfNull] public string? SquareCustomerId { get; set; }
     
     public string? AssistantThreadId { get; set; }
+    public string? ClarifyThreadId { get; set; }
 
     public static string? BuildNormalizedPhone(string? phone)
     {

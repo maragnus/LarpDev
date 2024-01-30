@@ -10,8 +10,12 @@ public class LarpContext
     static LarpContext()
     {
         ConventionRegistry.Register("IgnoreIfDefault",
-            new ConventionPack { new IgnoreIfDefaultConvention(true) },
-            _ => true);
+            conventions: new ConventionPack
+            {
+                new IgnoreIfDefaultConvention(true), 
+                new IgnoreExtraElementsConvention(true)
+            },
+            filter: _ => true);
     }
 
     public LarpContext(IOptions<LarpDataOptions> options, LarpDataCache cache)

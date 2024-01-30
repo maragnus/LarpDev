@@ -92,6 +92,8 @@ public class EventManager
                 .Set(x => x.EventType, @event.EventType)
                 .Set(x => x.Location, @event.Location)
                 .Set(x => x.Date, @event.Date)
+                .Set(x => x.Summary, @event.Summary)
+                .Set(x => x.Clarifies, @event.Clarifies)
                 .Set(x => x.IsHidden, @event.IsHidden)
                 .Set(x => x.LetterTemplates, @event.LetterTemplates)
                 .Set(x => x.Components, @event.Components)

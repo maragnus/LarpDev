@@ -1,6 +1,8 @@
+@using Larp.Landing.Shared
 @inject NavigationManager NavigationManager
 @inject IDialogService DialogService
 @inject LandingService LandingService
+@inject IClarifyService ClarifyService
 
 <MudCard>
     <MudCardContent>
@@ -35,6 +37,25 @@
                     </a>
                 </MudText>
             }
+            @if (!string.IsNullOrWhiteSpace(Item.Event.Summary))
+            {
+                <MudDivider FlexItem DividerType="DividerType.Middle" Class="my-2"/>
+                <MudText Typo="Typo.body2">
+                    @Item.Event.Summary
+                </MudText>
+            }
+            @if (_clarifies.Length > 0)
+            {
+                <MudStack Row Justify="Justify.SpaceBetween" class="mt-2">
+                @foreach (var clarify in _clarifies)
+                {
+                        <MudButton StartIcon="@Icons.Material.Filled.QuestionAnswer" OnClick="@(() => Clarify(clarify))"
+                                   Color="Color.Tertiary" Variant="Variant.Filled">
+                            @clarify
+                        </MudButton>
+                }
+                </MudStack>
+            }
             @if (Item.Event.Components.Length > 0)
             {
                 <MudChipSet ReadOnly Class="mt-1">
@@ -59,18 +80,13 @@
 </MudCard>
 
 @code {
+    [Parameter] public EventAttendanceItem Item { get; set; } = default!;
 
-    [Parameter]
-    public EventAttendanceItem Item { get; set; } = default!;
+    [Parameter] public RenderFragment? Header { get; set; }
 
-    [Parameter]
-    public RenderFragment? Header { get; set; }
+    [Parameter] public RenderFragment? Footer { get; set; }
 
-    [Parameter]
-    public RenderFragment? Footer { get; set; }
-
-    [Parameter]
-    public bool HideLetters { get; set; }
+    [Parameter] public bool HideLetters { get; set; }
 
     private RenderFragment? LetterChip(Letter? letter, string name, string icon, string label)
     {
@@ -102,6 +118,7 @@
     };
 
     private string _icon = default!;
+    private string[] _clarifies;
 
     static string GetEventIcon(string? type, string? title)
     {
@@ -135,10 +152,12 @@
             unit = "weeks";
         }
 
-        return diff switch {
+        return diff switch
+        {
             0 => "today",
             < 0 => $"{-diff} {unit} ago",
-            > 0 =>  $"in {diff} {unit}" };
+            > 0 => $"in {diff} {unit}"
+        };
     }
 
     private async Task ViewLetter(Letter letter)
@@ -175,6 +194,7 @@
         Item.PreEvent ??= MockLetter(LetterNames.PreEvent);
         Item.PostEvent ??= MockLetter(LetterNames.PostEvent);
         Item.BetweenEvent ??= MockLetter(LetterNames.BetweenEvent);
+        _clarifies = string.IsNullOrWhiteSpace(Item.Event.Clarifies) ? Array.Empty<string>() : Item.Event.Clarifies.Split("\n");
     }
 
     private Letter? MockLetter(string letterName)
@@ -182,6 +202,12 @@
         var template = Item.Event.LetterTemplates.FirstOrDefault(el => el.Name == letterName);
         if (template is not { IsOpen: true }) return null;
         return new Letter { Name = letterName, State = LetterState.NotStarted };
+    }
+
+    public async Task Clarify(string question)
+    {
+        await ClarifyService.Continue(question);
+        NavigationManager.NavigateTo("clarify");
     }
 
 }
