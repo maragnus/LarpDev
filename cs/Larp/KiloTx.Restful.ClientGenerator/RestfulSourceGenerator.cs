@@ -66,6 +66,19 @@ public class RestfulSourceGenerator : IIncrementalGenerator
             context.AddSource($"{hintName}.g.cs", source);
         }
     }
+    
+    class TypeSymbolComparer : IEqualityComparer<ITypeSymbol>
+    {
+        public bool Equals(ITypeSymbol x, ITypeSymbol y)
+        {
+            return x.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Equals(y.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+        }
+
+        public int GetHashCode(ITypeSymbol obj)
+        {
+            return obj.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).GetHashCode();
+        }
+    }
 
     private static SourceText GenerateSourceCode(ITypeSymbol type)
     {
@@ -82,8 +95,8 @@ public class RestfulSourceGenerator : IIncrementalGenerator
 
         var factoryTypes = interfaces
             .Select(factoryType => factoryType.HttpClientFactory)
-            .DistinctBy(x => x.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat))
-            .Order()
+            .Distinct(new TypeSymbolComparer())
+            .OrderBy(symbol => symbol.ToDisplayString())
             .Select(symbol => (
                 Symbol: symbol,
                 QualifiedName: symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
@@ -91,8 +104,8 @@ public class RestfulSourceGenerator : IIncrementalGenerator
                 ArgName: ToCamelCase(symbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)),
                 FieldName: $"_{ToCamelCase(symbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat))}"))
             .ToList();
-        var factoryTypesArg = string.Join(", ", factoryTypes
-            .Select(factoryType => $"{factoryType.TypeName} {factoryType.ArgName}"));
+        string[] items = factoryTypes.Select(factoryType => $"{factoryType.TypeName} {factoryType.ArgName}").ToArray();
+        var factoryTypesArg = string.Join(", ", items);
 
         var source = new SourceCodeBuilder();
         source.AppendLine();
@@ -313,7 +326,7 @@ public class RestfulSourceGenerator : IIncrementalGenerator
 
         source.CloseBlock();
 
-        source.PrependLines(usings.Order()
+        source.PrependLines(usings.OrderBy(namespaceName => namespaceName)
             .Where(namespaceName => !namespaceName.Contains("global namespace"))
             .Select(namespaceName => $"using {namespaceName};"));
         source.PrependLine();
