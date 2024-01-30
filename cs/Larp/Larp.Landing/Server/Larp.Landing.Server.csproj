@@ -9,9 +9,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="EPPlus" Version="6.2.2" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.5" />
-        <PackageReference Include="SkiaSharp" Version="2.88.3" />
+        <PackageReference Include="EPPlus" Version="7.0.8" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.15" />
+        <PackageReference Include="SkiaSharp" Version="2.88.7" />
     </ItemGroup>
 
     <ItemGroup>
