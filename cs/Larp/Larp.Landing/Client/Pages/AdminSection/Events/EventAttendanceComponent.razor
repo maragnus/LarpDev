@@ -4,6 +4,15 @@
 @inject IJSRuntime Js
 @inject LandingService LandingService
 
+<MudStack Row Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
+    <MudText Typo="Typo.button">Approve All: </MudText>
+    <MudButtonGroup Variant="Variant.Filled" Color="Color.Secondary">
+        <MudButton StartIcon="@LetterIcon[LetterNames.PreEvent]" OnClick="@ApprovePreEvent">Pre Event</MudButton> 
+        <MudButton StartIcon="@LetterIcon[LetterNames.PostEvent]" OnClick="@ApprovePostEvent">Post Event</MudButton> 
+        <MudButton StartIcon="@LetterIcon[LetterNames.BetweenEvent]" OnClick="@ApproveBetweenEvent">Between Event</MudButton> 
+    </MudButtonGroup>
+</MudStack>
+
 <MudStack Row AlignItems="AlignItems.Center">
     <MudSelectExtended
         T="AccountName" ItemCollection="_accountNames" Clearable @ref="_addPlayerComponent"
@@ -138,7 +147,7 @@
         { LetterState.Approved, ("Approved", Color.Success) },
     };
 
-    static readonly Dictionary<string, string> LetterIcon = new()
+    public static readonly Dictionary<string, string> LetterIcon = new()
     {
         { LetterNames.PreEvent, Icons.Material.Filled.Rsvp },
         { LetterNames.PostEvent, Icons.Material.Filled.Email },
@@ -337,4 +346,25 @@
         return null;
     }
 
+    private Task ApprovePreEvent() => ApproveLetters(LetterNames.PreEvent);
+    private Task ApprovePostEvent() => ApproveLetters(LetterNames.PostEvent);
+    private Task ApproveBetweenEvent() => ApproveLetters(LetterNames.BetweenEvent);
+
+    private async Task ApproveLetters(string letterName)
+    {
+        var letterTemplateId = _event.LetterTemplates.FirstOrDefault(x => x.Name == letterName)?.LetterTemplateId;
+        if (string.IsNullOrEmpty(letterTemplateId))
+        {
+            await DialogService.ShowMessageBox($"Approve All {letterName}", "This letter is not set in the Event and cannot be approved");
+            return;
+        }
+        await SafeActionAsync(async () =>
+        {
+            var response = await DialogService.ShowMessageBox($"Approve All {letterName}", $"Are you sure you want to approve all {letterName} letters?\r\n\r\nThis will save all your changes first.\r\n\r\nWARNING: You cannot undo this.", "Yes, Approve All", "No, Do Nothing");
+            if (response != true) return;
+            await Save();
+            await LandingService.Admin.ApproveLetters(_event.EventId, letterTemplateId);
+            await OnParametersSetAsync();
+        });
+    }
 }

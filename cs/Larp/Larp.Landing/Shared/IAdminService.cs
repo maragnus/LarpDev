@@ -172,6 +172,9 @@ public interface IAdminService
 
     [ApiPost("events/new")]
     Task<Event> DraftEvent();
+    
+    [ApiPost("events/{eventId}/approve/{templateId}")]
+    Task ApproveLetters(string eventId, string templateId);
 
     [ApiPost("mw5e/characters/{characterId}/notes"), ApiAuthenticated(AccountRoles.AdminAccess)]
     Task SetMwFifthCharacterNotes(string characterId, string? notes);

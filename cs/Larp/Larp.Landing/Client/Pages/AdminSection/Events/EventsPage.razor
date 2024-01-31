@@ -28,6 +28,7 @@
                 <HierarchyColumn T="EventInfo" ButtonDisabledFunc="@(x => x.Components.Length == 0)"/>
                 <PropertyColumn Property="x => x.When" Title="Date" Format="dddd, MMM d, yyyy"/>
                 <PropertyColumn Property="x => x.Title" Title="Title"/>
+                <PropertyColumn Property="x => x.Attendees" Title="Attendees"/>
                 <PropertyColumn Property="x => x.LettersApproved" Title="Letters Approved"/>
                 <PropertyColumn Property="x => x.LettersSubmitted" Title="Letters Submitted"/>
                 <TemplateColumn T="EventInfo">
@@ -59,7 +60,7 @@
 
     [UsedImplicitly(ImplicitUseTargetFlags.Members)]
     record EventInfo(Event Event, string Game, string Id, string Title, string Location, DateOnly When,
-        ComponentInfo[] Components, int LettersApproved, int LettersSubmitted)
+        ComponentInfo[] Components, int Attendees, int LettersApproved, int LettersSubmitted)
     {
         public EventInfo(string game, Event e, LetterState[] letters) : this(
             e, game, e.EventId, e.Title ?? "Untitled", e.Location ?? "", e.Date,
@@ -67,6 +68,7 @@
                 .Select(c =>
                     new ComponentInfo(c.Name ?? "Untitled", c.Date))
                 .ToArray(),
+            e.Attendees,
             letters.Count(x => x == LetterState.Approved),
             letters.Count(x => x == LetterState.Submitted))
         {

@@ -67,6 +67,21 @@ public class LarpContext
     {
         await CreateIndices();
         await UpdateMoonstone();
+        await UpdateEventAttendance();
+    }
+
+    private async Task UpdateEventAttendance()
+    {
+        if (await Events.FindOneAsync(x => x.Attendees > 0) != null) return;
+
+        var events = await Events.Find(x => x.Attendees == 0).ToListAsync();
+        foreach (var ev in events)
+        {
+            var attendees = await Attendances.CountDocumentsAsync(x => x.EventId == ev.EventId);
+            await Events
+                .UpdateOneAsync(x => x.EventId == ev.EventId, Builders<Event>.Update
+                    .Set(x => x.Attendees, attendees));
+        }
     }
 
     private async Task UpdateMoonstone()

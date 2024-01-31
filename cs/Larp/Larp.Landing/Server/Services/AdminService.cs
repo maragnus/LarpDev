@@ -196,6 +196,9 @@ public class AdminService : IAdminService
     public async Task ApproveLetter(string letterId) =>
         await _letterManager.Approve(letterId, _account.AccountId);
 
+    public async Task ApproveLetters(string eventId, string templateId) =>
+        await _letterManager.ApproveAll(eventId, templateId, _account.AccountId);
+    
     public async Task RejectLetter(string letterId) =>
         await _letterManager.Reject(letterId, _account.AccountId);
 
@@ -263,7 +266,7 @@ public class AdminService : IAdminService
         await _characterManager.Move(characterId, newAccountId);
 
     public async Task<Event> DraftEvent() => await _eventManager.DraftEvent();
-
+    
     public async Task SetMwFifthCharacterNotes(string characterId, string? notes) =>
         await _characterManager.SetNotes(characterId, notes);
 

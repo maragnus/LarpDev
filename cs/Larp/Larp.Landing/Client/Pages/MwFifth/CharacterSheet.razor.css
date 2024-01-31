@@ -8,6 +8,10 @@
     print-color-adjust: exact;
 }
 
+strong, h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+}
+
 .character-title {
     font-size: 1.75em
 }
@@ -17,8 +21,7 @@
 }
 
 .gift-container {
-    border: 1pt solid #777777;
-    background-color: #f4f5f7;
+    /*background-color: #f4f5f7;*/
     position: relative;
     min-height: 5em;
 }
@@ -30,13 +33,15 @@
     width: 2em;
     height: 2em;
     border-radius: 50%;
-    border: 1pt solid #777777;
     background-color: #ffffff;
     font-size: 2em;
     text-align: center;
     font-weight: bold;
     padding-top: 0.2em;
-    box-sizing: border-box
+    box-sizing: border-box;
+    
+    border-width: 3px 4px 3px 5px;
+    border-radius:81% 95% 91% 95%/85% 91% 82% 91%;
 }
 
 .gift-name {
@@ -54,8 +59,8 @@
 }
 
 .property-container {
-    border: 1pt solid #777777;
-    background-color: #ffffff;
+    /*border: 1pt solid #777777;*/
+    /*background-color: #ffffff;*/
     position: relative
 }
 
@@ -64,25 +69,74 @@
     right: 0.5em;
     bottom: -0.5em;
     width: 1.75em;
-    height: 1.75em;
+    height: 2em;
     border-radius: 50%;
-    border: 1pt solid #777777;
+    /*border: 1pt solid #777777;*/
     background-color: #ffffff;
     font-size: 1em;
     text-align: center;
     font-weight: bold;
     padding-top: 0.1em;
-    box-sizing: border-box
+    box-sizing: border-box;
+
+    border-width: 3px 2px 3px 2px;
+    border-radius:81% 95% 91% 95%/85% 91% 82% 91%;
 }
 
 .property-name {
     padding: 0.25em 2.25em 0.25em 0.5em;
     font-weight: bold;
-    background-color: #f4f5f7;
+    /*background-color: #f4f5f7;*/
+}
+
+.mk-border-1-long {
+    border-width: 3px 4px 3px 5px;
+    border-radius:95% 4% 92% 2%/4% 95% 6% 95%;
+}
+
+.mk-border-2-long {
+    border-width: 3px 3px 3px 5px;
+    border-radius:89% 5% 74% 2%/5% 100% 26% 79%;
+}
+
+.mk-border-3-long {
+    border-width: 3px 4px 3px 5px;
+    border-radius:3% 100% 3% 95%/94% 8% 92% 9%;
+}
+
+.mk-border-4-long {
+    border-width: 3px 3px 4px 3px;
+    border-radius:5% 100% 2% 95%/94% 4% 92% 2%;
+}
+
+.mk-border-1 {
+    border-width: 3px 4px 3px 5px;
+    border-radius:95% 4% 92% 5%/4% 95% 6% 95%;
+    transform: rotate(0.5deg);
+}
+.mk-border-1 .list-body {
+    transform: rotate(-0.5deg);
+}
+
+.mk-border-2 {   
+    border-width: 5px 3px 3px 5px;
+    border-radius:95% 4% 97% 5%/4% 94% 3% 95%;
+    transform: rotate(0.5deg);
+}
+.mk-border-2 .list-body {
+    transform: rotate(-0.5deg);
+}
+
+.mk-border-3 {
+    border-width: 3px 3px 5px 5px;
+    border-radius:4% 95% 6% 95%/95% 4% 92% 5%;
+    transform: rotate(-0.5deg);
+}
+.mk-border-3 .list-body {
+    transform: rotate(0.5deg);
 }
 
 .list-container {
-    border: 1pt solid #777777;
     background-color: #ffffff;
     position: relative;
     padding-top: 2em;
@@ -93,13 +147,16 @@
     position: absolute;
     left: 0.5em;
     top: -0.5em;
-    border: 1pt solid #777777;
     background-color: #f4f5f7;
 
     text-align: center;
     font-weight: bold;
     padding: 0.25em 0.5em;
-    box-sizing: border-box
+    box-sizing: border-box;
+    
+    border-width: 3px 3px 5px 5px;
+    border-radius:4% 95% 6% 95%/95% 4% 92% 5%;
+    transform: rotate(-0.5deg);
 }
 
 .list-item {
@@ -130,12 +187,15 @@
     position: absolute;
     left: 0.5em;
     top: -0.5em;
-    border: 1pt solid #777777;
     background-color: #f4f5f7;
     text-align: center;
     font-weight: bold;
     padding: 0.25em 0.5em;
-    box-sizing: border-box
+    box-sizing: border-box;
+
+    border-width: 3px 3px 5px 5px;
+    border-radius:4% 95% 6% 95%/95% 4% 92% 5%;
+    transform: rotate(-0.5deg);
 }
 
 .spell-info {

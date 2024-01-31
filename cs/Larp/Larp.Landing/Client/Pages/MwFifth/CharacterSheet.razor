@@ -161,7 +161,7 @@
     </style>
 }
 
-<MudGrid Class="print-sheet" Style="color: #000; background-color: #fff">
+<MudGrid Class="print-sheet" Style="color: #000; background-color: #fff; font-family: 'Playpen Sans','Comic Sans','sans-serif'; font-weight: 400">
     <MudItem xs="12" Class="justify-center">
         <MudStack Row AlignItems="AlignItems.Center" Justify="Justify.FlexStart">
             <div>
@@ -182,7 +182,7 @@
             @foreach (var (name, rank) in _gifts)
             {
                 <MudItem xs="@(Print ? 2 : FullLayout ? 4 : 6)" sm="@(Print ? 2 : FullLayout ? 2 : 3)" md="2">
-                    <div class="gift-container">
+                    <div class="gift-container mk-border-1-long">
                         <div class="gift-rank">
                             @rank
                         </div>
@@ -195,11 +195,13 @@
         </MudGrid>
     </MudItem>
 
-    @foreach (var (name, value) in _properties)
+    @foreach (var (name, value, index) in _properties.Select((item, index) => (item.Key, item.Value, index)))
     {
+        var border = 1+ index % 4;
+        var classes = $"property-container mk-border-{border}-long";
         if (value == "-") continue;
         <MudItem xs="Print ? 4 : 6" sm="4" Style="page-break-inside: avoid">
-            <div class="property-container">
+            <div class="@classes">
                 <div class="property-value">@value</div>
                 <div class="property-name">@name</div>
             </div>
@@ -207,20 +209,23 @@
     }
     <MudItem xs="12" Style="height: 0"></MudItem>
     <MudItem xs="@(Print ? 4 : FullLayout ? 6 : 12)" sm="@(Print ? 4 : FullLayout ? 4 : 6)" Style="page-break-inside: avoid">
-        <div class="list-container">
+        <div class="list-container mk-border-1">
             <div class="list-header">Abilities</div>
-            @foreach (var name in _attributes)
-            {
-                <div class="list-item">
-                    @name
-                    @ClarifyTerm(name)
-                </div>
-            }
+            <div class="list-body">
+                @foreach (var name in _attributes)
+                {
+                    <div class="list-item">
+                        @name
+                        @ClarifyTerm(name)
+                    </div>
+                }
+            </div>
         </div>
     </MudItem>
     <MudItem xs="@(Print ? 4 : FullLayout ? 6 : 12)" sm="@(Print ? 4 : FullLayout ? 4 : 6)" Style="page-break-inside: avoid">
-        <div class="list-container">
+        <div class="list-container mk-border-3">
             <div class="list-header">Skills</div>
+            <div class="list-body">
             @if (Admin)
             {
                 @foreach (var category in _skills.GroupBy(x => x.Type.ToString()))
@@ -244,90 +249,106 @@
                     </div>
                 }
             }
+            </div>
         </div>
     </MudItem>
     @if (Character.Advantages.Length > 0 || Character.Disadvantages.Length > 0)
     {
         <MudItem xs="@(Print ? 4 : FullLayout ? 6 : 12)" sm="@(Print ? 4 : FullLayout ? 4 : 6)" Style="page-break-inside: avoid">
             <div style="display: flex; flex-direction: column; gap: 2em; height: 100%">
-                <div class="list-container" style="height: auto; flex-grow: 1">
+                <div class="list-container mk-border-1" style="height: auto; flex-grow: 1">
                     <div class="list-header">Advantages</div>
-                    @foreach (var (name, rank) in Character.Advantages)
-                    {
-                        <div class="list-item">
-                            @rank @name
-                            @ClarifyTerm(name)
-                        </div>
+                    <div class="list-body">
+                        @foreach (var (name, rank) in Character.Advantages)
+                        {
+                            <div class="list-item">
+                                @rank @name
+                                @ClarifyTerm(name)
+                            </div>
                     }
+                    </div>
                 </div>
-                <div class="list-container" style="height: auto; flex-grow: 1">
+                <div class="list-container mk-border-2" style="height: auto; flex-grow: 1">
                     <div class="list-header">Disadvantages</div>
-
-                    @foreach (var (name, rank) in Character.Disadvantages)
-                    {
-                        <div class="list-item">
-                            @rank @name
-                            @ClarifyTerm(name)
-                        </div>
-                    }
+                    <div class="list-body">
+                        @foreach (var (name, rank) in Character.Disadvantages)
+                        {
+                            <div class="list-item">
+                                @rank @name
+                                @ClarifyTerm(name)
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
         </MudItem>
     }
-    <MudItem xs="@(Print ? 4 : 12)" sm="@(Print ? 4 : FullLayout ? 6 : 12)" Style="page-break-inside: avoid">
-        <div class="list-container">
-            <div class="list-header">Unusual Features</div>
-            <div class="list-text">
-                @(Character.Revision.UnusualFeatures ?? "No Unusual Features")
+    @if (!string.IsNullOrWhiteSpace(Character.Revision.UnusualFeatures))
+    {
+        <MudItem xs="@(Print ? 4 : 12)" sm="@(Print ? 4 : FullLayout ? 6 : 12)" Style="page-break-inside: avoid">
+            <div class="list-container mk-border-3-long">
+                <div class="list-header">Unusual Features</div>
+                <div class="list-body list-text">
+                    @(Character.Revision.UnusualFeatures ?? "No Unusual Features")
+                </div>
             </div>
-        </div>
-    </MudItem>
+        </MudItem>
+    }
+    @if (!string.IsNullOrWhiteSpace(Character.Revision.Cures))
+    {
     <MudItem xs="@(Print ? 4 : 12)" sm="@(Print ? 4 : FullLayout ? 6 : 12)" Style="page-break-inside: avoid">
-        <div class="list-container">
+        <div class="list-container mk-border-2-long">
             <div class="list-header">Cures</div>
-            <div class="list-text">
+            <div class="list-body list-text">
                 @(Character.Revision.Cures ?? "No Cures")
             </div>
         </div>
     </MudItem>
-    <MudItem xs="@(Print ? 4 : 12)" sm="@(Print ? 4 : 12)" Style="page-break-inside: avoid">
-        <div class="list-container">
-            <div class="list-header">Documents</div>
-            <div class="list-text">
-                @(Character.Revision.Documents ?? "No Documents")
+    }
+    @if (!string.IsNullOrWhiteSpace(Character.Revision.Documents))
+    {
+        <MudItem xs="@(Print ? 4 : 12)" sm="@(Print ? 4 : 12)" Style="page-break-inside: avoid">
+            <div class="list-container mk-border-3-long">
+                <div class="list-header">Documents</div>
+                <div class="list-body list-text">
+                    @(Character.Revision.Documents ?? "No Documents")
+                </div>
             </div>
-        </div>
-    </MudItem>
+        </MudItem>
+    }
     <MudItem xs="12" Style="page-break-inside: avoid">
         <div></div>
     </MudItem>
     @if (!Print)
     {
         <MudItem xs="12" sm="@(FullLayout ? 6 : 12)" Style="page-break-inside: avoid">
-            <div class="list-container">
+            <div class="list-container mk-border-2">
                 <div class="list-header">Public History</div>
-                <div class="list-text">
+                <div class="list-body list-text">
                     @(Character.Revision.PublicHistory ?? "No Public History")
                 </div>
             </div>
         </MudItem>
         <MudItem xs="12" sm="@(FullLayout ? 6 : 12)" Style="page-break-inside: avoid">
-            <div class="list-container">
+            <div class="list-container mk-border-3">
                 <div class="list-header">Private History</div>
-                <div class="list-text">
+                <div class="list-body list-text">
                     @(Character.Revision.PrivateHistory ?? "No Private History")
                 </div>
             </div>
         </MudItem>
     }
-    @foreach (var spell in _spells)
+    @foreach (var (spell, index) in _spells.Select((item, index) => (item, index)))
     {
+        var border = 1 + index % 4;
+        var classes = $"spell-container mk-border-{border}";
+
         var type = spell.Type == SpellType.GestureOrVoice
             ? "Gesture/Voice"
             : spell.Type.ToString();
 
         <MudItem xs="@(Print ? 4 : 12)" sm="@(Print ? 4 : FullLayout ? 3 : 4)">
-            <div class="spell-container">
+            <div class="@classes">
                 <div class="spell-name">@spell.Name</div>
                 <div class="spell-info">
                     <div class="spell-type">@type</div>

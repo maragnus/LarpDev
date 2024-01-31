@@ -118,6 +118,7 @@ public class EventManager
         if (!attended)
         {
             await _larpContext.Attendances.DeleteOneAsync(x => x.EventId == eventId && x.AccountId == accountId);
+            await UpdateAttendance(eventId);
             return;
         }
 
@@ -143,6 +144,7 @@ public class EventManager
             upsert);
 
         await _characterManager.UpdateMoonstone(accountId);
+        await UpdateAttendance(eventId);
     }
 
     public async Task<Attendance[]> GetEventAttendances(string eventId) =>
@@ -150,6 +152,14 @@ public class EventManager
             .Find(attendance => attendance.EventId == eventId)
             .ToListAsync())
         .ToArray();
+    
+    public async Task UpdateAttendance(string eventId)
+    {
+        var attendees = await _larpContext.Attendances.CountDocumentsAsync(x => x.EventId == eventId);
+        await _larpContext.Events
+            .UpdateOneAsync(x => x.EventId == eventId, Builders<Event>.Update
+                .Set(x => x.Attendees, attendees));
+    }
 
     public async Task<Event> DraftEvent()
     {

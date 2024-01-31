@@ -121,3 +121,34 @@ ul, li { margin: 0; padding: 0; padding-inline-start: 0 !important; }
 .paragraphs p + p {
     margin-top: 0.5em;
 }
+
+.drawn-box-1 {
+    border-width: 3px 4px 3px 5px;
+    border-radius:95% 4% 92% 5%/4% 95% 6% 95%;
+    transform: rotate(2deg);
+}
+.drawn-box-1 > div {
+    margin:15px;
+    transform: rotate(-2deg);
+}
+
+.drawn-box-2 {
+    width:350px;
+    border-width: 3px 3px 5px 5px;
+    border-radius:4% 95% 6% 95%/95% 4% 92% 5%;
+    transform: rotate(-2deg);
+}
+.drawn-box-2 > div {
+    margin:15px;
+    transform: rotate(2deg);
+}
+
+.drawn-box-3 {
+    border-width: 5px 3px 3px 5px;
+    border-radius:95% 4% 97% 5%/4% 94% 3% 95%;
+    transform: rotate(2deg);
+}
+.drawn-box-3 > div {
+    margin:15px;
+    transform: rotate(-2deg);
+}

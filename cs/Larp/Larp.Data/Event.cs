@@ -88,6 +88,8 @@ public class Event
     [BsonIgnoreIfDefault, JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? Clarifies { get; set; }
 
+    public int Attendees { get; set; }
+
     private static bool Summarize<T>(IEnumerable<T> oldList, IEnumerable<T> newList, Func<T, string> transformer,
         out string[] oldItems, out string[] newItems)
     {

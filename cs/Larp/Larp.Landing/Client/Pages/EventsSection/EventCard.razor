@@ -1,8 +1,10 @@
 @using Larp.Landing.Shared
+@using Larp.Common
 @inject NavigationManager NavigationManager
 @inject IDialogService DialogService
 @inject LandingService LandingService
 @inject IClarifyService ClarifyService
+@inject IJSRuntime Js
 
 <MudCard>
     <MudCardContent>
@@ -16,10 +18,6 @@
                     <em>@When(Item.Event.Date)</em>
                 </MudText>
                 @Header
-                @if (LandingService.IsInRole(AccountRole.AdminAccess))
-                {
-                    <MudIconButton Href="@($"/admin/events/{Item.Event.EventId}")" Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" Size="Size.Small"/>
-                }
             </MudStack>
             @if (Item.Event.Date.DayOfYear > 1)
             {
@@ -44,18 +42,29 @@
                     @Item.Event.Summary
                 </MudText>
             }
-            @if (_clarifies.Length > 0)
-            {
-                <MudStack Row Justify="Justify.SpaceBetween" class="mt-2">
+            <MudStack Row Justify="Justify.SpaceBetween" class="mt-2">
+                <MudButtonGroup OverrideStyles="false">
+                    @if (LandingService.IsInRole(AccountRole.AdminAccess))
+                    {
+                        <MudTooltip Text="Edit this event in Admin Section">
+                            <MudIconButton Href="@($"/admin/events/{Item.Event.EventId}")" Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" Size="Size.Medium"/>
+                        </MudTooltip>
+                    }
+                    <MudTooltip Text="Add this event to your calendar">
+                        <MudIconButton Icon="@Icons.Material.Filled.CalendarMonth" OnClick="@AddIcsEvent" Color="Color.Primary" Size="Size.Medium"/>
+                    </MudTooltip>
+                    <MudTooltip Text="Add this event to your Google calendar">
+                        <MudIconButton Icon="@Icons.Custom.Brands.Google" Target="_blank" Href="@_googleCalendarUrl" Color="Color.Primary" Size="Size.Medium"/>
+                    </MudTooltip>
+                </MudButtonGroup>
                 @foreach (var clarify in _clarifies)
                 {
-                        <MudButton StartIcon="@Icons.Material.Filled.QuestionAnswer" OnClick="@(() => Clarify(clarify))"
-                                   Color="Color.Tertiary" Variant="Variant.Filled">
-                            @clarify
-                        </MudButton>
+                    <MudButton StartIcon="@Icons.Material.Filled.QuestionAnswer" OnClick="@(() => Clarify(clarify))"
+                               Color="Color.Tertiary" Variant="Variant.Filled">
+                        @clarify
+                    </MudButton>
                 }
-                </MudStack>
-            }
+            </MudStack>
             @if (Item.Event.Components.Length > 0)
             {
                 <MudChipSet ReadOnly Class="mt-1">
@@ -119,6 +128,9 @@
 
     private string _icon = default!;
     private string[] _clarifies = Array.Empty<string>();
+    private DateTime _start;
+    private DateTime _end;
+    private string _googleCalendarUrl = "";
 
     static string GetEventIcon(string? type, string? title)
     {
@@ -195,6 +207,9 @@
         Item.PostEvent ??= MockLetter(LetterNames.PostEvent);
         Item.BetweenEvent ??= MockLetter(LetterNames.BetweenEvent);
         _clarifies = string.IsNullOrWhiteSpace(Item.Event.Clarifies) ? Array.Empty<string>() : Item.Event.Clarifies.Split("\n");
+        _start = Item.Event.Date.ToDateTime(TimeOnly.MinValue);
+        _end = Item.Event.Date.ToDateTime(TimeOnly.MinValue).AddDays(1);
+        _googleCalendarUrl = CalendarGenerator.CreateGoogleCalendarUrl(FromEvent());
     }
 
     private Letter? MockLetter(string letterName)
@@ -208,6 +223,44 @@
     {
         await ClarifyService.Continue(question);
         NavigationManager.NavigateTo("clarify");
+    }
+
+    private CalendarEvent FromComponent(EventComponent c) =>
+        new(
+            c.Date,
+            null,
+            c.Date.AddDays(1),
+            null,
+            $"{Item.Event.Title}: {c.Name}",
+            Item.Event.Location,
+            Item.Event.Summary);
+
+    private CalendarEvent FromEvent() =>
+        new(
+            Item.Event.Components
+                .DefaultIfEmpty(new EventComponent() { Date = Item.Event.Date })
+                .Min(x => x.Date),
+            null,
+            Item.Event.Components
+                .DefaultIfEmpty(new EventComponent() { Date = Item.Event.Date })
+                .Max(x => x.Date).AddDays(1),
+            null,
+            Item.Event.Title ?? "Mystwood Event",
+            Item.Event.Location,
+            Item.Event.Summary);
+
+    private async Task AddIcsEvent()
+    {
+        var events = new List<CalendarEvent>();
+
+        if (Item.Event.Components.Length > 0)
+            events.AddRange(Item.Event.Components.Select(FromComponent));
+        else
+            events.Add(FromEvent());
+
+        var stream = CalendarGenerator.CreateIcsStream(events);
+        var streamRef = new DotNetStreamReference(stream: stream);
+        await Js.InvokeVoidAsync("downloadFileFromStream", $"mystwood.ics", streamRef);
     }
 
 }

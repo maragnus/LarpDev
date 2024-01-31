@@ -94,6 +94,23 @@ public class LetterManager
 
         await _larpContext.Letters.UpdateOneAsync(l => l.LetterId == letterId, update);
     }
+    
+    public async Task ApproveAll(string eventId, string templateId, string adminAccountId)
+    {
+        var filter = Builders<Letter>.Filter.And(
+            Builders<Letter>.Filter.Eq(x => x.EventId, eventId),
+            Builders<Letter>.Filter.Eq(x => x.State, LetterState.Submitted),
+            Builders<Letter>.Filter.Eq(x => x.TemplateId, templateId)
+        );
+
+        var update = Builders<Letter>.Update
+            .Set(x => x.ApprovedOn, DateTimeOffset.Now)
+            .Set(x => x.ApprovedBy, adminAccountId)
+            .Set(x => x.State, LetterState.Approved)
+            .Push(x => x.ChangeLog, ChangeLog.Log("Approve", LetterState.Approved, adminAccountId));
+
+        await _larpContext.Letters.UpdateManyAsync(filter, update);
+    }
 
     public async Task Reject(string letterId, string adminAccountId)
     {
@@ -291,4 +308,5 @@ public class LetterManager
             ?? throw new BadRequestException($"Event {eventId} does not have letter {letterName}");
         return await Draft(templateId, eventId, accountId, letterName);
     }
+
 }
