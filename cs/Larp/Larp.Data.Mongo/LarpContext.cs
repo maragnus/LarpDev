@@ -72,8 +72,6 @@ public class LarpContext
 
     private async Task UpdateEventAttendance()
     {
-        if (await Events.FindOneAsync(x => x.Attendees > 0) != null) return;
-
         var events = await Events.Find(x => x.Attendees == 0).ToListAsync();
         foreach (var ev in events)
         {

@@ -44,18 +44,18 @@
             }
             <MudStack Row Justify="Justify.SpaceBetween" class="mt-2">
                 <MudButtonGroup OverrideStyles="false">
-                    @if (LandingService.IsInRole(AccountRole.AdminAccess))
-                    {
-                        <MudTooltip Text="Edit this event in Admin Section">
-                            <MudIconButton Href="@($"/admin/events/{Item.Event.EventId}")" Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" Size="Size.Medium"/>
-                        </MudTooltip>
-                    }
                     <MudTooltip Text="Add this event to your calendar">
                         <MudIconButton Icon="@Icons.Material.Filled.CalendarMonth" OnClick="@AddIcsEvent" Color="Color.Primary" Size="Size.Medium"/>
                     </MudTooltip>
                     <MudTooltip Text="Add this event to your Google calendar">
                         <MudIconButton Icon="@Icons.Custom.Brands.Google" Target="_blank" Href="@_googleCalendarUrl" Color="Color.Primary" Size="Size.Medium"/>
                     </MudTooltip>
+                    @if (LandingService.IsInRole(AccountRole.AdminAccess))
+                    {
+                        <MudTooltip Text="Edit this event in Admin Section">
+                            <MudIconButton Href="@($"/admin/events/{Item.Event.EventId}")" Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" Size="Size.Medium"/>
+                        </MudTooltip>
+                    }
                 </MudButtonGroup>
                 @foreach (var clarify in _clarifies)
                 {
