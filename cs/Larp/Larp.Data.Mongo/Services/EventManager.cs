@@ -155,7 +155,7 @@ public class EventManager
     
     public async Task UpdateAttendance(string eventId)
     {
-        var attendees = await _larpContext.Attendances.CountDocumentsAsync(x => x.EventId == eventId);
+        var attendees = (int?)await _larpContext.Attendances.CountDocumentsAsync(x => x.EventId == eventId);
         await _larpContext.Events
             .UpdateOneAsync(x => x.EventId == eventId, Builders<Event>.Update
                 .Set(x => x.Attendees, attendees));

@@ -60,7 +60,7 @@
 
     [UsedImplicitly(ImplicitUseTargetFlags.Members)]
     record EventInfo(Event Event, string Game, string Id, string Title, string Location, DateOnly When,
-        ComponentInfo[] Components, int Attendees, int LettersApproved, int LettersSubmitted)
+        ComponentInfo[] Components, int? Attendees, int LettersApproved, int LettersSubmitted)
     {
         public EventInfo(string game, Event e, LetterState[] letters) : this(
             e, game, e.EventId, e.Title ?? "Untitled", e.Location ?? "", e.Date,

@@ -72,10 +72,10 @@ public class LarpContext
 
     private async Task UpdateEventAttendance()
     {
-        var events = await Events.Find(x => x.Attendees == 0).ToListAsync();
+        var events = await Events.Find(x => x.Attendees == null).ToListAsync();
         foreach (var ev in events)
         {
-            var attendees = await Attendances.CountDocumentsAsync(x => x.EventId == ev.EventId);
+            var attendees = (int?)await Attendances.CountDocumentsAsync(x => x.EventId == ev.EventId);
             await Events
                 .UpdateOneAsync(x => x.EventId == ev.EventId, Builders<Event>.Update
                     .Set(x => x.Attendees, attendees));
